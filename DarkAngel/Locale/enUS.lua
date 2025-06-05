@@ -973,16 +973,15 @@ L['slow']=true
 L['fast']=true
 end
 
-L["minimaptooltip"]=[==[|cff1eeb1eClick|r |cff1eebe4- main window|r
-|cff1eeb1eShift+click|r |cff1eebe4- inviter/dispenser|r
-|cff1eeb1eCtrl+click|r |cff1eebe4- quick logs by target|r
-|cff1eeb1eAlt+click|r |cff1eebe4- raid tool/Awarder|r
+L["minimaptooltip"]=[==[|cffa7faf7Click|r |cff12a39e- main window|r
+|cffa7faf7Shift+click|r |cff12a39e- inviter/dispenser|r
+|cffa7faf7Ctrl+click|r |cff12a39e- quick logs by target|r
+|cffa7faf7Alt+click|r |cff12a39e- raid tool/Awarder|r
 
 |cffa7faf7Ctrl+Shift+O|r |cff12a39e- dispenser|r
 |cffa7faf7Ctrl+Alt+O|r |cff12a39e- Bid tool|r
 
-|cff1eeb1eRight click|r |cff1eebe4- all options|r]==]
-
+|cffa7faf7Right click|r |cff12a39e- all options|r]==]
 
 
 L["DA_Funlist"]={
