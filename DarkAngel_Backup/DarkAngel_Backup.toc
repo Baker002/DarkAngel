@@ -1,0 +1,10 @@
+## Title: DarkAngel_Backup
+## Author: Baker
+## Interface: 30300
+## Notes: You have a backup? You bedda do mon!
+## SavedVariables: DA_BackupsDB
+## SavedVariablesPerCharacter: DA_Backups_charDB
+## Dependencies: DarkAngel
+
+
+backup.lua
