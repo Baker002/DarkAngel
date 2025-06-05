@@ -1,0 +1,8 @@
+## Title: DarkAngel_BidTracker
+## Author: Baker
+## Interface: 30300
+## Notes: Tool for tracking bids for DKP/EP-Auc rolling systems. Highlights MS/OS bids by checking the item/raid members roles. Dark whispers decide your loot fate...
+## Dependencies: DarkAngel
+
+
+bidtracker.lua

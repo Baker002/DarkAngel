@@ -1,0 +1,329 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+	<Texture name="UIDarkAngelButtonUpTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+	<Texture name="UIDarkAngelButtonDownTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Down" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+	<Texture name="UIDarkAngelButtonDisabledTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Disabled" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+	<Texture name="UIDarkAngelButtonDisabledTexture2" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Disabled" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+
+	<Texture name="UIDarkAngelButtonHighlightTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Highlight" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+		<!-- <TexCoords left="0.2" right="0.4" top="0.2" bottom="0.3"/> -->
+	</Texture>
+	<Texture name="UIDarkAngelButtonWhiteTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+	<Texture name="UIDarkAngelButtonHighlightBlueTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Blue" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.5" right="0.3" top="0.5" bottom="0.18"/>
+	</Texture>
+	
+	<Texture name="UIDarkAngelOptionsButtonButtonUpTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Options-Up.tga" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.203" right="0.797" top="0.219" bottom="0.781"/>
+	</Texture>
+	<Texture name="UIDarkAngelOptionsButtonButtonDownTexture" file="Interface\AddOns\DarkAngel\template\UI-Panel-Options-Down.tga" alphaMode="ADD" virtual="true">
+		<TexCoords left="0.203" right="0.797" top="0.219" bottom="0.781"/>
+	</Texture>
+	
+	
+	
+	<Button name="UIDarkAngelOptionsButtonButton" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelOptionsButtonButtonUpTexture"/>
+		<PushedTexture inherits="UIDarkAngelOptionsButtonButtonDownTexture"/>
+		<HighlightTexture inherits="UIDarkAngelButtonHighlightTexture"/>
+	</Button>
+	
+	<Button name="UIDarkAngelCloseButton" inherits="UIPanelCloseButton" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelButtonHighlightTexture"/>
+		<PushedTexture inherits="UIDarkAngelButtonDownTexture"/>
+		<DisabledTexture inherits="UIDarkAngelButtonDisabledTexture"/>
+		<HighlightTexture inherits="UIDarkAngelButtonUpTexture"/>
+	</Button>
+	<Button name="UIDarkAngelIconicButton" virtual="true">
+		<ButtonText name="$parentText"/>
+		<!-- <NormalTexture inherits="UIDarkAngelButtonHighlightTexture"/> -->
+		<HighlightTexture inherits="UIDarkAngelButtonUpTexture"/>
+	</Button>
+	<Button name="UIDarkAngelButtonTemplate2" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelButtonHighlightTexture"/>
+		<PushedTexture inherits="UIDarkAngelButtonDownTexture"/>
+		<DisabledTexture inherits="UIDarkAngelButtonDisabledTexture"/>
+		<HighlightTexture inherits="UIDarkAngelButtonUpTexture"/>
+	</Button>
+	<Button name="UIDarkAngelButtonTemplate4" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelButtonWhiteTexture"/>
+		<PushedTexture inherits="UIDarkAngelButtonHighlightBlueTexture"/>
+		<DisabledTexture inherits="UIDarkAngelButtonDisabledTexture2"/>
+		<HighlightTexture inherits="UIDarkAngelButtonDisabledTexture2"/>
+	</Button>
+	<Button name="UIDarkAngelSecureButton" inherits="SecureActionButtonTemplate" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelButtonHighlightTexture"/>
+		<PushedTexture inherits="UIDarkAngelButtonDownTexture"/>
+		<DisabledTexture inherits="UIDarkAngelButtonDisabledTexture"/>
+		<HighlightTexture inherits="UIDarkAngelButtonUpTexture"/>
+	</Button>
+	<Button name="UIDarkAngelButtonTabs" virtual="true">
+		<ButtonText name="$parentText"/>
+		<NormalFont style="UIDarkAngelFontNormal"/>
+		<HighlightFont style="UIDarkAngelFontHighlight"/>
+		<DisabledFont style="UIDarkAngelFontDisable"/>
+		<NormalTexture inherits="UIDarkAngelButtonHighlightTexture"/>
+		<PushedTexture inherits="UIDarkAngelButtonUpTexture"/>
+		<DisabledTexture inherits="UIDarkAngelButtonDisabledTexture"/>
+		<HighlightTexture inherits="UIDarkAngelButtonUpTexture"/>
+	</Button>
+	
+	<CheckButton name="UIDarkAngelCheckButton" virtual="true">
+		<Size>
+			<AbsDimension x="32" y="32"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" inherits="UIDarkAngelFontNormalSmall">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="-2" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<NormalTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Up"/>
+		<PushedTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Down"/>
+		<HighlightTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Highlight" alphaMode="ADD"/>
+		<CheckedTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Check"/>
+		<DisabledCheckedTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Check-Disabled"/>
+	</CheckButton>
+	
+	<Texture name="UIDarkAngelScrollBarButton" virtual="true">
+		<TexCoords left="0.20" right="0.80" top="0.25" bottom="0.75"/>
+	</Texture>
+	<Button name="UIDarkAngelScrollUpButton" virtual="true">
+		<Size>
+			<AbsDimension x="18" y="16"/>
+		</Size>
+		<NormalTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Up"  alphaMode="ADD"/>
+		<PushedTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Down"  alphaMode="ADD"/>
+		<DisabledTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Disabled"  alphaMode="ADD"/>
+		<HighlightTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Highlight" alphaMode="ADD"/>
+	</Button>
+	<Button name="UIDarkAngelScrollDownButton" virtual="true">
+		<Size>
+			<AbsDimension x="18" y="16"/>
+		</Size>
+		<NormalTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Up"  alphaMode="ADD"/>
+		<PushedTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Down"  alphaMode="ADD"/>
+		<DisabledTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Disabled"  alphaMode="ADD"/>
+		<HighlightTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Highlight" alphaMode="ADD"/>
+	</Button>
+	<Slider name="UIDarkAngelScrollBarSlider" virtual="true">
+		<Size>
+			<AbsDimension x="16" y="0"/>
+		</Size>
+		<Frames>
+			<Button name="$parentScrollUpButton" inherits="UIDarkAngelScrollUpButton">
+				<Anchors>
+					<Anchor point="BOTTOM" relativePoint="TOP"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local parent = self:GetParent();
+						parent:SetValue(parent:GetValue() - (parent:GetHeight() / 2));
+						PlaySound("UChatScrollButton");
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="$parentScrollDownButton" inherits="UIDarkAngelScrollDownButton">
+				<Anchors>
+					<Anchor point="TOP" relativePoint="BOTTOM"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						local parent = self:GetParent();
+						parent:SetValue(parent:GetValue() + (parent:GetHeight() / 2));
+						PlaySound("UChatScrollButton");
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnValueChanged>
+				self:GetParent():SetVerticalScroll(value);
+			</OnValueChanged>
+		</Scripts>
+		<ThumbTexture name="$parentThumbTexture" inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-Knob" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="18" y="24"/>
+			</Size>
+			<TexCoords left="0.20" right="0.80" top="0.125" bottom="0.875"/>
+		</ThumbTexture>
+	</Slider>
+	<ScrollFrame name="UIDarkAngelScrollFrame" virtual="true">
+		<Frames>
+			<Slider name="$parentScrollBar" inherits="UIDarkAngelScrollBarSlider">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="6" y="-16"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="6" y="16"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				ScrollFrame_OnLoad(self);
+			</OnLoad>
+			<OnScrollRangeChanged>
+				ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
+			</OnScrollRangeChanged>
+			<!--  The code to disable the ScrollDownButton is pretty hacked, but it works -->
+			<OnVerticalScroll>
+				local scrollbar = _G[self:GetName().."ScrollBar"];
+				scrollbar:SetValue(offset);
+				local min;
+				local max;
+				min, max = scrollbar:GetMinMaxValues();
+				if ( offset == 0 ) then
+					_G[scrollbar:GetName().."ScrollUpButton"]:Disable();
+				else
+					_G[scrollbar:GetName().."ScrollUpButton"]:Enable();
+				end
+				if ((scrollbar:GetValue() - max) == 0) then
+					_G[scrollbar:GetName().."ScrollDownButton"]:Disable();
+				else
+					_G[scrollbar:GetName().."ScrollDownButton"]:Enable();
+				end
+				scrollbar.storedval=scrollbar:GetValue()
+			</OnVerticalScroll>
+			<OnMouseWheel>				
+				local scrollBar=scrollBar or _G[self:GetName() .. "ScrollBar"];
+				if ( delta > 0 ) then
+					if IsShiftKeyDown() then 
+						scrollBar:SetValue(scrollBar:GetValue() - (scrollBar:GetHeight() / 8));
+					else
+						scrollBar:SetValue(scrollBar:GetValue() - (scrollBar:GetHeight() / 16));
+					end
+				else
+					if IsShiftKeyDown() then 
+						scrollBar:SetValue(scrollBar:GetValue() + (scrollBar:GetHeight() / 8));
+					else
+						scrollBar:SetValue(scrollBar:GetValue() + (scrollBar:GetHeight() / 16));
+					end
+				end
+			</OnMouseWheel>
+		</Scripts>
+	</ScrollFrame>
+	
+	<ScrollFrame name="UIDarkAngelScrollFrame2" virtual="true">
+		<Frames>
+			<Slider name="$parentScrollBar" inherits="UIDarkAngelScrollBarSlider">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="6" y="-16"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="6" y="16"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				ScrollFrame_OnLoad(self);
+			</OnLoad>
+			<OnScrollRangeChanged>
+				ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
+			</OnScrollRangeChanged>
+			<!--  The code to disable the ScrollDownButton is pretty hacked, but it works -->
+			<OnVerticalScroll>
+				if IsShiftKeyDown() then GameTooltip:Hide() end
+				local scrollbar = _G[self:GetName().."ScrollBar"];
+				scrollbar:SetValue(offset);
+				local min;
+				local max;
+				min, max = scrollbar:GetMinMaxValues();
+				if ( offset == 0 ) then
+					_G[scrollbar:GetName().."ScrollUpButton"]:Disable();
+				else
+					_G[scrollbar:GetName().."ScrollUpButton"]:Enable();
+				end
+				if ((scrollbar:GetValue() - max) == 0) then
+					_G[scrollbar:GetName().."ScrollDownButton"]:Disable();
+				else
+					_G[scrollbar:GetName().."ScrollDownButton"]:Enable();
+				end
+				scrollbar.storedval=scrollbar:GetValue()
+			</OnVerticalScroll>
+			<OnMouseWheel>
+				local scrollBar = _G[self:GetName() .. "ScrollBar"];
+				local step = IsShiftKeyDown() and 30 or 15; -- 15 normal, 30px with shift
+				if ( delta > 0 ) then
+					scrollBar:SetValue(scrollBar:GetValue() - step);
+				else
+					scrollBar:SetValue(scrollBar:GetValue() + step);
+				end
+			</OnMouseWheel>
+		</Scripts>
+	</ScrollFrame>
+	
+	
+	<Font name="UIDarkAngelFontNormal" inherits="SystemFont_Shadow_Med1" virtual="true">
+		<Color r="0.85" g="1" b="1"/>
+	</Font>
+	<Font name="UIDarkAngelFontNormalSmall" inherits="SystemFont_Shadow_Small" virtual="true">
+		<Color r="0.85" g="1" b="1"/>
+	</Font>
+	<Font name="UIDarkAngelFontHighlight" inherits="UIDarkAngelFontNormal" virtual="true">
+		<Color r="1.0" g="1.0" b="1.0"/>
+	</Font>
+	<Font name="UIDarkAngelFontDisable" inherits="UIDarkAngelFontNormal" virtual="true">
+		<Color r="0.5" g="0.5" b="0.5"/>
+	</Font>
+	
+	
+	<Font name="UIDarkAngelFontConsolas" font="Interface\AddOns\DarkAngel\template\CONSOLA.TTF" virtual="true">
+		<FontHeight>
+			<AbsValue val="10"/>
+		</FontHeight>
+	</Font>
+	
+	
+</Ui>

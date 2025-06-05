@@ -1,0 +1,9 @@
+## Title: DarkAngel_Logger
+## Author: Baker
+## Interface: 30300
+## Notes: Logs any player's guild data change. C'mon, it's not spying it's for the guild!
+## SavedVariables: DarkAngel_FD, DarkAngel_JRN, DA_StoredGChat, DA_Leavers
+## Dependencies: DarkAngel
+
+
+logger.lua

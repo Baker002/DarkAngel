@@ -1,0 +1,9 @@
+## Title: DarkAngel_Awarder
+## Author: Baker
+## Interface: 30300
+## Notes: Raid Roster tool. Supports awarding DKP/EPGP for up to 8 independent criteria with various automations based on class, role, guild/raid status or even Skada logs
+## SavedVariables: DA_StoredCheckboxes, DA_StoredCheckboxes_remembered, DA_standby_mainslist, DA_Standby, DA_Snapshots, DA_StandbyFunList
+## Dependencies: DarkAngel
+
+
+awarder.lua

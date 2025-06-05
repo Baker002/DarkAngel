@@ -1,0 +1,10 @@
+## Title: DarkAngel_Dispenser
+## Author: Baker
+## Interface: 30300
+## Notes: A tool for dispensing items(flasks for RT). Works for 4 raid roles: Tank/Healer/Melee/Caster. Put a dispenser her'
+## SavedVariables: DarkAngel_FlaskDB
+## Dependencies: DarkAngel
+
+
+trader_ui.lua
+trader.lua

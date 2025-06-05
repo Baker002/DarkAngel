@@ -1,0 +1,28 @@
+## Title: DarkAngel
+## Version: 5.0
+## Author: Baker
+## Interface: 30300
+## Notes: No one can hide from my sight...
+## SavedVariables: fuckingOptions, fuckingOptions_g, FEP_L_gMain, FFTestFF, DA_Guild_Info
+## SavedVariablesPerCharacter: fucking2Options_char
+## OptionalDeps: epgp, QDKP_V2, RaidRoll_EPGP
+## DefaultState: enabled
+## License: Apache-2.0
+
+#@no-lib-strip@
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceLocale-3.0\AceLocale-3.0.xml
+Libs\LibTalentQuery-1.0\lib.xml
+Libs\LibGroupTalents-1.0\lib.xml
+#Libs\LibCoroutine-1.0.lua
+#@end-no-lib-strip@
+
+Libs\LibCompress.lua
+template\frozentemplate.xml
+
+Locale\locale.xml
+
+Core.lua
+gui.lua

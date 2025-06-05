@@ -1,0 +1,8 @@
+## Title: DarkAngel_Inviter
+## Author: Baker
+## Interface: 30300
+## Notes: Automated gnomish raid time battle machine. Supports multiple inviting modes
+## Dependencies: DarkAngel
+
+
+inviter.lua
