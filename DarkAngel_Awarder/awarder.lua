@@ -4687,7 +4687,7 @@ local function catch_decide_Move(source_gr)
 				end
 			end
 
-			for i = 1, math.max(#q_from_source, #q_from_dest) do
+			for i = math.max(#q_from_source, #q_from_dest), 1, -1  do
 				if q_from_source[i] then
 					print("[DEBUG] Final move:", q_from_source[i][1], "to", q_from_source[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_source[i][1], q_from_source[i][2])
