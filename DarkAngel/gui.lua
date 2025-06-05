@@ -2014,6 +2014,8 @@ do
 			)
 			
 			copyFrame_Update = function()
+				if not CopyFrameAdditional:IsShown() then return end
+				
 				local unlocked
 				local search={}
 				for i,c in pairs(search_patterns) do
