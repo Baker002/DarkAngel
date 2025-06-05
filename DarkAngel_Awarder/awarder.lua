@@ -4585,33 +4585,33 @@ tinsert(DA_PlayerMoverList,{name,group})
 	DA.ResumeTimer('raid_mover')
 end
 local function catch_decide_Move(source_gr)
-	print("[DEBUG] Entered catch_decide_Move with source_gr:", source_gr)
+	-- print("[DEBUG] Entered catch_decide_Move with source_gr:", source_gr)
 
 	local destination_gr = catch_moving_to_Grp()
-	print("[DEBUG] destination_gr determined as:", destination_gr)
+	-- print("[DEBUG] destination_gr determined as:", destination_gr)
 
 	catch_hide_frames()
 
 	if not destination_gr or destination_gr == source_gr then
-		print("[DEBUG] Invalid move: destination_gr is nil or same as source_gr")
+		-- print("[DEBUG] Invalid move: destination_gr is nil or same as source_gr")
 		return
 	end
 
 	local source_members = DA_Awarder.array['g' .. source_gr]
 	local destination_members = DA_Awarder.array['g' .. destination_gr]
 
-	print("[DEBUG] source_members:", source_members, "destination_members:", destination_members)
+	-- print("[DEBUG] source_members:", source_members, "destination_members:", destination_members)
 
 	if source_members == 0 then
-		print("[DEBUG] No members in source group")
+		-- print("[DEBUG] No members in source group")
 		return
 	end
 
 	if IsShiftKeyDown() then
-		print("[DEBUG] Shift key held: entering replacement mode")
+		-- print("[DEBUG] Shift key held: entering replacement mode")
 
 		if destination_members > 3 or source_members > 3 then
-			print("[DEBUG] Using transit group strategy")
+			-- print("[DEBUG] Using transit group strategy")
 			local transitslots = 0
 			local freeslots = {}
 			local slotstaken_inGrp = {}
@@ -4627,10 +4627,10 @@ local function catch_decide_Move(source_gr)
 				end
 			end
 
-			print("[DEBUG] Total transitslots:", transitslots)
+			-- print("[DEBUG] Total transitslots:", transitslots)
 
 			if transitslots == 0 then
-				print("[DEBUG] No available transit slots")
+				-- print("[DEBUG] No available transit slots")
 				return
 			end
 
@@ -4653,11 +4653,11 @@ local function catch_decide_Move(source_gr)
 			local extra_from_source = math.max(0, c_from_source - 3)
 			local extra_from_dest = math.max(0, c_from_dest - 3)
 
-			print("[DEBUG] q_from_source:", c_from_source, "extra:", extra_from_source)
-			print("[DEBUG] q_from_dest:", c_from_dest, "extra:", extra_from_dest)
+			-- print("[DEBUG] q_from_source:", c_from_source, "extra:", extra_from_source)
+			-- print("[DEBUG] q_from_dest:", c_from_dest, "extra:", extra_from_dest)
 
 			if transitslots < extra_from_source + extra_from_dest then
-				print("[DEBUG] Not enough transit slots for extras")
+				-- print("[DEBUG] Not enough transit slots for extras")
 				return
 			end
 
@@ -4665,7 +4665,7 @@ local function catch_decide_Move(source_gr)
 				for n = 1, extra_from_source do
 					for i = 8, 1, -1 do
 						if freeslots[i] and slotstaken_inGrp[i] < freeslots[i] then
-							print("[DEBUG] Transit source:", q_from_source[n][1], "to group", i)
+							-- print("[DEBUG] Transit source:", q_from_source[n][1], "to group", i)
 							FEP_QeuePlayerGroupTransfer(q_from_source[n][1], i)
 							slotstaken_inGrp[i] = slotstaken_inGrp[i] + 1
 							break
@@ -4678,7 +4678,7 @@ local function catch_decide_Move(source_gr)
 				for n = 1, extra_from_dest do
 					for i = 8, 1, -1 do
 						if freeslots[i] and slotstaken_inGrp[i] < freeslots[i] then
-							print("[DEBUG] Transit dest:", q_from_dest[n][1], "to group", i)
+							-- print("[DEBUG] Transit dest:", q_from_dest[n][1], "to group", i)
 							FEP_QeuePlayerGroupTransfer(q_from_dest[n][1], i)
 							slotstaken_inGrp[i] = slotstaken_inGrp[i] + 1
 							break
@@ -4689,17 +4689,17 @@ local function catch_decide_Move(source_gr)
 
 			for i = math.max(#q_from_source, #q_from_dest), 1, -1  do
 				if q_from_source[i] then
-					print("[DEBUG] Final move:", q_from_source[i][1], "to", q_from_source[i][2])
+					-- print("[DEBUG] Final move:", q_from_source[i][1], "to", q_from_source[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_source[i][1], q_from_source[i][2])
 				end
 				if q_from_dest[i] then
-					print("[DEBUG] Final move:", q_from_dest[i][1], "to", q_from_dest[i][2])
+					-- print("[DEBUG] Final move:", q_from_dest[i][1], "to", q_from_dest[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_dest[i][1], q_from_dest[i][2])
 				end
 			end
 
 		else
-			print("[DEBUG] Using direct swap strategy")
+			-- print("[DEBUG] Using direct swap strategy")
 
 			local q_from_source = {}
 			local q_from_dest = {}
@@ -4715,32 +4715,32 @@ local function catch_decide_Move(source_gr)
 
 			for i = 1, math.max(#q_from_source, #q_from_dest) do
 				if q_from_source[i] then
-					print("[DEBUG] Swap source:", q_from_source[i][1], "to", q_from_source[i][2])
+					-- print("[DEBUG] Swap source:", q_from_source[i][1], "to", q_from_source[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_source[i][1], q_from_source[i][2])
 				end
 				if q_from_dest[i] then
-					print("[DEBUG] Swap dest:", q_from_dest[i][1], "to", q_from_dest[i][2])
+					-- print("[DEBUG] Swap dest:", q_from_dest[i][1], "to", q_from_dest[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_dest[i][1], q_from_dest[i][2])
 				end
 			end
 		end
 	else
 		-- move mode
-		print("[DEBUG] Normal move mode")
+		-- print("[DEBUG] Normal move mode")
 		if destination_members == 5 then
-			print("[DEBUG] Destination group is full")
+			-- print("[DEBUG] Destination group is full")
 			return
 		end
 
 		local moving_members = 5 - destination_members
-		print("[DEBUG] Members to move:", moving_members)
+		-- print("[DEBUG] Members to move:", moving_members)
 
 		local queued = 0
 
 		for i = 1, 40 do
 			local name, _, subgroup = GetRaidRosterInfo(i)
 			if subgroup == source_gr then
-				print("[DEBUG] Moving:", name, "to", destination_gr)
+				-- print("[DEBUG] Moving:", name, "to", destination_gr)
 				FEP_QeuePlayerGroupTransfer(name, destination_gr)
 				queued = queued + 1
 				if queued == moving_members then
