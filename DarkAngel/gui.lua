@@ -2024,7 +2024,7 @@ do
 				end
 
 				local editbox=CopyFrameAdditional.EB
-				editbox:SetText("")
+				
 				if not unlocked then DA.Print(L['select at least one criteria']) return end
 				
 				local separator=DarkAngelGUI.Guild.copyFrame.separator:GetText()
@@ -2041,6 +2041,8 @@ do
 					DarkAngelGUI.Guild.copyFrame.numlines:SetText(fuckingOptions.gcopyfrnumlines)
 				end
 				
+				local result = ""
+				
 				if doing_by_selection then
 					for _,player in ipairs(DA_G_Processed) do
 						if DA.Players_Selected[player.plname] then
@@ -2052,7 +2054,7 @@ do
 								end
 							end
 							if line~="" then
-								editbox:Insert(line..'\n')
+								result = result .. line..'\n'
 							end
 						end
 					end
@@ -2069,12 +2071,14 @@ do
 								end
 							end
 							if line~="" then
-								editbox:Insert(line..'\n')
+								result = result .. line..'\n'
 							end
 						end
 					end
 					
 				end
+				
+				editbox:SetText(result)
 				
 			end
 		

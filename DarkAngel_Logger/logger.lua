@@ -1361,6 +1361,7 @@ do
 					DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.lcopyfrnumlines)
 				end
 				
+				local result = ""
 				for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
 					local player = DA_L_Processed[i]
 					if player then
@@ -1372,12 +1373,12 @@ do
 							end
 						end
 						if line~="" then
-							editbox:Insert(line..'\n')
+							result = result .. line..'\n'
 						end
 					end
 				end
 					
-					
+				editbox:SetText(result)
 				
 			end
 		
