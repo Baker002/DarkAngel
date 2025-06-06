@@ -617,12 +617,15 @@ local function TransLegitCheck(name,epdif,gpdif)
 			end
 		end
 		
-		if dkp_DA_counter==epdif and (dkpwhcounter==epdif or dkppubl_allcounter==epdif or dkppublcounter==epdif) then
+		if dkp_DA_counter==epdif then
 			return 'both',author
-		elseif dkp_DA_counter==epdif and ( (epdif==dkpwhcounter+dkppubl_allcounter) or (epdif==dkpwhcounter+dkppublcounter) or (epdif==dkppubl_allcounter+dkppublcounter) or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) ) then
+		elseif (dkpwhcounter==epdif or dkppubl_allcounter==epdif or dkppublcounter==epdif) 
+			or (epdif==dkpwhcounter+dkppubl_allcounter) 
+			or (epdif==dkpwhcounter+dkppublcounter) 
+			or (epdif==dkppubl_allcounter+dkppublcounter) 
+			or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) 
+			then
 			return 'both',author	
-		elseif (epdif==dkpwhcounter+dkppubl_allcounter) or (epdif==dkpwhcounter+dkppublcounter) or (epdif==dkppubl_allcounter+dkppublcounter) or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) then
-			return 'msg',author	
 		elseif dkp_DA_counter==epdif then
 			return 'log',author
 		end
@@ -1098,51 +1101,6 @@ local function ScanCompare(db,firstrun)
 
 end
 
-
--- local function CopyLog()
-	
-	-- local unlocked
-	-- for i,criteria in pairs({"date_time","change_type","name","diff_ep","diff_gp","diff_other","total"}) do
-		-- if DarkAngelGUI.Log.copyFrame[criteria]:GetChecked() then
-			-- unlocked=true
-			-- break
-		-- end
-	-- end
-	-- if not unlocked then DA.Print(L['select at least one criteria']) return end
-
-	-- FFLCopyFrameBox:Show()
-	-- local editbox=FFLCopyFrameBox.EB
-	-- editbox:SetText("")
-	-- local separator=DarkAngelGUI.Log.copyFrame.separator:GetText()
-	-- if not separator then 
-		-- DA.Print("separating data with single spacing")
-		-- separator=" "
-	-- end
-
-
-	-- if not tonumber(fuckingOptions.copyframenumlines) or tonumber(fuckingOptions.copyframenumlines)<=0 then 
-	-- fuckingOptions.copyframenumlines=35
-	-- DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.copyframenumlines)
-	-- end
-	-- for i=1,fuckingOptions.copyframenumlines do
-		-- if _G["FFGLine"..i] then
-			-- local line=""
-			
-			-- for b,criteria in pairs({{"date_time","time"},{"change_type","typ"},{"name",""},{"diff_ep",'che'},{"diff_gp",'chg'},{"diff_other",'note'},{"total",'last'}}) do
-				-- if DarkAngelGUI.Log.copyFrame[criteria[1]]:GetChecked() and _G["FFGLine"..i..criteria[2]] and _G["FFGLine"..i..criteria[2]]:IsShown() then
-					-- line=line..(_G["FFGLine"..i..criteria[2]]:GetText() or "  ").."|r"..separator
-				-- end
-			-- end	
-			-- editbox:Insert('|r'..line..'\n')
-			
-		-- else
-			-- break
-		-- end
-	-- end
-
-
--- end
-
 function Mod:StartScan()
 
 if DA_CurrentGuild~="n0-guild" then else return end
@@ -1245,6 +1203,7 @@ do
 		
 		
 		local copyFrame_Update
+		--copy
 		do
 			DarkAngelGUI.Log.copybtn,DarkAngelGUI.Log.copyFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Log,L["copy"],12,35,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-6},80,175,"TOP",nil,function() copyFrame_Update() end)
 			
@@ -1316,7 +1275,7 @@ do
 			
 			local CopyFrameAdditional=DA.FrameCreater(nil,DarkAngelGUI.Log.copyFrame,499,175,{"BOTTOMLEFT",DarkAngelGUI.Log.copyFrame,"BOTTOMRIGHT"})
 			CopyFrameAdditional:Show()
-			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x')
+			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x',CopyFrameAdditional:GetFrameLevel()+3)
 			
 			DA.ScrollBarCreater("DarkAngelLog_CopyFrame",CopyFrameAdditional,{CopyFrameAdditional.width-5, CopyFrameAdditional.height-30},{"TOPLEFT", 5, -20},1)
 			local copyfr_Scrolled=DarkAngelLog_CopyFrame.scrollchild
@@ -1385,80 +1344,7 @@ do
 			end
 		
 		end
-		--copy
-		do
-			-- DarkAngelGUI.Log.copybtn,DarkAngelGUI.Log.copyFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Log,L["copy"],12,35,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-6},80,175,"TOP",nil,function() DarkAngelGUI.Log.copyFrame.separator:HighlightText() end,function() FFLCopyFrameBox:Hide() end)
-			-- for i,criteria in pairs({"date_time","change_type","name","diff_ep","diff_gp","diff_other","total"}) do
-				-- DarkAngelGUI.Log.copyFrame[criteria]=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPLEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10,5-12*i},15,15,criteria,nil,nil,nil)
-				-- DarkAngelGUI.Log.copyFrame[criteria]:SetChecked(1)
-			-- end
-			--separator
-			-- do
-				-- DarkAngelGUI.Log.copyFrame.separator=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -130},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end, --enter here
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
-					-- function(self) 	
-						-- if self:GetParent():IsShown() then
-							
-							-- self.t:SetBlendMode("BLEND")
-							-- self.focusgained=1
-						-- end
-					-- end,
-					-- function(self)
-						-- fuckingOptions.copyframeseparator=self:GetText()
-					-- end
-				-- )
-				
-				-- DarkAngelGUI.Log.copyFrame.separator:SetText(fuckingOptions.copyframeseparator)
-				-- DA.FontCreater(nil,L['separator'],{"LEFT",DarkAngelGUI.Log.copyFrame.separator,"LEFT",6,13},DarkAngelGUI.Log.copyFrame.separator,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
-			-- end
-			--numlines
-			-- do
-				-- DarkAngelGUI.Log.copyFrame.numlines=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -160},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end, --enter here
-					-- function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
-					-- function(self) 	
-						-- if self:GetParent():IsShown() then
-							
-							-- self.t:SetBlendMode("BLEND")
-							-- self.focusgained=1
-							-- if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end 
-						-- end
-					-- end,
-					-- function(self)
-						-- fuckingOptions.copyframenumlines=self:GetText()
-					-- end,1
-				-- )
-				
-				-- DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.copyframenumlines)
-				-- DA.FontCreater(nil,L['lines to print'],{"LEFT",DarkAngelGUI.Log.copyFrame.numlines,"LEFT",2,13},DarkAngelGUI.Log.copyFrame.numlines,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
-			-- end
-			
-			-- DA.CreateFFGButton2(nil,DarkAngelGUI.Log.copyFrame,{"LEFT",DarkAngelGUI.Log.copyFrame,"TOPLEFT",35,-100},15,35,'>>>>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() CopyLog() end)
-			
-			-- DA.FrameCreater("FFLCopyFrameBox",DarkAngelGUI.Log.copyFrame,499,175,{"BOTTOMLEFT",DarkAngelGUI.Log.copyFrame,"BOTTOMRIGHT"})
-			-- DA.CloseButtonCreater(nil,FFLCopyFrameBox,{"TOPRIGHT", FFLCopyFrameBox, "TOPRIGHT", -5,-5},10,10,'x')
-			
-			-- DA.ScrollBarCreater("FFG_CopyFrame",FFLCopyFrameBox,{FFLCopyFrameBox.width-5, FFLCopyFrameBox.height-30},{"TOPLEFT", 5, -20},1)
-			-- local copyfr_Scrolled=FFG_CopyFrame.scrollchild
-
-			-- FFLCopyFrameBox.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-				-- function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				-- function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
-				-- function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				-- function(self) 	
-					-- self.t:SetBlendMode("BLEND")
-					-- self.focusgained=1
-					-- self:HighlightText()
-				-- end,
-				-- nil,nil,nil,1
-			-- )
-			
 		
-		end
-
 		do --search checkboxes
 			-- for 
 			local newplayerCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",180,-10},15,15,L["new player"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_new=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_new','DA_CurrentGuild'})

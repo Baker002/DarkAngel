@@ -64,12 +64,24 @@ DA_Inviter.OpenClose=function()
 		DA_Inviter:Show()
 	end
 end
-DA.CloseButtonCreater(nil,DA_Inviter,{"TOPRIGHT", DA_Inviter, "TOPRIGHT", -5,-5},10,10,'x')
+DA.CloseButtonCreater(nil,DA_Inviter,{"TOPRIGHT", DA_Inviter, "TOPRIGHT", -5,-5},12,12,'x')
 
 local PhrasesFrame=DA.FrameCreater(nil,DA_Inviter,DA_Inviter.width,150,{"BOTTOMLEFT", DA_Inviter, "TOPLEFT", 0, 2})
 PhrasesFrame:RegisterForDrag("LeftButton")
 PhrasesFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 PhrasesFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+
+DA_Inviter.OptionsFr=DA.FrameCreater(nil,DA_Inviter,250,95,{"TOPLEFT", DA_Inviter, "TOPRIGHT", 3, 0})
+DA.CloseButtonCreater(nil,DA_Inviter.OptionsFr,{"TOPRIGHT", DA_Inviter.OptionsFr, "TOPRIGHT", -2,-1},10,10,'x')
+
+DA.OptionsButtonCreater(nil,DA_Inviter,{"TOPRIGHT", DA_Inviter, "TOPRIGHT", -20,-5},12,12,function(self)
+	if DA_Inviter.OptionsFr:IsShown() then
+		DA_Inviter.OptionsFr:Hide()
+	else
+		DA_Inviter.OptionsFr:Show()
+	end
+end)
+
 
 
 local convertedToRaid=false
@@ -320,7 +332,7 @@ function Mod:OnInitialize()
 			DA_Inviter.startbtn:SetText(L['start'])
 			Inviter_Started=false
 			DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Invite auto-stopped'],1,0.5,0.5)
-			SendChatMessage("# "..L['Invite auto-stopped'].." ("..fuckingOptions.RTstoper.." "..L['minutes_short']..")","guild")
+			SendChatMessage("# "..fuckingOptions_g[DA_CurrentGuild].inviter_autostop.." ("..fuckingOptions.RTstoper.." "..L['minutes_short']..")","guild")
 			if fuckingOptions.SR_autojoin then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_CHANNEL");end
 			if fuckingOptions.SR_autoaccept then else InviterMsgFrame:UnregisterEvent("PARTY_INVITE_REQUEST");end
 			if fuckingOptions.SR_pm then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_WHISPER");end
@@ -419,7 +431,7 @@ do
 	}
 	local rerender_speedSelectFrame
 	
-	DA_Inviter.startMenuFrame.speedSelectBtn,DA_Inviter.startMenuFrame.speedSelectFrame=DA.CreateFFGDropFrame(DA_Inviter.startMenuFrame,"",12,70,{"CENTER",DA_Inviter.startMenuFrame,"TOPLEFT",40,-20},72,34,"BOTTOM")
+	DA_Inviter.startMenuFrame.speedSelectBtn,DA_Inviter.startMenuFrame.speedSelectFrame=DA.CreateFFGDropFrame(DA_Inviter.startMenuFrame,"",12,70,{"CENTER",DA_Inviter.startMenuFrame,"TOPLEFT",40,-20},72,34,"BOTTOM",nil,nil,nil,'speedSelect')
 	DA_Inviter.startMenuFrame.speedSelectFrame:SetFrameLevel(200)
 	for id,ss in ipairs(speedSelectTbl) do
 		DA_Inviter.startMenuFrame.speedSelectFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.startMenuFrame.speedSelectFrame,{"TOPLEFT",DA_Inviter.startMenuFrame.speedSelectFrame, "TOPLEFT",1, 10-11*id},10,70,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
@@ -467,7 +479,7 @@ do
 		{"Free",'f'},
 	}
 	local rerender_lootSelectFrame
-	DA_Inviter.startMenuFrame.lootBtn,DA_Inviter.startMenuFrame.lootFrame=DA.CreateFFGDropFrame(DA_Inviter.startMenuFrame,"",12,45,{"CENTER",DA_Inviter.startMenuFrame,"TOPLEFT",135,-20},47,34,"BOTTOM")
+	DA_Inviter.startMenuFrame.lootBtn,DA_Inviter.startMenuFrame.lootFrame=DA.CreateFFGDropFrame(DA_Inviter.startMenuFrame,"",12,45,{"CENTER",DA_Inviter.startMenuFrame,"TOPLEFT",135,-20},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect')
 	DA_Inviter.startMenuFrame.lootFrame:SetFrameLevel(200)
 	for id,ss in ipairs(lootSelectTbl) do
 		DA_Inviter.startMenuFrame.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.startMenuFrame.lootFrame,{"TOPLEFT",DA_Inviter.startMenuFrame.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
@@ -613,7 +625,7 @@ do
 			DA_Inviter.startMenuFrame.speedSelectTimerEB:ClearFocus()
 			if Inviter_Started==true then
 				DA_Inviter.stopbtn:Enable()
-				SendChatMessage(L['Type + in guild chat if you are still not in raid'],"guild")
+				SendChatMessage(fuckingOptions_g[DA_CurrentGuild].inviter_repeat,"guild")
 				SendAddonMessage("SRranons",GetUnitName("player"), "guild")
 			else
 				DA_Inviter.startbtn:SetText(L["guild ping"])
@@ -661,7 +673,7 @@ DA_Inviter.stopbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter
 			DA_Inviter.startbtn:SetText(L['start'])
 			Inviter_Started=false
 			DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Raid inviter is disabled now'],1,0.5,0.5)
-			if not DA_Inviter.startMenuFrame.silentstart:GetChecked() then SendChatMessage(L['raidinv_stop_msg'],"guild") end
+			if not DA_Inviter.startMenuFrame.silentstart:GetChecked() then SendChatMessage(fuckingOptions_g[DA_CurrentGuild].inviter_stop,"guild") end
 			if fuckingOptions.SR_autojoin then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_CHANNEL");end
 			if fuckingOptions.SR_autoaccept then else InviterMsgFrame:UnregisterEvent("PARTY_INVITE_REQUEST");end
 			if fuckingOptions.SR_pm then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_WHISPER");end
@@ -719,8 +731,12 @@ DA.EditBoxCreater2(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 245, -20},{
 DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -50},20,20,L['provide discord if asked'],function(self) fuckingOptions.SR_discenab=(self:GetChecked() or false) end,{'fuckingOptions','SR_discenab'},nil)
 DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 170, -53},  12,  50,  L['send'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 	function(self)
-		SendChatMessage(fuckingOptions.RTdiscordlink,"RAID")
-		SendChatMessage(fuckingOptions.RTdiscordlink,"RAID_WARNING")
+		if fuckingOptions.RTdiscordlink~="https://discord.gg/discord_link_here" then
+			SendChatMessage(fuckingOptions.RTdiscordlink,"RAID")
+			SendChatMessage(fuckingOptions.RTdiscordlink,"RAID_WARNING")
+		else
+			DA.Print("")
+		end
 	end
 )
 -- для линки дс
@@ -755,10 +771,35 @@ false,
 function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();fuckingOptions.RTlfgphrases=self:GetText() end,
 function(self) self.t:SetBlendMode("BLEND") end
 )
+
+--opt
+if not fuckingOptions_g[DA_CurrentGuild].inviter_stop then
+	fuckingOptions_g[DA_CurrentGuild].inviter_stop=L['raidinv_stop_msg']
+end
+local eb_inviter_stop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-20},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_stop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_stop",'DA_CurrentGuild'},1,255,'text')
+DA.FontCreater(nil,"Stop message",{"BOTTOMLEFT",eb_inviter_stop,"TOPLEFT",5,-2},eb_inviter_stop,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+	
+
+if not fuckingOptions_g[DA_CurrentGuild].inviter_repeat then
+	fuckingOptions_g[DA_CurrentGuild].inviter_repeat=L['Type + in guild chat if you are still not in raid']
+end
+local eb_inviter_repeat = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-50},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_repeat,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_repeat",'DA_CurrentGuild'},1,255,'text')
+DA.FontCreater(nil,"Repeat message",{"BOTTOMLEFT",eb_inviter_repeat,"TOPLEFT",5,-2},eb_inviter_repeat,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+
+
+if not fuckingOptions_g[DA_CurrentGuild].inviter_autostop then
+	fuckingOptions_g[DA_CurrentGuild].inviter_autostop=L['Invite auto-stopped']
+end
+local eb_inviter_autostop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-80},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_autostop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_autostop",'DA_CurrentGuild'},1,255,'text')
+DA.FontCreater(nil,"Auto-stop message",{"BOTTOMLEFT",eb_inviter_autostop,"TOPLEFT",5,-2},eb_inviter_autostop,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+
+
+
 -----------
 -----------
 -----------
 DA.CreateScaler('DA_Inviter',0.6,2,{'fuckingOptions','SRScale'})
+
 
 end
 

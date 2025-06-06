@@ -199,11 +199,13 @@ DA_Awarder.autoopt:SetScript("OnDragStop", function(self) self:GetParent():StopM
 
 -- DA_Awarder.autoopt:SetFrameLevel(180)
 
-DA.CloseButtonCreater(nil,DA_Awarder.autoopt,{"TOPRIGHT", DA_Awarder.autoopt, "TOPRIGHT", -2,-2},10,10,'x'):SetFrameLevel(181)
+DA.CloseButtonCreater(nil,DA_Awarder.autoopt,{"TOPRIGHT", DA_Awarder.autoopt, "TOPRIGHT", -2,-2},10,10,'x')
+-- :SetFrameLevel(181)
 
 
 DA_Awarder.autoopt.officerassign=DA.FrameCreater(nil,DA_Awarder.autoopt,70,(GuildControlGetNumRanks()+1)*11,{"BOTTOMLEFT", DA_Awarder.autoopt, "TOPLEFT", 0, 0},nil,nil,1)
-DA.CloseButtonCreater(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPRIGHT", 1,5},8,8,'x'):SetFrameLevel(192)
+DA.CloseButtonCreater(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPRIGHT", 1,5},8,8,'x')
+-- :SetFrameLevel(192)
 DA_Awarder.autoopt.officerassign:SetScript("OnHide",function() DA.AWAutoOptions() end)
 DA_Awarder.autoopt.officerassign.andhigher=DA.CheckBtnCreater(nil,DA_Awarder.autoopt.officerassign,{"CENTER", DA_Awarder.autoopt.officerassign, "BOTTOMLEFT", 5,5},12,12,L['and higher'],function(self) end)
 DA_Awarder.autoopt.officerassign.andhigher.font:SetFont("Fonts\\FRIZQT__.TTF", 7, "OUTLINE")
@@ -262,7 +264,8 @@ end
 DA_Awarder.autoopt.skadaassign=DA.FrameCreater(nil,DA_Awarder.autoopt,180,200,{"BOTTOMLEFT", DA_Awarder.autoopt, "TOPLEFT", 0, 0},nil,nil,1)
 -- DA_Awarder.autoopt.skadaassign:SetFrameLevel(190)
 DA_Awarder.autoopt.skadaassign.t:SetTexture(0.1, 0.1, 0.12, 0.75)
-DA.CloseButtonCreater(nil,DA_Awarder.autoopt.skadaassign,{"TOPLEFT", DA_Awarder.autoopt.skadaassign, "TOPRIGHT", 1,5},10,10,'x'):SetFrameLevel(200)
+DA.CloseButtonCreater(nil,DA_Awarder.autoopt.skadaassign,{"TOPLEFT", DA_Awarder.autoopt.skadaassign, "TOPRIGHT", 1,5},10,10,'x')
+-- :SetFrameLevel(200)
 DA_Awarder.autoopt.skadaassign:SetScript("OnHide",function() DA.AWAutoOptions() end)
 
 
@@ -3384,14 +3387,14 @@ do --main frame buttons
 	
 	do --roles help
 		
-		DA_Awarder.EPGPValues=DA.FrameCreater(nil,DA_Awarder,345,490,{"TOPLEFT", DA_Awarder, "TOPLEFT", 2.5, -2.5})
+		DA_Awarder.EPGPValues=DA.FrameCreater(nil,DA_Awarder,345,490,{"TOPLEFT", DA_Awarder, "TOPLEFT", 2.5, -2.5},nil,nil,1)
 		DA_Awarder.EPGPValues:RegisterForDrag("LeftButton")
 		DA_Awarder.EPGPValues:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 		DA_Awarder.EPGPValues:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
 		-- DA_Awarder.EPGPValues:SetFrameLevel(150)
 		DA_Awarder.EPGPValues.t:SetTexture(0.03, 0.04, 0.07, 0.9)
 		
-		DA.CloseButtonCreater(nil,DA_Awarder.EPGPValues,{"TOPRIGHT", DA_Awarder.EPGPValues, "TOPRIGHT", -5,-5},10,10,'x',152)
+		DA.CloseButtonCreater(nil,DA_Awarder.EPGPValues,{"TOPRIGHT", DA_Awarder.EPGPValues, "TOPRIGHT", -5,-5},10,10,'x')
 		
 		local startingpointX=10
 		local diffpointPR=70

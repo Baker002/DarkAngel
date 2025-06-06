@@ -248,8 +248,11 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelCloseButton")
 	-- f:SetScript("OnClick", HideParentPanel)
 	f:SetText(settext)
 	f:SetFrameStrata("FULLSCREEN_DIALOG");
-	f:SetFrameLevel(framelevel or 104)
-	f:SetFrameLevel(rel:GetFrameLevel() + 61)
+	if framelevel then
+		f:SetFrameLevel(framelevel or 104)
+	else
+		f:SetFrameLevel(rel:GetFrameLevel() + 3)
+	end
 rel.myclosebtn=f
 	return f
 end
@@ -1996,7 +1999,7 @@ do
 			
 			local CopyFrameAdditional=DA.FrameCreater(nil,DarkAngelGUI.Guild.copyFrame,499,175,{"BOTTOMLEFT",DarkAngelGUI.Guild.copyFrame,"BOTTOMRIGHT"})
 			CopyFrameAdditional:Show()
-			DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x')
+			DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x',CopyFrameAdditional:GetFrameLevel()+3)
 			
 			DA.ScrollBarCreater("DarkAngelGuild_CopyFrame",CopyFrameAdditional,{CopyFrameAdditional.width-5, CopyFrameAdditional.height-30},{"TOPLEFT", 5, -20},1)
 			local copyfr_Scrolled=DarkAngelGuild_CopyFrame.scrollchild
@@ -2548,7 +2551,7 @@ do
 			end)
 				
 			
-			DarkAngelGUI.Guild.OpenGC_Btn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",425,-10},12,25,'gc','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+			DarkAngelGUI.Guild.OpenGC_Btn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",425,-10},12,25,'gm','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 				if gc:IsShown() then
 					gc:Hide()
 				else

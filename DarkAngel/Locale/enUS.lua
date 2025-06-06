@@ -417,7 +417,7 @@ L['zamclearafteraward']='clear after\naward'
 L['6-8 standby']=true
 L['profile']='set'
 L['jokes']=true
-L['zamprocep']='standby %ep'
+L['zamprocep']='%raid award for standby'
 L['zamenagudok']='# whisper me \'epgp standby\' to join the raid standby'
 L["settingep0"]="Player $1 got less EP than you try to spend ($2). Wrote EP as 0"
 L["settinggp0"]="Player $1 got less GP than you try to spend ($2). Wrote GP as 0"
@@ -575,7 +575,8 @@ end
 
 --Descriptions
 do
-
+L['DESCr-lootBtnSelect']=[==[Set looting method]==]
+L['DESCr-speedSelect']=[==[Raid invitations sending speed]==]
 L['DESCr-awgrpmover']=[==[|cffff9999   Drag|r
 Move group members to another group
 
@@ -759,26 +760,12 @@ Also affects global dispenser sequences.
 If the module keeps failing stacks creations, especially if you dispense 
 a lot of items of the same type for many roles, you may think of increasing this value (0.2 should work just fine)
 |cff99eeeeDefault|r: 0.15]==]
-L["DESCr-LogHelp"]=[==[This tool allows to track guild officer note changes.
+L['DESCr-LogHelp']=[==[The time displayed for each line is colored |cff4d7f7fgreen|r
+for changes that were noticed online, so the changes are fairly accurate.
+For changes that happened while you were offline, their times are marked |cff7f4d4dred|r.
+The red values ​​are not as accurate, as they show the overall difference and represent when the change was |cffffaaffnoted|r, not committed
 
-|cffffaaffscan|r button:
-   Performs re-scan of the guild, updating the current locally stored data.
-   Once an addon spots any changes, it will display them right away in this |cffffaaffLog|r.
-   
-   By default, there is no need to click |cffffaaffscan|r button 
-   since an addon performs re-scans automatically. (|cffffaaffopt|r>|cffffaaffAuto-update|r)
-
-The |cffffaaffdate|r displayed for each line is colored |cff4d7f7fgreen|r 
-   for the changes that were spot online, so the changes are pretty precise.
-
-For the changes that were rather occur while you were offline, their date is marked as |cff7f4d4dred|r.
-   Red values are not so accurate since they show the total difference.
-   (+10+20+30-50 in |cff4d7f7fonline|r will be shown as +10 in |cff7f4d4doffline|r total)
-   
-Player |cffffaaffnames|r are clickable, so you may open the |cffffaaffDetails|r of this player in 1 click.
-
-All of these tabs are |cffff00ffmovable|r by dragging and |cffff00ffre-Sizable|r with Alt+Dragging.
-The addon |cffff00ffScale|r can be also set in the |cffffaaffopt|r tab.]==]
+(+10+20+30-50 in |cff4d7fonline|r mode would be shown as +10 in |cff7f4d4doffline|r mode)]==]
 L["DESCr-DetailsHelp"]=[==[asdasd]==]
 L["DESCr-GuildHelp"]=[==[asd]==]
 L["DESCr-storeautoman"]=[==[If selected, the backup will be saved in local character storage

@@ -171,6 +171,9 @@ local fuckingOptions_g_local={
 	evaluateoffnote=false,
 	aw_send_whispers=1,
 	initRaidLootMethod='m',
+	inviter_stop=false,
+	inviter_repeat=false,
+	inviter_autostop=false,
 	
 	minlog=3,
 	storeleavers=30,

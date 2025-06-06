@@ -332,7 +332,7 @@ end
 
 
 F.FlaskDispenser=DA.FrameCreater(nil,F,100,200,{"TOPLEFT", F,"TOPRIGHT",2,0},"Interface\\AddOns\\DarkAngel\\template\\pict\\box1",1)
-DA.CloseButtonCreater(nil,F,{"TOPRIGHT", F.FlaskDispenser, "TOPRIGHT", 0,0},8,8,'x')
+DA.CloseButtonCreater(nil,F,{"TOPRIGHT", F.FlaskDispenser, "TOPRIGHT", 0,0},8,8,'x',F.FlaskDispenser:GetFrameLevel()+3)
 F.FlaskDispenser.add:SetFrameLevel(0)
 
 F.FlaskDispenser.sets={}
