@@ -1438,7 +1438,7 @@ function DA.CreateGUIs()
 ---- MAIN ----
 ---- MAIN ----
 
-	DA.CloseButtonCreater(nil,DarkAngelGUI,{"TOPRIGHT", DarkAngelGUI, "TOPRIGHT", -5,-5},10,10,'x')
+	DA.CloseButtonCreater(nil,DarkAngelGUI,{"TOPRIGHT", DarkAngelGUI, "TOPRIGHT", -5,-5},10,10,'x',222)
 	DarkAngelGUI.myclosebtn:HookScript("OnClick",function() DA.Garbage_Collect() end)
 	
 	if UISpecialFrames then 

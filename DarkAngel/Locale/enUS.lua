@@ -248,7 +248,7 @@ end
 
 --opt
 do
-
+L["Bidder module is disabled. Enable it in main addon options"]=true
 L["Store logs"]=true
 L["Trusted players"]=true
 L["Texture Options"]=true

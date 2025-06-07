@@ -266,6 +266,10 @@ end)
 DA.FontCreater(nil,L["Bid tracker"],{"LEFT",DA_BidTracker,"TOPLEFT",2,5},DA_BidTracker,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 
 DA_BidTracker.itemicon=DA.ButtonCreater(nil,DA_BidTracker,{"TOPLEFT",DA_BidTracker,"TOPLEFT",2,-2},30,30,'','',function(self,mouse) 
+	if not DA_BidTracker.working then 
+		DA.Print(L["Bidder module is disabled. Enable it in main addon options"])
+		return 
+	end
 	if mouse=="RightButton" then
 		--disable all
 		self:SetPushedTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot")
@@ -1304,6 +1308,11 @@ function Mod:start_new_bid_session(itemLink)
 	DA_BidTracker.winnermain=nil
 	DA_BidTracker.winneralt=nil
 	DA.ResumeTimer("itembidder")
+	if DA_BidTracker.itemicon:IsMouseOver() and (itemLink or itemID) and DA_BidTracker.itemfont:GetText() and DA_BidTracker.itemfont:GetText()~="" and #DA_BidTracker.itemfont:GetText()>0 then
+		GameTooltip:SetOwner(DA_BidTracker.itemicon,'ANCHOR_CURSOR')
+		GameTooltip:SetHyperlink(itemLink or "\124cffffffff\124Hitem:"..itemID.."::::::::70:::::\124h[loading data]\124h\124r")
+		GameTooltip:Show()
+	end
 end
 
 function Mod:BidTracker_Load()

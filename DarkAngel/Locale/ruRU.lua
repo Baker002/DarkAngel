@@ -244,6 +244,7 @@ end
 
 --opt
 do
+L["Bidder module is disabled. Enable it in main addon options"]='Модуль ставок выключен. Включите его в core настройках аддона'
 L["Store logs"]="Храненить логи"
 L["Trusted players"]="Выдача рейд ассиста"
 L["Texture Options"]='Настройки текстур'
