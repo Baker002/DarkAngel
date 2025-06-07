@@ -1321,7 +1321,7 @@ end
 
 function DA.DKPawardfunc(name,value,reason,isfake,wh,isblk)
 if name and value and reason then else return end
-if type(value)=='number' then else print('error 1044') return end
+if type(value)=='number' then else print('error 1324') return end
 if FEP_gMain[name] then else DA.Print(DA.GetColorName(name or 'no_name')..' -not found') return end
 
 
@@ -1358,7 +1358,7 @@ end
 end
 function DA.EPawardfunc(name,value,reason,isfake,wh,isblk)
 if name and value and reason then else return end
-if type(value)=='number' then else print('error 1044') return end
+if type(value)=='number' then else print('error 1361') return end
 if FEP_gMain[name] then else DA.Print(DA.GetColorName(name or 'no_name')..' -not found') return end
 
 
@@ -1395,7 +1395,7 @@ end
 end
 function DA.GPawardfunc(name,value,reason,isfake,wh,isblk)
 if name and value and reason then else return end
-if type(value)=='number' then else print('error 1044') return end
+if type(value)=='number' then else print('error 1398') return end
 if FEP_gMain[name] then else DA.Print(DA.GetColorName(name or 'no_name')..' -not found') return end
 
 local typ,ep,gp=DA.DecodeNote(FEP_gMain[name])

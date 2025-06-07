@@ -821,7 +821,7 @@ local function skada_addit_gather()
 				
 			elseif DA_Awarder.autoopt.skadaassign.skada_version==2 then
 				
-				print('Skada version 2')
+				print('Skada version ##: failed to determine Skada version. Report this bug')
 				return {}
 				
 			end
@@ -4247,18 +4247,18 @@ do --SETS
 		if not text then
 			DA_Awarder.naboredit:SetText(DA_SelSet)
 		elseif DA_SelSet=='default' then
-			print('cannot edit name for default set')
+			DA.Print('error: cannot edit name for default set')
 			DA_Awarder.naboredit:SetText(DA_SelSet)
 		elseif text==DA_SelSet then
 		
 		elseif DA_StoredCheckboxes[text] then
-			print('name '..text..' is already in use for another set')
+			DA.Print('error: name '..text..' is already in use for another set')
 			DA_Awarder.naboredit:SetText(DA_SelSet)
 		elseif text:gsub('%!', ''):gsub('%@', ''):gsub('%#', ''):gsub('%$', ''):gsub('%%', ''):gsub('%^', ''):gsub('%&', ''):gsub('%*', ''):gsub('%(', ''):gsub('%)', ''):gsub('%_', ''):gsub('%=', ''):gsub('%+', ''):gsub('%-', ''):gsub('% ', '')~=text then
-			print('!@#$%... characters and spaces are not allowed')
+			DA.Print('error: !@#$%... characters and spaces are not allowed')
 			DA_Awarder.naboredit:SetText(DA_SelSet)
 		elseif tonumber(text:sub(1,1)) then
-			print('first character of name cannot be number')
+			DA.Print('error: first character of name cannot be number')
 			DA_Awarder.naboredit:SetText(DA_SelSet)
 		else
 			DA_StoredCheckboxes[text]=DA_StoredCheckboxes[DA_SelSet]
