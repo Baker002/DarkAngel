@@ -175,6 +175,10 @@ local fuckingOptions_g_local={
 	inviter_repeat=false,
 	inviter_autostop=false,
 	
+	aw_auto_locals=true,
+	aw_auto_Ch_locals=false,
+	aw_auto_silent_locals=false,
+	
 	minlog=3,
 	storeleavers=30,
 	cleanlogonceper=1209600,

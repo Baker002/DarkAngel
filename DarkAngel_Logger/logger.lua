@@ -2083,10 +2083,9 @@ end
 
 
 function Mod:AddModOptions(modOptTable)
-	local f = DA.FrameCreater("sgsdgsdgSA",DarkAngelopt.scrollchild,154,227)
+	local f = DA.FrameCreater("sgsdgsdgSA",DarkAngelopt.scrollchild,154,232)
 	f:Show()
 	tinsert(modOptTable, {'Logger',f})	
-	
 	DA.FontCreater(nil,"Logger",{"LEFT",f,"TOPLEFT",5,-6},f,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		
 	
@@ -2231,7 +2230,7 @@ function Mod:AddModOptions(modOptTable)
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 		dodecaycheck:Hide()
 		suspext:Show()
-		f:SetSize(154,197)
+		f:SetSize(154,203)
 		logF:SetPoint("TOPLEFT",f,"TOPLEFT",2,-95)
 	else
 		suspext:Hide()

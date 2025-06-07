@@ -246,7 +246,7 @@ end
 do
 L["Bidder module is disabled. Enable it in main addon options"]='Модуль ставок выключен. Включите его в core настройках аддона'
 L["Store logs"]="Храненить логи"
-L["Trusted players"]="Выдача рейд ассиста"
+L["Trusted players"]="Доверенные игроки"
 L["Texture Options"]='Настройки текстур'
 L["Art texture alpha"]="Прозр-ть арта"
 L["BG texture alpha"]="Прозр-ть BG"
@@ -310,6 +310,16 @@ end
 
 --EP Awarder
 do
+L["DESCr-aw_auto_locals"]=[[|cffff9999Автоматические локалки|r
+Когда один из "Доверенных игроков" делает локальную привязку, вы автоматически сохраните её у себя]]
+L["DESCr-aw_auto_Ch_locals"]=[[Если полученная локальная привязка изменяет существующую, она будет принята автоматически
+Если выключено, такая привязка пропускается]]
+L['subscribe to auto locals']="подписаться на автопривязки"
+L['apply changes']="принимать изменения"
+L['silent mode']='тихий режим'
+L["DESCr-aw_trusted_players"]=[[|cffff9999Доверенные игроки|r
+-могут взять\убрать роль помошника себе в рейде, если вы РЛ
+-могут делиться с вами локальными привязками ("Any" работает также как "Any Guild")]]
 L["DESCr-dkpWhispers"]="Писать о начислении в лс, а не в гильдию"
 L["dkpWhispers"]="DKP: шепот"
 L["Promoted to Raid Assistant: "]="Выдан Рейд Ассист: "

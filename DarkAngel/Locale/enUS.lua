@@ -314,6 +314,16 @@ end
 
 --EP Awarder
 do
+L["DESCr-aw_auto_locals"]=[[|cffff9999Automatic Locals|r
+When one of the "Trusted Players" creates a local binding, you will automatically save it as well]]
+L["DESCr-aw_auto_Ch_locals"]=[[If the received local binding modifies an existing one, it will be accepted automatically
+If disabled, such a binding is skipped]]
+L['subscribe to auto locals']=true
+L['apply changes']=true
+L['silent mode']=true
+L["DESCr-aw_trusted_players"]=[[|cffff9999Trusted Players|r
+-can take/remove the assistant role in the raid if you are RL
+-can share local twins with you ("Any" works same as "Any Guild")]]
 L["DESCr-dkpWhispers"]="Send whispers for DKP awards instead of guild chat messages"
 L["dkpWhispers"]="DKP: whispers"
 L["Promoted to Raid Assistant: "]=true

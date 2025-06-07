@@ -6,7 +6,8 @@ local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 local Mod = DA:NewModule("Awarder")
 
 
-
+local localsToShare={}
+local locals_Bulk={}
 function Mod:OnInitialize()
 
 	DA_Awarder:SetScale(fuckingOptions.Awarderscale)
@@ -34,8 +35,18 @@ function Mod:OnInitialize()
 		end
 	end)  
 	
-	--raid mover
+	--autolocals share
+	DA.CreateTimer(nil,"localsShare",0,0.2,true,function(self)
+		if not locals_Bulk[1] then self:SetScript("OnUpdate",nil) return end
+		
+		for _,message in ipairs(locals_Bulk) do
+			SendAddonMessage("DA_flcans", message , "guild")
+		end
+		table.wipe(locals_Bulk)
+		self:SetScript("OnUpdate",nil)
+	end) 
 	
+	--raid mover
 	DA_PlayerMoverList={}
 	local function alreadymoved(tbl)
 		local name2=tbl[1]
@@ -140,6 +151,30 @@ function Mod:OnGuildLoad()
 		tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 		tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 	end
+	
+	
+ 
+end
+
+function Mod:PublishLocal(name)
+	table.wipe(locals_Bulk)
+	localsToShare[name] = true
+	
+	local chunk={}
+	local FN = FEP_L_gMain[DA_CurrentGuild]
+	
+	for player,_ in pairs(localsToShare) do
+		local main = FN[player]
+		if main and FEP_gMain[main] and (DA.DecodeNote(FEP_gMain[main])=='m' or DA.DecodeNote(FEP_gMain[main])=='f') then
+			tinsert(chunk,player.."@"..main)
+		end
+	end
+	for _,message in ipairs(DA.ConcatStr(chunk,254,"_")) do
+		tinsert(locals_Bulk, message)
+	end
+	DA.SetTimerTime('localsShare',30)
+	DA.ResumeTimer('localsShare')
+	
 end
 
 
@@ -2017,7 +2052,7 @@ function DA.AWAutoOptions()
 end
 ---- variables
 
-DA_locals_UpdList={}
+local DA_locals_UpdList={}
 DA_standby_mainslist=DA_standby_mainslist or "@"
 
 DA_StoredCheckboxes=DA_StoredCheckboxes or {
@@ -2734,8 +2769,6 @@ local f = CreateFrame("EditBox", name, rel)
 	end
 	return f
 end
--- /run zxczc:SetPoint("TOPLEFT", DA_Awarder, "TOPLEFT", 84.5, -354)
-
 
 
 
@@ -3098,8 +3131,7 @@ do --main frame buttons
 				end
 				if done then
 					DA.Print(L['fepupdating'])
-					DA_locals_UpdList=nil
-					DA_locals_UpdList={}
+					table.wipe(DA_locals_UpdList)
 					FEP_GatherRaid()
 					tinsert(DA_Fep_bulk,function()  end)
 					tinsert(DA_Fep_bulk,function()  if GetNumRaidMembers()==0 then else FEP_GatherRaid() end end)
@@ -3953,9 +3985,11 @@ do --Assign frame
 							local ntt2=DA.DecodeNote(FEP_gMain[FEP_gMain[newmain]])
 							if ntt2=='m' then
 								FEP_L_gMain[DA_CurrentGuild][name]=FEP_gMain[newmain]
+								Mod:PublishLocal(name)
 							elseif ntt2=='f' then
 								DA.Print(L['[OK] local created, however, main is frozen'])
 								FEP_L_gMain[DA_CurrentGuild][name]=FEP_gMain[newmain]
+								Mod:PublishLocal(name)
 							elseif ntt2=='t' then
 								DA.Print(L['this is a dublicated tvin!'].." -"..newmain.."-"..FEP_gMain[newmain].."-"..FEP_gMain[FEP_gMain[newmain]])
 								if FEP_gMain[FEP_gMain[FEP_gMain[newmain]]] then
@@ -3970,9 +4004,11 @@ do --Assign frame
 					elseif notetype=='f' then
 						DA.Print(L['[OK] local created, however, main is frozen'])
 						FEP_L_gMain[DA_CurrentGuild][name]=newmain
+						Mod:PublishLocal(name)
 						
 					elseif notetype=='m' then
 						FEP_L_gMain[DA_CurrentGuild][name]=newmain
+						Mod:PublishLocal(name)
 					end
 				else
 					DA.Print(L['no such player in guild'])
@@ -3994,6 +4030,7 @@ do --Assign frame
 				if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] then
 					if FEP_gMain[newmain] then
 						FEP_L_gMain[DA_CurrentGuild][name]=newmain
+						Mod:PublishLocal(name)
 					else
 						FEP_L_gMain[DA_CurrentGuild][name]=nil
 					end
@@ -6559,8 +6596,7 @@ local mt={
 [[###################################################]]}
 function FEP_AskUpd()
 
-	DA_locals_UpdList=nil
-	DA_locals_UpdList={}
+	table.wipe(DA_locals_UpdList)
 	DA_Awarder.getlocalsFrame.EB:SetText("")
 	
 	tinsert(DA_Fep_bulk,function()  if GetNumRaidMembers()==0 then DA.RegatherGuildNotes() else FEP_GatherRaid() end DA_Awarder.getlocalsFrame.EB:SetText(mt[1]) end)
@@ -6577,7 +6613,6 @@ function FEP_AskUpd()
 DA.ResumeTimer('fep')
 end
 
-DA_locals_UpdList={}
 function FEP_UpdatePrint()
 
 	local output={}
@@ -6649,63 +6684,65 @@ function FEP_UpdatePrint()
 end
 
 
+local lastGuildGet = 0
+local AW_allowed_players={}
+local function gatherAllowedPlayers()
+	table.wipe(AW_allowed_players)
+	if fuckingOptions_g[DA_CurrentGuild].assistperm=="Manual" then
+		local allowedlist=fuckingOptions_g[DA_CurrentGuild].assistperm_manual:gsub("%s","")
+		if allowedlist~="" then
+			for allowed in string.gmatch(allowedlist,"([^%,]+)") do
+				if DA.IsInSameGuild(allowed) then
+					AW_allowed_players[allowed]=true
+				end
+			end
+			return
+		else
+			return
+		end
+	elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Guild Rank" then
+		local permitted_rank=fuckingOptions_g[DA_CurrentGuild].assistperm_rank
+		for i=1, DA.GetNumGMembers() do
+			local nam, _, rankIndex, _, _, _, _, _, _, _, _, _, _, _, _, _ = GetGuildRosterInfo(i)
+			if nam and rankIndex and rankIndex+1<=permitted_rank then
+				AW_allowed_players[nam]=true
+			end
+		end
+	end
+end
+local function IsAllowedPlayer(name,mode)
+    if (time() - lastGuildGet > 5) then
+        lastGuildGet = time()
+		gatherAllowedPlayers()
+    end
+	local perm_type = fuckingOptions_g[DA_CurrentGuild].assistperm
+	
+	if perm_type == "None" then return end
+	
+	if mode=="locals" and (perm_type == "Any" or perm_type == "Guild Any") and DA.IsInSameGuild(name) then return true end
+	
+	if mode=="assist" and (perm_type == "Any" or (perm_type == "Guild Any" and DA.IsInSameGuild(name)))  then return true end
+	
+	if AW_allowed_players[name] then return true end
+end
 
 DA:RegisterComm("DA_ass", 
 	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() then
+		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() and dtype=='raid' then
 			local name,class,raidID
 			for i=1,40 do
 				local na, _, _, _, _, cl, _, _, _, _, _ = GetRaidRosterInfo(i)
 				if na==sender then
 					name=na
 					class=cl
-					raidID=i
 					break
 				end
 			end
-			if not name or not class or not raidID then return end
-					
-			if fuckingOptions_g[DA_CurrentGuild].assistperm=="Manual" then
-				if DA.IsInSameGuild(name) then
-					local allowedlist=fuckingOptions_g[DA_CurrentGuild].assistperm_manual:gsub("%s","")
-					if allowedlist~="" then
-						for allowed in string.gmatch(allowedlist,"([^%,]+)") do
-							if name==allowed then
-								PromoteToAssistant(name)
-								DA.Print(L["Promoted to Raid Assistant: "]..DA.GetClassColorCode(class)..name)
-								return
-							end
-						end
-						return
-					else
-						return
-					end
-				end
-			elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Guild Rank" then
-				if DA.IsInSameGuild(name) then
-					for i=1, DA.GetNumGMembers() do
-						local nam, _, rankIndex, _, _, _, _, _, _, _, _, _, _, _, _, _ = GetGuildRosterInfo(i)
-						if nam==name then
-							if fuckingOptions_g[DA_CurrentGuild].assistperm_rank and rankIndex and rankIndex+1<=fuckingOptions_g[DA_CurrentGuild].assistperm_rank then
-								PromoteToAssistant(name)
-								DA.Print(L["Promoted to Raid Assistant: "]..DA.GetClassColorCode(class)..name)
-								return
-							else
-								return
-							end
-						end
-					end
-				end
-			elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Guild Any" then
-				if DA.IsInSameGuild(name) then
-					PromoteToAssistant(name)
-					DA.Print(L["Promoted to Raid Assistant: "]..DA.GetClassColorCode(class)..name)
-				end
-			elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Any" then
+			if not name or not class then return end
+			
+			if IsAllowedPlayer(sender,'assist') then
 				PromoteToAssistant(name)
 				DA.Print(L["Promoted to Raid Assistant: "]..DA.GetClassColorCode(class)..name)
-			elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="None" then
-				-- do nothing
 			end
 			
 		end
@@ -6738,7 +6775,7 @@ DA:RegisterComm("DA_fask",
 )
 DA:RegisterComm("DA_fans", 
 	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and DA.IsInSameGuild(sender) and message:find("_") then
+		if sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
 			for str in string.gmatch(message, "[^_]+") do 
 				local atIndex = str:find("@")
 
@@ -6767,10 +6804,60 @@ DA:RegisterComm("DA_fans",
 		end
 	end
 )
+DA:RegisterComm("DA_flcans", 
+	function(message, dtype, sender)
+		if fuckingOptions_g[DA_CurrentGuild].aw_auto_locals and sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
+			local dochange = fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals
+			local quietmode = fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals
+			
+			local FL = FEP_L_gMain[DA_CurrentGuild]
+			
+			local received=0
+			local received_ignored=0
+			
+			for str in string.gmatch(message, "[^_]+") do 
+				local atIndex = str:find("@")
 
+				if atIndex then
+					local player = str:sub(1, atIndex - 1)
+					local main = str:sub(atIndex + 1)
+					
+					if FL[player] and FL[player]==main then
+						--do nothing
+					elseif FL[player] and FL[player]~=main then
+						if dochange then
+							FL[player]=main
+							received=received+1
+						else
+							received=received+1
+							received_ignored=received_ignored+1
+						end
+					elseif not FL[player] then
+						FL[player]=main
+						received=received+1
+					end
+					
+				end
+			end
+			
+			if received>0 then 
+				if DA_Awarder:IsShown() then
+					FEP_GatherRaid()
+					tinsert(DA_Fep_bulk,function()  end)
+					tinsert(DA_Fep_bulk,function()  end)
+					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
+				end
+				if not quietmode then 
+					DA.Print(" [|cff00ffff"..sender.."|r]: +|cff00ffff"..received.."|r new locals "..(received_ignored>0 and "(|cfffff200"..received_ignored.."|r changing locals ignored)" or "") )
+				end
+			end
+			
+		end
+	end
+)
 
 function Mod:AddModOptions(modOptTable)
-	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,100)
+	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,130)
 	f:Show()
 	tinsert(modOptTable, {'Awarder',f})	
 	
@@ -6778,6 +6865,11 @@ function Mod:AddModOptions(modOptTable)
 	
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['commands on whisper'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm=(self:GetChecked() or false);DA.DKP_commUpdate() end,{'fuckingOptions_g','dkpcomm','DA_CurrentGuild'},'dkpcomm')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-32},15,15,L['only in raid'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm_inraid=(self:GetChecked() or false) end,{'fuckingOptions_g','dkpcomm_inraid','DA_CurrentGuild'},nil)
+	
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-93},15,15,L['subscribe to auto locals'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_locals','DA_CurrentGuild'},'aw_auto_locals')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-105},15,15,L['apply changes'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_Ch_locals','DA_CurrentGuild'},'aw_auto_Ch_locals')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-117},15,15,L['silent mode'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_silent_locals','DA_CurrentGuild'})
+	
 	
 	do --assister ranks permit
 		if not fuckingOptions_g[DA_CurrentGuild].assistperm_rank or GuildControlGetNumRanks()<=fuckingOptions_g[DA_CurrentGuild].assistperm_rank then
@@ -6810,10 +6902,10 @@ function Mod:AddModOptions(modOptTable)
 		
 		
 		
-		DarkAngelGUI.opt.assistpermbtn,DarkAngelGUI.opt.assistpermFrame=DA.CreateFFGDropFrame(f,"",12,68,{"CENTER",f,"TOPLEFT",45,-60},70,56,"BOTTOM",nil,function() DarkAngelGUI.opt.assistperm_byrankFrame:Hide() end)
+		DarkAngelGUI.opt.assistpermbtn,DarkAngelGUI.opt.assistpermFrame=DA.CreateFFGDropFrame(f,"",12,68,{"CENTER",f,"TOPLEFT",45,-60},70,56,"BOTTOM",nil,function() DarkAngelGUI.opt.assistperm_byrankFrame:Hide() end,nil,'aw_trusted_players')
 		DA.FontCreater(nil,L["Trusted players"],{"LEFT",DarkAngelGUI.opt.assistpermbtn,"LEFT",-5,13},DarkAngelGUI.opt.assistpermbtn,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		
-		DarkAngelGUI.opt.assistperm_manual=DA.EditBoxCreater2(nil,DarkAngelGUI.opt.assistpermbtn,{"LEFT",DarkAngelGUI.opt.assistpermbtn,"RIGHT",3,0},{68,12},fuckingOptions_g[DA_CurrentGuild].assistperm_manual,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","assistperm_manual",'DA_CurrentGuild'},nil,nil,'text')
+		DarkAngelGUI.opt.assistperm_manual=DA.EditBoxCreater2(nil,DarkAngelGUI.opt.assistpermbtn,{"TOPLEFT",DarkAngelGUI.opt.assistpermbtn,"BOTTOMLEFT",0,-4},{90,12},fuckingOptions_g[DA_CurrentGuild].assistperm_manual,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","assistperm_manual",'DA_CurrentGuild'},nil,nil,'text')
 		DarkAngelGUI.opt.assistperm_manual:SetScript("OnTextChanged",function(self)
 			if self:GetText():find("[0-9]") or self:GetText():find("%.") then
 				self.t:SetTexture(70/255, 12/255, 20/255, 1)
@@ -6891,4 +6983,7 @@ function Mod:AddModOptions(modOptTable)
 		re_highlight_assist()
 		
 	end
+
+	
+	
 end
