@@ -2998,7 +2998,7 @@ do --main frame buttons
 		
 		local gtypestr
 		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-			
+			DA_Awarder.dkpWhispers:Hide()
 			DA_Awarder.AwardFrame.AwardStartBtn:SetText("+EP")
 			DA_Awarder.AwardFrame.Awardmodebtn,DA_Awarder.AwardFrame.AwardmodeFrame=DA.CreateFFGDropFrame(DA_Awarder.AwardFrame,"mode: +EP",15,80,{"CENTER",DA_Awarder.AwardFrame,"TOPLEFT",42,-35},50,60,"LEFT")
 			gtypestr={"+EP","-EP","+GP","-GP"}
@@ -3250,7 +3250,6 @@ do --main frame buttons
 		if not QDKP2_Data then
 			DA_Awarder.qdkpexportbutton:Hide()
 			DA_Awarder.qdkpsyncbutton:Hide()
-			DA_Awarder.dkpWhispers:Hide()
 		end
 		DA.ScrollBarCreater("DA_Locals_Frm",DA_Awarder.getlocalsFrame,{DA_Awarder.getlocalsFrame.width-5, DA_Awarder.getlocalsFrame.height-30},{"TOPLEFT", 5, -20},1)
 		local copyfr_Scrolled=DA_Locals_Frm.scrollchild
@@ -5546,18 +5545,18 @@ for group=1,8 do
 				
 				if frame.state=="tnormal" then
 					if FEP_L_gMain[DA_CurrentGuild][frame.c.name] then
-						tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name})
+						tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name,'l'})
 					else
-						tinsert(results,{frame.main,frame.epvalue,reason})
+						tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name})
 					end
 				elseif frame.state=="mnormal" then
 					tinsert(results,{frame.c.name,frame.epvalue,reason})
 				elseif frame.state=="pb" then
 					if DA.DecodeNote(frame.main)=='t' then
 						if FEP_L_gMain[DA_CurrentGuild][frame.c.name] then
-							tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name})
+							tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name,'l'})
 						else
-							tinsert(results,{frame.main,frame.epvalue,reason})
+							tinsert(results,{frame.main,frame.epvalue,reason,frame.c.name})
 						end
 					elseif DA.DecodeNote(frame.main)=='m' then
 						tinsert(results,{frame.c.name,frame.epvalue,reason})
@@ -5775,6 +5774,7 @@ end
 			local value=players[i][2]; if mode=="-EP" then value=-value end
 			local reason=players[i][3]
 			local alt=players[i][4]
+			local Localalt=players[i][4]
 			
 			if name and value and reason then
 				if pl_dat[name] then
@@ -5799,7 +5799,7 @@ end
 							
 						end
 
-						if alt and UnitInRaid('player') then
+						if Localalt and UnitInRaid('player') then
 							if value>0 then
 								tinsert(DA_Fep_bulk,function() 
 									SendChatMessage("EPGP: +"..value.." EP ("..reason..") "..alt.."["..name.."]",'raid')
@@ -5825,6 +5825,7 @@ end
 			local value=players[i][2]; if mode=="-GP" then value=-value end
 			local reason=players[i][3]
 			local alt=players[i][4]
+			local Localalt=players[i][4]
 			
 			if name and value and reason then
 				if pl_dat[name] then
@@ -5847,7 +5848,7 @@ end
 							DA.Print((L["settinggp0"]:gsub("$1",name)):gsub("$2",tonumber(gp).."/"..tonumber(value)))
 						end
 
-						if alt and UnitInRaid('player') then
+						if Localalt and UnitInRaid('player') then
 							if value>0 then
 								tinsert(DA_Fep_bulk,function() 
 									SendChatMessage("EPGP: +"..value.." GP ("..reason..") "..alt.."["..name.."]",'raid')
@@ -5873,6 +5874,7 @@ end
 			local value=players[i][2]
 			local reason=players[i][3]
 			local alt=players[i][4]
+			local Localalt=players[i][4]
 			if name and value and reason then
 				if pl_dat[name] then
 					local typ,ep,gp,hrs=DA.DecodeNote(pl_dat[name][2])
@@ -5907,7 +5909,7 @@ end
 						SendAddonMessage("DA_log",name.."\031"..value, "guild")
 						
 						-- messages for local alts
-						if not fuckingOptions_g[DA_CurrentGuild].aw_send_whispers and alt and UnitInRaid('player') then
+						if not fuckingOptions_g[DA_CurrentGuild].aw_send_whispers and Localalt and UnitInRaid('player') then
 							if tonumber(value*minus)>0 then
 								tinsert(DA_Fep_bulk,function() 
 									SendChatMessage("QDKP2> "..alt.." Gains "..value.." DKP ("..reason..")".."["..name.."]",'raid')

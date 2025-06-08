@@ -1190,6 +1190,163 @@ end
 local Log_Create_ScrollBar
 function Mod.Logger_Load()
 	
+
+do --log cachers
+	local my_name=GetUnitName('player')
+	
+	local function FDEPGPlogcatcher(self, event, textofev1, textofev2, textofev3, author, ...)
+	local hhasd={}
+		if event == "CHAT_MSG_ADDON" then
+			if textofev1== "EPGP" then
+				if string.sub(textofev2, 0, 4)=="LOG:" then
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					for s in string.gmatch(textofev2, "[^\031]+") do 
+						table.insert(hhasd,s)
+					end 
+					if hhasd[2] and hhasd[3] and tonumber(hhasd[5]) then
+						tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[3],typ=hhasd[2],count=tonumber(hhasd[5])})
+						table.wipe(DA_Scaner_bulk)
+					end
+				end
+			elseif textofev1=="DA_log" then
+				if author==my_name then
+					DA.SetTimerTime("scan_schedule",3)
+				else
+					DA.SetTimerTime("scan_schedule",25)
+				end
+				for s in string.gmatch(textofev2, "[^\031]+") do 
+					table.insert(hhasd,s)
+				end 
+				if hhasd[1] and tonumber(hhasd[2]) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[1],count=tonumber(hhasd[2])})
+					table.wipe(DA_Scaner_bulk)
+				end
+			end
+			
+		end
+	end
+	local afp = CreateFrame("Frame")
+	afp:SetScript("OnEvent", FDEPGPlogcatcher)
+	afp:RegisterEvent("CHAT_MSG_ADDON");
+
+	local function FDEPGPlogcatcherG(_, event, message, author)
+
+	if message and author then else return end
+		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and event=='CHAT_MSG_GUILD' then
+			local count=string.match(message,"EPGP:%s(.%d+)%s")
+			local typ=string.match(message,"EPGP:%s.%d+%s(.-)%s%(")
+			local character=string.match(message,"EPGP:%s.%d+%s.-%(.+%)%s"..L['fepfor'].."%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sдля%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sto%s(.+)$")
+				if tonumber(count) and typ and character then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="chat",	author=author, name=character,typ=typ,count=tonumber(count)})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+				end
+		elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+		
+
+			if event=='CHAT_MSG_WHISPER' then
+				local gain=string.match(message,"QDKP2?>%sGains%s(%d+)%sDKP")
+				local spend=string.match(message,"QDKP2?>%sSpends%s(%d+)%sDKP")
+				if spend then spend="-"..spend end
+				
+				
+				local all_p_persona_g,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
+				
+				local all_p_persona_s,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
+				if all_p_spends then all_p_spends="-"..all_p_spends end
+				
+				local all_p_persona_p,all_p_purch=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
+				if all_p_purch then all_p_purch="-"..all_p_purch end
+				
+				local altern = tonumber(all_p_gains) or tonumber(all_p_spends) or tonumber(all_p_purch)
+				
+				if tonumber(gain) or tonumber(spend) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=(tonumber(gain) or tonumber(spend))})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+				elseif altern then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=altern})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+				end
+			elseif event=='CHAT_MSG_GUILD' then
+				local all_dkp=string.match(message,"QDKP2?>%sOnline%sRaid%smembers%sreceived%s(%d+)")
+				if tonumber(all_dkp) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all', gain=tonumber(all_dkp)})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+					return
+				end
+			
+				local all_p_persona,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
+				if all_p_persona and tonumber(all_p_gains) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_gains)})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+					return
+				end
+				
+				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
+				if all_p_spends then all_p_spends="-"..all_p_spends end
+				if all_p_persona and tonumber(all_p_spends) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+					return
+				end
+				
+				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
+				if all_p_spends then all_p_spends="-"..all_p_spends end
+				if all_p_persona and tonumber(all_p_spends) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+					return
+				end
+				
+				
+			end
+			
+		end
+	end
+	local dfj = CreateFrame("Frame")
+	dfj:SetScript("OnEvent", FDEPGPlogcatcherG)
+	dfj:RegisterEvent("CHAT_MSG_GUILD");
+	dfj:RegisterEvent("CHAT_MSG_WHISPER");
+end	
+
 ---- 2 TAB ------
 ---- 2 TAB ------
 ---- 2 TAB ------
@@ -1887,161 +2044,6 @@ function Mod:OnInitialize()
 	
 	
 	QueryGuildEventLog()
-do --log cachers
-	local my_name=GetUnitName('player')
-	
-	local function FDEPGPlogcatcher(self, event, textofev1, textofev2, textofev3, author, ...)
-	local hhasd={}
-		if event == "CHAT_MSG_ADDON" then
-			if textofev1== "EPGP" then
-				if string.sub(textofev2, 0, 4)=="LOG:" then
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					for s in string.gmatch(textofev2, "[^\031]+") do 
-						table.insert(hhasd,s)
-					end 
-					if hhasd[2] and hhasd[3] and tonumber(hhasd[5]) then
-						tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[3],typ=hhasd[2],count=tonumber(hhasd[5])})
-						table.wipe(DA_Scaner_bulk)
-					end
-				end
-			elseif textofev1=="DA_log" then
-				if author==my_name then
-					DA.SetTimerTime("scan_schedule",3)
-				else
-					DA.SetTimerTime("scan_schedule",25)
-				end
-				for s in string.gmatch(textofev2, "[^\031]+") do 
-					table.insert(hhasd,s)
-				end 
-				if hhasd[1] and tonumber(hhasd[2]) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[1],count=tonumber(hhasd[2])})
-					table.wipe(DA_Scaner_bulk)
-				end
-			end
-			
-		end
-	end
-	local afp = CreateFrame("Frame")
-	afp:SetScript("OnEvent", FDEPGPlogcatcher)
-	afp:RegisterEvent("CHAT_MSG_ADDON");
-
-	local function FDEPGPlogcatcherG(_, event, message, author)
-
-	if message and author then else return end
-		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and event=='CHAT_MSG_GUILD' then
-			local count=string.match(message,"EPGP:%s(.%d+)%s")
-			local typ=string.match(message,"EPGP:%s.%d+%s(.-)%s%(")
-			local character=string.match(message,"EPGP:%s.%d+%s.-%(.+%)%s"..L['fepfor'].."%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sдля%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sto%s(.+)$")
-				if tonumber(count) and typ and character then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="chat",	author=author, name=character,typ=typ,count=tonumber(count)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				end
-		elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
-		
-
-			if event=='CHAT_MSG_WHISPER' then
-				local gain=string.match(message,"QDKP2?>%sGains%s(%d+)%sDKP")
-				local spend=string.match(message,"QDKP2?>%sSpends%s(%d+)%sDKP")
-				if spend then spend="-"..spend end
-				
-				
-				local all_p_persona_g,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
-				
-				local all_p_persona_s,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				
-				local all_p_persona_p,all_p_purch=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
-				if all_p_purch then all_p_purch="-"..all_p_purch end
-				
-				local altern = tonumber(all_p_gains) or tonumber(all_p_spends) or tonumber(all_p_purch)
-				
-				if tonumber(gain) or tonumber(spend) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=(tonumber(gain) or tonumber(spend))})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				elseif altern then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=altern})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				end
-			elseif event=='CHAT_MSG_GUILD' then
-				local all_dkp=string.match(message,"QDKP2?>%sOnline%sRaid%smembers%sreceived%s(%d+)")
-				if tonumber(all_dkp) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all', gain=tonumber(all_dkp)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-			
-				local all_p_persona,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
-				if all_p_persona and tonumber(all_p_gains) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_gains)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				if all_p_persona and tonumber(all_p_spends) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				if all_p_persona and tonumber(all_p_spends) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				
-			end
-			
-		end
-	end
-	local dfj = CreateFrame("Frame")
-	dfj:SetScript("OnEvent", FDEPGPlogcatcherG)
-	dfj:RegisterEvent("CHAT_MSG_GUILD");
-	dfj:RegisterEvent("CHAT_MSG_WHISPER");
-end	
 
 	
 	--scaner
