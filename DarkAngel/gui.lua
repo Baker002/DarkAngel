@@ -2030,6 +2030,8 @@ do
 
 				local editbox=CopyFrameAdditional.EB
 				
+				local oldtext = editbox:GetText()
+				
 				if not unlocked then DA.Print(L['select at least one criteria']) return end
 				
 				local separator=DarkAngelGUI.Guild.copyFrame.separator:GetText()
@@ -2083,8 +2085,13 @@ do
 					
 				end
 				
-				editbox:SetText(result)
-				
+				if oldtext == result then
+					--do nothing
+				else
+					editbox:Hide()
+					editbox:SetText(result)
+					editbox:Show()
+				end
 			end
 		
 		end
