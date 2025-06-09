@@ -2035,7 +2035,7 @@ do
 				if not unlocked then DA.Print(L['select at least one criteria']) return end
 				
 				local separator=DarkAngelGUI.Guild.copyFrame.separator:GetText()
-				if not separator then 
+				if not separator or separator == "" then 
 					DA.Print("separating data with single spacing")
 					separator=" "
 				end
@@ -2048,20 +2048,21 @@ do
 					DarkAngelGUI.Guild.copyFrame.numlines:SetText(fuckingOptions.gcopyfrnumlines)
 				end
 				
-				local result = ""
+				local result = {}
+				local sep = "|r" .. separator
 				
 				if doing_by_selection then
 					for _,player in ipairs(DA_G_Processed) do
 						if DA.Players_Selected[player.plname] then
 							-- if player.isLocal then
-							local line=""
+							local line = {}
 							for _,patt in ipairs(search_patterns) do
 								if search[patt[2]] and player[patt[2]] then
-									line=line .. player[patt[2]] .. "|r" .. separator
+									tinsert(line, player[patt[2]])
 								end
 							end
-							if line~="" then
-								result = result .. line..'\n'
+							if next(line) then
+								tinsert(result, table.concat(line, sep))
 							end
 						end
 					end
@@ -2071,25 +2072,23 @@ do
 						local player = DA_G_Processed[i]
 						if player then
 							-- if player.isLocal then
-							local line=""
+							local line = {}
 							for _,patt in ipairs(search_patterns) do
 								if search[patt[2]] and player[patt[2]] then
-									line=line .. player[patt[2]] .. "|r" .. separator
+									tinsert(line, player[patt[2]])
 								end
 							end
-							if line~="" then
-								result = result .. line..'\n'
+							if next(line) then
+								tinsert(result, table.concat(line, sep))
 							end
 						end
 					end
 					
 				end
-				
-				if oldtext == result then
-					--do nothing
-				else
+				local newtext = table.concat(result, "\n")
+				if oldtext ~= newtext then
 					editbox:Hide()
-					editbox:SetText(result)
+					editbox:SetText(newtext)
 					editbox:Show()
 				end
 			end
