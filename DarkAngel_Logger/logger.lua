@@ -1487,7 +1487,7 @@ do
 					local player = DA_L_Processed[i]
 					if player then
 						-- if player.isLocal then
-						local line=""
+						local line = {}
 						for _,patt in ipairs(search_patterns) do
 							if search[patt[2]] and player[patt[2]] then
 								tinsert(line, player[patt[2]])
