@@ -6703,7 +6703,7 @@ function DA.GuildSearchTec(eb_name, eb_lvl, eb_note, eb_offnote, eb_rank, eb_onl
 			(not anyclass or
 				classTbl[entry[6]])
 			)
-		or 
+		or (not preciseMatch and
 		   ((eb_name and checker(entry[1], eb_name)) or
 			(eb_lvl and mathchecker(entry[2], eb_lvl)) or
 			(eb_note and mathchecker(entry[3], eb_note)) or
@@ -6716,7 +6716,7 @@ function DA.GuildSearchTec(eb_name, eb_lvl, eb_note, eb_offnote, eb_rank, eb_onl
 					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online))) or
 			(anyclass and
 				classTbl[entry[6]])
-			)
+			))
 		then
 			result[#result + 1] = entry
 		end
