@@ -272,33 +272,31 @@
 			<OnScrollRangeChanged>
 				ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
 			</OnScrollRangeChanged>
-			<!--  The code to disable the ScrollDownButton is pretty hacked, but it works -->
+			
 			<OnVerticalScroll>
-				if IsShiftKeyDown() then GameTooltip:Hide() end
-				local scrollbar = _G[self:GetName().."ScrollBar"];
-				scrollbar:SetValue(offset);
-				local min;
-				local max;
-				min, max = scrollbar:GetMinMaxValues();
-				if ( offset == 0 ) then
-					_G[scrollbar:GetName().."ScrollUpButton"]:Disable();
-				else
-					_G[scrollbar:GetName().."ScrollUpButton"]:Enable();
-				end
-				if ((scrollbar:GetValue() - max) == 0) then
-					_G[scrollbar:GetName().."ScrollDownButton"]:Disable();
-				else
-					_G[scrollbar:GetName().."ScrollDownButton"]:Enable();
-				end
-				scrollbar.storedval=scrollbar:GetValue()
+			
 			</OnVerticalScroll>
 			<OnMouseWheel>
 				local scrollBar = _G[self:GetName() .. "ScrollBar"];
-				local step = IsShiftKeyDown() and 30 or 15; -- 15 normal, 30px with shift
+				local scrollBarname = scrollBar:GetName()
+				local _, max= scrollBar:GetMinMaxValues();
+				local offset = scrollBar:GetValue();
+				local step = IsShiftKeyDown() and 30 or 15;
+				
 				if ( delta > 0 ) then
-					scrollBar:SetValue(scrollBar:GetValue() - step);
+					scrollBar:SetValue(offset - step);
 				else
-					scrollBar:SetValue(scrollBar:GetValue() + step);
+					scrollBar:SetValue(offset + step);
+				end
+				if ( offset == 0 ) then
+					_G[scrollBarname.."ScrollUpButton"]:Disable();
+				else
+					_G[scrollBarname.."ScrollUpButton"]:Enable();
+				end
+				if ((offset - max) == 0) then
+					_G[scrollBarname.."ScrollDownButton"]:Disable();
+				else
+					_G[scrollBarname.."ScrollDownButton"]:Enable();
 				end
 			</OnMouseWheel>
 		</Scripts>
