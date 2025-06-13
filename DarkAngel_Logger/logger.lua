@@ -68,9 +68,10 @@ local time_cap=time()-fuckingOptions_g[DA_CurrentGuild].storeleavers*86400
 	end
 end
 local LogSetAllLines
-local DetailsSetLine
 local LogSetLine
+local DetailsSetLine
 local DA_L_Processed={}
+local DA_D_Processed={}
 local function CheckIfDecaying()
     local g_s = DA_Guild_Info[DA_CurrentGuild]
     if not (g_s and g_s.lastupdate1 and g_s.decay1 and g_s.base1) then return end
@@ -380,35 +381,8 @@ else
 end
 
 	local Gathered=getMergedEntries(DA_CurrentGuild,name)
-	-- HLKSDFHGS=Gathered
-	local currentdate
-	for i=1,1000 do
-		if Gathered[i] then
-			-- pos=pos+1
-			if not currentdate then
-				currentdate=Gathered[i][2][2]
-				DetailsSetLine(Gathered[i],i,1)
-			elseif currentdate==Gathered[i][2][2] then
-				DetailsSetLine(Gathered[i],i)
-			else
-				DetailsSetLine(Gathered[i],i,1)
-				currentdate=Gathered[i][2][2]
-			end
-		else
-			if _G["FFDetLine"..i] and _G["FFDetLine"..i]:IsShown() then
-				_G["FFDetLine"..i]:Hide()
-				if _G["FFDetLine"..i..'che'] then _G["FFDetLine"..i..'che']:Hide() end
-				if _G["FFDetLine"..i..'typ'] then _G["FFDetLine"..i..'typ']:Hide() end
-				if _G["FFDetLine"..i..'chg'] then _G["FFDetLine"..i..'chg']:Hide() end
-				-- if _G["FFDetLine"..i..'last'] then _G["FFDetLine"..i..'last']:Hide() end
-				if _G["FFDetLine"..i..'time'] then _G["FFDetLine"..i..'time']:Hide() end
-				-- if _G["FFDetLine"..i..'note'] then _G["FFDetLine"..i..'note']:Hide() end
-				if _G["FFDetLine"..i..'addit'] then _G["FFDetLine"..i..'addit']:Hide() end
-			end
-		end
-	end
-	-- DarkAngelDetails.getsomething=#FDData[DA_CurrentGuild][name]
-	-- DA.ResetScrollBoxes()
+	DetailsSetLine(Gathered)
+	
 end
 
 local function val_isEmpty(v)
@@ -528,6 +502,7 @@ local function TransLegitCheck(name,epdif,gpdif)
 		local gplogcounter=0
 		local gpmsgcounter=0
 		
+		--chat
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 		local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and jk.typ=="EP" and tvinspool[jk.name] and jk.logtype=='chat' then
@@ -543,15 +518,24 @@ local function TransLegitCheck(name,epdif,gpdif)
 				break
 			end
 		end
+		
+		--cmds
+		local reasons={}
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 		local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and jk.typ=="EP" and tvinspool[jk.name] and jk.logtype=='cmd' then
 				eplogcounter=eplogcounter+jk.count
 				author=jk.author
+				if jk.reason then
+					tinsert(reasons,jk.reason)
+				end
 			end
 			if gpdif and jk.typ=="GP" and tvinspool[jk.name] and jk.logtype=='cmd'  then
 				gplogcounter=gplogcounter+jk.count
 				author=jk.author
+				if jk.reason then
+					tinsert(reasons,jk.reason)
+				end
 			end
 			
 			if eplogcounter==epdif and gplogcounter==gpdif then
@@ -559,12 +543,15 @@ local function TransLegitCheck(name,epdif,gpdif)
 			end
 		end
 		
+		if #reasons==0 then
+			reasons=nil
+		end
 		if (epmsgcounter==epdif and eplogcounter==epdif) and (gpmsgcounter==gpdif and gplogcounter==gpdif) then
-			return 'both',author
+			return 'both',author,reasons
 		elseif epmsgcounter==epdif and gpmsgcounter==gpdif then
 			return 'msg',author
 		elseif eplogcounter==epdif and gplogcounter==gpdif then
-			return 'log',author
+			return 'log',author,reasons
 		end
 		
 	elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
@@ -574,15 +561,22 @@ local function TransLegitCheck(name,epdif,gpdif)
 		local dkp_DA_counter=0
 		
 		--DA cmds
+		local reasons={}
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 			local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and tvinspool[jk.name] and jk.logtype=='cmd' then
 				dkp_DA_counter=dkp_DA_counter+jk.count
 				author=jk.author
+				if jk.reason then
+					tinsert(reasons,jk.reason)
+				end
 			end
 			if dkp_DA_counter==epdif then
 				break
 			end
+		end
+		if #reasons==0 then
+			reasons=nil
 		end
 		
 		--whispers
@@ -618,16 +612,16 @@ local function TransLegitCheck(name,epdif,gpdif)
 		end
 		
 		if dkp_DA_counter==epdif then
-			return 'both',author
+			return 'both',author,reasons
 		elseif (dkpwhcounter==epdif or dkppubl_allcounter==epdif or dkppublcounter==epdif) 
 			or (epdif==dkpwhcounter+dkppubl_allcounter) 
 			or (epdif==dkpwhcounter+dkppublcounter) 
 			or (epdif==dkppubl_allcounter+dkppublcounter) 
 			or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) 
 			then
-			return 'both',author	
+			return 'both',author,reasons
 		elseif dkp_DA_counter==epdif then
-			return 'log',author
+			return 'log',author,reasons
 		end
 	end
 	
@@ -642,18 +636,18 @@ local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	if tonumber(oldgp) and tonumber(newgp) then
 		gpdif=newgp-oldgp
 	end
-	local checked,author=TransLegitCheck(name,epdif,gpdif)
+	local checked,author,reasons = TransLegitCheck(name,epdif,gpdif)
 	if not checked then
 		if fuckingOptions_g[DA_CurrentGuild].warnsuspic then
 			DA.Print(L['detmanchange'] .. DA.GetPlayerScanLink(name)) 
 		end
-		return {'off_unkn',officers}
+		return {'off_unkn',officers, reasons=reasons}
 	elseif checked=='both' then
-		return {'officer',author}
+		return {'officer',author, reasons=reasons}
 	elseif checked=='log' then
-		return {'officer_cmd',author}
+		return {'officer_cmd',author, reasons=reasons}
 	elseif checked=='msg' or checked=='dkp' then
-		return {'off_alm',author,officers}
+		return {'off_alm',author,officers, reasons=reasons}
 	end
 end
 local function TransLegitAdditionals(name,oldtyp,oldep,oldgp,newtyp,newep,newgp,officers)
@@ -1166,9 +1160,9 @@ local DA_gRoster=DA.RegatherGuildNotes(true)
 	end
 	
 	tinsert(DA_Scaner_bulk,function() 
-		if DarkAngelGUI:IsShown() then
-			DarkAngelGUI.Details.scrolpos={DarkAngelDetailsScrollFrame:GetScrollChild():GetPoint(1)} 
-		end
+		-- if DarkAngelGUI:IsShown() then
+			-- DarkAngelGUI.Details.scrolpos={DarkAngelDetailsScrollFrame:GetScrollChild():GetPoint(1)} 
+		-- end
 		if DarkAngelGUI:IsShown() then 
 			LogSetAllLines()
 			DA.RunLogSearch(FFuckingSearch:GetText()) 
@@ -1188,54 +1182,54 @@ local DA_gRoster=DA.RegatherGuildNotes(true)
 end
 
 local Log_Create_ScrollBar
+local Details_Create_ScrollBar
 function Mod.Logger_Load()
 	
 
 do --log cachers
 	local my_name=GetUnitName('player')
-	
-	local function FDEPGPlogcatcher(self, event, textofev1, textofev2, textofev3, author, ...)
-	local hhasd={}
-		if event == "CHAT_MSG_ADDON" then
-			if textofev1== "EPGP" then
-				if string.sub(textofev2, 0, 4)=="LOG:" then
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					for s in string.gmatch(textofev2, "[^\031]+") do 
-						table.insert(hhasd,s)
-					end 
-					if hhasd[2] and hhasd[3] and tonumber(hhasd[5]) then
-						tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[3],typ=hhasd[2],count=tonumber(hhasd[5])})
-						table.wipe(DA_Scaner_bulk)
-					end
-				end
-			elseif textofev1=="DA_log" then
+	local function split31(str)
+		local parts = {}
+		for part in string.gmatch(str, "([^%z\031]+)") do
+			table.insert(parts, part)
+		end
+		return unpack(parts)
+	end
+	local function cmd_catch(_, _, prefix, message, _, author)
+		if prefix == "EPGP" then
+			if string.sub(message, 0, 4)=="LOG:" then
 				if author==my_name then
 					DA.SetTimerTime("scan_schedule",3)
 				else
 					DA.SetTimerTime("scan_schedule",25)
 				end
-				for s in string.gmatch(textofev2, "[^\031]+") do 
-					table.insert(hhasd,s)
-				end 
-				if hhasd[1] and tonumber(hhasd[2]) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=hhasd[1],count=tonumber(hhasd[2])})
+				local _, typ, name, reason, value = split31(message)
+				if typ and name and tonumber(value) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, typ=typ, name=name, count=tonumber(value), reason=reason})
 					table.wipe(DA_Scaner_bulk)
 				end
 			end
-			
+		elseif prefix == "DA_log" then
+			if author==my_name then
+				DA.SetTimerTime("scan_schedule",3)
+			else
+				DA.SetTimerTime("scan_schedule",25)
+			end
+			local name, value, reason = split31(message)
+			if name and tonumber(value) then
+				tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=name, count=tonumber(value), reason=reason})
+				table.wipe(DA_Scaner_bulk)
+			end
 		end
 	end
 	local afp = CreateFrame("Frame")
-	afp:SetScript("OnEvent", FDEPGPlogcatcher)
+	afp:SetScript("OnEvent", cmd_catch)
 	afp:RegisterEvent("CHAT_MSG_ADDON");
 
-	local function FDEPGPlogcatcherG(_, event, message, author)
+	local function chat_catch(_, event, message, author)
 
-	if message and author then else return end
+		if message and author then else return end
+		
 		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and event=='CHAT_MSG_GUILD' then
 			local count=string.match(message,"EPGP:%s(.%d+)%s")
 			local typ=string.match(message,"EPGP:%s.%d+%s(.-)%s%(")
@@ -1342,7 +1336,7 @@ do --log cachers
 		end
 	end
 	local dfj = CreateFrame("Frame")
-	dfj:SetScript("OnEvent", FDEPGPlogcatcherG)
+	dfj:SetScript("OnEvent", chat_catch)
 	dfj:RegisterEvent("CHAT_MSG_GUILD");
 	dfj:RegisterEvent("CHAT_MSG_WHISPER");
 end	
@@ -1582,8 +1576,8 @@ end
 ---- 3 TAB ------	
 DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",125,0},15,40,10,55,"Details",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,"Interface\\AddOns\\DarkAngel\\template\\pict\\nier557")
 do
-	DA.ScrollBarCreater("DarkAngelDetails",DarkAngelGUI.Details,{DarkAngelGUI.Details.width-5, DarkAngelGUI.Details.height-70},{"TOPLEFT", 5, -62})
-	
+	-- DA.ScrollBarCreater("DarkAngelDetails",DarkAngelGUI.Details,{DarkAngelGUI.Details.width-5, DarkAngelGUI.Details.height-70},{"TOPLEFT", 5, -62})
+	Details_Create_ScrollBar()
 
 		
 		DA.EditBoxCreater("FFuckingSearch",DarkAngelGUI.Details,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 50, -40},{190,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
@@ -1613,7 +1607,7 @@ do
 		)
 		FFuckingSearch.t:SetBlendMode("blend")
 		
-		DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,FFuckingSearch,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,100,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
+		DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,FFuckingSearch,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
 		DarkAngelGUI.Details.notific:Hide()
 		
 	DA.FrameCreater("UndFr2guy",FFuckingSearch,160,20,{"TOPLEFT",FFuckingSearch,"BOTTOMLEFT",-220,58})	
@@ -1703,95 +1697,6 @@ LogSetAllLines = function()
 	
 end
 
-local function det_get_change_type_colored(tag,data)
-
-	if tag=='s' then
-		if data=='seen' then
-			return "|cff43bf5aseen" , false
-		elseif data=='new' or data=='re-joined' then
-			return "|cff43bf5a"..data , false
-		elseif data=='left guild' then
-			return "|cffb04c51"..data , false
-		end
-	elseif tag=='n' then
-		return '|cff71aad9note' , data
-	elseif tag=='o' then
-		return '|cfff0f0f0officer' , DA.GetColorName(data,1)
-	elseif tag=='r' then
-		return '|cffd96e27rank' , data
-	else
-		return tag
-	end
-	
-end
-DetailsSetLine = function(data,pos,printdate)
-
-	local typ_colored,change=det_get_change_type_colored(data.typ, data[1])
-	
-	DA.CreateFFGButton2("FFDetLine"..pos,_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",140,0-(15*pos)},15,145,change,nil,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
-			if data.typ=='o' and select(1,DA.DecodeNote(data[1]))=='t' then
-				FFuckingSearch:SetText(data[1])
-				DA.RunLogSearch(FFuckingSearch:GetText())
-			end
-			 end,
-			nil,nil,"LEFT")
-	
-	local addits
-	if data.addit then
-		if data.addit[1]=='officer' then
-			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-				addits="|cff28d445EPGP |cffaaffff"..data.addit[2]
-			elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
-				addits="|cffeb4bfaDKP |cffaaffff"..data.addit[2]
-			end
-		elseif data.addit[1]=='officer_cmd' then
-			addits=L['detmostlikely']..data.addit[2]
-		elseif data.addit[1]=='off_unkn' then
-			addits=L['detmcstr']..data.addit[2]
-		elseif data.addit[1]=='off_alm' then
-			addits=L['detmostlikely']..data.addit[2].." \n\n"..L['detposby']..data.addit[3]
-		elseif data.addit[1]=='invite' then
-			addits=L['detinvited']..data.addit[2]
-		elseif data.addit[1]=='kick' then
-			addits=L['detkicked']..data.addit[2]
-		end
-	
-	end
-	_G["FFDetLine"..pos]:SetScript("OnEnter", function(self)
-		if addits then
-			DA.myShowTooltip(self,addits)
-		end
-	end)
-	_G["FFDetLine"..pos]:SetScript("OnLeave", function(self)
-		DA.myHideTooltip()
-	end)
-	
-	DA.CreateFFGFont("FFDetLine"..pos.."typ",_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",100,0-(15*pos)},15,50,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},typ_colored,nil,nil,"LEFT")
-	
-	
-	--TIME
-	DA.CreateFFGFont("FFDetLine"..pos.."time",_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",1,0-(15*pos)},15,110,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-	((printdate and data[2][2] or string.rep(" ", #data[2][2])) .. " " .. (data[2][1] and "|cff85aaaa"..data[2][3] or "|cffdd9999"..data[2][3]) ),
-	{0.17,0.6,0.6,0.85},nil,"LEFT")
-	
-	-- CHANGE
-	if data.comp then
-		if data.typ=='r' then
-			DA.CreateFFGFont("FFDetLine"..pos.."che",_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",178,0-(15*pos)},15,200,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},data.comp[1]..data.comp[3]..data.comp[2],{0.45,0.65,0.65,1},nil,"LEFT")	--gp ch
-			if _G["FFDetLine"..pos.."chg"] then _G["FFDetLine"..pos.."chg"]:Hide() end
-		else
-			DA.CreateFFGFont("FFDetLine"..pos.."che",_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",217,0-(15*pos)},15,100,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},data.comp[1],{0.45,0.65,0.65,1},nil,"RIGHT")	--ep ch
-			DA.CreateFFGFont("FFDetLine"..pos.."chg",_G["DarkAngelDetails"].scrollchild,{"LEFT",_G["DarkAngelDetails"].scrollchild,"TOPLEFT",282,0-(15*pos)},15,100,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},data.comp[2],{0.45,0.65,0.65,1},nil,"RIGHT")	--gp ch
-		
-		end
-	else
-		if _G["FFDetLine"..pos.."che"] then _G["FFDetLine"..pos.."che"]:Hide() end
-		if _G["FFDetLine"..pos.."chg"] then _G["FFDetLine"..pos.."chg"]:Hide() end
-	end
-	
-	
-end
-
 Log_Create_ScrollBar = function()
 	local NUM_ROWS = 15
 	local ROW_HEIGHT = 15
@@ -1852,7 +1757,7 @@ Log_Create_ScrollBar = function()
 		row.buttons = {}
 		row.buttons[1]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 1, 0}, 20, 110, {font, 9, "OUTLINE"}, "", {0.17,0.6,0.6,0.85}, nil, "LEFT")		--time
 		row.buttons[2]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 100, 0}, 20, 130, {font, 8, "OUTLINE"}, "", {0.6, 0.6, 0.6, 1}, nil, "LEFT")		--type
-		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 137, 0}, 20, 130, {font, 9, "OUTLINE"}, "", nil, nil, "LEFT")					--name
+		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 140, 0}, 20, 130, {font, 9, "OUTLINE"}, "", nil, nil, "LEFT")					--name
 		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 212, 0}, 20, 180, {font, 8, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")	--note
 		row.buttons[5]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 232, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change ep
 		row.buttons[6]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 317, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change gp
@@ -1860,50 +1765,6 @@ Log_Create_ScrollBar = function()
 		
 		RowButtons[i] = row
 		
-	
-
-	-- if data[2] then
-		-- btnAncor=DA.CreateFFGButton2("FFGLine"..pos,_G["DarkAngelLog"].scrollchild,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",137,0-(15*pos)},15,70,data[2] or "",nil,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},,
-				-- nil,nil,"LEFT")
-			-- _G["FFGLine"..pos]:RegisterForClicks("AnyUp")
-			
-	-- else
-		-- btnAncor=DA.CreateFFGButton2("FFGLine"..pos,_G["DarkAngelLog"].scrollchild,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",137,0-(15*pos)},15,80,"",nil,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
-		-- end,
-		-- nil,nil,"LEFT")
-	-- end
-	--TIME
-	-- DA.CreateFFGFont("FFGLine"..pos.."time",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",1,0-(15*pos)},20,110,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-	-- ((printdate and data[3][2] or string.rep(" ", #data[3][2])) .. " " .. (data[3][1] and "|cff85aaaa"..data[3][3] or "|cffdd9999"..data[3][3]) ),
-	-- {0.17,0.6,0.6,0.85},nil,"LEFT")	--online time
-	
-	-- TYPE
-	-- DA.CreateFFGFont("FFGLine"..pos.."typ",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",100,0-(15*pos)},20,50,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},log_get_change_type_colored(data[1]),nil,nil,"LEFT")	--type
-	
-	-- CHANGE
-	-- if data.note then
-		-- if _G["FFGLine"..pos.."che"] then _G["FFGLine"..pos.."che"]:Hide() end
-		-- if _G["FFGLine"..pos.."chg"] then _G["FFGLine"..pos.."chg"]:Hide() end
-		-- DA.CreateFFGFont("FFGLine"..pos.."note",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",207,0-(15*pos)},20,200,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},data.note,{0.45,0.65,0.65,1},nil,"LEFT")	--change custom
-	-- elseif data[1]=="leaver" or data[1]=="new" then
-		-- if _G["FFGLine"..pos.."che"] then _G["FFGLine"..pos.."che"]:Hide() end
-		-- if _G["FFGLine"..pos.."chg"] then _G["FFGLine"..pos.."chg"]:Hide() end
-		-- if _G["FFGLine"..pos.."note"] then _G["FFGLine"..pos.."note"]:Hide() end
-	-- else
-			
--- DA.CreateFFGFont("FFGLine"..pos.."che",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",182,0-(15*pos)},20,100,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},data[4][1],{0.45,0.65,0.65,1},nil,"RIGHT")	--ep ch
--- DA.CreateFFGFont("FFGLine"..pos.."chg",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",247,0-(15*pos)},20,100,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},data[4][2],{0.45,0.65,0.65,1},nil,"RIGHT")	--gp ch
-		
-	-- end
-	
-	--TOTAL
-	-- if data.total then
-		-- DA.CreateFFGFont("FFGLine"..pos.."last",btnAncor,{"LEFT",_G["DarkAngelLog"].scrollchild,"TOPLEFT",362,0-(15*pos)},20,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},">> "..data.total,{0.45,0.65,0.65,1},nil,"LEFT")	--total epgp
-	-- else
-		-- if _G["FFGLine"..pos.."last"] then _G["FFGLine"..pos.."last"]:Hide() end
-	-- end
-	
-	
 	end
 	
 	local function UpdateRows(offset)
@@ -1935,6 +1796,22 @@ Log_Create_ScrollBar = function()
 	ScrollFrame:EnableMouseWheel(true)
 	local scrollbar = _G[ScrollFrame:GetName().."ScrollBar"]
 	scrollbar:SetScript("OnValueChanged", function(self, value)
+		local scrollBarname = self:GetName()
+		local _, max= self:GetMinMaxValues();
+		
+		if GameTooltip:IsShown() then
+			GameTooltip:Hide()
+		end
+		if ( value == 0 ) then
+			_G[scrollBarname.."ScrollUpButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollUpButton"]:Enable();
+		end
+		if ((value - max) == 0) then
+			_G[scrollBarname.."ScrollDownButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollDownButton"]:Enable();
+		end
 		UpdateRows(value)
 	end)
 
@@ -2000,19 +1877,6 @@ table.wipe(DA_L_Processed)
 		
 		DA_L_Processed[pos]={}
 		local plDat = DA_L_Processed[pos]
-		plDat.fnc=function(self, clickType)
-           
-            if clickType == 'LeftButton' then
-               
-            elseif clickType == 'RightButton' then
-                if name and officerNoteText then
-                    DAOptMenuFrame.calledfrom = "DarkAngelGUI"
-                    DA.OpenOptMenu(self, name, DarkAngelGuild.custom_mode)
-                else
-                    DAOptMenuFrame:Hide()
-                end
-            end
-        end
         
 		if not displaydate then
 			displaydate=dat
@@ -2039,6 +1903,234 @@ table.wipe(DA_L_Processed)
 	
 	
 end
+
+
+
+
+Details_Create_ScrollBar = function()
+	local NUM_ROWS = 15
+	local ROW_HEIGHT = 15
+
+	local ScrollFrame = CreateFrame("ScrollFrame", "DarkAngelDetails", DarkAngelGUI.Details, "UIDarkAngelScrollFrame2")
+	ScrollFrame:SetPoint("TOPLEFT",DarkAngelGUI.Details,"TOPLEFT",6,-60)
+	ScrollFrame:SetPoint("BOTTOMRIGHT",DarkAngelGUI.Details,"BOTTOMRIGHT",-25,10)
+-- local tf = ScrollFrame:CreateTexture(nil, "BACKGROUND"); tf:SetAllPoints(); tf:SetTexture(8/255, 12/255, 20/255, 0.5); tf:SetBlendMode("blend")
+
+
+	local ContentFrame = CreateFrame("Frame", "DarkAngelDetailsCF", ScrollFrame)
+	
+	ScrollFrame:SetScrollChild(ContentFrame)
+-- local zxc = ContentFrame:CreateTexture(nil, "BACKGROUND"); zxc:SetAllPoints(); zxc:SetTexture(8/255, 55/255, 20/255, 0.5); zxc:SetBlendMode("blend")
+
+	local RowButtons = {}
+	local font=UIDarkAngelFontConsolas:GetFont()
+	
+	for i = 1, NUM_ROWS do
+		local row = DA.CreateFFGButton2(nil, DarkAngelDetails, {"TOPLEFT", DarkAngelDetails, "TOPLEFT", 0, 10 - (ROW_HEIGHT * i)}, ROW_HEIGHT-1, 465, "", nil, {font, 9, "OUTLINE"},function(self,btntype) 
+			if not self.onclickdata then return end
+			
+			if btntype=='LeftButton' then
+				FFuckingSearch:ClearFocus()
+				FFuckingSearch:SetText(self.onclickdata)
+			end
+		end)
+		row:RegisterForClicks("AnyUp")
+        row:SetNormalTexture('')
+			
+		row:SetScript("OnEnter", function(self)
+			if not self.onenterdata then return end
+			
+			DA.myShowTooltip(self, self.onenterdata)
+			
+		end)
+		row:SetScript("OnLeave", function(self)
+			DA.myHideTooltip()
+		end)
+		
+		
+		
+		row.buttons = {}
+		row.buttons[1]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 1, 0}, 20, 110, {font, 9, "OUTLINE"}, "", {0.17,0.6,0.6,0.85}, nil, "LEFT")		--time
+		row.buttons[2]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 100, 0}, 20, 130, {font, 8, "OUTLINE"}, "", {0.6, 0.6, 0.6, 1}, nil, "LEFT")		--type
+		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 137, 0}, 20, 133, {font, 9, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--total
+		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 130, 0}, 20, 180, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "RIGHT")					--EP
+		row.buttons[5]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 180, 0}, 20, 180, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "RIGHT")					--GP
+		row.buttons[6]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 365, 0}, 20, 125, {font, 8, "OUTLINE"}, "", nil, nil, "LEFT")					--reason
+		
+		RowButtons[i] = row
+		
+	end
+	
+	local function UpdateRows(offset)
+		
+		DarkAngelDetails.offset=offset
+		
+		local rowIndex = math.floor(offset / ROW_HEIGHT + 0.5) + 1
+		for i = 1, NUM_ROWS do
+			local data = DA_D_Processed[rowIndex + i - 1]
+			if data then
+				local row = RowButtons[i]
+					row.onclickdata = data.onclickdata or nil
+					row.onenterdata = data.onenterdata or nil
+					row:Show()
+				row.buttons[1]:SetText(data.TimeText or "")
+				row.buttons[2]:SetText(data.TagText or "")
+				row.buttons[3]:SetText(data.changeOrTotal or "")
+				row.buttons[4]:SetText(data.colorEPchange or "")
+				row.buttons[5]:SetText(data.colorGPchange or "")
+				row.buttons[6]:SetText(data.reason or "")
+			else
+				RowButtons[i]:Hide()
+			end
+		end
+	end
+		
+	DarkAngelGUI.Details.UpdRows=UpdateRows
+	
+	ScrollFrame:EnableMouseWheel(true)
+	local scrollBar = _G[ScrollFrame:GetName().."ScrollBar"]
+	scrollBar:SetScript("OnValueChanged", function(self, value)
+		local scrollBarname = self:GetName()
+		local _, max= self:GetMinMaxValues();
+		
+		if GameTooltip:IsShown() then
+			GameTooltip:Hide()
+		end
+		if ( value == 0 ) then
+			_G[scrollBarname.."ScrollUpButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollUpButton"]:Enable();
+		end
+		if ((value - max) == 0) then
+			_G[scrollBarname.."ScrollDownButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollDownButton"]:Enable();
+		end
+		UpdateRows(value)
+	end)
+
+end
+local function det_get_change_type_colored(tag,data)
+
+	if tag=='s' then
+		if data=='seen' then
+			return "|cff43bf5aseen" , false
+		elseif data=='new' or data=='re-joined' then
+			return "|cff43bf5a"..data , false
+		elseif data=='left guild' then
+			return "|cffb04c51"..data , false
+		end
+	elseif tag=='n' then
+		return '|cff71aad9note' , data
+	elseif tag=='o' then
+		return '|cfff0f0f0officer' , DA.GetColorName(data,1)
+	elseif tag=='r' then
+		return '|cffd96e27rank' , data
+	else
+		return tag
+	end
+	
+end
+DetailsSetLine = function(data1)
+
+table.wipe(DA_D_Processed)
+	
+	local displaydate
+    for pos, data in ipairs(data1) do
+		local typ = data.typ
+        local changeSMTH, timeTbl = unpack(data)
+		local timestamp, isOnline, dat, tim = timeTbl.t, unpack(timeTbl)
+		local typ_colored,changeOrTotal=det_get_change_type_colored(typ, changeSMTH)
+		local comp1, comp2, comp3 
+		if data.comp then
+			comp1, comp2, comp3 = unpack(data.comp)
+		end
+		local additType,additAddit,additListOfficers,additReason
+		local reasons
+		local reasons_packed
+			if data.addit then
+				additType,additAddit,additListOfficers=unpack(data.addit)
+				additReason=data.addit.reasons
+			end
+			if additReason then
+				local countR = #additReason
+				if countR==1 then
+					reasons=unpack(additReason)
+				elseif countR>1 then
+					reasons="<...>"
+					reasons_packed="  "..table.concat(additReason,"|r\n  ")
+				end
+			end
+        local printdate
+		
+		DA_D_Processed[pos]={}
+		local plDat = DA_D_Processed[pos]
+        
+		if not displaydate then
+			displaydate=dat
+			printdate=true
+		elseif displaydate==dat then
+		else
+			printdate=true
+			displaydate=dat
+		end
+		
+		plDat.TimeText = ((printdate and dat or string.rep(" ", #dat)) .. " " .. (isOnline and "|cff85aaaa"..tim or "|cffdd9999"..tim) )
+		plDat.TagText = typ_colored
+		
+		if data.typ=='r' then
+			plDat.changeOrTotal = comp1 and comp2 and comp3 and comp1..comp3..comp2
+			plDat.colorEPchange=nil
+			plDat.colorGPchange=nil
+		else
+			plDat.changeOrTotal = changeOrTotal
+			plDat.colorEPchange=comp1
+			plDat.colorGPchange=comp2
+		end
+		
+		
+		plDat.reason=reasons
+		local addits = {}
+		if reasons_packed then
+			tinsert(addits, "Reasons:\n"..reasons_packed.."\n|r")
+		end
+		if additType then
+			if additType=='officer' then
+				if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+					tinsert(addits, "|cff28d445EPGP |cffaaffff"..additAddit)
+				elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+					tinsert(addits, "|cffeb4bfaDKP |cffaaffff"..additAddit)
+				end
+			elseif additType=='officer_cmd' then
+				tinsert(addits, L['detmostlikely']..additAddit)
+			elseif additType=='off_unkn' then
+				tinsert(addits, L['detmcstr']..additAddit)
+			elseif additType=='off_alm' then
+				tinsert(addits, L['detmostlikely']..additAddit.." \n\n"..L['detposby']..additListOfficers)
+			elseif additType=='invite' then
+				tinsert(addits, L['detinvited']..additAddit)
+			elseif additType=='kick' then
+				tinsert(addits, L['detkicked']..additAddit)
+			end
+		end
+		
+		if next(addits) then
+			plDat.onenterdata=table.concat(addits,"\n")
+		end
+		
+		if data.typ=='o' and select(1,DA.DecodeNote(changeOrTotal))=='t' then
+			plDat.onclickdata=data[1]
+		end
+		
+	end
+	
+	DarkAngelDetailsCF:SetSize(5, #DA_D_Processed * 15)
+	
+	DarkAngelGUI.Details.UpdRows(DarkAngelDetails.offset or 1)
+	
+	
+end
+
 
 function Mod:OnInitialize()
 	

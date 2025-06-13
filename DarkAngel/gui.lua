@@ -1342,7 +1342,7 @@ if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 			SendChatMessage("QDKP2> "..name.." Spends "..math.abs(value).." DKP ("..reason..")",'guild')
 		end
 	end
-	SendAddonMessage("DA_log",name.."\031"..value, "guild")
+	SendAddonMessage("DA_log",name.."\031"..value.."\031"..reason, "guild")
 	
 
 	if wh and isblk and UnitInRaid('player') then
@@ -7089,6 +7089,22 @@ Guild_Create_ScrollBar = function ()
 	ScrollFrame:EnableMouseWheel(true)
 	local scrollbar = _G[ScrollFrame:GetName().."ScrollBar"]
 	scrollbar:SetScript("OnValueChanged", function(self, value)
+		local scrollBarname = self:GetName()
+		local _, max= self:GetMinMaxValues();
+		
+		if GameTooltip:IsShown() then
+			GameTooltip:Hide()
+		end
+		if ( value == 0 ) then
+			_G[scrollBarname.."ScrollUpButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollUpButton"]:Enable();
+		end
+		if ((value - max) == 0) then
+			_G[scrollBarname.."ScrollDownButton"]:Disable();
+		else
+			_G[scrollBarname.."ScrollDownButton"]:Enable();
+		end
 		UpdateRows(value)
 	end)
 

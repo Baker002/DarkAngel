@@ -5906,7 +5906,7 @@ end
 								end)
 							end
 						end
-						SendAddonMessage("DA_log",name.."\031"..value, "guild")
+						SendAddonMessage("DA_log",name.."\031"..value.."\031"..reason, "guild")
 						
 						-- messages for local alts
 						if not fuckingOptions_g[DA_CurrentGuild].aw_send_whispers and Localalt and UnitInRaid('player') then

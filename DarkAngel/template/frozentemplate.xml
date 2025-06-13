@@ -278,8 +278,6 @@
 			</OnVerticalScroll>
 			<OnMouseWheel>
 				local scrollBar = _G[self:GetName() .. "ScrollBar"];
-				local scrollBarname = scrollBar:GetName()
-				local _, max= scrollBar:GetMinMaxValues();
 				local offset = scrollBar:GetValue();
 				local step = IsShiftKeyDown() and 30 or 15;
 				
@@ -288,16 +286,7 @@
 				else
 					scrollBar:SetValue(offset + step);
 				end
-				if ( offset == 0 ) then
-					_G[scrollBarname.."ScrollUpButton"]:Disable();
-				else
-					_G[scrollBarname.."ScrollUpButton"]:Enable();
-				end
-				if ((offset - max) == 0) then
-					_G[scrollBarname.."ScrollDownButton"]:Disable();
-				else
-					_G[scrollBarname.."ScrollDownButton"]:Enable();
-				end
+				
 			</OnMouseWheel>
 		</Scripts>
 	</ScrollFrame>
