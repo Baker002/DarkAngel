@@ -1370,7 +1370,7 @@ if typ=='f' then
 end
 
 	if EPGP then --insert EPGP log
-		tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {GetTimestamp(),'EP',name,reason,tonumber(value)})
+		tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'EP',name,reason,tonumber(value)})
 	end
 
 	DA_fakeep(name,'EP',value,reason)
@@ -1406,7 +1406,7 @@ if typ=='f' then
 end
 
 	if EPGP then --insert EPGP log
-		tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {GetTimestamp(),'GP',name,reason,tonumber(value)})
+		tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'GP',name,reason,tonumber(value)})
 	end
 		
 	DA_fakeep(name,'GP',value,reason)

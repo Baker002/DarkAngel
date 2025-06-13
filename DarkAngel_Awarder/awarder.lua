@@ -5451,15 +5451,6 @@ function FEP_RecalculateAllBtnEP()
 
 end
 
-local function GetTimestamp()
-local timearray = {}
-  timearray.month = select(2, CalendarGetDate())
-  timearray.day = select(3, CalendarGetDate())
-  timearray.year = select(4, CalendarGetDate())
-  timearray.hour = select(1, GetGameTime())
-  timearray.min = select(2, GetGameTime())
-  return time(timearray)
-end
 function DA_fakeep(name,epgp,value,comment,nochat,inr)
 	if not name or not epgp or not value or not comment then
 	DA.Print("incorrect command. Here is an example: ")
@@ -5480,10 +5471,10 @@ function DA_fakeep(name,epgp,value,comment,nochat,inr)
 	
 	if inr then
 		if epgp=="ep" or epgp=="EP" or epgp=="e" or epgp=="E" then
-			SendAddonMessage("EPGP","LOG:"..GetTimestamp().."\031EP\031"..name.."\031"..comment.."\031"..value, "raid")
+			SendAddonMessage("EPGP","LOG:"..DA.GetEPGPTimestamp().."\031EP\031"..name.."\031"..comment.."\031"..value, "raid")
 			if not nochat then SendChatMessage("EPGP: "..value1.." EP ("..comment..") "..L['fepfor'].." "..name,"raid") end
 		elseif epgp=="gp" or epgp=="GP" or epgp=="g" or epgp=="G" then
-			SendAddonMessage("EPGP","LOG:"..GetTimestamp().."\031GP\031"..name.."\031"..comment.."\031"..value, "raid")
+			SendAddonMessage("EPGP","LOG:"..DA.GetEPGPTimestamp().."\031GP\031"..name.."\031"..comment.."\031"..value, "raid")
 			if not nochat then SendChatMessage("EPGP: "..value1.." GP ("..comment..") "..L['fepfor'].." "..name,"raid") end
 			
 		else
@@ -5494,10 +5485,10 @@ function DA_fakeep(name,epgp,value,comment,nochat,inr)
 		end
 	else
 		if epgp=="ep" or epgp=="EP" or epgp=="e" or epgp=="E" then
-			SendAddonMessage("EPGP","LOG:"..GetTimestamp().."\031EP\031"..name.."\031"..comment.."\031"..value, "guild")
+			SendAddonMessage("EPGP","LOG:"..DA.GetEPGPTimestamp().."\031EP\031"..name.."\031"..comment.."\031"..value, "guild")
 			if not nochat then SendChatMessage("EPGP: "..value1.." EP ("..comment..") "..L['fepfor'].." "..name,"guild") end
 		elseif epgp=="gp" or epgp=="GP" or epgp=="g" or epgp=="G" then
-			SendAddonMessage("EPGP","LOG:"..GetTimestamp().."\031GP\031"..name.."\031"..comment.."\031"..value, "guild")
+			SendAddonMessage("EPGP","LOG:"..DA.GetEPGPTimestamp().."\031GP\031"..name.."\031"..comment.."\031"..value, "guild")
 			if not nochat then SendChatMessage("EPGP: "..value1.." GP ("..comment..") "..L['fepfor'].." "..name,"guild") end
 			
 		else
@@ -5782,7 +5773,7 @@ end
 					
 					if typ=='m' then
 						if EPGP and EPGP_DB then
-							tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {GetTimestamp(),'EP',name,reason,tonumber(value)})
+							tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'EP',name,reason,tonumber(value)})
 						end
 
 						
@@ -5833,7 +5824,7 @@ end
 					
 					if typ=='m' then
 						if EPGP and EPGP_DB then
-							tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {GetTimestamp(),'GP',name,reason,tonumber(value)})
+							tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'GP',name,reason,tonumber(value)})
 						end
 
 						

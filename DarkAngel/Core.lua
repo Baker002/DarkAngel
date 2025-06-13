@@ -739,6 +739,15 @@ function DA.GetClassColorCode(clas)
 	return clas and "|cff"..gethexcolor(DA.GetClassColor(clas)) or ""
 end
 
+function DA.GetEPGPTimestamp()
+local timearray = {}
+  timearray.month = select(2, CalendarGetDate())
+  timearray.day = select(3, CalendarGetDate())
+  timearray.year = select(4, CalendarGetDate())
+  timearray.hour = select(1, GetGameTime())
+  timearray.min = select(2, GetGameTime())
+  return time(timearray)
+end
 local function Create_Slash_Functions()
 	SLASH_FRAMESTK1 = SLASH_FRAMESTK1 or "/fs"
 	SlashCmdList.FRAMESTK = SlashCmdList.FRAMESTK or function() LoadAddOn("Blizzard_DebugTools");FrameStackTooltip_Toggle() end

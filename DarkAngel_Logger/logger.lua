@@ -381,6 +381,7 @@ else
 end
 
 	local Gathered=getMergedEntries(DA_CurrentGuild,name)
+	SGASFDSGASFAF = Gathered
 	DetailsSetLine(Gathered)
 	
 end
@@ -527,14 +528,14 @@ local function TransLegitCheck(name,epdif,gpdif)
 				eplogcounter=eplogcounter+jk.count
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,jk.reason)
+					tinsert(reasons,{jk.reason,jk.count,0})
 				end
 			end
 			if gpdif and jk.typ=="GP" and tvinspool[jk.name] and jk.logtype=='cmd'  then
 				gplogcounter=gplogcounter+jk.count
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,jk.reason)
+					tinsert(reasons,{jk.reason,0,jk.count})
 				end
 			end
 			
@@ -568,7 +569,7 @@ local function TransLegitCheck(name,epdif,gpdif)
 				dkp_DA_counter=dkp_DA_counter+jk.count
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,jk.reason)
+					tinsert(reasons,{jk.reason,jk.count})
 				end
 			end
 			if dkp_DA_counter==epdif then
@@ -619,7 +620,7 @@ local function TransLegitCheck(name,epdif,gpdif)
 			or (epdif==dkppubl_allcounter+dkppublcounter) 
 			or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) 
 			then
-			return 'both',author,reasons
+			return 'both',author
 		elseif dkp_DA_counter==epdif then
 			return 'log',author,reasons
 		end
@@ -627,7 +628,6 @@ local function TransLegitCheck(name,epdif,gpdif)
 	
 	return false
 end
-
 local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	local epdif,gpdif
 	if tonumber(oldep) and tonumber(newep) then
@@ -636,6 +636,7 @@ local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	if tonumber(oldgp) and tonumber(newgp) then
 		gpdif=newgp-oldgp
 	end
+	
 	local checked,author,reasons = TransLegitCheck(name,epdif,gpdif)
 	if not checked then
 		if fuckingOptions_g[DA_CurrentGuild].warnsuspic then
@@ -1940,7 +1941,7 @@ Details_Create_ScrollBar = function()
 		row:SetScript("OnEnter", function(self)
 			if not self.onenterdata then return end
 			
-			DA.myShowTooltip(self, self.onenterdata)
+			DA.myShowTooltip(self, self.onenterdata, 1, {font, 10})
 			
 		end)
 		row:SetScript("OnLeave", function(self)
@@ -2031,6 +2032,25 @@ local function det_get_change_type_colored(tag,data)
 	end
 	
 end
+
+local function strip_itemlink(s)
+    s = s:gsub("|c%x%x%x%x%x%x%x%x|H.-|h%[(.-)%]|h|r", "%1")
+    s = s:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+    return s
+end
+local function utf8len(str)
+    local _, count = str:gsub("[^\128-\193]", "")
+    return count
+end
+local function pad_utf8(str, target_len)
+    local stripped = strip_itemlink(str)
+    local actual_len = utf8len(stripped)
+		if str:find("%[") then
+			actual_len=actual_len+2
+		end
+    local pad = target_len - actual_len
+    return str .. string.rep(" ", pad)
+end
 DetailsSetLine = function(data1)
 
 table.wipe(DA_D_Processed)
@@ -2055,10 +2075,56 @@ table.wipe(DA_D_Processed)
 			if additReason then
 				local countR = #additReason
 				if countR==1 then
-					reasons=unpack(additReason)
+					reasons=additReason[1][1]
 				elseif countR>1 then
 					reasons="<...>"
-					reasons_packed="  "..table.concat(additReason,"|r\n  ")
+					local maxNameLength = 0
+					for _, entry in ipairs(additReason) do
+						local name = tostring(entry[1])
+						local stripped = strip_itemlink(name)
+						local len = utf8len(stripped)
+							if name:find("%[") then
+								len=len+2
+							end
+						if len > maxNameLength then
+							maxNameLength = len
+						end
+					end
+					local all={}
+					for _, entry in ipairs(additReason) do
+						local name = tostring(entry[1])
+						local value2 = tonumber(entry[2])
+						local value3 = tonumber(entry[3])
+
+						local paddedName = pad_utf8(name, maxNameLength + 2)
+
+						local lineParts = { paddedName }
+
+						if value2 and value2 > 0 then
+							table.insert(lineParts, "|cffaaffff" .. value2 .. "|r")
+						elseif value2 and value2 < 0 then
+							table.insert(lineParts, "|cffff00ff" .. value2 .. "|r")
+						else
+							table.insert(lineParts, "     ")
+						end
+
+						table.insert(lineParts, "  ")
+
+						if value3 and value3 > 0 then
+							table.insert(lineParts, "|cffedf500" .. value3 .. "|r")
+						elseif value3 and value3 < 0 then
+							table.insert(lineParts, "|cffff0000" .. value3 .. "|r")
+						else
+							table.insert(lineParts, "")
+						end
+
+						local line = table.concat(lineParts)
+						tinsert(all, line)
+					end
+
+					reasons_packed = "  " .. table.concat(all, "\n  ")
+
+
 				end
 			end
         local printdate
