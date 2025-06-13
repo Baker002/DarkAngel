@@ -6694,14 +6694,14 @@ function DA.GuildSearchTec(eb_name, eb_lvl, eb_note, eb_offnote, eb_rank, eb_onl
 			(not eb_lvl or mathchecker(entry[2], eb_lvl)) and
 			(not eb_note or mathchecker(entry[3], eb_note)) and
 			(not eb_offnote or mathchecker(entry[4][2], eb_offnote)) and
-			(not eb_rank or string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank) or
-						  string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank) or
-						  mathchecker(entry[5][1], eb_rank)) and
+			(not eb_rank or string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank) 
+				or string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank) 
+				or mathchecker(entry[5][1], eb_rank)) and
 			(not eb_online or 
 				(entry[5][1] ~= 'local' and
 					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online))) and
-			(not anyclass or
-				classTbl[entry[6]])
+			(not anyclass 
+				or classTbl[entry[6]])
 			)
 		or (not preciseMatch and
 		   ((eb_name and checker(entry[1], eb_name)) or
@@ -6798,7 +6798,7 @@ DarkAngelGuild.scrolled=false
 DarkAngelGuild.btnshidden=false
 
 local eb={}
-for r=1,5 do
+for r=1,6 do
 	local ebt = DarkAngelGUI.Guild["EB"..r]:GetText()
 	if ebt~="" then
 		eb[r]=ebt
