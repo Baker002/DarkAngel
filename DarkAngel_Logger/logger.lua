@@ -1107,7 +1107,7 @@ local DA_gRoster=DA.RegatherGuildNotes(true)
 	
 	FDCutStoredText()
 	
-	local batch_size = 50
+	local batch_size = 20
 	local names_tbl = {}
 
 	for key in pairs(DA_gRoster) do
@@ -2213,7 +2213,7 @@ function Mod:OnInitialize()
 
 	
 	--scaner
-	DA.CreateTimer(nil,"scaner",0,0.05,true,function(self)
+	DA.CreateTimer(nil,"scaner",0,0.02,true,function(self)
 		local guildName,_,_= GetGuildInfo('player')
 		if guildName and guildName==DA_CurrentGuild then
 		elseif not guildName and DA_CurrentGuild=="n0-guild" then
