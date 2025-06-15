@@ -2227,9 +2227,12 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 					local spec_ID = (spec_a == specname and 1) or (spec_b == specname and 2) or (spec_c == specname and 3) or nil
 					local specShort = raidCompGetClassShort(class, spec_ID)
 					
-					if spec_ID and specShort then
+					if specShort then
 						tinsert(raidCompSpec, specShort)
 						tinsert(raidCompNames, name)
+						if not spec_ID then
+							specFailed = specFailed + 1
+						end
 					else
 						tinsert(raidCompSpec, "0")
 						tinsert(raidCompNames, ";")
