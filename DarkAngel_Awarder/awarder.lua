@@ -1129,6 +1129,7 @@ for i=100,1,-1 do
 						return
 					end
 					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(saves_sorted[i].compLink))
+					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, saves_sorted[i].compLink)
 				end
 			end,
 		nil,nil,'left')
