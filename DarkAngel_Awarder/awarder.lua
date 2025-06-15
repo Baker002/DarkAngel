@@ -1124,11 +1124,11 @@ for i=100,1,-1 do
 				elseif not IsAltKeyDown() and not IsShiftKeyDown() and IsControlKeyDown() then
 					DA.LoadSnapshot(self.stored,'marks')
 				elseif IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
-					if not self.compLink then
+					if not saves_sorted[i].compLink then
 						DA.Print("Raid composition is not stored for this old snapshot. Try to load and re-save it")
 						return
 					end
-					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(self.compLink))
+					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(saves_sorted[i].compLink))
 				end
 			end,
 		nil,nil,'left')
