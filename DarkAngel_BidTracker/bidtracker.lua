@@ -904,7 +904,7 @@ local function Add_Check_Bid(value, name, isAllIn)
 	
 	local specname = select(1,LGT:GetUnitTalentSpec(name),1)
 	local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
-	local spec_ID = (spec_a == specname and 1) or (spec_b == specname and 2) or (spec_c == specname and 3) or nil
+	local spec_ID = specname and ((spec_a and spec_a == specname and 1) or (spec_b and spec_b == specname and 2) or (spec_c and spec_c == specname and 3)) or nil
 	local role=LGT:GetUnitRole(name)
 	
 	if DA_BidTracker.bidsession_roster[1] and value<DA_BidTracker.bidsession_roster[1][1] and fuckingOptions_g[DA_CurrentGuild].auc_allow_lower then

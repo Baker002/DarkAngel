@@ -2223,11 +2223,8 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 					local name = frame.c.name
 					local class = frame.c.clas
 						local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
-						print(spec_a,spec_b,spec_c)
 						local specname = select(1,LGT:GetUnitTalentSpec(name),1)
-						print(name, specname)
-					local spec_ID = (spec_a == specname and 1) or (spec_b == specname and 2) or (spec_c == specname and 3) or nil
-					print(spec_ID)
+					local spec_ID = specname and ((spec_a and spec_a == specname and 1) or (spec_b and spec_b == specname and 2) or (spec_c and spec_c == specname and 3)) or nil
 					local specShort = raidCompGetClassShort(class, spec_ID)
 					
 					if spec_ID and specShort then
