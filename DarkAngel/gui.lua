@@ -1085,7 +1085,7 @@ function DA.CreateTimer(runfromstart,short,startfrom,speed,runwhile,OnRun)
 	f.speed=speed
 	f.time=startfrom
 
-	if type(runwhile)=='boolean' and runwhile then
+	if type(runwhile)=='boolean' then
 		f.myscript=function(self,elapsed)		
 			self.time = self.time - elapsed
 			if self.time <= 0 then
@@ -1119,16 +1119,26 @@ function DA.CreateTimer(runfromstart,short,startfrom,speed,runwhile,OnRun)
 end
 
 function DA.ResumeTimer(short)
-
 	if DA_XTimers[short] then
 		if DA_XTimers[short]:GetScript("OnUpdate") then
 			-- print(short..' already runnin')
 		else
-			-- print('resumed',short)
 			DA_XTimers[short]:SetScript("OnUpdate", DA_XTimers[short].myscript)
 		end
 	else
-		-- print('no such timer-'..short)
+		print('no such timer-'..short)
+		return
+	end
+end
+function DA.IsTimerActive(short)
+	if DA_XTimers[short] then
+		if DA_XTimers[short]:GetScript("OnUpdate") then
+			return true
+		else
+			return false
+		end
+	else
+		print('no such timer-'..short)
 		return
 	end
 end
@@ -1149,9 +1159,25 @@ function DA.SetTimerTime(short,times)
 		return
 	end
 end
+function DA.GetTimerTime(short)
+	if DA_XTimers[short] then
+		return DA_XTimers[short]['time']
+	else
+		print('no such timer-'..short)
+		return
+	end
+end
 function DA.SetTimerSpeed(short,speed)
 	if DA_XTimers[short] then
 		DA_XTimers[short]['speed']=speed
+	else
+		print('no such timer-'..short)
+		return
+	end
+end
+function DA.GetTimerSpeed(short)
+	if DA_XTimers[short] then
+		return DA_XTimers[short]['speed']
 	else
 		print('no such timer-'..short)
 		return

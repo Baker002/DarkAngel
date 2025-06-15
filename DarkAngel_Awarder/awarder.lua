@@ -2124,6 +2124,83 @@ DA_StoredCheckboxes=DA_StoredCheckboxes or {
 	},
 }
 
+local raidCompClasses = {
+	["DEATHKNIGHT"]  = "L",
+	["DEATHKNIGHT1"] = "K",
+	["DEATHKNIGHT2"] = "L",
+	["DEATHKNIGHT3"] = "M",
+
+	["PRIEST"]  = "q",
+	["PRIEST1"] = "n",
+	["PRIEST2"] = "p",
+	["PRIEST3"] = "q",
+
+	["DRUID"]  = "x",
+	["DRUID1"] = "x",
+	["DRUID2"] = "v",
+	["DRUID3"] = "w",
+
+	["ROGUE"]  = "j",
+	["ROGUE1"] = "k",
+	["ROGUE2"] = "j",
+	["ROGUE3"] = "m",
+
+	["HUNTER"]  = "F",
+	["HUNTER1"] = "C",
+	["HUNTER2"] = "F",
+	["HUNTER3"] = "D",
+
+	["SHAMAN"]  = "r",
+	["SHAMAN1"] = "r",
+	["SHAMAN2"] = "t",
+	["SHAMAN3"] = "s",
+
+	["MAGE"]  = "b",
+	["MAGE1"] = "d",
+	["MAGE2"] = "b",
+	["MAGE3"] = "c",
+
+	["WARLOCK"]  = "y",
+	["WARLOCK1"] = "z",
+	["WARLOCK2"] = "B",
+	["WARLOCK3"] = "y",
+
+	["PALADIN"]  = "G",
+	["PALADIN1"] = "H",
+	["PALADIN2"] = "J",
+	["PALADIN3"] = "G",
+
+	["WARRIOR"]  = "h",
+	["WARRIOR1"] = "f",
+	["WARRIOR2"] = "h",
+	["WARRIOR3"] = "g",
+}
+
+local function raidCompGetClassShort(class,spec)
+	if not class then return "0" end
+	
+	local result
+	if spec then
+		result = raidCompClasses[class..spec]
+	else
+		result = raidCompClasses[class]
+	end
+	return result or "0" 
+	
+end
+local function raidCompCleanup(t,rem)
+	while true do
+		local s = #t 
+		
+		if s==0 then
+			return
+		elseif t[s] == rem then
+			table.remove(t, s)
+		else
+			return
+		end
+	end
+end
 function DA.CreateSnapshot(isauto)
 
 
@@ -2131,24 +2208,59 @@ local stamp
 	local datX,timX=string.match(date(), "(.+)%s(.+)")
 	stamp=datX..' |cff85aaaa'..timX
 
-if GetNumRaidMembers() and GetNumRaidMembers()>0 then
-	tinsert(DA_Snapshots,{isauto=isauto,members=GetNumRaidMembers(),stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks)})
-	
-elseif DA_Awarder.locker.getstate() then
+if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate() then
+	local raidCompSpec={}
+	local raidCompNames={}
+	local specFailed=0
 	local counterplayers=0
+	
 	for grp=1,8 do
-		for player=1,5 do
-			if _G["DA_AwarderGroup"..grp.."frame"..player] and _G["DA_AwarderGroup"..grp.."frame"..player]:IsShown() then
-				counterplayers=counterplayers+1
+		for id=1,5 do
+			local frame = _G["DA_AwarderGroup"..grp.."frame"..id]
+			if frame then
+				if frame:IsShown() and frame.c then
+					counterplayers=counterplayers+1
+					local name = frame.c.name
+					local class = frame.c.clas
+						local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
+						local specname = select(1,LGT:GetUnitTalentSpec(name),1)
+					local spec_ID = (spec_a == specname and 1) or (spec_b == specname and 2) or (spec_c == specname and 3) or nil
+					local specShort = raidCompGetClassShort(class, spec_ID)
+					
+					if specShort then
+						tinsert(raidCompSpec, specShort)
+						tinsert(raidCompNames, name)
+					else
+						tinsert(raidCompSpec, "0")
+						tinsert(raidCompNames, ";")
+						specFailed = specFailed + 1
+					end
+						
+				else
+					tinsert(raidCompSpec, "0")
+					tinsert(raidCompNames, ";")
+				end
+					
 			end
 		end
 	end
-	if counterplayers>0 then
-		tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks)})
-	else
+	
+	if counterplayers==0 then
 		DA.Print(L["raid is empty"])
 		return
 	end
+	
+	raidCompCleanup(raidCompSpec, "0")
+	raidCompCleanup(raidCompNames, ";")
+	
+	if specFailed ~= 0 then
+		DA.Print(L["failed to detect specialization"]..": "..specFailed.." players")
+	end
+	
+	local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames,";")
+	DA.Print("Raid Comp Link: "..RaidCompLink)
+	
+	tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks) , compLink = RaidCompLink})
 	
 else
 	DA.Print(L["raid is empty"])

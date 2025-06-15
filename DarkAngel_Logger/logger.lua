@@ -789,7 +789,6 @@ local function GetGuildNoteDiff(oldNote, newNote)
 end
 
 
-
 local function ScanCompare(db,firstrun)
 
 	if DA.guild_info_found==false and FFDecayCount and (not DA_Guild_Info[DA_CurrentGuild].base1 or not DA_Guild_Info[DA_CurrentGuild].decay1) then
@@ -2241,11 +2240,52 @@ function Mod:OnEnable()
 	DA:ModuleLoaded("Logger")
 end
 
+local function IsLoggingRequired()
+	local optTbl = fuckingOptions_g[DA_CurrentGuild]
+	for _,opt in ipairs({
+	"Log_offnote",
+	"Log_note",
+	"Log_rank",
+	"Log_ginfo",
+	"Log_gmotd",
+	"Log_GM"})
+	do
+		if optTbl[opt] then
+			return true
+		end
+	end
+	return false
+end
+function Mod:UpdateLogging()
+	if IsLoggingRequired() then
+		if DA.GetTimerTime("scan_schedule")<4 then
+			DA.SetTimerTime("scan_schedule",4)
+		end
+		DA.ResumeTimer("scan_schedule")
+	else
+		DA.StopTimer('scan_schedule')
+	end
+end
+
 function Mod:OnGuildLoad()
 	self.Logger_Load()
-	DA.CreateTimer(1,"scan_schedule",4,45,true,function(self)
+	DA.CreateTimer(IsLoggingRequired(),"scan_schedule",3,45,true,function(self)
 		Mod:StartScan()
 	end) 
+	
+	
+	local scaner_combat_delay=CreateFrame("Frame")
+	scaner_combat_delay:RegisterEvent("PLAYER_REGEN_ENABLED")
+	scaner_combat_delay:RegisterEvent("PLAYER_REGEN_DISABLED")
+	
+	scaner_combat_delay:SetScript("OnEvent",function(self,event)
+		if event=="PLAYER_REGEN_DISABLED" then --combat start
+			DA.StopTimer('scan_schedule')
+		elseif event=="PLAYER_REGEN_ENABLED" then --combat end
+			Mod:UpdateLogging()
+		end
+	end)
+
 end
 
 
@@ -2389,6 +2429,8 @@ function Mod:AddModOptions(modOptTable)
 			
 			logF.resetBtn:Disable()
 			logF.saveBtn:Disable()
+			
+			Mod:UpdateLogging()
 		end)	
 		
 		selectors_upd(1)
