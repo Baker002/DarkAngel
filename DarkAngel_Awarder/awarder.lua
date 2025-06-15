@@ -2125,69 +2125,84 @@ DA_StoredCheckboxes=DA_StoredCheckboxes or {
 }
 
 local raidCompClasses = {
-	["DEATHKNIGHT"]  = "L",
-	["DEATHKNIGHT1"] = "K",
-	["DEATHKNIGHT2"] = "L",
-	["DEATHKNIGHT3"] = "M",
+	["DEATHKNIGHT"] = { letter = "L", role = "melee" },
+	["DEATHKNIGHT1"] = { letter = "K", role = "tank" },
+	["DEATHKNIGHT2"] = { letter = "L", role = "melee" },
+	["DEATHKNIGHT3"] = { letter = "M", role = "melee" },
 
-	["PRIEST"]  = "q",
-	["PRIEST1"] = "n",
-	["PRIEST2"] = "p",
-	["PRIEST3"] = "q",
+	["PRIEST"] = { letter = "q", role = "caster" },
+	["PRIEST1"] = { letter = "n", role = "healer" },
+	["PRIEST2"] = { letter = "p", role = "healer" },
+	["PRIEST3"] = { letter = "q", role = "caster" },
 
-	["DRUID"]  = "x",
-	["DRUID1"] = "x",
-	["DRUID2"] = "v",
-	["DRUID3"] = "w",
+	["DRUID"] = { letter = "x", role = "caster" },
+	["DRUID1"] = { letter = "x", role = "caster" },
+	["DRUID2"] = { letter = "v", role = "melee" },
+	["DRUID3"] = { letter = "w", role = "healer" },
 
-	["ROGUE"]  = "j",
-	["ROGUE1"] = "k",
-	["ROGUE2"] = "j",
-	["ROGUE3"] = "m",
+	["ROGUE"] = { letter = "j", role = "melee" },
+	["ROGUE1"] = { letter = "k", role = "melee" },
+	["ROGUE2"] = { letter = "j", role = "melee" },
+	["ROGUE3"] = { letter = "m", role = "melee" },
 
-	["HUNTER"]  = "F",
-	["HUNTER1"] = "C",
-	["HUNTER2"] = "F",
-	["HUNTER3"] = "D",
+	["HUNTER"] = { letter = "F", role = "melee" },
+	["HUNTER1"] = { letter = "C", role = "melee" },
+	["HUNTER2"] = { letter = "F", role = "melee" },
+	["HUNTER3"] = { letter = "D", role = "melee" },
 
-	["SHAMAN"]  = "r",
-	["SHAMAN1"] = "r",
-	["SHAMAN2"] = "t",
-	["SHAMAN3"] = "s",
+	["SHAMAN"] = { letter = "r", role = "caster" },
+	["SHAMAN1"] = { letter = "r", role = "caster" },
+	["SHAMAN2"] = { letter = "t", role = "melee" },
+	["SHAMAN3"] = { letter = "s", role = "healer" },
 
-	["MAGE"]  = "b",
-	["MAGE1"] = "d",
-	["MAGE2"] = "b",
-	["MAGE3"] = "c",
+	["MAGE"] = { letter = "b", role = "caster" },
+	["MAGE1"] = { letter = "d", role = "caster" },
+	["MAGE2"] = { letter = "b", role = "caster" },
+	["MAGE3"] = { letter = "c", role = "caster" },
 
-	["WARLOCK"]  = "y",
-	["WARLOCK1"] = "z",
-	["WARLOCK2"] = "B",
-	["WARLOCK3"] = "y",
+	["WARLOCK"] = { letter = "z", role = "caster" },
+	["WARLOCK1"] = { letter = "z", role = "caster" },
+	["WARLOCK2"] = { letter = "B", role = "caster" },
+	["WARLOCK3"] = { letter = "y", role = "caster" },
 
-	["PALADIN"]  = "G",
-	["PALADIN1"] = "H",
-	["PALADIN2"] = "J",
-	["PALADIN3"] = "G",
+	["PALADIN"] = { letter = "G", role = "melee" },
+	["PALADIN1"] = { letter = "H", role = "healer" },
+	["PALADIN2"] = { letter = "J", role = "tank" },
+	["PALADIN3"] = { letter = "G", role = "melee" },
 
-	["WARRIOR"]  = "h",
-	["WARRIOR1"] = "f",
-	["WARRIOR2"] = "h",
-	["WARRIOR3"] = "g",
+	["WARRIOR"] = { letter = "h", role = "melee" },
+	["WARRIOR1"] = { letter = "f", role = "melee" },
+	["WARRIOR2"] = { letter = "h", role = "melee" },
+	["WARRIOR3"] = { letter = "g", role = "tank" },
 }
 
-local function raidCompGetClassShort(class,spec)
+local function raidCompGetClassShort(class, spec, role)
 	if not class then return "0" end
-	
-	local result
+
+	-- if specID is provided (number)
 	if spec then
-		result = raidCompClasses[class..spec]
-	else
-		result = raidCompClasses[class]
+		local entry = raidCompClasses[class .. spec]
+		return entry and entry.letter or "0"
 	end
-	return result or "0" 
-	
+
+	-- if role is provided, find matching spec for that role
+	if role then
+		if class=="DRUID" and (role=='melee' or role=='tank') then
+			return "v" --yes, we are tolerant to bear tanks
+		end
+		for i = 1, 3 do
+			local entry = raidCompClasses[class .. i]
+			if entry and entry.role == role then
+				return entry.letter
+			end
+		end
+	end
+
+	-- 404 return base class letter
+	local entry = raidCompClasses[class]
+	return entry and entry.letter or "0"
 end
+
 local function raidCompCleanup(t,rem)
 	while true do
 		local s = #t 
@@ -2222,6 +2237,8 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 					counterplayers=counterplayers+1
 					local name = frame.c.name
 					local class = frame.c.clas
+					local storedRole = frame.c.checkedSpec
+					local role = LGT:GetUnitRole(name)
 						local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
 						local specname = select(1,LGT:GetUnitTalentSpec(name),1)
 					local spec_ID = specname and ((spec_a and spec_a == specname and 1) or (spec_b and spec_b == specname and 2) or (spec_c and spec_c == specname and 3)) or nil
@@ -2233,7 +2250,7 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 					elseif specShort then	
 						specFailed = specFailed + 1
 						tinsert(raidCompSpec, specShort)
-						tinsert(raidCompNames, "@@@ "..name)
+						tinsert(raidCompNames, "@@@+"..name)
 							
 					else
 						tinsert(raidCompSpec, "0")
