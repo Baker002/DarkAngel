@@ -343,7 +343,7 @@ local DA_GUILD_R    = string.format(ERR_GUILD_REMOVE_SS, "(.+)", "(.+)")
 	end
 end)
 
-
+-- Initialization
 function DA:OnInitialize()
 
 	DA.OptionsUpd()
@@ -440,7 +440,6 @@ function DA:OnInitialize()
 
 
 end
-
 function DA:OnEnable()
 	QueryGuildEventLog()
 	self.loadFrame=CreateFrame("Frame")
@@ -461,7 +460,6 @@ function DA:OnEnable()
 	end) 
 	
 end
-
 local Dark_Angel_OnInit_completed
 function DA:OnGuildUpdate()
     self:TryInitGuildData()
@@ -502,7 +500,6 @@ function DA:OnGuildDataAvailable(guildName,delayednoguild)
 	
 	
 end
-
 local DA_loadedModules = {}
 function DA:ModuleLoaded(name)
 
@@ -517,7 +514,6 @@ function DA:ModuleLoaded(name)
 	self.AllModulesLoaded=true
     self:IfModsAndGuildDataReady()
 end
-
 function DA:IfModsAndGuildDataReady()
 	if self.GuildDataReady and self.AllModulesLoaded then
 		self.GuildDataReady=nil
@@ -527,7 +523,6 @@ function DA:IfModsAndGuildDataReady()
 	end
 	
 end
-
 function DA:ModsAndGuildDataReady(nomods)
 	DA.RegatherGuildNotes()
 	
@@ -614,7 +609,6 @@ function DA:ModsAndGuildDataReady(nomods)
 	end)
 	DA.ResumeTimer('fep')
 end
-
 function DA:SetAllFrameCoords()
 	for frameName,pos in pairs(fuckingOptions.saved_guiPositions) do
 		if _G[frameName] then
@@ -679,7 +673,7 @@ local garbage_collector=CreateFrame("Frame")
 function DA.Garbage_Collect()
 	
 	if not garbage_collector.r then
-		garbage_collector.r=1
+		garbage_collector.r=true
 		garbage_collector:SetScript("OnUpdate", function(self,_)
 			if collectgarbage("step",128) then 
 				self:SetScript("OnUpdate", nil)
@@ -753,12 +747,61 @@ local function Create_Slash_Functions()
 	SlashCmdList.FRAMESTK = SlashCmdList.FRAMESTK or function() LoadAddOn("Blizzard_DebugTools");FrameStackTooltip_Toggle() end
 	SLASH_DAtargetsearch1="/dasearch"
 	SlashCmdList.DAtargetsearch = function(...) 
-			DarkAngelGUI:Show()
-			_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
-			_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
-			FFuckingSearch:SetText(...)
-			DA.RunLogSearch(FFuckingSearch:GetText())
-		 end
+		DarkAngelGUI:Show()
+		_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
+		_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
+		FFuckingSearch:SetText(...)
+		DA.RunLogSearch(FFuckingSearch:GetText())
+	 end
+	StaticPopupDialogs["DA_COPY_TEXT_POPUP"] = {
+		text = "",                -- must be non‑nil
+		button1 = "Close",
+		hasEditBox = true,
+		hasWideEditBox = true,
+		maxLetters = 2048,
+		editBoxWidth = 320,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = STATICPOPUP_NUMDIALOGS,
+
+		OnShow = function(self)
+			local text = self.data or ""
+			-- pick the real edit‐box
+			local eb 
+			if self.editBox and self.editBox:IsShown() then
+				eb = self.editBox 
+			elseif self.wideEditBox and self.wideEditBox:IsShown() then
+				eb = self.wideEditBox
+			end
+			eb:SetText(text)
+			eb:SetCursorPosition(0)      -- force a layout refresh
+			eb:HighlightText()           -- visually select it
+			eb:SetFocus()
+		end,
+
+		EditBoxOnEscapePressed = function(self)
+			self:GetParent():Hide()
+		end,
+
+		EditBoxOnEnterPressed = function(self)
+			self:GetParent():Hide()
+		end,
+
+		EditBoxOnEditFocusGained = function(self)
+			self:HighlightText()
+		end,
+	}
+
+
+
+
+
+	-- SLASH_DALinkCopy1="/dalinkcopy"
+	-- SlashCmdList.DALinkCopy = function(...) 
+		-- print(...)
+		-- StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, ...)
+	-- end
 	function DA_targetep(reason,ammount,optionaltarg)
 		
 		local target=UnitName('target')
@@ -1003,10 +1046,18 @@ function Dark_Angel_OnInit(guildinit)
 
 			Box:Insert(string.sub(link, 11))
 			ChatEdit_ParseText(Box, 1)
+		elseif (string.sub(link, 1, 6) == "dalink") then
+			local id = string.sub(link, 8)
+			local data = DA_LinkStorage[id]
+			if data then
+				StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, data)
+
+			end
 		else
 			SetHyperlink(self, link, text, button, frame)
 		end
 	end
+
 	
 	SendAddonMessage("DA_RTq",'DA_RTq', "guild")
 	
@@ -1250,22 +1301,6 @@ function DA.GetPlayerGuildIndex(name)
 end
 
 
-local my_channel_filter = function(...)
-	local _, _, _, _, _, _, _, _, _, _, channelName, _, _, _ = ...;
-	if channelName == "DarkAngelChannel" then
-		return true
-	end
-	return false
-end
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE", my_channel_filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE_USER", my_channel_filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_JOIN", my_channel_filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LEAVE", my_channel_filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LIST", my_channel_filter)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", my_channel_filter)
-
-
-
 function DA.stringToTable(str)
 	return loadstring("return " .. str)()
 end
@@ -1314,6 +1349,15 @@ end
 function DA.GetPlayerScanLink(text)
 	return string.gsub(string.lower(text), string.lower(text), string.format("|cffFFEB3B|Hdacommand:%s %s|h[%s]|h|r", SLASH_DAtargetsearch1, text, text))
 end
+DA_LinkStorage = {}
+DA_LinkIndex = 0
+function DA.GetChatCopyLink(longString)
+	DA_LinkIndex = DA_LinkIndex + 1
+	local id = tostring(DA_LinkIndex)
+	DA_LinkStorage[id] = longString
+	return "|cffffff00|Hdalink:" .. id .. "|h<click to copy>|h|r"
+end
+
 local function Guild_determine(frombackup)
 	local dkp=0
 	local epgp=0

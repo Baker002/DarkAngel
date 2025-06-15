@@ -734,7 +734,9 @@ If such message was spotted, the addon will open a special tool for bidding item
 L['DESCr-loadsave']=[==[|cffff9999load stored raid|r
 Click — load selected save (players + award checks)
 Shift + Click — load players only
-Ctrl + Click — load award checks only]==]
+Ctrl + Click — load award checks only
+Alt + Click — print raid composition link
+  (player names with non-verified specs would have @@)]==]
 L['DESCr-saveraid']=[==[save current raid members and their award checks]==]
 L['DESCr-sixeightdet']=[==[|cffff99996-8 parties - standby|r
 The addon will treat players in 6-8 groups as standby as well

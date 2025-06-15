@@ -1123,6 +1123,8 @@ for i=100,1,-1 do
 					DA.LoadSnapshot(self.stored,'raid')
 				elseif IsControlKeyDown() then
 					DA.LoadSnapshot(self.stored,'marks')
+				elseif IsAltKeyDown() then
+					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(self.compLink))
 				end
 			end,
 		nil,nil,'left')
@@ -1159,15 +1161,11 @@ end
 	DA_Saved_Raids:SetPoint("TOPLEFT", saves_Frame, "TOPLEFT", 0, -1)
 		DA_Saved_Raids.scrollchild:ClearAllPoints()
 		DA_Saved_Raids.scrollchild:SetPoint("TOPLEFT", DA_Saved_Raids, "TOPLEFT")
-		-- DA_Saved_Raids.scrollchild:SetSize(179,#saves_sorted*13)
+		
 		if not DA_Saved_Raids.scrollbar:GetThumbTexture():IsShown() then
 			DA_Saved_Raids.scrollbar:Hide()
 		end
-		-- DA_Saved_Raids.scrollbar:GetThumbTexture():Hide()
-		-- DA_Saved_Raids.scrollupbutton:Hide()
-		-- DA_Saved_Raids.scrolldownbutton:Hide()
-		
-		
+	
 end
 
 
@@ -2284,7 +2282,7 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 	end
 	
 	local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames,";")
-	DA.Print("Raid Comp Link: "..RaidCompLink)
+	DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(RaidCompLink))
 	
 	tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks) , compLink = RaidCompLink})
 	
