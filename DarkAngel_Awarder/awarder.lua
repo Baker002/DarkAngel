@@ -1117,13 +1117,17 @@ for i=100,1,-1 do
 		local f=DA.CreateFFGButton2("DA_RS_"..counter..'but',saves_Frame_Scrolled,{"TOPLEFT",saves_Frame_Scrolled,"TOPLEFT",0,10-(11*counter)},13,145,saves_sorted[i].stamp..((saves_sorted[i].isauto and "|cffaaffa0 A |r") or "|cffc490fc M |r")..saves_sorted[i].members.." |cff99aaaapl.|r",nil,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
 			function(self)
 				saves_Frame:Hide()
-				if not IsShiftKeyDown() and not IsControlKeyDown() then
+				if not IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
 					DA.LoadSnapshot(self.stored,'all')
-				elseif IsShiftKeyDown() then
+				elseif not IsAltKeyDown() and IsShiftKeyDown() and not IsControlKeyDown() then
 					DA.LoadSnapshot(self.stored,'raid')
-				elseif IsControlKeyDown() then
+				elseif not IsAltKeyDown() and not IsShiftKeyDown() and IsControlKeyDown() then
 					DA.LoadSnapshot(self.stored,'marks')
-				elseif IsAltKeyDown() then
+				elseif IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
+					if not self.compLink then
+						DA.Print("Raid composition is not stored for this old snapshot. Try to load and re-save it")
+						return
+					end
 					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(self.compLink))
 				end
 			end,
