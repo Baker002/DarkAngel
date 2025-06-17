@@ -1081,7 +1081,7 @@ local function ScanCompare(db,firstrun)
 			
 			--strip log
 			for i=1,10 do
-				if time_cap >= jr[1][3].t then
+				if jr[1] and time_cap >= jr[1][3].t then
 					table.remove(jr,1)
 				else
 					break

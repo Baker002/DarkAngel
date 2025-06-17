@@ -3676,8 +3676,8 @@ do --main frame buttons
 								end
 							end
 						end
-					elseif FEP_L_gMain[name] and FEP_gMain[FEP_L_gMain[name]] then
-						local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[FEP_L_gMain[name]])
+					elseif FEP_L_gMain[DA_CurrentGuild][name] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] then
+						local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])
 						if typ=='m' then
 							value=ep
 						elseif typ=='f' then
