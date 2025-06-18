@@ -126,7 +126,6 @@ end
 
 local fepgrupdframe=CreateFrame("Frame")
 function Mod:OnEnable()
-    -- self.Flasker_Load()
 	if UISpecialFrames then 
 		tinsert(UISpecialFrames, "DA_Awarder")
 	end
@@ -232,27 +231,24 @@ DA_Awarder.autoopt:RegisterForDrag("LeftButton")
 DA_Awarder.autoopt:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 DA_Awarder.autoopt:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
 
--- DA_Awarder.autoopt:SetFrameLevel(180)
 
 DA.CloseButtonCreater(nil,DA_Awarder.autoopt,{"TOPRIGHT", DA_Awarder.autoopt, "TOPRIGHT", -2,-2},10,10,'x')
--- :SetFrameLevel(181)
+
 
 
 DA_Awarder.autoopt.officerassign=DA.FrameCreater(nil,DA_Awarder.autoopt,70,(GuildControlGetNumRanks()+1)*11,{"BOTTOMLEFT", DA_Awarder.autoopt, "TOPLEFT", 0, 0},nil,nil,1)
 DA.CloseButtonCreater(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPRIGHT", 1,5},8,8,'x')
--- :SetFrameLevel(192)
+
 DA_Awarder.autoopt.officerassign:SetScript("OnHide",function() DA.AWAutoOptions() end)
 DA_Awarder.autoopt.officerassign.andhigher=DA.CheckBtnCreater(nil,DA_Awarder.autoopt.officerassign,{"CENTER", DA_Awarder.autoopt.officerassign, "BOTTOMLEFT", 5,5},12,12,L['and higher'],function(self) end)
 DA_Awarder.autoopt.officerassign.andhigher.font:SetFont("Fonts\\FRIZQT__.TTF", 7, "OUTLINE")
--- DA_Awarder.autoopt.officerassign.andhigher:SetFrameLevel(191)
+
 
 
 for i=1,GuildControlGetNumRanks() do 
 	DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function() end,nil,nil,'left')
-	-- DA_Awarder.autoopt.officerassign['rankbtn'..i]:SetFrameLevel(191)
 end
-		
--- DA_Awarder.autoopt.officerassign:SetFrameLevel(190)	
+
 local DA_SelSet=false
 local function OpenOfficerCriteriaAssignment(ID)
 
@@ -276,7 +272,6 @@ local function OpenOfficerCriteriaAssignment(ID)
 		end
 		DA_Awarder.autoopt.officerassign['rankbtn'..i]:Show()
 		DA_Awarder.autoopt.officerassign['rankbtn'..i].fs:SetTextColor(0.5,0.9,1,1)
-		-- DA_Awarder.autoopt.officerassign['rankbtn'..i]:SetFrameLevel(191)	
 		
 	end
 	local gcnr=GuildControlGetNumRanks()
@@ -297,10 +292,10 @@ end
 
 
 DA_Awarder.autoopt.skadaassign=DA.FrameCreater(nil,DA_Awarder.autoopt,180,200,{"BOTTOMLEFT", DA_Awarder.autoopt, "TOPLEFT", 0, 0},nil,nil,1)
--- DA_Awarder.autoopt.skadaassign:SetFrameLevel(190)
+
 DA_Awarder.autoopt.skadaassign.t:SetTexture(0.1, 0.1, 0.12, 0.75)
 DA.CloseButtonCreater(nil,DA_Awarder.autoopt.skadaassign,{"TOPLEFT", DA_Awarder.autoopt.skadaassign, "TOPRIGHT", 1,5},10,10,'x')
--- :SetFrameLevel(200)
+
 DA_Awarder.autoopt.skadaassign:SetScript("OnHide",function() DA.AWAutoOptions() end)
 
 
@@ -697,7 +692,6 @@ local function skada_opt_refresh_bosses()
 			end
 			
 			skadaframe_Scrolled[i].fs:SetSize(230,15)
-			-- skadaframe_Scrolled[i]:SetFrameLevel(195)
 		elseif skadaframe_Scrolled[i] then
 			skadaframe_Scrolled[i]:Hide()
 		end
@@ -737,7 +731,6 @@ local function skada_db_version_check()
 skada_db_check_if_one()
 skada_db_set()
 	if DA_StoredCheckboxes[DA_SelSet].skadamode and _G[DA_StoredCheckboxes[DA_SelSet].skadamode] then
-		--_G[DA_StoredCheckboxes[DA_SelSet].skadamode] is Skada DB
 		if next(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) then
 			for i,j in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
 				if j then
@@ -952,7 +945,6 @@ local function skada_addit_render()
 				end
 				
 				f_Scrolled[i].fs:SetSize(230,15)
-				-- f_Scrolled[i]:SetFrameLevel(195)
 			elseif f_Scrolled[i] then
 				f_Scrolled[i]:Hide()
 			end
@@ -1185,7 +1177,7 @@ do
 	DA_Awarder.autoopt.skadaassign.main:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.main:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.main:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
-	-- DA_Awarder.autoopt.skadaassign.main:SetFrameLevel(191)
+
 
 	
 	DA_Awarder.autoopt.skadaassign.main.bossesbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-30},12,40,'boss','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
@@ -1194,7 +1186,7 @@ do
 		skada_opt_refresh_bosses()
 		DA_Awarder.autoopt.skadaassign.bosses:Show()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.bossesbtn:SetFrameLevel(192)
+
 	DA_Awarder.autoopt.skadaassign.main.selectedboss=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.bossesbtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.bossesbtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
 
@@ -1204,14 +1196,14 @@ do
 		skada_modes_preshow()
 		DA_Awarder.autoopt.skadaassign.modes:Show()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.modebtn:SetFrameLevel(192)
+
 	DA_Awarder.autoopt.skadaassign.main.selectedmode=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.modebtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.modebtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
 	DA_Awarder.autoopt.skadaassign.main.additbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-70},12,40,'select','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
 	function(self)
 		skada_addit_render()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.additbtn:SetFrameLevel(192)
+
 	DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
 	
 	DA_Awarder.autoopt.skadaassign.main.addit_eb=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main.additbtn,{"LEFT",DA_Awarder.autoopt.skadaassign.main.additbtn,"RIGHT",2,0},{120,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
@@ -1225,7 +1217,7 @@ do
 			end
 		end
 	)
-	-- DA_Awarder.autoopt.skadaassign.main.addit_eb:SetFrameLevel(193)
+
 	
 	-- SAVE
 	DA_Awarder.autoopt.skadaassign.main.savebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-180},12,45,'Save','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp',
@@ -1327,7 +1319,7 @@ do
 		DA.AWAutoOptions()
 		
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.savebtn:SetFrameLevel(192)
+
 	
 	--DELETE
 	DA_Awarder.autoopt.skadaassign.main.deletebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",80,-180},12,45,'Delete','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',
@@ -1341,7 +1333,7 @@ do
 			DA.AWAutoOptions()
 		end
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.deletebtn:SetFrameLevel(192)
+
 	DA_Awarder.autoopt.skadaassign.main.deletebtn:Disable()
 	DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
 	
@@ -1361,7 +1353,7 @@ do
 		DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText('')
 		DA_Awarder.autoopt.skadaassign.SKDTBL=nil
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.main.resetbtn:SetFrameLevel(192)
+
 	
 	do -- operand
 		DA_Awarder.autoopt.skadaassign.main.operand_btn,DA_Awarder.autoopt.skadaassign.main.operand_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt.skadaassign.main,skada_list_matematics[1][2],12,45,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-95},120,#skada_list_matematics*11 +1,"BOTTOMRIGHT")
@@ -1387,11 +1379,6 @@ do
 				end,nil,nil,'left')
 				
 			end
-			
-		-- DA_Awarder.autoopt.skadaassign.main.operand_btn:SetFrameLevel(192)
-		-- DA_Awarder.autoopt.skadaassign.main.operand_FRM:SetFrameLevel(193)
-		-- DA.FontCreater(nil,L['value'],{"RIGHT",DA_Awarder.autoopt.skadaassign.main.operand_btn,"LEFT",-4,0},DA_Awarder.autoopt.skadaassign.main.operand_btn,15,80,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'right',{0.85,1,1,0.8})
-	
 		
 		DA_Awarder.autoopt.skadaassign.main.operand_eb1=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",60,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
 			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
@@ -1405,7 +1392,6 @@ do
 			end,
 			nil,true
 		)
-		-- DA_Awarder.autoopt.skadaassign.main.operand_eb1:SetFrameLevel(193)
 		DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
 		
 		DA_Awarder.autoopt.skadaassign.main.operand_eb2=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",105,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
@@ -1420,7 +1406,6 @@ do
 			end,
 			nil,true
 		)
-		-- DA_Awarder.autoopt.skadaassign.main.operand_eb2:SetFrameLevel(193)
 		DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
 		
 		
@@ -1436,7 +1421,7 @@ do
 	DA_Awarder.autoopt.skadaassign.addit:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.addit:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.addit:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
-	-- DA_Awarder.autoopt.skadaassign.addit:SetFrameLevel(191)
+
 	DA_Awarder.autoopt.skadaassign.addit:Hide()
 	
 	DA_Awarder.autoopt.skadaassign.addit.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.addit,{"CENTER",DA_Awarder.autoopt.skadaassign.addit,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
@@ -1444,10 +1429,10 @@ do
 		DA_Awarder.autoopt.skadaassign.addit:Hide()
 		DA_Awarder.autoopt.skadaassign.main:Show()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.addit.back:SetFrameLevel(192)
+
 	
 	DA.ScrollBarCreater("DA_Skada_addit_scr",DA_Awarder.autoopt.skadaassign.addit,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
-	-- DA_Skada_addit_scr:SetFrameLevel(194)
+
 end
 ---BOSSES
 ---BOSSES
@@ -1457,7 +1442,7 @@ do
 	DA_Awarder.autoopt.skadaassign.bosses:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.bosses:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.bosses:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
-	-- DA_Awarder.autoopt.skadaassign.bosses:SetFrameLevel(191)
+
 	DA_Awarder.autoopt.skadaassign.bosses:Hide()
 
 	DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
@@ -1465,20 +1450,20 @@ do
 		DA_Awarder.autoopt.skadaassign.bosses:Hide()
 		DA_Awarder.autoopt.skadaassign.main:Show()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.bosses.back:SetFrameLevel(192)
+
 	
 	DA_Awarder.autoopt.skadaassign.bosses.refresh=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
 	function(self)
 		skada_opt_refresh_bosses()
 	end,'center')
-	-- DA_Awarder.autoopt.skadaassign.bosses.refresh:SetFrameLevel(192)
+
 
 	
 
 	DA_Awarder.autoopt.skadaassign.bosses.nobosses=DA.FontCreater(nil,L['Skada logs not found'],{"LEFT",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",10,-30},DA_Awarder.autoopt.skadaassign.bosses.back,15,110,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 	
 	DA.ScrollBarCreater("DA_Skada_bosses_scr",DA_Awarder.autoopt.skadaassign.bosses,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
-	-- DA_Skada_bosses_scr:SetFrameLevel(194)
+
 end
 ---Modes
 ---Modes
@@ -1488,17 +1473,15 @@ do
 	DA_Awarder.autoopt.skadaassign.modes:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.modes:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.modes:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
-	-- DA_Awarder.autoopt.skadaassign.modes:SetFrameLevel(191)
+
 	DA_Awarder.autoopt.skadaassign.modes:Hide()
 	
 	DA_Awarder.autoopt.skadaassign.modes.back=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.modes,{"CENTER",DA_Awarder.autoopt.skadaassign.modes,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 		DA_Awarder.autoopt.skadaassign.modes:Hide()
 		DA_Awarder.autoopt.skadaassign.main:Show()
 	end,nil,nil,'center')
-	-- DA_Awarder.autoopt.skadaassign.modes.back:SetFrameLevel(192)
 	
 	DA.ScrollBarCreater("DA_Skada_modes_scr",DA_Awarder.autoopt.skadaassign.modes,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
-	-- DA_Skada_modes_scr:SetFrameLevel(194)
 	
 	local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
 	
@@ -1526,7 +1509,6 @@ do
 		end
 		
 		modesframe_Scrolled[i].fs:SetSize(230,15)
-		-- modesframe_Scrolled[i]:SetFrameLevel(195)
 	
 	end
 
@@ -1612,26 +1594,22 @@ end
 
 for i=1,8 do
 	DA_Awarder.autoopt['fr'..i]=DA.FrameCreater(nil,DA_Awarder.autoopt,DA_Awarder.autoopt.width-5,12,{"LEFT", DA_Awarder.autoopt, "BOTTOMLEFT", 2.5, 111-13*i})
-	-- DA_Awarder.autoopt['fr'..i]:SetFrameLevel(181)
-	DA_Awarder.autoopt['fr'..i].t:SetTexture(0.69, 0.84, 0.87, 0.45)
-		-- DA_Awarder.autoopt['fr'..i].setfont=DA.FontCreater(nil,'set_name',{"LEFT", DA_Awarder.autoopt['fr'..i], "LEFT", 0, 0},DA_Awarder.autoopt['fr'..i],15,80,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"left",{0.85,1,1,0.9})
-		
 
+	DA_Awarder.autoopt['fr'..i].t:SetTexture(0.69, 0.84, 0.87, 0.45)
+		
 		
 		if i==1 then
 			DA_Awarder.autoopt['fr'..i]['raid']=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i],{"CENTER", DA_Awarder.autoopt['fr'..i], "LEFT", 7, 0},12,"Interface\\Icons\\Spell_Magic_PolymorphRabbit",function(self)
 				DA_StoredCheckboxes[DA_SelSet][i].rl['raid']=self.isenabled
 			end,L['award for raid'])
-			-- DA_Awarder.autoopt['fr'..i]['raid']:SetFrameLevel(182)
 			DA_Awarder.autoopt['fr'..i]['raid'].switch(false)
 		end
 		
 		DA_Awarder.autoopt['fr'..i].fonts=CreateFrame("Frame",nil,DA_Awarder.autoopt['fr'..i])
-		-- DA_Awarder.autoopt['fr'..i].fonts:SetFrameLevel(190)
 		
 	do --grp 1
 		DA_Awarder.autoopt['fr'..i].group1=DA.HideBarCreater('DA_Aw_AO'..i..'grp1',DA_Awarder.autoopt['fr'..i],{55,11},{"LEFT", DA_Awarder.autoopt['fr'..i], "LEFT", 16, 0})
-		-- DA_Awarder.autoopt['fr'..i].group1:SetFrameLevel(182)
+	
 		
 		
 		DA_Awarder.autoopt['fr'..i].group1.rolefont=DA.FontCreater(nil,L['mark on role'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group1,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
@@ -1665,16 +1643,12 @@ for i=1,8 do
 					self:RegisterEvent('MODIFIER_STATE_CHANGED')
 					local ppls,list=getstorednames(i)
 					if IsAltKeyDown() and not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						-- self.pressed=true
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cfffc3562"..L['alt-click to DELETE all saved characters'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						-- self.pressed=true
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb".."|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.." |cff6df7bb:\n|cff62ddf5"..list,1,{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						-- self.pressed=true
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cff824452"..L['alt-click to DELETE all saved characters'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif GetMouseFocus():GetName()==self:GetName() and ppls==0 then
-						-- self.pressed=true
 						DA.myShowTooltip(self,txt[2].."\n\n|cffeef564 "..L['no people saved'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
 					end
 				end)
@@ -1686,13 +1660,10 @@ for i=1,8 do
 				end)
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]:SetScript("OnLeave", function(self)
 					self:UnregisterEvent('MODIFIER_STATE_CHANGED')
-					-- DA_Awarder.autoopt['fr'..i].group1['gr1'..n].pressed=false
 					DA.myHideTooltip()
 				end)
 			end
 			
-			
-			-- DA_Awarder.autoopt['fr'..i].group1['gr1'..n]:SetFrameLevel(183)
 			DA_Awarder.autoopt['fr'..i].group1['gr1'..n].switch(false)
 			DA_Awarder.autoopt['fr'..i].group1['gr1'..n]:HookScript("OnEnter",function()
 				DA_Awarder.autoopt['fr'..i].group1.onenter()
@@ -1742,7 +1713,6 @@ for i=1,8 do
 	
 	do --grp 2
 		DA_Awarder.autoopt['fr'..i].group2=DA.HideBarCreater('DA_Aw_AO'..i..'grp2',DA_Awarder.autoopt['fr'..i],{150,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group1, "RIGHT", 5, 0})
-		-- DA_Awarder.autoopt['fr'..i].group2:SetFrameLevel(182)
 		
 		DA_Awarder.autoopt['fr'..i].group2.classfont=DA.FontCreater(nil,L['mark on class'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group2,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
 
@@ -1770,7 +1740,6 @@ for i=1,8 do
 				end,LOCALIZED_CLASS_NAMES_MALE[txt[2]])
 				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]:GetNormalTexture():SetTexCoord(unpack(CLASS_ICON_TCOORDS[txt[2]]))
 			end
-			-- DA_Awarder.autoopt['fr'..i].group2['gr2'..n]:SetFrameLevel(183)
 			DA_Awarder.autoopt['fr'..i].group2['gr2'..n].switch(false)
 			DA_Awarder.autoopt['fr'..i].group2['gr2'..n]:HookScript("OnEnter",function()
 				DA_Awarder.autoopt['fr'..i].group2.onenter()
@@ -1821,7 +1790,6 @@ for i=1,8 do
 	
 	do --grp 3
 		DA_Awarder.autoopt['fr'..i].group3=DA.HideBarCreater('DA_Aw_AO'..i..'grp3',DA_Awarder.autoopt['fr'..i],{34,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group2, "RIGHT", 5, 0})
-		-- DA_Awarder.autoopt['fr'..i].group3:SetFrameLevel(182)
 		
 		DA_Awarder.autoopt['fr'..i].group3.miscfont=DA.FontCreater(nil,L['misc'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group3,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
 		
@@ -1915,7 +1883,6 @@ for i=1,8 do
 				
 				
 			end
-			-- DA_Awarder.autoopt['fr'..i].group3['gr3'..n]:SetFrameLevel(183)
 			DA_Awarder.autoopt['fr'..i].group3['gr3'..n].switch(false)
 			DA_Awarder.autoopt['fr'..i].group3['gr3'..n]:HookScript("OnEnter",function()
 				DA_Awarder.autoopt['fr'..i].group3.onenter()
@@ -2650,12 +2617,6 @@ DA.RegatherGuildNotes()
 						end
 						
 						
-						
-						
-					-- elseif flag=="n" then 
-						-- frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp')
-						
-						
 					end
 				end
 			end
@@ -2709,7 +2670,6 @@ local function FEP_Fill()
 			
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetJustifyH('LEFT')
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetTextColor(unpack(color))
-			-- _G['DA_AwarderGroup'.. group .. 'frame' .. player ]:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp')
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].c=a[i]
 			DA_Awarder.array["g"..group]=DA_Awarder.array["g"..group]+1
 			for cbox=1,#DA_StoredCheckboxes[DA_SelSet] do
@@ -3460,16 +3420,8 @@ do --main frame buttons
 	
 	DA_Awarder.CreateRaidBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 270,-18},12,60,CONVERT_TO_RAID,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() 
 		if (GetNumRaidMembers()==0 and GetNumPartyMembers()>0) then
-			-- convertedToRaid=true
 			ConvertToRaid()
 			SetLootMethod("master","player")
-			-- if not DA_Inviter or DA_Inviter.initRaidLootMethod=='m' then
-				-- SetLootMethod("master","player")
-			-- elseif DA_Inviter.initRaidLootMethod=='g' then
-				-- SetLootMethod("group")
-			-- elseif DA_Inviter.initRaidLootMethod=='f' then
-				-- SetLootMethod("freeforall")
-			-- end
 			SetRaidDifficulty(DA_Inviter.initRaidDifficulty)
 		end
 	end)
@@ -4315,14 +4267,12 @@ end
 
 do --SETS
 
-	-- DA.FontCreater(nil,L['criterias'],{'top',DA_Awarder.autoopt,'topleft',40,-15},DA_Awarder.autoopt,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"center",{0.75,0.85,0.85,0.8})
-	
 	if not DA_SelSet then DA_SelSet='default' end
 	local naborscount=countCHsets()
 	
 	
 	DA_Awarder.naborbtn,DA_Awarder.naborFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,40,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 55,-10},90,20+11*naborscount,"TOP",nil,function() DA_Awarder.boxesFrame:Hide() end)
-	-- DA_Awarder.naborbtn:SetFrameLevel(182)
+	
 	DA.FontCreater(nil,L['profile'],{"RIGHT",DA_Awarder.naborbtn,"LEFT",-2,0},DA_Awarder.naborbtn,15,60,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
 	
 	--nabors exp
@@ -4458,7 +4408,6 @@ do --SETS
 		function(self) self.t:SetBlendMode("BLEND"); self.focusgained=1; end,
 		nil,{28/255, 32/255, 50/255, 1})
 	DA_Awarder.naboredit:Hide()
-	-- DA_Awarder.naboredit:SetFrameLevel(182)
 	DA_Awarder.naboredit:SetText(DA_SelSet)
 	DA.FontCreater(nil,L['setname'],{"RIGHT",DA_Awarder.naboredit,"LEFT",-2,0},DA_Awarder.naboredit,15,50,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
 	
@@ -4489,7 +4438,6 @@ do --SETS
 	
 	DA_Awarder.boxesbtn,DA_Awarder.boxesFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,15,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 140,-10},85,18,"TOP",nil,function() DA_Awarder.naborFrame:Hide() end)
 	
-	-- DA_Awarder.boxesbtn:SetFrameLevel(182)
 	DA.FontCreater(nil,L['criterias'],{"RIGHT",DA_Awarder.boxesbtn,"LEFT",-2,0},DA_Awarder.boxesbtn,15,65,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
 	for h,naborname in ipairs({'3','4','5','6','7','8'}) do
 			DA_Awarder.boxesFrame[naborname]=DA.CreateFFGButton2(nil,DA_Awarder.boxesFrame,{"CENTER", DA_Awarder.boxesFrame, "TOPLEFT", -7+14*h,-7},12,12,naborname,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
@@ -4520,14 +4468,10 @@ do --SETS
 	DA_Awarder.boxesbtn:SetText(#DA_StoredCheckboxes[DA_SelSet])
 	
 	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-25},15,15,L['AW_raid68'],function(self) fuckingOptions.AW_raid68=(self:GetChecked() or false) end,{'fuckingOptions','AW_raid68'},'AW_raid68')
-	-- :SetFrameLevel(182)
 	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-35},15,15,L['AW_roles68'],function(self) fuckingOptions.AW_roles68=(self:GetChecked() or false) end,{'fuckingOptions','AW_roles68'},'AW_roles68')
-	-- :SetFrameLevel(182)
 	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-45},15,15,L['AW_saved68'],function(self) fuckingOptions.AW_saved68=(self:GetChecked() or false) end,{'fuckingOptions','AW_saved68'},'AW_saved68')
-	-- :SetFrameLevel(182)
 	
 	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 110,-30},15,15,L['AW_skada68'],function(self) fuckingOptions.AW_skada68=(self:GetChecked() or false) end,{'fuckingOptions','AW_skada68'},'AW_skada68')
-	-- :SetFrameLevel(182)
 	DA_Awarder.autoopt.selectdb_BTN,DA_Awarder.autoopt.selectdb_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt,"",13,78,{"CENTER",DA_Awarder.autoopt,"TOPLEFT",170,-45},10,80,"TOP",nil,
 		function()
 			for i,name in ipairs(getSkadadatabasenames()) do
@@ -4551,9 +4495,6 @@ do --SETS
 					end,nil,nil,'left')
 				end
 				DA_Awarder.autoopt.selectdb_FRM:SetSize(80,i*10)
-				-- DA_Awarder.autoopt.selectdb_BTN:SetFrameLevel(140)
-				-- DA_Awarder.autoopt.selectdb_FRM:SetFrameLevel(141)
-				-- DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetFrameLevel(185)
 			end
 		end
 	)
@@ -4579,10 +4520,7 @@ do --SETS
 			DA.Print('SkadaStorageDB - |cffaf8888not found')
 		end
 	end)
-	-- :SetFrameLevel(140)
-				
-	-- DA_Awarder.autoopt.selectdb_BTN:SetFrameLevel(140)
-	-- DA_Awarder.autoopt.selectdb_FRM:SetFrameLevel(141)
+
 	
 end
 
@@ -4760,38 +4698,30 @@ local function catch_moving_to_Grp()
 	end
 end
 local function FEP_QeuePlayerGroupTransfer(name,group)
--- print(name,group)
 tinsert(DA_PlayerMoverList,{name,group})
 	DA.ResumeTimer('raid_mover')
 end
 local function catch_decide_Move(source_gr)
-	-- print("[DEBUG] Entered catch_decide_Move with source_gr:", source_gr)
 
 	local destination_gr = catch_moving_to_Grp()
-	-- print("[DEBUG] destination_gr determined as:", destination_gr)
 
 	catch_hide_frames()
 
 	if not destination_gr or destination_gr == source_gr then
-		-- print("[DEBUG] Invalid move: destination_gr is nil or same as source_gr")
 		return
 	end
 
 	local source_members = DA_Awarder.array['g' .. source_gr]
 	local destination_members = DA_Awarder.array['g' .. destination_gr]
 
-	-- print("[DEBUG] source_members:", source_members, "destination_members:", destination_members)
 
 	if source_members == 0 then
-		-- print("[DEBUG] No members in source group")
 		return
 	end
 
 	if IsShiftKeyDown() then
-		-- print("[DEBUG] Shift key held: entering replacement mode")
 
 		if destination_members > 3 or source_members > 3 then
-			-- print("[DEBUG] Using transit group strategy")
 			local transitslots = 0
 			local freeslots = {}
 			local slotstaken_inGrp = {}
@@ -4807,10 +4737,8 @@ local function catch_decide_Move(source_gr)
 				end
 			end
 
-			-- print("[DEBUG] Total transitslots:", transitslots)
 
 			if transitslots == 0 then
-				-- print("[DEBUG] No available transit slots")
 				return
 			end
 
@@ -4833,11 +4761,8 @@ local function catch_decide_Move(source_gr)
 			local extra_from_source = math.max(0, c_from_source - 3)
 			local extra_from_dest = math.max(0, c_from_dest - 3)
 
-			-- print("[DEBUG] q_from_source:", c_from_source, "extra:", extra_from_source)
-			-- print("[DEBUG] q_from_dest:", c_from_dest, "extra:", extra_from_dest)
 
 			if transitslots < extra_from_source + extra_from_dest then
-				-- print("[DEBUG] Not enough transit slots for extras")
 				return
 			end
 
@@ -4845,7 +4770,6 @@ local function catch_decide_Move(source_gr)
 				for n = 1, extra_from_source do
 					for i = 8, 1, -1 do
 						if freeslots[i] and slotstaken_inGrp[i] < freeslots[i] then
-							-- print("[DEBUG] Transit source:", q_from_source[n][1], "to group", i)
 							FEP_QeuePlayerGroupTransfer(q_from_source[n][1], i)
 							slotstaken_inGrp[i] = slotstaken_inGrp[i] + 1
 							break
@@ -4858,7 +4782,6 @@ local function catch_decide_Move(source_gr)
 				for n = 1, extra_from_dest do
 					for i = 8, 1, -1 do
 						if freeslots[i] and slotstaken_inGrp[i] < freeslots[i] then
-							-- print("[DEBUG] Transit dest:", q_from_dest[n][1], "to group", i)
 							FEP_QeuePlayerGroupTransfer(q_from_dest[n][1], i)
 							slotstaken_inGrp[i] = slotstaken_inGrp[i] + 1
 							break
@@ -4869,17 +4792,14 @@ local function catch_decide_Move(source_gr)
 
 			for i = math.max(#q_from_source, #q_from_dest), 1, -1  do
 				if q_from_source[i] then
-					-- print("[DEBUG] Final move:", q_from_source[i][1], "to", q_from_source[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_source[i][1], q_from_source[i][2])
 				end
 				if q_from_dest[i] then
-					-- print("[DEBUG] Final move:", q_from_dest[i][1], "to", q_from_dest[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_dest[i][1], q_from_dest[i][2])
 				end
 			end
 
 		else
-			-- print("[DEBUG] Using direct swap strategy")
 
 			local q_from_source = {}
 			local q_from_dest = {}
@@ -4895,32 +4815,26 @@ local function catch_decide_Move(source_gr)
 
 			for i = 1, math.max(#q_from_source, #q_from_dest) do
 				if q_from_source[i] then
-					-- print("[DEBUG] Swap source:", q_from_source[i][1], "to", q_from_source[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_source[i][1], q_from_source[i][2])
 				end
 				if q_from_dest[i] then
-					-- print("[DEBUG] Swap dest:", q_from_dest[i][1], "to", q_from_dest[i][2])
 					FEP_QeuePlayerGroupTransfer(q_from_dest[i][1], q_from_dest[i][2])
 				end
 			end
 		end
 	else
 		-- move mode
-		-- print("[DEBUG] Normal move mode")
 		if destination_members == 5 then
-			-- print("[DEBUG] Destination group is full")
 			return
 		end
 
 		local moving_members = 5 - destination_members
-		-- print("[DEBUG] Members to move:", moving_members)
 
 		local queued = 0
 
 		for i = 1, 40 do
 			local name, _, subgroup = GetRaidRosterInfo(i)
 			if subgroup == source_gr then
-				-- print("[DEBUG] Moving:", name, "to", destination_gr)
 				FEP_QeuePlayerGroupTransfer(name, destination_gr)
 				queued = queued + 1
 				if queued == moving_members then
@@ -4997,10 +4911,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 					DA.ResumeTimer('fep')
 						
-						
-						
-					-- GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(main), string.sub(mainmain,2))
-			
 			
 				elseif btntype=='RightButton' and IsShiftKeyDown() and self.state=='pb' and CanEditOfficerNote() then
 					if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
@@ -5036,10 +4946,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 	_G[framename]:SetMinResize(100, 100)
 	_G[framename]:RegisterForDrag("LeftButton")
 	_G[framename]:RegisterForClicks("AnyUp")
-	-- _G[framename]:EnableKeyboard()
-	-- _G[framename]:SetPropagateKeyboardInput(false)
-	-- _G[framename]:SetScript("OnKeyDown", function(self,key) if key=='SHIFT' then self:GetScript("OnEnter")(self) end end)
-	-- _G[framename]:SetScript("OnKeyUp", function(self,key) if key=='SHIFT' then self:GetScript("OnLeave")(self) end end)
 	_G[framename]:SetScript("OnDragStart", function(...) if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then _G[framename].StartMoving(...);_G[framename].ismoving=true;GameTooltip:Hide() end end)
 	_G[framename]:SetScript("OnDragStop", function(self) 
 			self:StopMovingOrSizing(); 
@@ -5065,7 +4971,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
-					-- DA.myShowTooltip(self,DA.GetTwinsInfo(self.c.name,self.main))
 					
 					GameTooltip:Show()
 				elseif self.state=='f' then
@@ -5074,15 +4979,13 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
 					GameTooltip:Show()
-					-- DA.myShowTooltip(self,L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main))
-				
+					
 				elseif self.state=='tf' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
 					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
 					GameTooltip:Show()
-					-- DA.myShowTooltip(self,L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main))
 					
 				elseif self.state=='pb' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
@@ -5090,10 +4993,8 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					if CanEditOfficerNote() then
 						GameTooltip:SetText(L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1'],0.45,0.65,0.65,1)
-						-- DA.myShowTooltip(self,L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1'])
 					else
 						GameTooltip:SetText(L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2'],0.45,0.65,0.65,1)
-						-- DA.myShowTooltip(self,L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2'])
 					end
 					GameTooltip:Show()
 					
@@ -5172,7 +5073,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 						
 					end
 					GameTooltip:SetText(origmessg,0.45,0.65,0.65,1)
-					-- DA.myShowTooltip(self,origmessg)
 					GameTooltip:Show()
 				end
 			
@@ -5182,10 +5082,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		end)
 	_G[framename]:SetScript("OnLeave", function(self)
 		self:UnregisterEvent('MODIFIER_STATE_CHANGED')
-		-- GameTooltip:Hide()
-		-- if self.c and self.c.name then
-			-- GameTooltipTextLeft1:SetFont(unpack(FEP_TT_savedfont1))
-		-- end
 		DA.myHideTooltip()
 	end)
 	_G[framename]:SetScript("OnEvent", function(self)
@@ -5203,7 +5099,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		_G[framename].rcicon:SetNormalTexture(_G[framename].rcicon.txt)
 		_G[framename].rcicon:SetPushedTexture(_G[framename].rcicon.txt)
 		_G[framename].rcicon:SetHighlightTexture('')
-		-- _G[framename].rcicon:SetFrameLevel(109)
 		_G[framename].rcicon:Hide()
 		_G[framename].rcicon.txt:Show()
 	end
@@ -5217,7 +5112,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		_G[framename].rlassist:SetNormalTexture(_G[framename].rlassist.txt)
 		_G[framename].rlassist:SetPushedTexture(_G[framename].rlassist.txt)
 		_G[framename].rlassist:SetHighlightTexture('')
-		-- _G[framename].rlassist:SetFrameLevel(108)
 		_G[framename].rlassist:Hide()
 		_G[framename].rlassist.txt:Show()
 	end
@@ -5232,7 +5126,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		_G[framename].MTot:SetNormalTexture(_G[framename].MTot.txt)
 		_G[framename].MTot:SetPushedTexture(_G[framename].MTot.txt)
 		_G[framename].MTot:SetHighlightTexture('')
-		-- _G[framename].MTot:SetFrameLevel(107)
 		_G[framename].MTot:Hide()
 		_G[framename].MTot.txt:Show()
 	end
@@ -5246,7 +5139,6 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		_G[framename].masterlooter:SetNormalTexture(_G[framename].masterlooter.txt)
 		_G[framename].masterlooter:SetPushedTexture(_G[framename].masterlooter.txt)
 		_G[framename].masterlooter:SetHighlightTexture('')
-		-- _G[framename].masterlooter:SetFrameLevel(106)
 		_G[framename].masterlooter:Hide()
 		_G[framename].masterlooter.txt:Show()
 	end
@@ -5298,7 +5190,6 @@ local font2=DA_Awarder.AssignFrame.Pname2
 local font3=DA_Awarder.AssignFrame.Pname3
 local font4=DA_Awarder.AssignFrame.Pname4
 DA_Awarder.AssignFrame.GetCalledby=callb
--- local descr=DA_Awarder.AssignFrame.Pnametitle
 local eb=DA_Awarder.AssignFrame.EB
 local easy=DA_Awarder.AssignFrame.easybtn
 easy:SetText("")
@@ -5323,7 +5214,6 @@ local name=data.name
 			if CanEditOfficerNote() then
 				GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), string.sub(main,2))
 				GuildRoster()
-				-- self:GetParent():Hide()
 				
 				FEP_GatherRaid()
 				tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
@@ -5347,7 +5237,6 @@ local name=data.name
 			if CanEditOfficerNote() then
 				GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(main), string.sub(mainmain,2))
 				GuildRoster()
-				-- self:GetParent():Hide()
 				
 				FEP_GatherRaid()
 				tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
@@ -6501,8 +6390,6 @@ FEP_GatherRaid()
     member = sender
   end
 	
-  -- print('member='..member)
-  -- print('sender='..sender)
   if strlower(member)=='player' or strlower(sender)=='player' or 
   strlower(member)=='target' or strlower(sender)=='target' or
   strlower(member)=='targettarget' or strlower(sender)=='targettarget' or
@@ -6543,7 +6430,6 @@ FEP_GatherRaid()
 							SendChatMessage(member.." "..L['added on standby'],"guild")
 						end
 					FEP_GatherRaid()
-					-- DA_standby_mainslist=DA_standby_mainslist..sender.."@"
 				end
 				
 			elseif DA.DecodeNote(FEP_gMain[sender])=='t' then
@@ -6566,7 +6452,6 @@ FEP_GatherRaid()
 							end
 						
 						FEP_GatherRaid()
-						-- DA_standby_mainslist=DA_standby_mainslist..FEP_gMain[sender].."@"
 					end
 					
 				elseif DA.DecodeNote(FEP_gMain[FEP_gMain[sender]])=='f' then
@@ -6594,7 +6479,6 @@ FEP_GatherRaid()
 							SendChatMessage(FEP_L_gMain[DA_CurrentGuild][sender].." "..L['added on standby'],"whisper",nil,sender)
 						end
 					FEP_GatherRaid()
-					-- DA_standby_mainslist=DA_standby_mainslist..FEP_L_gMain[DA_CurrentGuild][sender].."@"
 				end
 				
 			elseif DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][sender]])=='t' then
@@ -6634,7 +6518,6 @@ FEP_GatherRaid()
 						SendChatMessage(member.." "..L['added on standby'],"whisper",nil,sender)
 					end
 				FEP_GatherRaid()
-				-- DA_standby_mainslist=DA_standby_mainslist..member.."@"
 			end
 			
 		elseif DA.DecodeNote(FEP_gMain[member])=='t' then
