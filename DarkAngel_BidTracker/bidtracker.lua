@@ -1044,6 +1044,7 @@ DA_BidTracker.spendbutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_Bi
 			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 				tinsert(DA_Fep_bulk,function() 
 					DA.EPawardfunc(main,-price,item,nil,localTvin,true)
+					DA.AddRecentAward(main,"ep",-price,item)
 				end)
 				tinsert(DA_Fep_bulk,function() 
 					self:Enable()
@@ -1053,6 +1054,7 @@ DA_BidTracker.spendbutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_Bi
 			elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 				tinsert(DA_Fep_bulk,function() 
 					DA.DKPawardfunc(main,-price,item,nil,localTvin,true)
+					DA.AddRecentAward(main,"-dkp",price,item)
 				end)
 				tinsert(DA_Fep_bulk,function() 
 					self:Enable()

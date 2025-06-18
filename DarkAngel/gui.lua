@@ -1456,7 +1456,33 @@ end
 
 end
 
-
+function DA.AddRecentAward(name,epgp,value,reason)
+	local t = DA_Guild_Info[DA_CurrentGuild].RecentAwards
+	local dat,tim=string.match(date(), "(.+)%s(.+)")
+	local p = 1
+	local count = #t
+	
+	if count==100 then
+		table.remove(t,1)
+	elseif count~=0 then
+		while true do
+			
+			local e = t[p]
+			if e then
+				if e[1]==name and e[2]==epgp and e[3]==value and e[4]==reason then
+					table.remove(t,p)
+				else
+					p = p + 1
+				end
+			else
+				break
+			end
+		end
+	end
+	
+	tinsert(DA_Guild_Info[DA_CurrentGuild].RecentAwards, {name,epgp,value,reason,{dat,tim}})
+	
+end
 
 local Guild_Create_ScrollBar
 
@@ -1610,7 +1636,9 @@ do
 		DAOptMenuFrame.epgpawardFrame.t:SetTexture(0.03, 0.04, 0.07, 0.8)
 			do 
 				local function awardfunc(name,epgp,value,reason)
-
+					
+					DA.AddRecentAward(name,epgp,value,reason)
+					
 					if epgp=='ep' then
 						if FEP_gMain[name] then
 							if DA.DecodeNote(FEP_gMain[name])=='m' then
@@ -1674,7 +1702,46 @@ do
 				DA.ResumeTimer('fep')
 
 				end
-
+				
+				
+				DAOptMenuFrame.epgpawardFrame.Dropdown = DA.FrameCreater('HSETBVNHXA',DAOptMenuFrame.epgpawardFrame,270,111,{"TOPLEFT",DAOptMenuFrame.epgpawardFrame,"BOTTOMLEFT",2,-2})
+					DA.CloseButtonCreater(nil,DAOptMenuFrame.epgpawardFrame.Dropdown,{"BOTTOMLEFT", DAOptMenuFrame.epgpawardFrame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
+				for i=1,20 do
+					DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame.Dropdown,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
+						
+					end,nil,nil,'left')
+				end
+				local function getcoloredval(epgp,value)
+					if epgp=='ep' then
+						if value>0 then
+							return "|cffaaffff+"..value.." EP|r"
+						else
+							return "|cffff00ff"..value.." EP|r"
+						end
+					elseif epgp=='gp' then
+						if value>0 then
+							return "|cffedf500+"..value.." GP|r"
+						else
+							return "|cffff0000"..value.." GP|r"
+						end
+					elseif epgp=='+dkp' then
+						if value>0 then
+							return "|cffaaffff+"..value.." DKP|r"
+						else
+							return "|cffff00ff"..value.." DKP|r"
+						end
+					elseif epgp=='-dkp' then
+						if value>0 then
+							return "|cffff00ff"..value.." DKP|r"
+						else
+							return "|cffaaffff+"..value.." DKP|r"
+						end
+					end
+					
+				end
+				local Dropdown_rerender
+				
+				
 				DAOptMenuFrame.epgpawardFrame.start=DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame, "TOPLEFT", 60, -2},13,50,L['add'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 					self:Disable() 
 					DAOptMenuFrame.epgpawardFrame.value.focusgained=nil
@@ -1697,6 +1764,8 @@ do
 						self:Enable()
 						return
 					end
+					
+					DAOptMenuFrame.epgpawardFrame.Dropdown:Hide()
 					
 					awardfunc(DAOptMenuFrame.player,string.lower(DAOptMenuFrame.epgpawardFrame.epgp.fs:GetText()),tonumber(value),tostring(reason))
 				end,nil,nil)
@@ -1725,35 +1794,156 @@ do
 				end
 				DAOptMenuFrame.epgpawardFrame.epgp=DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame, "TOPLEFT", 5, -2},13,40,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
 				
+				
 				DAOptMenuFrame.epgpawardFrame.reason=DA.EditBoxCreater(nil,DAOptMenuFrame.epgpawardFrame,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame, "TOPLEFT", 5, -30},{50,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end,
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end, --enter here
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end,
 					function(self) 	
 						if self:GetParent():IsShown() then
 							self.t:SetBlendMode('blend');
 							self.focusgained=1
 							self:HighlightText()
+							Dropdown_rerender()
+						end
+					end,
+					function(self)
+						if self:GetParent():IsShown() and self.focusgained then
+							Dropdown_rerender()
 						end
 					end
 				)
 				DAOptMenuFrame.epgpawardFrame.reason:SetText("test")
+				DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame.reason,{"TOPRIGHT",DAOptMenuFrame.epgpawardFrame.reason,"TOPRIGHT",0,0},5,5,'x','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 6},function() DAOptMenuFrame.epgpawardFrame.reason:SetText("") end,nil,nil,'left')
+			
 				DA.FontCreater(nil,L['reason'],{"LEFT",DAOptMenuFrame.epgpawardFrame.reason,"LEFT",3,15},DAOptMenuFrame.epgpawardFrame.reason,15,170,{UIDarkAngelFontConsolas:GetFont(), 10},'left',{0.85,1,1,0.8})
 				
 				DAOptMenuFrame.epgpawardFrame.value=DA.EditBoxCreater(nil,DAOptMenuFrame.epgpawardFrame,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame, "TOPLEFT", 60, -30},{50,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
-					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end,
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end, --enter here
+					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DAOptMenuFrame.epgpawardFrame.Dropdown:Hide();self.focusgained=nil end,
 					function(self) 	
 						if self:GetParent():IsShown() then
 							self.t:SetBlendMode('blend');
 							self.focusgained=1
+							Dropdown_rerender()
+						end
+					end,
+					function(self)
+						if self:GetParent():IsShown() and self.focusgained then
+							Dropdown_rerender()
 						end
 					end
-					,nil,true
 				)
 				DA.FontCreater(nil,L['value'],{"LEFT",DAOptMenuFrame.epgpawardFrame.value,"LEFT",3,15},DAOptMenuFrame.epgpawardFrame.value,15,170,{UIDarkAngelFontConsolas:GetFont(), 10},'left',{0.85,1,1,0.8})
 				
+				DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame.value,{"TOPRIGHT",DAOptMenuFrame.epgpawardFrame.value,"TOPRIGHT",0,0},5,5,'x','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 6},function() DAOptMenuFrame.epgpawardFrame.value:SetText("") end,nil,nil,'left')
+				
+				local function SetEpgp(epgp,value)
+					local btn = DAOptMenuFrame.epgpawardFrame.epgp
+					if epgp=='ep' then
+						btn:SetText("EP")
+						btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+					elseif epgp=='gp' then
+						btn:SetText("GP")
+						btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+					elseif epgp=='+dkp' then
+						btn:SetText("+DKP")
+						btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+					elseif epgp=='-dkp' then
+						btn:SetText("-DKP")
+						btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+					end
+					
+				end
+				local function gatherFilteredEntries()
+					local result={}
+					local t = DA_Guild_Info[DA_CurrentGuild].RecentAwards
+					local count = #t
+					if count== 0 then return result end
+					
+					
+					local reason = tostring(DAOptMenuFrame.epgpawardFrame.reason:GetText())
+						if reason=="" or reason:gsub("%s+","")=="" then
+							reason=nil
+						end
+					local value = tostring(DAOptMenuFrame.epgpawardFrame.value:GetText())
+						if value=="0" or value=="" or value:gsub("%s+","")=="" then
+							value=nil
+						end
+					local perfectmatch={}
+					local anymatch={}
+					
+					for i=count,1,-1 do
+						local e = t[i]
+						if (not value or e[3] and tostring(e[3]):find(value) )
+						and (not reason or e[4] and tostring(e[4]):find(reason) )
+						then
+							tinsert(perfectmatch, e)
+							
+						elseif (not value or e[3] and tostring(e[3]):find(value) )
+						or (not reason or e[4] and tostring(e[4]):find(reason) )
+						then
+							tinsert(anymatch, e)
+						end
+					end
+					
+					for _,j in ipairs(perfectmatch) do
+						tinsert(result,j)
+					end
+					
+					for _,j in ipairs(anymatch) do
+						tinsert(result,j)
+					end
+					
+					return result
+				end
+				function Dropdown_rerender()
+					local entries = gatherFilteredEntries()
+					if #entries == 0 then
+						DAOptMenuFrame.epgpawardFrame.Dropdown:Hide()
+						return
+					end
+					
+					local displaydate
+					local counted = 0
+					for i=1,20 do
+						local entry = entries[i]
+						
+						if not entry then
+							DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]:Hide()
+						else
+							
+							local name,epgp,value,reason,timest = unpack(entry)
+							local dat,tim = unpack(timest)
+							
+							local printdate
+							if not displaydate then
+								displaydate=dat
+								printdate=true
+							elseif displaydate==dat then
+							else
+								printdate=true
+								displaydate=dat
+							end
+							
+							local TimeText = ((printdate and "|cff85aaaa"..dat or string.rep(" ", #dat)) .. " |r"..tim )
+							
+							DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]:SetText(TimeText .. "  |r"..name.. "  |r"..getcoloredval(epgp,value).. " |r("..reason.."|r)")
+							DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]:SetScript("OnClick",function() 
+								DAOptMenuFrame.epgpawardFrame.reason:ClearFocus()
+								DAOptMenuFrame.epgpawardFrame.value:ClearFocus()
+								DAOptMenuFrame.epgpawardFrame.reason:SetText(reason)
+								DAOptMenuFrame.epgpawardFrame.value:SetText(value)
+								SetEpgp(epgp,value)
+							end)
+							DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]:Show()
+							counted = counted + 1
+						end
+					end
+					DAOptMenuFrame.epgpawardFrame.Dropdown:SetSize(270,((counted * 11) + 1))
+					DAOptMenuFrame.epgpawardFrame.Dropdown:Show()
+				end
 			end
 		DAOptMenuFrame.GKick=DA.CreateFFGButton2(nil,DAOptMenuFrame,{"LEFT",DAOptMenuFrame,"TOPRIGHT",-75,-95},14,73,L['G.Kick'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 			if DAOptMenuFrame.player~=UnitName('player') then

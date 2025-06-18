@@ -402,7 +402,7 @@ function DA:OnInitialize()
 	
 	--rightclick optmenu hide
 	DA.CreateTimer(nil,"OptHider",0,0.2,function() if DAOptMenuFrame and DAOptMenuFrame:IsShown() then return true end end,function(self)
-		if (DAOptMenuFrame.parentbtn:IsMouseOver() or DAOptMenuFrame:IsMouseOver() or DAOptMenuFrame.epgpawardFrame:IsMouseOver()) then 
+		if (DAOptMenuFrame.parentbtn:IsMouseOver() or DAOptMenuFrame:IsMouseOver() or DAOptMenuFrame.epgpawardFrame:IsMouseOver() or DAOptMenuFrame.epgpawardFrame.Dropdown:IsMouseOver()) then 
 			DAOptMenuFrame.timerticked=0 
 		elseif not _G[DAOptMenuFrame.calledfrom]:IsVisible() then
 			DAOptMenuFrame.timerticked=0
@@ -996,7 +996,7 @@ function Dark_Angel_OnInit(guildinit)
 	if DA.modules.Logger then DA.Logger_rewrite_Gopt() end
 	
 	DA_Guild_Info[DA_CurrentGuild]=DA_Guild_Info[DA_CurrentGuild] or {}
-	
+	DA_Guild_Info[DA_CurrentGuild].RecentAwards = DA_Guild_Info[DA_CurrentGuild].RecentAwards or {}
 	FEP_L_gMain[DA_CurrentGuild]=FEP_L_gMain[DA_CurrentGuild] or {}
 	fuckingOptions_g[DA_CurrentGuild]=fuckingOptions_g[DA_CurrentGuild] or {}
 	
