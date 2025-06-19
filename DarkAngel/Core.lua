@@ -997,6 +997,7 @@ function Dark_Angel_OnInit(guildinit)
 	
 	DA_Guild_Info[DA_CurrentGuild]=DA_Guild_Info[DA_CurrentGuild] or {}
 	DA_Guild_Info[DA_CurrentGuild].RecentAwards = DA_Guild_Info[DA_CurrentGuild].RecentAwards or {}
+	DA_Guild_Info[DA_CurrentGuild].LogINFO = DA_Guild_Info[DA_CurrentGuild].LogINFO or {info={}, motd={}, gm={}, lastupdate1=time()/60}
 	FEP_L_gMain[DA_CurrentGuild]=FEP_L_gMain[DA_CurrentGuild] or {}
 	fuckingOptions_g[DA_CurrentGuild]=fuckingOptions_g[DA_CurrentGuild] or {}
 	

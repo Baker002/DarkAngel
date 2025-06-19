@@ -27,6 +27,10 @@ end
 
 --Log
 do
+
+L["Guild Information Changed"]=true
+L["Guild Information Added"]=true
+L["Guild Information Removed"]=true
 L["copy"]=true
 L["separator"]=true
 L["lines to print"]=true

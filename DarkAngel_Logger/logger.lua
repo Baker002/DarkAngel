@@ -441,8 +441,16 @@ local function Log_PlayerRank(guild, name)
         return playerData.r[targetIndex][1]
     end
 end
+local function Log_GetGuildInfo(typ)
+	local t = DA_Guild_Info[DA_CurrentGuild].LogINFO[typ]
+    local count = #t
 
-
+    if count==0 then
+		return nil
+    else
+        return t[count][1]
+    end
+end
 
 local function GetOnlineGuildOfficerslist()
 	local ranks={}
@@ -687,9 +695,9 @@ local function CheckWhoKicked(name)
 	return nil
 end
 
-	local GN_added="|cff69bf78"
-	local GN_removed="|cffbf6969"
-	local GN_modified="|cffbfbc69"
+local GN_added   = "|cff69bf78"
+local GN_removed = "|cffbf6969"
+local GN_reset   = "|r"
 local function utf8_chars(str)
     local chars = {}
     for uchar in str:gmatch("[\1-\127\194-\244][\128-\191]*") do
@@ -697,95 +705,103 @@ local function utf8_chars(str)
     end
     return chars
 end
-local function count_differences(oldChars, newChars)
-    local differences = 0
-    local length = math.min(#oldChars, #newChars)
-    for i = 1, length do
-        if oldChars[i] ~= newChars[i] then
-            differences = differences + 1
-        end
-    end
-    differences = differences + math.abs(#oldChars - #newChars)
-    return differences
-end
-local function lcs_table(oldWords, newWords)
-    local m, n = #oldWords, #newWords
+local function lcs_table(oldSeq, newSeq)
+    local m, n = #oldSeq, #newSeq
     local lcs = {}
-
-    -- Initialize the LCS table
     for i = 0, m do lcs[i] = {} end
-    for i = 0, m do
-        for j = 0, n do
-            lcs[i][j] = 0
-        end
-    end
-
-    -- Fill the LCS table
+    for i = 0, m do for j = 0, n do lcs[i][j] = 0 end end
     for i = 1, m do
         for j = 1, n do
-            if oldWords[i] == newWords[j] then
-                lcs[i][j] = lcs[i - 1][j - 1] + 1
+            if oldSeq[i] == newSeq[j] then
+                lcs[i][j] = lcs[i-1][j-1] + 1
             else
-                lcs[i][j] = math.max(lcs[i - 1][j], lcs[i][j - 1])
+                lcs[i][j] = math.max(lcs[i-1][j], lcs[i][j-1])
             end
         end
     end
-
     return lcs
 end
-local function backtrack_lcs(lcs, oldWords, newWords, i, j)
+local function char_diff(oldWord, newWord)
+    local oldChars = utf8_chars(oldWord)
+    local newChars = utf8_chars(newWord)
+    local lcs = lcs_table(oldChars, newChars)
+
     local result = {}
+    local i, j = #oldChars, #newChars
 
-    while i > 0 and j > 0 do
-        if oldWords[i] == newWords[j] then
-            table.insert(result, 1, {type = "unchanged", old = oldWords[i], new = newWords[j]})
+    while i > 0 or j > 0 do
+        if i > 0 and j > 0 and oldChars[i] == newChars[j] then
+            table.insert(result, 1, oldChars[i])
             i = i - 1
             j = j - 1
-        elseif count_differences(utf8_chars(oldWords[i]), utf8_chars(newWords[j])) <= 2 then
-            table.insert(result, 1, {type = "modified", old = oldWords[i], new = newWords[j]})
-            i = i - 1
+        elseif j > 0 and (i == 0 or lcs[i][j-1] >= lcs[i-1][j]) then
+            table.insert(result, 1, GN_added .. newChars[j] .. GN_reset)
             j = j - 1
-        elseif lcs[i-1][j] >= lcs[i][j-1] then
-            table.insert(result, 1, {type = "removed", old = oldWords[i]})
+        elseif i > 0 then
+            table.insert(result, 1, GN_removed .. oldChars[i] .. GN_reset)
             i = i - 1
-        else
-            table.insert(result, 1, {type = "added", new = newWords[j]})
-            j = j - 1
         end
     end
 
-    while i > 0 do
-        table.insert(result, 1, {type = "removed", old = oldWords[i]})
-        i = i - 1
-    end
-    while j > 0 do
-        table.insert(result, 1, {type = "added", new = newWords[j]})
-        j = j - 1
-    end
-
-    return result
+    return table.concat(result)
 end
-local function GetGuildNoteDiff(oldNote, newNote)
-    local diff = {}
-    local oldWords = { strsplit(" ", oldNote or "") }
-    local newWords = { strsplit(" ", newNote or "") }
+-- count how many characters differ (for similarity scoring)
+local function count_char_differences(a, b)
+    local ca = utf8_chars(a)
+    local cb = utf8_chars(b)
+    local diff = 0
+    local len = math.max(#ca, #cb)
+    for i = 1, len do
+        if ca[i] ~= cb[i] then
+            diff = diff + 1
+        end
+    end
+    return diff
+end
 
+local function is_similar(a, b)
+    local maxLen = math.max(#a, #b)
+    if maxLen == 0 then return true end
+    local diff = count_char_differences(a, b)
+    return (diff / maxLen) <= 0.4  -- allow 40% difference to be considered "modification"
+end
+
+local function word_diff(oldStr, newStr)
+    local oldWords = { strsplit(" ", oldStr or "") }
+    local newWords = { strsplit(" ", newStr or "") }
     local lcs = lcs_table(oldWords, newWords)
-    local diffWords = backtrack_lcs(lcs, oldWords, newWords, #oldWords, #newWords)
 
-    for _, entry in ipairs(diffWords) do
-        if entry.type == "unchanged" then
-            table.insert(diff, entry.old)
-        elseif entry.type == "added" then
-            table.insert(diff, GN_added .. entry.new .. "|r")
-        elseif entry.type == "removed" then
-            table.insert(diff, GN_removed .. entry.old .. "|r")
-        elseif entry.type == "modified" then
-            table.insert(diff, GN_modified .. entry.new .. "|r")
+    local result = {}
+    local i, j = #oldWords, #newWords
+
+    while i > 0 or j > 0 do
+        if i > 0 and j > 0 and oldWords[i] == newWords[j] then
+            table.insert(result, 1, oldWords[i])
+            i = i - 1
+            j = j - 1
+        elseif i > 0 and j > 0 and is_similar(oldWords[i], newWords[j]) then
+            -- close enough to be treated as a modification
+            table.insert(result, 1, char_diff(oldWords[i], newWords[j]))
+            i = i - 1
+            j = j - 1
+        elseif j > 0 and (i == 0 or lcs[i][j-1] >= lcs[i-1][j]) then
+            table.insert(result, 1, GN_added .. newWords[j] .. GN_reset)
+            j = j - 1
+        elseif i > 0 then
+            table.insert(result, 1, GN_removed .. oldWords[i] .. GN_reset)
+            i = i - 1
         end
     end
 
-    return table.concat(diff, " ")
+    return table.concat(result, " ")
+end
+
+function GetGuildNoteDiff(oldNote, newNote)
+	local strippedOld = oldNote:gsub("\n"," ¤")
+	local strippednew = newNote:gsub("\n"," ¤")
+	
+	local result = word_diff(strippedOld, strippednew)
+    return result:gsub("¤","\n")
 end
 
 
@@ -819,8 +835,6 @@ local function ScanCompare(db,firstrun)
 	local cn = DA.GetColorName
 	local cepd = GetColorEPGPdiff
 	local log_offn = DA.Log_PlayerOfficerNote
-	local log_note = Log_PlayerNote
-	local log_rank = Log_PlayerRank
 		local minlog=fuckingOptions_g[DA_CurrentGuild].minlog
 		local time_cap=time()-fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
 		local opt_offnote = fuckingOptions_g[DA_CurrentGuild].Log_offnote
@@ -944,10 +958,9 @@ local function ScanCompare(db,firstrun)
 					if not opt_note then
 						table.wipe(fd.n)
 					else
-						local note=log_note(DA_CurrentGuild,player)
-						-- print(player, note, val.n)
-						if not note then
-							--new logging method started, adding value without writing journal
+						local note=Log_PlayerNote(DA_CurrentGuild,player)
+						
+						if not note then --new logging method started, adding value without writing journal
 							table.insert(fd.n, {val.n, tmstmp})
 						elseif note==val.n then
 						else
@@ -980,7 +993,7 @@ local function ScanCompare(db,firstrun)
 					if not opt_rank then
 						table.wipe(fd.r)
 					else
-						local rank=log_rank(DA_CurrentGuild,player)
+						local rank=Log_PlayerRank(DA_CurrentGuild,player)
 					
 						if not rank then
 							--new logging method started, adding value without writing journal
@@ -1089,12 +1102,115 @@ local function ScanCompare(db,firstrun)
 			end
 		end
 	
-	DA_Guild_Info[DA_CurrentGuild].lastupdate1=GetTimestamp2()
+		DA_Guild_Info[DA_CurrentGuild].lastupdate1=GetTimestamp2()
 
 	end
 
 end
 
+local function CheckGuildInfosChange()
+	local optTbl = fuckingOptions_g[DA_CurrentGuild]
+	local tmstmp
+	local isonlinechange
+	local curtime=time()
+	local minlog=fuckingOptions_g[DA_CurrentGuild].minlog
+	local time_cap=curtime-fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
+	-- elseif tag == "ginfo" then
+	-- elseif tag == "gmotd" then
+	-- elseif tag == "_GM" then
+	
+		local dat,tim=string.match(date(), "(.+)%s(.+)")
+		if DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1 and GetTimestamp2()-DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1<2.2 then
+			isonlinechange=true
+		end
+		if isonlinechange then
+			tmstmp= {true,dat,tim, t=curtime}
+		else
+			tmstmp= {false,dat,tim, t=curtime}
+		end
+		
+	local jr = DarkAngel_JRN[DA_CurrentGuild]
+	local infoLog = optTbl.Log_ginfo
+	
+		do
+			local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO.info
+			
+			if not infoLog then
+				table.wipe(DB)
+			else
+				local value = GetGuildInfoText()
+				local note = Log_GetGuildInfo('info')
+				
+				if not note then --new logging method started, adding value without writing journal
+					table.insert(DB, {value, tmstmp})
+				elseif note==value then
+				else
+					local isNewOrDeletion
+					if string.gmatch(note,"%s+","")=="" then
+						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Added"]})
+						isNewOrDeletion=true
+					elseif not value or string.gmatch(value,"%s+","")=="" then
+						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Removed"]})
+						isNewOrDeletion=true
+					else
+						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Changed"]})
+					end
+					
+					
+					if infoLog==2 then
+						table.insert(DB, {
+							value, 
+							tmstmp,
+							not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
+						})
+					elseif infoLog==1 then
+						table.wipe(DB)
+						table.insert(DB, {
+							value, 
+							tmstmp,
+							not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
+						})
+						
+					end
+				end
+				local tblsize=#DB
+				if tblsize<=1 or tblsize<=minlog then
+				elseif tblsize>minlog then
+					if time_cap >= DB[1][2].t then
+						table.remove(DB,1)
+					end
+				end
+			end
+		
+		end
+	local motdLog = optTbl.Log_gmotd
+		do
+			local motdDB = DA_Guild_Info[DA_CurrentGuild].LogINFO.motd
+			local current = GetGuildRosterMOTD()
+		
+		
+		end
+	local gmLog = optTbl.Log_GM
+		do
+			local gmDB = DA_Guild_Info[DA_CurrentGuild].LogINFO.gm
+	
+		end
+		
+		DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1=GetTimestamp2()
+end
+local function IsGINFOLoggingRequired()
+	local optTbl = fuckingOptions_g[DA_CurrentGuild]
+	for _,opt in ipairs({
+	"Log_ginfo",
+	"Log_gmotd",
+	"Log_GM"})
+	do
+		if optTbl[opt] then
+			return true
+		end
+	end
+	return false
+end
 function Mod:StartScan()
 
 if DA_CurrentGuild~="n0-guild" then else return end
@@ -1159,23 +1275,23 @@ local DA_gRoster=DA.RegatherGuildNotes(true)
 		tinsert(DA_Scaner_bulk,function() Fcheckleavers() end)
 	end
 	
+	
+	if IsGINFOLoggingRequired() then
+		tinsert(DA_Scaner_bulk,function() 
+			CheckGuildInfosChange()
+		end)
+	end
+	
 	tinsert(DA_Scaner_bulk,function() 
-		-- if DarkAngelGUI:IsShown() then
-			-- DarkAngelGUI.Details.scrolpos={DarkAngelDetailsScrollFrame:GetScrollChild():GetPoint(1)} 
-		-- end
-		if DarkAngelGUI:IsShown() then 
-			LogSetAllLines()
-			DA.RunLogSearch(FFuckingSearch:GetText()) 
-			-- FilterLog()
-		end 
 	end)
 	tinsert(DA_Scaner_bulk,function() 
-		if DarkAngelGUI:IsShown() then
-		DA.ResetScrollBoxes(); 
-			if DarkAngelGUI.Details.scrolpos then
-				DarkAngelDetailsScrollFrame:GetScrollChild():SetPoint(unpack(DarkAngelGUI.Details.scrolpos))
-			end 
+		if DarkAngelLog:IsShown() then 
+			LogSetAllLines()
 		end
+		
+		if DarkAngelDetails:IsShown() then 
+			DA.RunLogSearch(FFuckingSearch:GetText()) 
+		end 
 	end)
 	
 	DA.ResumeTimer('scaner')
@@ -1672,8 +1788,8 @@ local sortingOptions_tbl=fuckingOptions_g[DA_CurrentGuild]
        ((tag == "tfm" or tag == "fc" or tag == "f" or tag == "uf") and sortingOptions_tbl.LCB_frozen) or
        (tag == "note" and sortingOptions_tbl.LCB_note) or
        (tag == "rank" and sortingOptions_tbl.LCB_rank) or
-       (tag == "ginf" and sortingOptions_tbl.LCB_ginfo) or
-       (tag == "motd" and sortingOptions_tbl.LCB_gmotd) or
+       (tag == "ginfo" and sortingOptions_tbl.LCB_ginfo) or
+       (tag == "gmotd" and sortingOptions_tbl.LCB_gmotd) or
        (tag == "_GM" and sortingOptions_tbl.LCB_GM) then
         return true
     end
@@ -1758,7 +1874,7 @@ Log_Create_ScrollBar = function()
 		row.buttons[1]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 1, 0}, 20, 110, {font, 9, "OUTLINE"}, "", {0.17,0.6,0.6,0.85}, nil, "LEFT")		--time
 		row.buttons[2]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 100, 0}, 20, 130, {font, 8, "OUTLINE"}, "", {0.6, 0.6, 0.6, 1}, nil, "LEFT")		--type
 		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 140, 0}, 20, 130, {font, 9, "OUTLINE"}, "", nil, nil, "LEFT")					--name
-		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 212, 0}, 20, 180, {font, 8, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")	--note
+		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 212, 0}, 20, 180, {font, 8, "OUTLINE"}, "", {0.75,0.85,0.85,1}, nil, "LEFT")	--note
 		row.buttons[5]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 232, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change ep
 		row.buttons[6]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 317, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change gp
 		row.buttons[7]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 382, 0}, 20, 100, {font, 8, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--total
@@ -1847,9 +1963,9 @@ local function log_get_change_type_colored(tag)
   		return "|cff71aad9"..tag
 	elseif tag == "rank" then
  		return "|cffd96e27"..tag
-	elseif tag == "ginf" then
+	elseif tag == "ginfo" then
  		return "|cffb5c45eguild\ninfo"
-	elseif tag == "motd" then
+	elseif tag == "gmotd" then
 		return "|cffb5c45eguild\ngreet"
 	elseif tag == "_GM" then
         return "|cffe31e1e_GM"

@@ -26,6 +26,10 @@ end
 
 --Log
 do
+
+L["Guild Information Changed"]="Изменение описания гильдии"
+L["Guild Information Added"]="Добавлено описани гильдии"
+L["Guild Information Removed"]="Описании гильдии удалено"
 L["copy"]="копия"
 L['separator']="разделитель"
 L['lines to print']="печатать строк"

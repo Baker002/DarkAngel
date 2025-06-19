@@ -1732,9 +1732,9 @@ do
 						end
 					elseif epgp=='-dkp' then
 						if value>0 then
-							return "|cffff00ff"..value.." DKP|r"
+							return "|cffff00ff-"..value.." DKP|r"
 						else
-							return "|cffaaffff+"..value.." DKP|r"
+							return "|cffaaffff-"..value.." DKP|r"
 						end
 					end
 					
