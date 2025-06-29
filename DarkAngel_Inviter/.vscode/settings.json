@@ -1,9 +1,0 @@
-{
-    "Lua.diagnostics.disable": [
-        "param-type-mismatch",
-        "undefined-field",
-        "undefined-global",
-        "missing-parameter",
-        "assign-type-mismatch"
-    ]
-}

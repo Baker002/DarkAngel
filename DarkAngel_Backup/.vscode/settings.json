@@ -1,9 +1,0 @@
-{
-    "Lua.diagnostics.disable": [
-        "undefined-global",
-        "inject-field",
-        "undefined-field",
-        "cast-local-type",
-        "param-type-mismatch"
-    ]
-}
