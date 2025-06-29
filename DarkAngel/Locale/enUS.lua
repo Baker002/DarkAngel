@@ -28,9 +28,12 @@ end
 --Log
 do
 
-L["Guild Information Changed"]=true
-L["Guild Information Added"]=true
-L["Guild Information Removed"]=true
+L["Guild Information changed"]=true
+L["Guild Information added"]=true
+L["Guild Information removed"]=true
+L["Message of the day added"]=true
+L["Message of the day removed"]=true
+L["Message of the day changed"]=true
 L["copy"]=true
 L["separator"]=true
 L["lines to print"]=true

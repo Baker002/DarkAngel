@@ -1283,12 +1283,12 @@ function Mod.Backup_Load()
 		
 			DarkAngelGUI.Backup.doginviter=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",395,-262},15,15,L['Guild inviter'],
 			function(self) 
-				fucking2Options_char.doginviter=(self:GetChecked() or false);
+				fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled=(self:GetChecked() or false);
 				if self:GetChecked() and CanGuildInvite() then
 				elseif self:GetChecked() then
 					DA.Print("You are not allowed to invite new members to your guild")
 					self:SetChecked(false)
-					fucking2Options_char.doginviter=false
+					fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled=false
 					DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) 
 					return
 				end
@@ -1297,16 +1297,16 @@ function Mod.Backup_Load()
 				else 
 					DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) 
 				end 
-			end,{'fucking2Options_char','doginviter'},'doginviter_d')
-			DarkAngelGUI.Backup.doginvitereb=DA.EditBoxCreater2(nil,DarkAngelGUI.Backup,{"TOPLEFT",DarkAngelGUI.Backup.doginviter,"TOPLEFT",5,-15},{100,32},fucking2Options_char.doginviterphrase,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fucking2Options_char","doginviterphrase"},4,200,'text')
+			end,{'fuckingOptions_g','guildInviterEnabled',"DA_CurrentGuild"},'doginviter_d')
+			DarkAngelGUI.Backup.doginvitereb=DA.EditBoxCreater2(nil,DarkAngelGUI.Backup,{"TOPLEFT",DarkAngelGUI.Backup.doginviter,"TOPLEFT",5,-15},{100,32},fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","guildInviterPhrase","DA_CurrentGuild"},4,200,'text')
 			-- DA.FontCreater(nil,L["Secret phrase"],{"LEFT",DarkAngelGUI.Backup.doginvitereb,"TOPLEFT",5,5},DarkAngelGUI.Backup.doginvitereb,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
-			if fucking2Options_char.doginviter then DarkAngelGUI.Backup.doginvitereb:EnableMouse(true);DarkAngelGUI.Backup.doginvitereb:SetAlpha(1) else DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) end
+			if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled then DarkAngelGUI.Backup.doginvitereb:EnableMouse(true);DarkAngelGUI.Backup.doginvitereb:SetAlpha(1) else DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) end
 			
 			
 			
 			
-			local f=CreateFrame('Frame');f:RegisterEvent("CHAT_MSG_CHANNEL");f:SetScript("OnEvent",function(self,_,message,sender,...) if fucking2Options_char.doginviter and fucking2Options_char.doginviterphrase~="" and message==fucking2Options_char.doginviterphrase then GuildInvite(sender) end end)
+			local f=CreateFrame('Frame');f:RegisterEvent("CHAT_MSG_CHANNEL");f:SetScript("OnEvent",function(self,_,message,sender,...) if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled and fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase~="" and message==fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase then GuildInvite(sender) end end)
 			
 		end
 				

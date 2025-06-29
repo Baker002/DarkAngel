@@ -2,7 +2,6 @@
 local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
-
 local Mod = DA:NewModule("BidTracker")
 
 

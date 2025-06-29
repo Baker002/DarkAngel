@@ -27,9 +27,12 @@ end
 --Log
 do
 
-L["Guild Information Changed"]="Изменение описания гильдии"
-L["Guild Information Added"]="Добавлено описани гильдии"
-L["Guild Information Removed"]="Описании гильдии удалено"
+L["Guild Information changed"]="Изменение описания гильдии"
+L["Guild Information added"]="Добавлено описани гильдии"
+L["Guild Information removed"]="Описании гильдии удалено"
+L["Message of the day added"]="Сообщение дня добавлено"
+L["Message of the day removed"]="Сообщение дня удалено"
+L["Message of the day changed"]="Сообщение дня изменено"
 L["copy"]="копия"
 L['separator']="разделитель"
 L['lines to print']="печатать строк"

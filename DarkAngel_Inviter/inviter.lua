@@ -22,6 +22,12 @@ local function removeFromList(name)
         end
     end
 end
+
+local convertedToRaid=false
+local Inviter_Started=false
+local InviterMsgFrame=CreateFrame("FRAME");
+DA.listinvite_bulk={}
+local SRwant2invite=SRwant2invite or "no"
 DA.Inviter_responseFrame:SetScript("OnEvent",function(_,event,msg)
 	if not Inviter_Started then return end
 	
@@ -84,11 +90,6 @@ end)
 
 
 
-local convertedToRaid=false
-local Inviter_Started=false
-local InviterMsgFrame=CreateFrame("FRAME");
-DA.listinvite_bulk={}
-local SRwant2invite=SRwant2invite or "no"
 local function AddInQueue(_, event, message, author, _,addit2, _)
 
 	if not Inviter_Started then
@@ -218,7 +219,6 @@ local discordphrases={
 	['дайтедиск'] = true,
 	['дайте дискорд'] = true,
 	['дайтедискорд'] = true,
-	['дайте диск'] = true,
 	['дайте discord'] = true,
 	['дайтеdiscord'] = true,
 	['дайтеdisc'] = true,

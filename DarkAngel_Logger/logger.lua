@@ -796,7 +796,7 @@ local function word_diff(oldStr, newStr)
     return table.concat(result, " ")
 end
 
-function GetGuildNoteDiff(oldNote, newNote)
+local function GetGuildNoteDiff(oldNote, newNote)
 	local strippedOld = oldNote:gsub("\n"," ¤")
 	local strippednew = newNote:gsub("\n"," ¤")
 	
@@ -1130,16 +1130,31 @@ local function CheckGuildInfosChange()
 		end
 		
 	local jr = DarkAngel_JRN[DA_CurrentGuild]
-	local infoLog = optTbl.Log_ginfo
-	
-		do
-			local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO.info
+		
+		for _,t in ipairs({
+			{"Log_ginfo", "info", GetGuildInfoText, 'ginfo',{
+				L["Guild Information added"],
+				L["Guild Information removed"],
+				L["Guild Information changed"]}},
+			{"Log_gmotd", "motd", GetGuildRosterMOTD, 'gmotd',{
+				L["Message of the day added"],
+				L["Message of the day removed"],
+				L["Message of the day changed"]}}
+		}) do
+			local opt = optTbl[t[1]]
+			local short = t[2]
+			local func = t[3]
+			local J_short = t[4]
+			local J_msg = t[5]
 			
-			if not infoLog then
+			local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
+			local option = optTbl[opt]
+			
+			if not opt then
 				table.wipe(DB)
 			else
-				local value = GetGuildInfoText()
-				local note = Log_GetGuildInfo('info')
+				local value = func()
+				local note = Log_GetGuildInfo(short)
 				
 				if not note then --new logging method started, adding value without writing journal
 					table.insert(DB, {value, tmstmp})
@@ -1147,23 +1162,23 @@ local function CheckGuildInfosChange()
 				else
 					local isNewOrDeletion
 					if string.gmatch(note,"%s+","")=="" then
-						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Added"]})
+						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[1]})
 						isNewOrDeletion=true
 					elseif not value or string.gmatch(value,"%s+","")=="" then
-						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Removed"]})
+						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[2]})
 						isNewOrDeletion=true
 					else
-						table.insert(jr, {'ginfo',nil,tmstmp,note=L["Guild Information Changed"]})
+						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[3]})
 					end
 					
 					
-					if infoLog==2 then
+					if opt==2 then
 						table.insert(DB, {
 							value, 
 							tmstmp,
 							not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
 						})
-					elseif infoLog==1 then
+					elseif opt==1 then
 						table.wipe(DB)
 						table.insert(DB, {
 							value, 
@@ -1183,13 +1198,9 @@ local function CheckGuildInfosChange()
 			end
 		
 		end
-	local motdLog = optTbl.Log_gmotd
-		do
-			local motdDB = DA_Guild_Info[DA_CurrentGuild].LogINFO.motd
-			local current = GetGuildRosterMOTD()
 		
 		
-		end
+	
 	local gmLog = optTbl.Log_GM
 		do
 			local gmDB = DA_Guild_Info[DA_CurrentGuild].LogINFO.gm
@@ -1468,6 +1479,29 @@ do
 		
 		DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,'scan','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() Mod:StartScan() end)
 		
+		--info/motd details
+		do
+			DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,250,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
+			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"TOPRIGHT", DarkAngelGUI.Log.GinfoFrame, "TOPRIGHT", -5,-5},10,10,'x')
+			
+			DA.ScrollBarCreater("DarkAngelGinfoFrame",DarkAngelGUI.Log.GinfoFrame,{DarkAngelGUI.Log.GinfoFrame.width-5, DarkAngelGUI.Log.GinfoFrame.height-30},{"TOPLEFT", 5, -20},1)
+			local ginf_Scrolled=DarkAngelGinfoFrame.scrollchild
+
+			DarkAngelGUI.Log.GinfoFrame.EB=DA.EditBoxCreater(nil,ginf_Scrolled,{"TOPLEFT", ginf_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+				function(self) 	
+					self.t:SetBlendMode("BLEND")
+					self.focusgained=1
+				end,
+				nil,nil,nil,1
+			)
+			
+		
+		
+		
+		end
 		
 		local copyFrame_Update
 		--copy
@@ -1505,8 +1539,10 @@ do
 						end
 					end,
 					function(self)
-						fuckingOptions.lcopyfrsep=self:GetText()
-						copyFrame_Update()
+						if self.focusgained then
+							fuckingOptions.lcopyfrsep=self:GetText()
+							copyFrame_Update()
+						end
 					end
 				)
 				DarkAngelGUI.Log.copyFrame.separator:HighlightText()
@@ -1528,7 +1564,7 @@ do
 						end
 					end,
 					function(self)
-						if tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
+						if self.focusgained and tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
 							fuckingOptions.lcopyfrnumlines=self:GetText()
 							copyFrame_Update()
 						end
@@ -1593,6 +1629,8 @@ do
 				local result = {}
 				local sep = "|r" .. separator
 				
+				print("timestart",GetTime())
+				-- editbox:Hide()
 				for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
 					local player = DA_L_Processed[i]
 					if player then
@@ -1608,13 +1646,24 @@ do
 						end
 					end
 				end
+				print("timefinish",GetTime())
 				
 				local newtext = table.concat(result, "\n")
 				if oldtext ~= newtext then
+					-- copyfr_Scrolled:Hide()
 					editbox:Hide()
 					editbox:SetText(newtext)
-					editbox:Show()
+					editbox:SetScript("OnUpdate", function(self)
+						self:SetScript("OnUpdate", nil)
+						print("timeshow",GetTime())
+						self:Show()
+						return
+					end)
+					-- copyfr_Scrolled:Show()
+					
 				end
+				print("============",GetTime())
+				hjfdgddssdgfhfh=editbox
 				
 			end
 		
@@ -1715,7 +1764,7 @@ do
 			function(self) 
 				if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end
 				
-				if self:GetParent():IsShown() and (self.focusgained or self:GetText()~="") then 
+				if self:GetParent():IsShown() and self.focusgained then 
 					DA.DropdownHint(self:GetText(),self,UndFr2guy,"DF","FEP_gMain","officernote",UndFr2guy,30)
 					DA.RunLogSearch(self:GetText())
 				end 
@@ -1964,11 +2013,11 @@ local function log_get_change_type_colored(tag)
 	elseif tag == "rank" then
  		return "|cffd96e27"..tag
 	elseif tag == "ginfo" then
- 		return "|cffb5c45eguild\ninfo"
+ 		return "|cfffa99ff_Guild info"
 	elseif tag == "gmotd" then
-		return "|cffb5c45eguild\ngreet"
+		return "|cff9c99ff_Guild motd"
 	elseif tag == "_GM" then
-        return "|cffe31e1e_GM"
+        return "|cfffc7474_Guild Ranks System"
 		
 	else
 		return tag
@@ -2438,7 +2487,7 @@ function Mod:AddModOptions(modOptTable)
 		DA.HelpCreater(logF,{"CENTER",logF,"TOPLEFT",88,-7},'LogConfHelp',12,12)
 		
 		logF:Show()
-		microOpt={}
+		local microOpt={}
 		local microLabels = {
 			[false] = "|cff888888None",
 			[1] = "Last",

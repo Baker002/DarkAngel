@@ -85,20 +85,20 @@ local fuckingOptions_local={
 	showonl=1,
 	showoffl=1,
 	grefr=false,
-	
+
 	pricols=1,
-	
+
 	gwinbtn=1,
 	ctrlobind=1,
 	epgpofficer=1,
 	epgpmultiple=1,
 	epgptwinksandloot=false,
 	rrtwinks=1,
-	
+
 	localized_items_data={},
-	
+
 	darkenoffline=1,
-	
+
 	precisematchsearch=1,
 	showlocals=false,
 	gsort="-no sort-",
@@ -107,16 +107,16 @@ local fuckingOptions_local={
 	mmenuqcopy=1,
 	mmenuleavefocus=1,
 	mmenucloserank=false,
-	
+
 	AW_raid68=1,
 	AW_skada68=false,
 	AW_saved68=false,
 	AW_roles68=false,
-	
+
 	EnableZamena=false,
 	ZamenaClearAfterAward=1,
 	sixeight=1,
-	
+
 	saved_guiPositions={
 		DarkAngelGUI={'TOP', 'TOP', -129.966, -68.400},
 		DA_Inviter={'CENTER', 'CENTER', -64.575, -104.083},
@@ -160,9 +160,6 @@ autobackups=false,
 	
 	doautohours=false,
 	autohours=2,
-	
-	doginviter=false,
-	doginviterphrase='123121211211331311121311',
 }
 local fuckingOptions_g_local={
 	epgpepauc=false,
@@ -174,6 +171,10 @@ local fuckingOptions_g_local={
 	inviter_stop=false,
 	inviter_repeat=false,
 	inviter_autostop=false,
+	
+	
+	guildInviterEnabled=false,
+	guildInviterPhrase='123121211211331311121311',
 	
 	aw_auto_locals=true,
 	aw_auto_Ch_locals=false,

@@ -307,9 +307,9 @@ function DA.TR_routine(_,event,ac1,ac2,...)
 			if microrole=='tank' then
 				role="tank"
 				if (clas=="DEATHKNIGHT" and not UnitAura(unitrg, L['Frost Presence'] )) then
-					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(48263)), "whisper",nil,targetn)
+					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(48263)), "WHISPER",nil,targetn)
 				elseif (clas=="PALADIN" and not UnitAura(unitrg, L['Righteous Fury'] )) then
-					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(25780)), "whisper",nil,targetn)
+					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(25780)), "WHISPER",nil,targetn)
 				end
 			elseif microrole=='healer' then
 				role="heal"
@@ -356,8 +356,8 @@ function DA.TR_routine(_,event,ac1,ac2,...)
 		table.insert(DA.TR_Names,targetn)
 		
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_print then DA.Print(L["dispensed "]..targetn) end
-		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay then SendChatMessage("# "..L["dispensed "]..targetn,'raid') end
-		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay then SendChatMessage("# "..L["dispensed "]..targetn,'guild') end
+		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay then SendChatMessage("# "..L["dispensed "]..targetn,'RAID') end
+		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay then SendChatMessage("# "..L["dispensed "]..targetn,'GUILD') end
 		
 		TR_reset()
 		return
@@ -421,7 +421,7 @@ elseif not working or (working and DA.TR_SelSet~=mod) then
 				tinsert(DA.flasker_bulk,function() 
 					working=true
 					
-					if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'raid') else DA.Print("|cff00ffff    Ready.") end
+					if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'RAID') else DA.Print("|cff00ffff    Ready.") end
 					if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
 						if UnitIsRaidOfficer('player') then
 							SetRaidTarget('player',fuckingOptions_g[DA_CurrentGuild].dispenser_markself_n)
@@ -462,18 +462,18 @@ function DA.TR_stop()
 		end
 		
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay_results and #DA.TR_Names>0 then 
-			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","raid")
+			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","RAID")
 			local result = DA.ConcatStr(DA.TR_Names,255," ")
 			for _, str in ipairs(result) do
-				SendChatMessage(str,'raid')
+				SendChatMessage(str,'RAID')
 			end
 		end
 		
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay_results and #DA.TR_Names>0 then 
-			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","guild")
+			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","GUILD")
 			local result = DA.ConcatStr(DA.TR_Names,255," ")
 			for _, str in ipairs(result) do
-				SendChatMessage(str,'guild')
+				SendChatMessage(str,'GUILD')
 			end
 		end
 		

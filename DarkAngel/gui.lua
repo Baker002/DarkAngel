@@ -1,3 +1,4 @@
+
 local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 
@@ -2175,8 +2176,10 @@ do
 						end
 					end,
 					function(self)
-						fuckingOptions.gcopyfrsep=self:GetText()
-						copyFrame_Update()
+						if self.focusgained then
+							fuckingOptions.gcopyfrsep=self:GetText()
+							copyFrame_Update()
+						end
 					end
 				)
 				DarkAngelGUI.Guild.copyFrame.separator:HighlightText()
@@ -2198,7 +2201,7 @@ do
 						end
 					end,
 					function(self)
-						if tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
+						if self.focusgained and tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
 							fuckingOptions.gcopyfrnumlines=self:GetText()
 							copyFrame_Update()
 						end
@@ -4896,15 +4899,15 @@ if author==new_name or ((FEP_gMain[author] or FEP_L_gMain[DA_CurrentGuild][autho
 	end
 end
 
-	local oldtyp,oldep
-	local newtyp,newep
+	local oldtyp,oldep,oldgp
+	local newtyp,newep,newgp
 	if FEP_gMain[author] then
 		oldtyp,oldep,oldgp,_=DA.DecodeNote(FEP_gMain[author])
 	elseif FEP_L_gMain[DA_CurrentGuild][author] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][author]] then
 		oldtyp,oldep,oldgp,_=DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][author]])
 	end
 	if FEP_gMain[new_name] then
-		newtyp,newep,newgp,_=DA.DecodeNote(FEP_gMain[new_name])
+		newtyp,newep,newgp=DA.DecodeNote(FEP_gMain[new_name])
 	end
 	
 	if FEP_gMain[author] then

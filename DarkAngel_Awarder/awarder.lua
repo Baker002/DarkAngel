@@ -2,7 +2,6 @@
 local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
-
 local Mod = DA:NewModule("Awarder")
 
 
@@ -1176,7 +1175,7 @@ do
 	DA_Awarder.autoopt.skadaassign.main:SetParent(DA_Awarder.autoopt.skadaassign)
 	DA_Awarder.autoopt.skadaassign.main:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.main:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.main:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
+	DA_Awarder.autoopt.skadaassign.main:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 
 	
@@ -1420,7 +1419,7 @@ do
 	DA_Awarder.autoopt.skadaassign.addit:SetParent(DA_Awarder.autoopt.skadaassign)
 	DA_Awarder.autoopt.skadaassign.addit:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.addit:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.addit:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
+	DA_Awarder.autoopt.skadaassign.addit:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 	DA_Awarder.autoopt.skadaassign.addit:Hide()
 	
@@ -1441,7 +1440,7 @@ do
 	DA_Awarder.autoopt.skadaassign.bosses:SetParent(DA_Awarder.autoopt.skadaassign)
 	DA_Awarder.autoopt.skadaassign.bosses:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.bosses:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.bosses:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
+	DA_Awarder.autoopt.skadaassign.bosses:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 	DA_Awarder.autoopt.skadaassign.bosses:Hide()
 
@@ -1472,7 +1471,7 @@ do
 	DA_Awarder.autoopt.skadaassign.modes:SetParent(DA_Awarder.autoopt.skadaassign)
 	DA_Awarder.autoopt.skadaassign.modes:SetFrameStrata('FULLSCREEN_DIALOG')
 	DA_Awarder.autoopt.skadaassign.modes:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.modes:SetPoint('topleft',DA_Awarder.autoopt.skadaassign,'topleft')
+	DA_Awarder.autoopt.skadaassign.modes:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 	DA_Awarder.autoopt.skadaassign.modes:Hide()
 	
@@ -1612,7 +1611,7 @@ for i=1,8 do
 	
 		
 		
-		DA_Awarder.autoopt['fr'..i].group1.rolefont=DA.FontCreater(nil,L['mark on role'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group1,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
+		DA_Awarder.autoopt['fr'..i].group1.rolefont=DA.FontCreater(nil,L['mark on role'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group1,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
 		
 		for n,txt in ipairs({
 		{"Interface\\Icons\\Spell_Holy_AvengersShield",L['tanking award'],'tank'},
@@ -1714,7 +1713,7 @@ for i=1,8 do
 	do --grp 2
 		DA_Awarder.autoopt['fr'..i].group2=DA.HideBarCreater('DA_Aw_AO'..i..'grp2',DA_Awarder.autoopt['fr'..i],{150,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group1, "RIGHT", 5, 0})
 		
-		DA_Awarder.autoopt['fr'..i].group2.classfont=DA.FontCreater(nil,L['mark on class'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group2,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
+		DA_Awarder.autoopt['fr'..i].group2.classfont=DA.FontCreater(nil,L['mark on class'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group2,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
 
 		local ut="Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
 		for n,txt in ipairs({
@@ -1791,7 +1790,7 @@ for i=1,8 do
 	do --grp 3
 		DA_Awarder.autoopt['fr'..i].group3=DA.HideBarCreater('DA_Aw_AO'..i..'grp3',DA_Awarder.autoopt['fr'..i],{34,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group2, "RIGHT", 5, 0})
 		
-		DA_Awarder.autoopt['fr'..i].group3.miscfont=DA.FontCreater(nil,L['misc'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group3,'topleft',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
+		DA_Awarder.autoopt['fr'..i].group3.miscfont=DA.FontCreater(nil,L['misc'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group3,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
 		
 		for n,txt in ipairs({
 		{"Interface\\Icons\\Spell_Lightning_LightningBolt01",L['Skada-based award'],'skada'},
@@ -3021,7 +3020,7 @@ do --zamena frame
 		
 	
 	DA.CreateFFGButton2(nil,FEP_ZamFrame,{"CENTER", FEP_ZamFrame, "BOTTOMLEFT", 140,41},  13,  30,  L['anonszam'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-		SendChatMessage(L['zamenagudok'],'guild')
+		SendChatMessage(L['zamenagudok'],'GUILD')
 	end)
 	FEP_ZamFrame.AwardCB=DA.CheckBtnCreater(nil,FEP_ZamFrame,{"CENTER", FEP_ZamFrame, "TOPLEFT", 80,-11},25,25,L['raid award'],function(self) 
 		GuildRoster()
@@ -3403,7 +3402,7 @@ do --main frame buttons
 			
 			if not (IsRaidLeader() or IsRaidOfficer()) then DA.Print("I am not raid leader/officer") end
 			DA_Awarder.locker.setstate(1)
-			SendChatMessage('raid disbanded','raid')
+			SendChatMessage('raid disbanded','RAID')
 			for i = 1, 40 do
 				
 				
@@ -3474,30 +3473,30 @@ do --main frame buttons
 				
 
 		if frozen+newna+na > 0 then
-			SendChatMessage("# "..L["Do not forget to do the guild assignments:"],'raid')
+			SendChatMessage("# "..L["Do not forget to do the guild assignments:"],'RAID')
 			if frozen>0 then
-				SendChatMessage(L["Your current values are frozen. You need to un-freeze it?"].." : ",'raid')
+				SendChatMessage(L["Your current values are frozen. You need to un-freeze it?"].." : ",'RAID')
 				for _, str in ipairs(DA.ConcatStr(frozen_txt,255," ")) do
-					SendChatMessage(str,'raid')
+					SendChatMessage(str,'RAID')
 				end
 			end
 			
 			if newna>0 then
-				SendChatMessage(L["New player in guild or not assigned tvin?"].." : ",'raid')
+				SendChatMessage(L["New player in guild or not assigned tvin?"].." : ",'RAID')
 				for _, str in ipairs(DA.ConcatStr(newna_txt,255," ")) do
-					SendChatMessage(str,'raid')
+					SendChatMessage(str,'RAID')
 				end
 			end
 			
 			if na>0 then
-				SendChatMessage(L["Not in guild , not assigned or assigned incorrectly?"].." : ",'raid')
+				SendChatMessage(L["Not in guild , not assigned or assigned incorrectly?"].." : ",'RAID')
 				for _, str in ipairs(DA.ConcatStr(na_txt,255," ")) do
-					SendChatMessage(str,'raid')
+					SendChatMessage(str,'RAID')
 				end
 			end
 			
 			if fuckingOptions_g[DA_CurrentGuild].dkpcomm then
-				SendChatMessage("# "..L["You can set your main via '?main <name>' command. You need to PM me this"],'raid')
+				SendChatMessage("# "..L["You can set your main via '?main <name>' command. You need to PM me this"],'RAID')
 			end
 		else
 		
@@ -4968,28 +4967,28 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 			if IsShiftKeyDown() and self.main and self.state and self.c and self.c.name then
 				if self.state=='mnormal' or self.state=='pum' or self.state=='tnormal' or self.state=='put' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
+					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
 					
 					GameTooltip:Show()
 				elseif self.state=='f' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
+					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
 					GameTooltip:Show()
 					
 				elseif self.state=='tf' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
+					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					GameTooltip:SetText(L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
 					GameTooltip:Show()
 					
 				elseif self.state=='pb' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
+					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					if CanEditOfficerNote() then
 						GameTooltip:SetText(L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1'],0.45,0.65,0.65,1)
@@ -5000,7 +4999,7 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					
 				elseif self.state=='n' then
 					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
+					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
 					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					local adtxt="lol"
 					if CanGuildInvite() then
