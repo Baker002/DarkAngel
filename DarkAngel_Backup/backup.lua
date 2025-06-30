@@ -974,8 +974,6 @@ function Mod:OnInitialize()
 end
 
 function Mod:OnEnable()
-    self.Backup_Load()
-	UpdateAutoBackupsCHs()
 	DA:ModuleLoaded("Backup")
 end
 
@@ -1364,6 +1362,10 @@ function Mod.Backup_Load()
 end
 
 function Mod:OnGuildLoad()
+	
+    self.Backup_Load()
+	UpdateAutoBackupsCHs()
+	
 	if fucking2Options_char.autobackups and fucking2Options_char.doautohours then
 		DA.ResumeTimer('autobackup_hours')
 	elseif fucking2Options_char.autobackups then
