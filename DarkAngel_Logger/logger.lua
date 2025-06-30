@@ -1597,7 +1597,7 @@ do
 			
 			
 			copyFrame_Update = function()
-				if not CopyFrameAdditional:IsShown() then return end
+				if not CopyFrameAdditional:IsShown() or not DarkAngelGUI.Log.copyFrame:IsShown() then return end
 				
 				local unlocked
 				local search={}
@@ -1629,12 +1629,9 @@ do
 				local result = {}
 				local sep = "|r" .. separator
 				
-				print("timestart",GetTime())
-				-- editbox:Hide()
 				for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
 					local player = DA_L_Processed[i]
 					if player then
-						-- if player.isLocal then
 						local line = {}
 						for _,patt in ipairs(search_patterns) do
 							if search[patt[2]] and player[patt[2]] then
@@ -1646,24 +1643,18 @@ do
 						end
 					end
 				end
-				print("timefinish",GetTime())
 				
 				local newtext = table.concat(result, "\n")
 				if oldtext ~= newtext then
-					-- copyfr_Scrolled:Hide()
 					editbox:Hide()
 					editbox:SetText(newtext)
-					editbox:SetScript("OnUpdate", function(self)
-						self:SetScript("OnUpdate", nil)
-						print("timeshow",GetTime())
-						self:Show()
-						return
-					end)
-					-- copyfr_Scrolled:Show()
+					-- editbox:SetScript("OnUpdate", function(self)
+						-- self:SetScript("OnUpdate", nil)
+					editbox:Show()
+						-- return
+					-- end)
 					
 				end
-				print("============",GetTime())
-				hjfdgddssdgfhfh=editbox
 				
 			end
 		

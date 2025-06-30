@@ -2236,7 +2236,7 @@ do
 			)
 			
 			copyFrame_Update = function()
-				if not CopyFrameAdditional:IsShown() then return end
+				if not CopyFrameAdditional:IsShown() or not DarkAngelGUI.Guild.copyFrame:IsShown() then return end
 				
 				local unlocked
 				local search={}
