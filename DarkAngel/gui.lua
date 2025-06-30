@@ -2304,7 +2304,7 @@ do
 					end
 					
 				end
-				local newtext = table.concat(result, "\n")
+				local newtext = table.concat(result, "|r\n")
 				if oldtext ~= newtext then
 					editbox:Hide()
 					editbox:SetText(newtext)
