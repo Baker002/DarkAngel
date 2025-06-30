@@ -1583,7 +1583,7 @@ do
 			DA.ScrollBarCreater("DarkAngelLog_CopyFrame",CopyFrameAdditional,{CopyFrameAdditional.width-5, CopyFrameAdditional.height-30},{"TOPLEFT", 5, -20},1)
 			local copyfr_Scrolled=DarkAngelLog_CopyFrame.scrollchild
 
-			CopyFrameAdditional.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+			CopyFrameAdditional.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 7},
 				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
 				function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
 				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
@@ -1596,8 +1596,17 @@ do
 			)
 			
 			
-			copyFrame_Update = function()
-				if not CopyFrameAdditional:IsShown() or not DarkAngelGUI.Log.copyFrame:IsShown() then return end
+			DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+				copyFrame_Update(1)
+			end)
+			
+			DA.CheckBtnCreater(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",75,-12},15,15,"auto",function(self) fuckingOptions.logcopyauto=(self:GetChecked() or false) end,{'fuckingOptions','logcopyauto'})
+			
+			
+			
+			copyFrame_Update = function(manual)
+				if not DarkAngelGUI.Log.copyFrame:IsShown() then return end
+				if not fuckingOptions.logcopyauto and not manual then return end
 				
 				local unlocked
 				local search={}
@@ -1627,7 +1636,6 @@ do
 				end
 				
 				local result = {}
-				local sep = "|r" .. separator
 				
 				for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
 					local player = DA_L_Processed[i]
@@ -1635,24 +1643,21 @@ do
 						local line = {}
 						for _,patt in ipairs(search_patterns) do
 							if search[patt[2]] and player[patt[2]] then
-								tinsert(line, player[patt[2]])
+								local ss,_ = tostring(player[patt[2]]):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+								tinsert(line, ss)
 							end
 						end
 						if next(line) then
-							tinsert(result, table.concat(line, sep))
+							tinsert(result, table.concat(line, separator))
 						end
 					end
 				end
 				
-				local newtext = table.concat(result, "|r\n")
+				local newtext = table.concat(result, "\n")
 				if oldtext ~= newtext then
-					editbox:Hide()
+					-- editbox:Hide()
 					editbox:SetText(newtext)
-					-- editbox:SetScript("OnUpdate", function(self)
-						-- self:SetScript("OnUpdate", nil)
-					editbox:Show()
-						-- return
-					-- end)
+					-- editbox:Show()
 					
 				end
 				

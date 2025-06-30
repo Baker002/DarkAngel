@@ -70,6 +70,9 @@ local fuckingOptions_local={
 	txt1extra=false,
 	txt2extra=false,
 	
+	guildcopyauto=false,
+	logcopyauto=false,
+	
 	firsttimeloaded=1,
 	
 	storedpatterns={},
