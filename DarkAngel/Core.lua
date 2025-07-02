@@ -48,6 +48,29 @@ Official addon Discord channel: https://discord.gg/bpPzRk3bnk
 
 ]====]
 
+-- local fgdfgv=false
+-- local sdfgsdaa=CreateFrame("Frame")
+-- sdfgsdaa:SetScript("OnUpdate",function(s)
+	-- if not GetGuildInfoText then 
+		-- print('no api loaded yet')
+		-- return
+	-- end
+	
+	-- local ginfo = GetGuildInfoText()
+	-- if not ginfo then
+		-- fgdfgv=false
+		-- print('ginfo nil')
+	-- elseif ginfo=="" then
+		-- fgdfgv=false
+		-- print('ginfo empty')
+	-- elseif not fgdfgv then
+		-- fgdfgv=true
+		-- print('loaded')
+	-- end
+		
+-- end)
+
+
 
 DarkAngel = LibStub("AceAddon-3.0"):NewAddon("DarkAngel")
 
@@ -1321,7 +1344,8 @@ function DA.serialize(tbl, indent)
 	elseif t == "number" or t == "boolean" then
 		str = str .. tostring(tbl)
 	elseif t == "string" then
-		str = str .. string.format("%q", tbl)
+		-- str = str .. string.format("%q", tbl)
+		str = str .. '"' .. tbl .. '"'
 	end
 	return str
 end
@@ -1548,6 +1572,51 @@ function DA.Process_GMranking(db,selectedrank,bankslots,lock,anons)
 	
 end
 
+function DA.GetGuilGMSettings()
+	local guildranks={}
+	for i=1,GuildControlGetNumRanks() do
+		GuildControlSetRank(i)
+		
+		local guildchat_listen, guildchat_speak, officerchat_listen, officerchat_speak, promote, demote, invite_member, remove_member, set_motd, edit_public_note, view_officer_note, edit_officer_note, modify_guild_info, _, withdraw_repair, withdraw_gold, create_guild_event = GuildControlGetRankFlags()
+		local bankpermissions={}
+		local gwithraw=GetGuildBankWithdrawLimit()
+			
+		for b=1,GetNumGuildBankTabs() do
+			local canViewr, canDepositr, canEditInfor, stacksPerDayr = GetGuildBankTabPermissions(b)
+			bankpermissions[b]={
+				canView=canViewr or false,
+				canDeposit=canDepositr or false,
+				canEditInfo=canEditInfor or false,
+				stacksPerDay=stacksPerDayr or false
+			}
+		end	
+		
+		guildranks[i]={
+			name=GuildControlGetRankName(i),
+			 
+			guildchat_listen=guildchat_listen or false,
+			guildchat_speak=guildchat_speak or false,
+			officerchat_listen=officerchat_listen or false,
+			officerchat_speak=officerchat_speak or false,
+			promote=promote or false,
+			demote=demote or false,
+			invite_member=invite_member or false,
+			remove_member=remove_member or false,
+			set_motd=set_motd or false,
+			edit_public_note=edit_public_note or false,
+			view_officer_note=view_officer_note or false,
+			edit_officer_note=edit_officer_note or false,
+			modify_guild_info=modify_guild_info or false,
+			withdraw_repair=withdraw_repair or false,
+			withdraw_gold=withdraw_gold or false,
+			create_guild_event=create_guild_event or false,
+			gwithraw=gwithraw or false,
+			bankpermissions=bankpermissions or false --table with permissions for this rank for each bank tab
+		}
+	end
+	
+	return guildranks
+end
 
 local function ColorName(name2,clas)
 	local clas=string.upper(clas)

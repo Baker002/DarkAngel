@@ -482,9 +482,6 @@ local function GetOnlineGuildOfficerslist()
 	end
 end
 
-
-
-
 local function TransLegitCheck(name,epdif,gpdif)
 	
 	local author='|cffff0000unknown'
@@ -745,7 +742,6 @@ local function char_diff(oldWord, newWord)
 
     return table.concat(result)
 end
--- count how many characters differ (for similarity scoring)
 local function count_char_differences(a, b)
     local ca = utf8_chars(a)
     local cb = utf8_chars(b)
@@ -758,14 +754,12 @@ local function count_char_differences(a, b)
     end
     return diff
 end
-
 local function is_similar(a, b)
     local maxLen = math.max(#a, #b)
     if maxLen == 0 then return true end
     local diff = count_char_differences(a, b)
     return (diff / maxLen) <= 0.4  -- allow 40% difference to be considered "modification"
 end
-
 local function word_diff(oldStr, newStr)
     local oldWords = { strsplit(" ", oldStr or "") }
     local newWords = { strsplit(" ", newStr or "") }
@@ -795,13 +789,20 @@ local function word_diff(oldStr, newStr)
 
     return table.concat(result, " ")
 end
-
 local function GetGuildNoteDiff(oldNote, newNote)
+	if oldNote == "" then 
+		return GN_added..newNote..GN_reset
+	elseif newNote == "" then
+		return GN_removed..oldNote..GN_reset
+	end
+	
 	local strippedOld = oldNote:gsub("\n"," ¤")
 	local strippednew = newNote:gsub("\n"," ¤")
 	
 	local result = word_diff(strippedOld, strippednew)
-    return result:gsub("¤","\n")
+	
+	
+    return tostring(result:gsub("¤","\n"))
 end
 
 
@@ -1108,6 +1109,36 @@ local function ScanCompare(db,firstrun)
 
 end
 
+
+local function tables_equal(t1, t2)
+    if t1 == t2 then return true end
+    if type(t1) ~= "table" or type(t2) ~= "table" then return false end
+
+    -- Check if all keys and values in t1 exist and match in t2
+    for k, v in pairs(t1) do
+        if not tables_equal(v, t2[k]) then
+            return false
+        end
+    end
+
+    -- Check if t2 has any extra keys not in t1
+    for k in pairs(t2) do
+        if t1[k] == nil then
+            return false
+        end
+    end
+
+    return true
+end
+local function getGuildGMTblStrings()
+	local t=DA.GetGuilGMSettings()
+	local result={}
+		for i,e in ipairs(t) do
+			local r = DA.tableToString(e)
+			result[i] = r
+		end
+	return result
+end
 local function CheckGuildInfosChange()
 	local optTbl = fuckingOptions_g[DA_CurrentGuild]
 	local tmstmp
@@ -1115,99 +1146,180 @@ local function CheckGuildInfosChange()
 	local curtime=time()
 	local minlog=fuckingOptions_g[DA_CurrentGuild].minlog
 	local time_cap=curtime-fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
-	-- elseif tag == "ginfo" then
-	-- elseif tag == "gmotd" then
-	-- elseif tag == "_GM" then
+
+	local dat,tim=string.match(date(), "(.+)%s(.+)")
+	if DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1 and GetTimestamp2()-DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1<2.2 then
+		isonlinechange=true
+	end
+	if isonlinechange then
+		tmstmp= {true,dat,tim, t=curtime}
+	else
+		tmstmp= {false,dat,tim, t=curtime}
+	end
 	
-		local dat,tim=string.match(date(), "(.+)%s(.+)")
-		if DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1 and GetTimestamp2()-DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1<2.2 then
-			isonlinechange=true
-		end
-		if isonlinechange then
-			tmstmp= {true,dat,tim, t=curtime}
-		else
-			tmstmp= {false,dat,tim, t=curtime}
-		end
-		
 	local jr = DarkAngel_JRN[DA_CurrentGuild]
+	
+	
+	for _,t in ipairs({
+		{"Log_ginfo", "info", GetGuildInfoText, 'ginfo',{
+			L["Guild Information added"],
+			L["Guild Information removed"],
+			L["Guild Information changed"]}},
+		{"Log_gmotd", "motd", GetGuildRosterMOTD, 'gmotd',{
+			L["Message of the day added"],
+			L["Message of the day removed"],
+			L["Message of the day changed"]}}
+	}) do
+		local opt = optTbl[t[1]]
+		local short = t[2]
+		local func = t[3]
+		local J_short = t[4]
+		local J_msg = t[5]
 		
-		for _,t in ipairs({
-			{"Log_ginfo", "info", GetGuildInfoText, 'ginfo',{
-				L["Guild Information added"],
-				L["Guild Information removed"],
-				L["Guild Information changed"]}},
-			{"Log_gmotd", "motd", GetGuildRosterMOTD, 'gmotd',{
-				L["Message of the day added"],
-				L["Message of the day removed"],
-				L["Message of the day changed"]}}
-		}) do
-			local opt = optTbl[t[1]]
-			local short = t[2]
-			local func = t[3]
-			local J_short = t[4]
-			local J_msg = t[5]
+		local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
+		local option = optTbl[opt]
+		
+		if not opt then
+			table.wipe(DB)
+		else
+			local value = func()
+			local note = Log_GetGuildInfo(short)
 			
-			local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
-			local option = optTbl[opt]
-			
-			if not opt then
-				table.wipe(DB)
+			if not note then --new logging method started, adding value without writing journal
+				table.insert(DB, {value, tmstmp})
+			elseif note==value then
 			else
-				local value = func()
-				local note = Log_GetGuildInfo(short)
-				
-				if not note then --new logging method started, adding value without writing journal
-					table.insert(DB, {value, tmstmp})
-				elseif note==value then
+				local isNewOrDeletion
+				if string.gmatch(note,"%s+","")=="" then
+					table.insert(jr, {J_short,nil,tmstmp,note=J_msg[1]})
+					isNewOrDeletion=true
+				elseif not value or string.gmatch(value,"%s+","")=="" then
+					table.insert(jr, {J_short,nil,tmstmp,note=J_msg[2]})
+					isNewOrDeletion=true
 				else
-					local isNewOrDeletion
-					if string.gmatch(note,"%s+","")=="" then
-						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[1]})
-						isNewOrDeletion=true
-					elseif not value or string.gmatch(value,"%s+","")=="" then
-						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[2]})
-						isNewOrDeletion=true
-					else
-						table.insert(jr, {J_short,nil,tmstmp,note=J_msg[3]})
-					end
-					
-					
-					if opt==2 then
-						table.insert(DB, {
-							value, 
-							tmstmp,
-							not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
-						})
-					elseif opt==1 then
-						table.wipe(DB)
-						table.insert(DB, {
-							value, 
-							tmstmp,
-							not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
-						})
-						
-					end
+					table.insert(jr, {J_short,nil,tmstmp,note=J_msg[3]})
 				end
-				local tblsize=#DB
-				if tblsize<=1 or tblsize<=minlog then
-				elseif tblsize>minlog then
-					if time_cap >= DB[1][2].t then
-						table.remove(DB,1)
-					end
+				
+				
+				if opt==1 then
+					table.wipe(DB)
+				end
+				table.insert(DB, {
+					value, 
+					tmstmp,
+					not isNewOrDeletion and (GetGuildNoteDiff(note,value)) or nil
+				})
+			end
+			local tblsize=#DB
+			if tblsize<=1 or tblsize<=minlog then
+			elseif tblsize>minlog then
+				if time_cap >= DB[1][2].t then
+					table.remove(DB,1)
 				end
 			end
+		end
+	
+	end
+	
+	
+	local opt = optTbl.Log_GM
+	local short = "gm"
+	local J_short = '_GM'
+	
+	local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
+	local option = optTbl[opt]
+	
+	if not opt then
+		table.wipe(DB)
+	else
+		local value = getGuildGMTblStrings()
+		local note = Log_GetGuildInfo(short)
 		
+		if not note then --new logging method started, adding value without writing journal
+			table.insert(DB, {value, tmstmp})
+		elseif tables_equal(note,value) then
+		else
+			
+			local COMP = {"{"}
+			local actions = {}
+			local count_Curr = #value
+			local count_Log = #note
+
+			local ch_counter = 0
+			local add_counter = 0
+			local rem_counter = 0
+
+			for x = 1, math.max(count_Curr, count_Log) do
+				local e_val = value[x]
+				local e_log = note[x]
+
+
+				if e_val and e_log then
+					if not tables_equal(e_val, e_log) then
+						actions[x] = 'change'
+						ch_counter = ch_counter + 1
+					end
+				elseif e_log then
+					actions[x] = 'deletion'
+					rem_counter = rem_counter + 1
+				elseif e_val then
+					actions[x] = 'addition'
+					add_counter = add_counter + 1
+				end
+			end
+
+			for x = 1, math.max(count_Curr, count_Log) do
+				local act = actions[x]
+				if value[x] and act == 'addition' then
+					tinsert(COMP, '    ['..x..'] = "'..GN_added .. value[x] ..'|r",')
+				elseif note[x] and act == 'deletion' then
+					tinsert(COMP, '    ['..x..'] = "'..GN_removed .. note[x] .. '|r",')
+				elseif note[x] and value[x] and act == 'change' then
+					tinsert(COMP, '    ['..x..'] = "'..GetGuildNoteDiff(note[x], value[x])..'|r",')
+				elseif not act and note[x] then
+					tinsert(COMP, '|r    ['..x..'] = "'..note[x]..'|r",')
+				end
+			end
+			tinsert(COMP, "|r}")
+
+			local journal_text = {}
+			if ch_counter > 0 then
+				tinsert(journal_text, tostring(L["gm_changes_in"]:gsub("$1", ch_counter)))
+			end
+			if add_counter > 0 then
+				tinsert(journal_text, tostring(L["gm_additions_in"]:gsub("$1", add_counter)))
+			end
+			if rem_counter > 0 then
+				tinsert(journal_text, tostring(L["gm_removals_in"]:gsub("$1", rem_counter)))
+			end
+
+
+			table.insert(jr, {J_short, nil, tmstmp, note = table.concat(journal_text, ". ")})
+
+			if opt == 1 then
+				table.wipe(DB)
+			end
+
+			table.insert(DB, {
+				value,
+				tmstmp,
+				table.concat(COMP, "\n")
+			})
+
+
 		end
 		
 		
-	
-	local gmLog = optTbl.Log_GM
-		do
-			local gmDB = DA_Guild_Info[DA_CurrentGuild].LogINFO.gm
-	
+		local tblsize=#DB
+		if tblsize<=1 or tblsize<=minlog then
+		elseif tblsize>minlog then
+			if time_cap >= DB[1][2].t then
+				table.remove(DB,1)
+			end
 		end
-		
-		DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1=GetTimestamp2()
+	end
+	
+	DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1=GetTimestamp2()
 end
 local function IsGINFOLoggingRequired()
 	local optTbl = fuckingOptions_g[DA_CurrentGuild]
@@ -1481,15 +1593,15 @@ do
 		
 		--info/motd details
 		do
-			DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,250,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
+			DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,280,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
 			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"TOPRIGHT", DarkAngelGUI.Log.GinfoFrame, "TOPRIGHT", -5,-5},10,10,'x')
 			
 			DA.ScrollBarCreater("DarkAngelGinfoFrame",DarkAngelGUI.Log.GinfoFrame,{DarkAngelGUI.Log.GinfoFrame.width-5, DarkAngelGUI.Log.GinfoFrame.height-30},{"TOPLEFT", 5, -20},1)
 			local ginf_Scrolled=DarkAngelGinfoFrame.scrollchild
 
-			DarkAngelGUI.Log.GinfoFrame.EB=DA.EditBoxCreater(nil,ginf_Scrolled,{"TOPLEFT", ginf_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+			local ginf_eb = DA.EditBoxCreater(nil,ginf_Scrolled,{"TOPLEFT", ginf_Scrolled, "TOPLEFT", 5, -2},{250,270},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
 				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
+				nil, --enter here
 				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
 				function(self) 	
 					self.t:SetBlendMode("BLEND")
@@ -1498,8 +1610,23 @@ do
 				nil,nil,nil,1
 			)
 			
-		
-		
+			local comp=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",15,-12},15,15,"compare",function() DarkAngelGUI.Log.GinfoFrame.re_render() end)
+			
+			DarkAngelGUI.Log.GinfoFrame.re_render = function ()
+				local entry = DarkAngelGUI.Log.GinfoFrame.tbl
+				
+				if comp:GetChecked() and entry[3] then
+					ginf_eb:SetText(entry[3])
+				else
+					
+					if type(entry[1])=='table' then
+						ginf_eb:SetText(DA.tableToString(entry[1]))
+					else
+						ginf_eb:SetText(entry[1])
+					end
+				end
+				DarkAngelGUI.Log.GinfoFrame:Show()
+			end
 		
 		end
 		
@@ -1858,6 +1985,25 @@ LogSetAllLines = function()
 	
 end
 
+local function openAdditionalGINF(tag, timestamp)
+	if not tag or not timestamp or not DA_Guild_Info[DA_CurrentGuild].LogINFO[tag] then return end
+
+	local entry
+	
+	for _,e in ipairs(DA_Guild_Info[DA_CurrentGuild].LogINFO[tag]) do
+		if e and e[2] and e[2].t and e[2].t==timestamp then
+			entry = e
+			break
+		end
+	end
+	
+	if not entry then return end
+	
+	local frame = DarkAngelGUI.Log.GinfoFrame
+		frame.tbl = entry
+	frame.re_render()
+
+end
 Log_Create_ScrollBar = function()
 	local NUM_ROWS = 15
 	local ROW_HEIGHT = 15
@@ -1878,14 +2024,27 @@ Log_Create_ScrollBar = function()
 	
 	for i = 1, NUM_ROWS do
 		local row = DA.CreateFFGButton2(nil, DarkAngelLog, {"TOPLEFT", DarkAngelLog, "TOPLEFT", 0, 10 - (ROW_HEIGHT * i)}, ROW_HEIGHT-1, 465, "", nil, {font, 9, "OUTLINE"},function(self,btntype) 
-				if not self.plname then return end
 				
 				if btntype=='LeftButton' then
-					_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
-					_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
-					FFuckingSearch:SetText(self.plname)
-					DA.RunLogSearch(FFuckingSearch:GetText())
-				elseif btntype=='RightButton' then
+					if self.plname then
+					
+						_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
+						_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
+						FFuckingSearch:SetText(self.plname)
+						DA.RunLogSearch(FFuckingSearch:GetText())
+					elseif self.timestamp then
+						if self.tag=='ginfo' then
+							openAdditionalGINF("info",self.timestamp)
+						elseif self.tag=='gmotd' then
+							openAdditionalGINF("motd",self.timestamp)
+						
+						elseif self.tag=='_GM' then
+							openAdditionalGINF("gm",self.timestamp)
+						
+						end
+						
+					end
+				elseif btntype=='RightButton' and self.plname then
 					DAOptMenuFrame.calledfrom="DarkAngelGUI"
 					DA.OpenOptMenu(self,self.plname)
 				end
@@ -1939,6 +2098,8 @@ Log_Create_ScrollBar = function()
 				local row = RowButtons[i]
 					row:Show()
 					row.plname=data.plname
+					row.tag=data.tag
+					row.timestamp=data.timestamp
 				row.buttons[1]:SetText(data.TimeText or "")
 				row.buttons[2]:SetText(data.TagText or "")
 				row.buttons[3]:SetText(data.plname or "")
@@ -2050,6 +2211,8 @@ table.wipe(DA_L_Processed)
 		
 		plDat.TimeText = ((printdate and dat or string.rep(" ", #dat)) .. " " .. (isOnline and "|cff85aaaa"..tim or "|cffdd9999"..tim) )
 		plDat.TagText = log_get_change_type_colored(tag)
+		plDat.tag = tag
+		plDat.timestamp = timestamp
 		plDat.plname = plname
 		plDat.note = note
 		plDat.total = total

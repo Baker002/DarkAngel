@@ -27,7 +27,9 @@ end
 
 --Log
 do
-
+L["gm_changes_in"]="Detected changes in $1 guild ranks"
+L["gm_additions_in"]="Guild rank(s) added $1"
+L["gm_removals_in"]="Guild rank(s) removed $1"
 L["Guild Information changed"]=true
 L["Guild Information added"]=true
 L["Guild Information removed"]=true
