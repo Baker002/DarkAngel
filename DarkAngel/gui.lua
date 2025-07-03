@@ -1582,7 +1582,7 @@ do
 		DAOptMenuFrame.detailsbtn=DA.CreateFFGButton2(nil,DAOptMenuFrame,{"LEFT",DAOptMenuFrame,"TOPRIGHT",-75,-50},14,73,L['Details'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
 			DAOptMenuFrame:Hide(); 
 			if DAOptMenuFrame.player then
-				SlashCmdList.DAtargetsearch(DAOptMenuFrame.player)
+				DA.OpenLogSearch(DAOptMenuFrame.player)
 			end
 		end,nil,nil,'left')
 		DA.CreateFFGButton2(nil,DAOptMenuFrame,{"LEFT",DAOptMenuFrame,"TOPRIGHT",-75,-65},14,73,L['Twinks'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()

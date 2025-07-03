@@ -205,7 +205,13 @@ local function GetColorEPGPdiff(name,fold,fnew)
 	
 end
 
-
+function DA.OpenLogSearch(...) 
+	DarkAngelGUI:Show()
+	_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
+	_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
+	FFuckingSearch:SetText(...)
+	DA.RunLogSearch(FFuckingSearch:GetText())
+end
 local function getallcompsfor(key,person)
 
 	local result={}
@@ -633,6 +639,11 @@ local function TransLegitCheck(name,epdif,gpdif)
 	
 	return false
 end
+
+local function GetPlayerScanLink(text)
+	return "|cffffff00|Hdalogsrch:" .. text .. "|h<"..text..">|h|r"
+end
+
 local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	local epdif,gpdif
 	if tonumber(oldep) and tonumber(newep) then
@@ -645,7 +656,7 @@ local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	local checked,author,reasons = TransLegitCheck(name,epdif,gpdif)
 	if not checked then
 		if fuckingOptions_g[DA_CurrentGuild].warnsuspic then
-			DA.Print(L['detmanchange'] .. DA.GetPlayerScanLink(name)) 
+			DA.Print(L['detmanchange'] .. GetPlayerScanLink(name)) 
 		end
 		return {'off_unkn',officers, reasons=reasons}
 	elseif checked=='both' then
@@ -1072,9 +1083,9 @@ local function ScanCompare(db,firstrun)
 						
 						if fuckingOptions.prntleav then 
 							if DA.DecodeNote(val)=='t' then
-								DA.Print("F "..DA.GetPlayerScanLink(i)..' twink '..DA.GetPlayerScanLink(val))
+								DA.Print("F "..GetPlayerScanLink(i)..' twink '..GetPlayerScanLink(val))
 							else
-								DA.Print("F "..DA.GetPlayerScanLink(i)..' ['..val..']')
+								DA.Print("F "..GetPlayerScanLink(i)..' ['..val..']')
 							end
 						end
 						if val=="" or val==0 or val=="0" or val==" " or val=="." or not val then
@@ -1109,7 +1120,23 @@ local function ScanCompare(db,firstrun)
 
 end
 
-
+local function packGMTable(t)
+	SIJDNGBSIDJGS=t
+	local result={}
+		for i,j in ipairs(t) do
+			local microTable = DA.stringToTable(j)
+			
+			if i==1 then
+				local needed = {}
+					needed.name = microTable.name
+				tinsert(result, needed)
+			else
+				-- local _,needed = next(microTable)
+				tinsert(result, microTable)
+			end
+		end
+	return result
+end
 local function tables_equal(t1, t2)
     if t1 == t2 then return true end
     if type(t1) ~= "table" or type(t2) ~= "table" then return false end
@@ -1338,6 +1365,7 @@ function Mod:StartScan()
 
 if DA_CurrentGuild~="n0-guild" then else return end
 if ({GetGuildInfo("player")})[1] then else return end
+if not DA.GuildInfoFetched then return end
 
 	QueryGuildEventLog()
 
@@ -1424,6 +1452,16 @@ local Log_Create_ScrollBar
 local Details_Create_ScrollBar
 function Mod.Logger_Load()
 	
+	local function SetFontColor(widget, state)
+		if not widget or not widget.font then return end
+		if state == 2 then
+			widget.font:SetTextColor(0.45, 1, 1, 1)
+		elseif state == 1 then
+			widget.font:SetTextColor(0.85, 1, 1, 1)
+		else
+			widget.font:SetTextColor(0.6, 0.6, 0.6, 0.6)
+		end
+	end
 
 do --log cachers
 	local my_name=GetUnitName('player')
@@ -1611,9 +1649,28 @@ do
 			)
 			
 			local comp=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",15,-12},15,15,"compare",function() DarkAngelGUI.Log.GinfoFrame.re_render() end)
+			comp:SetChecked(true)
+			
+			
+			local gmpreview = DA.CreateFFGButton2(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",130,-12},10,105,'gm editor preview','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+				
+				local entry = DarkAngelGUI.Log.GinfoFrame.tbl
+				if not entry then return end
+				
+				local gc=DarkAngelGUI.Guild.GC
+				gc.ranksroster=nil
+				gc.ranksroster=packGMTable(entry[1])
+				
+				gc.finish_import()
+				gc:Show()
+			end)
+			gmpreview:Hide()
+			
 			
 			DarkAngelGUI.Log.GinfoFrame.re_render = function ()
 				local entry = DarkAngelGUI.Log.GinfoFrame.tbl
+				
+				if not entry then return end
 				
 				if comp:GetChecked() and entry[3] then
 					ginf_eb:SetText(entry[3])
@@ -1626,7 +1683,16 @@ do
 					end
 				end
 				DarkAngelGUI.Log.GinfoFrame:Show()
+				
+				if entry.isgm then
+					gmpreview:Show()
+				else
+					gmpreview:Hide()
+				end
 			end
+			
+			
+			
 		
 		end
 		
@@ -1813,50 +1879,36 @@ do
 				-- FilterLog()
 		end
 		
-		DarkAngelGUI.Log:HookScript("OnSHow",function()
-			for _,j in ipairs({
-			{"Log_offnote","offnoteCB"},
-			{"Log_note","noteCB"},
-			{"Log_rank","rankCB"},
-			{"Log_ginfo","ginfCB"},
-			{"Log_gmotd","motdCB"},
-			{"Log_GM","gmCB"},
+		DarkAngelGUI.Log:HookScript("OnShow", function()
+			for _, j in ipairs({
+				{"Log_offnote", "offnoteCB"},
+				{"Log_note",    "noteCB"},
+				{"Log_rank",    "rankCB"},
+				{"Log_ginfo",   "ginfCB"},
+				{"Log_gmotd",   "motdCB"},
+				{"Log_GM",      "gmCB"},
 			}) do
-				if j[1]=="Log_offnote" then
-					if not fuckingOptions_g[DA_CurrentGuild][j[1]] then
-						DarkAngelGUI.Log.offnoteCB.font:SetTextColor(0.6,0.6,0.6,0.6)
-						DarkAngelGUI.Log.twinkCB.font:SetTextColor(0.6,0.6,0.6,0.6)
-						DarkAngelGUI.Log.twinksuspCB.font:SetTextColor(0.6,0.6,0.6,0.6)
-						
-						if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-							DarkAngelGUI.Log.decayCB.font:SetTextColor(0.6,0.6,0.6,0.6)
-							DarkAngelGUI.Log.frozenCB.font:SetTextColor(0.6,0.6,0.6,0.6)
-						else
-							DarkAngelGUI.Log.decayCB:Hide()
-							DarkAngelGUI.Log.frozenCB:Hide()
-						end
+				local key, cbName = j[1], j[2]
+				local state = fuckingOptions_g[DA_CurrentGuild][key]
+
+				if key == "Log_offnote" then
+					SetFontColor(DarkAngelGUI.Log.offnoteCB, state)
+					SetFontColor(DarkAngelGUI.Log.twinkCB, state)
+					SetFontColor(DarkAngelGUI.Log.twinksuspCB, state)
+
+					if DA_Guild_Info[DA_CurrentGuild].GuildType == "epgp" then
+						SetFontColor(DarkAngelGUI.Log.decayCB, state)
+						SetFontColor(DarkAngelGUI.Log.frozenCB, state)
 					else
-						DarkAngelGUI.Log.offnoteCB.font:SetTextColor(0.85,1,1,1)
-						DarkAngelGUI.Log.twinkCB.font:SetTextColor(0.85,1,1,1)
-						DarkAngelGUI.Log.twinksuspCB.font:SetTextColor(0.85,1,1,1)
-						
-						if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-							DarkAngelGUI.Log.decayCB.font:SetTextColor(0.85,1,1,1)
-							DarkAngelGUI.Log.frozenCB.font:SetTextColor(0.85,1,1,1)
-						else
-							DarkAngelGUI.Log.decayCB:Hide()
-							DarkAngelGUI.Log.frozenCB:Hide()
-						end
+						DarkAngelGUI.Log.decayCB:Hide()
+						DarkAngelGUI.Log.frozenCB:Hide()
 					end
 				else
-					if not fuckingOptions_g[DA_CurrentGuild][j[1]] then
-						DarkAngelGUI.Log[j[2]].font:SetTextColor(0.6,0.6,0.6,0.6)
-					else
-						DarkAngelGUI.Log[j[2]].font:SetTextColor(0.85,1,1,1)
-					end
+					SetFontColor(DarkAngelGUI.Log[cbName], state)
 				end
 			end
 		end)
+
 end
 
 ---- 3 TAB ------	
@@ -1924,27 +1976,22 @@ do
 		end
 		
 
-	DarkAngelGUI.Details:HookScript("OnSHow",function()
-		for _,j in ipairs({
-		{"Log_note","CB_note"},
-		{"Log_offnote","CB_ofnote"},
-		{"Log_rank","CB_rank"},
-		}) do
-			if not fuckingOptions_g[DA_CurrentGuild][j[1]] then
-				DarkAngelGUI.Details[j[2]].font:SetTextColor(0.6,0.6,0.6,0.6)
-			elseif fuckingOptions_g[DA_CurrentGuild][j[1]]==2 then
-				DarkAngelGUI.Details[j[2]].font:SetTextColor(0.45,1,1,1)
-			elseif fuckingOptions_g[DA_CurrentGuild][j[1]]==1 then
-				DarkAngelGUI.Details[j[2]].font:SetTextColor(0.85,1,1,1)
+		DarkAngelGUI.Details:HookScript("OnShow", function()
+			for _, j in ipairs({
+				{"Log_note",    "CB_note"},
+				{"Log_offnote", "CB_ofnote"},
+				{"Log_rank",    "CB_rank"},
+			}) do
+				local key, cbName = j[1], j[2]
+				local state = fuckingOptions_g[DA_CurrentGuild][key]
+				SetFontColor(DarkAngelGUI.Details[cbName], state)
 			end
-		end
-	end)
-end
-
+		end)
 
 end
 
 
+end
 
 
 
@@ -1997,10 +2044,17 @@ local function openAdditionalGINF(tag, timestamp)
 		end
 	end
 	
-	if not entry then return end
+	if not entry then 
+		DarkAngelGUI.Log.GinfoFrame:Hide()
+		DA.Print(L["No log is stored for this entry"])
+		return 
+	end
 	
+	local isgmtag = tag=='gm'
 	local frame = DarkAngelGUI.Log.GinfoFrame
 		frame.tbl = entry
+		frame.tbl.isgm = isgmtag
+		
 	frame.re_render()
 
 end
@@ -2593,7 +2647,7 @@ end
 
 function Mod:OnGuildLoad()
 	self.Logger_Load()
-	DA.CreateTimer(IsLoggingRequired(),"scan_schedule",3,45,true,function(self)
+	DA.CreateTimer(IsLoggingRequired(),"scan_schedule",5,45,true,function(self)
 		Mod:StartScan()
 	end) 
 	
@@ -2623,12 +2677,12 @@ function Mod:AddModOptions(modOptTable)
 	
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['Print leavers in chat'],function(self) fuckingOptions.prntleav=(self:GetChecked() or false) end,{'fuckingOptions','prntleav'},nil)
 		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-20},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-			DA.Print("F "..DA.GetPlayerScanLink(UnitName('player'))..DA.GetPlayerScanLink(FEP_gMain[UnitName('player')]))
+			DA.Print("F "..GetPlayerScanLink(UnitName('player'))..GetPlayerScanLink(FEP_gMain[UnitName('player')]))
 		end)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['Track suspicious changes'],function(self) fuckingOptions_g[DA_CurrentGuild].warnsuspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warnsuspic','DA_CurrentGuild'},'warnsuspic')
 		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-43},12,12,L['DKP improvement'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
 		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-32},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-			DA.Print(L['detmanchange'].. DA.GetPlayerScanLink(UnitName('player'))) 
+			DA.Print(L['detmanchange'].. GetPlayerScanLink(UnitName('player'))) 
 		end)
 		
 	DA.EditBoxCreater2(nil,f,{"LEFT",f,"TOPLEFT",10,-70},{30,12},fuckingOptions_g[DA_CurrentGuild].minlog,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","minlog",'DA_CurrentGuild'},1,nil,true,L["Minimum log"],nil,'minlog')

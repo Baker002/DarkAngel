@@ -27,6 +27,7 @@ end
 
 --Log
 do
+L["No log is stored for this entry"]=true
 L["gm_changes_in"]="Detected changes in $1 guild ranks"
 L["gm_additions_in"]="Guild rank(s) added $1"
 L["gm_removals_in"]="Guild rank(s) removed $1"
@@ -49,9 +50,7 @@ Full - full logging
 
 |cffff9999When changing the logging method, some data of this type is erased according to settings|r
 Full => Last - all data except the latest is deleted
-Any => None - all data is deleted
-
-|cffff99ffпокачто только первые 3 работают)))) прости]==]
+Any => None - all data is deleted]==]
 end
 
 --Details

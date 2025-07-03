@@ -48,27 +48,6 @@ Official addon Discord channel: https://discord.gg/bpPzRk3bnk
 
 ]====]
 
--- local fgdfgv=false
--- local sdfgsdaa=CreateFrame("Frame")
--- sdfgsdaa:SetScript("OnUpdate",function(s)
-	-- if not GetGuildInfoText then 
-		-- print('no api loaded yet')
-		-- return
-	-- end
-	
-	-- local ginfo = GetGuildInfoText()
-	-- if not ginfo then
-		-- fgdfgv=false
-		-- print('ginfo nil')
-	-- elseif ginfo=="" then
-		-- fgdfgv=false
-		-- print('ginfo empty')
-	-- elseif not fgdfgv then
-		-- fgdfgv=true
-		-- print('loaded')
-	-- end
-		
--- end)
 
 
 
@@ -302,6 +281,29 @@ do --variables
 end
 
 
+DA.GuildInfoFetched=false
+local gInfoFetcher=CreateFrame("Frame")
+gInfoFetcher:SetScript("OnUpdate",function(s)
+	if not GetGuildInfoText then 
+		print('no api loaded yet')
+		return
+	end
+	
+	local ginfo = GetGuildInfoText()
+	if not ginfo then
+		DA.GuildInfoFetched=false
+		-- print('ginfo nil')
+	elseif ginfo=="" then
+		DA.GuildInfoFetched=false
+		-- print('ginfo empty')
+	elseif not DA.GuildInfoFetched then
+		s:SetScript("OnUpdate",nil)
+		DA.GuildInfoFetched=true
+		-- print('loaded')
+	end
+		
+end)
+
 local GuildSysTracker=CreateFrame('frame')
 GuildSysTracker:RegisterEvent("CHAT_MSG_SYSTEM")
 GuildSysTracker:SetScript("OnEvent", function (_,_,msg) 
@@ -496,7 +498,9 @@ function DA:TryInitGuildData()
 
     local guildName = GetGuildInfo("player")
 	local n,_=GetGuildRosterInfo(1)
-    if guildName and n then
+	local ginfoloaded = GetGuildInfoText()~=""
+	
+    if guildName and n and ginfoloaded then
         self.guildDataInitialized = true
 		self.loadFrame:UnregisterEvent("PLAYER_GUILD_UPDATE")
 		QueryGuildEventLog()
@@ -772,14 +776,7 @@ end
 local function Create_Slash_Functions()
 	SLASH_FRAMESTK1 = SLASH_FRAMESTK1 or "/fs"
 	SlashCmdList.FRAMESTK = SlashCmdList.FRAMESTK or function() LoadAddOn("Blizzard_DebugTools");FrameStackTooltip_Toggle() end
-	SLASH_DAtargetsearch1="/dasearch"
-	SlashCmdList.DAtargetsearch = function(...) 
-		DarkAngelGUI:Show()
-		_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',true)
-		_G['DarkAngelGUI']['Detailsbtn']:Click('LeftButton',false)
-		FFuckingSearch:SetText(...)
-		DA.RunLogSearch(FFuckingSearch:GetText())
-	 end
+	
 	StaticPopupDialogs["DA_COPY_TEXT_POPUP"] = {
 		text = "",                -- must be non‑nil
 		button1 = "Close",
@@ -821,14 +818,6 @@ local function Create_Slash_Functions()
 	}
 
 
-
-
-
-	-- SLASH_DALinkCopy1="/dalinkcopy"
-	-- SlashCmdList.DALinkCopy = function(...) 
-		-- print(...)
-		-- StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, ...)
-	-- end
 	function DA_targetep(reason,ammount,optionaltarg)
 		
 		local target=UnitName('target')
@@ -1061,19 +1050,13 @@ function Dark_Angel_OnInit(guildinit)
 	
 	local SetHyperlink = ItemRefTooltip.SetHyperlink
 	ItemRefTooltip.SetHyperlink = function(self, link, text, button, frame)
-		if (string.sub(link, 1, 9) == "dacommand") then
-			local Box = ChatEdit_ChooseBoxForSend()
+		if (string.sub(link, 1, 9) == "dalogsrch") then
+			local name = string.sub(link, 11)
+			if name then
+				DA.OpenLogSearch(name)
 
-			Box:SetText("")
-
-			if (not Box:IsShown()) then
-				ChatEdit_ActivateChat(Box)
-			else
-				ChatEdit_UpdateHeader(Box)
 			end
-
-			Box:Insert(string.sub(link, 11))
-			ChatEdit_ParseText(Box, 1)
+			
 		elseif (string.sub(link, 1, 6) == "dalink") then
 			local id = string.sub(link, 8)
 			local data = DA_LinkStorage[id]
@@ -1375,9 +1358,6 @@ function DA.GetNumGMembers()
 end
 
 
-function DA.GetPlayerScanLink(text)
-	return string.gsub(string.lower(text), string.lower(text), string.format("|cffFFEB3B|Hdacommand:%s %s|h[%s]|h|r", SLASH_DAtargetsearch1, text, text))
-end
 DA_LinkStorage = {}
 DA_LinkIndex = 0
 function DA.GetChatCopyLink(longString)
