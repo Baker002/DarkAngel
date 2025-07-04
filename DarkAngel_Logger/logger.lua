@@ -2647,7 +2647,7 @@ end
 
 function Mod:OnGuildLoad()
 	self.Logger_Load()
-	DA.CreateTimer(IsLoggingRequired(),"scan_schedule",5,45,true,function(self)
+	DA.CreateTimer(IsLoggingRequired(),"scan_schedule",4,45,true,function(self)
 		Mod:StartScan()
 	end) 
 	

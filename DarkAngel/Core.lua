@@ -283,24 +283,22 @@ end
 
 DA.GuildInfoFetched=false
 local gInfoFetcher=CreateFrame("Frame")
+local gInfo_countFetcher=0
 gInfoFetcher:SetScript("OnUpdate",function(s)
-	if not GetGuildInfoText then 
-		print('no api loaded yet')
-		return
-	end
+	if not GetGuildInfoText then return end
 	
 	local ginfo = GetGuildInfoText()
-	if not ginfo then
-		DA.GuildInfoFetched=false
-		-- print('ginfo nil')
-	elseif ginfo=="" then
-		DA.GuildInfoFetched=false
-		-- print('ginfo empty')
-	elseif not DA.GuildInfoFetched then
+	if not ginfo or ginfo=="" then
+		-- print('ginfo nil or empty')
+		
+	elseif not DA.GuildInfoFetched or gInfo_countFetcher > 200 then
 		s:SetScript("OnUpdate",nil)
 		DA.GuildInfoFetched=true
 		-- print('loaded')
+		DA:OnGuildUpdate()
 	end
+	
+	gInfo_countFetcher = gInfo_countFetcher + 1
 		
 end)
 
@@ -478,10 +476,14 @@ function DA:OnEnable()
 	
 	DA.CreateTimer(1,"init_noguild",0,0.2,true,function(self)
 		if not self.tick then self.tick=0 end
+		
 		self.tick=self.tick+1
 		local guildName,_,_= GetGuildInfo('player')
 		if self.tick>=15 and not guildName then
 			DA:OnGuildDataAvailable(guildName,'delayednoguild')
+			self:SetScript("OnUpdate",nil)
+			return
+		elseif guildName then
 			self:SetScript("OnUpdate",nil)
 			return
 		end
@@ -500,7 +502,7 @@ function DA:TryInitGuildData()
 	local n,_=GetGuildRosterInfo(1)
 	local ginfoloaded = GetGuildInfoText()~=""
 	
-    if guildName and n and ginfoloaded then
+    if guildName and n and (ginfoloaded or DA.GuildInfoFetched) then
         self.guildDataInitialized = true
 		self.loadFrame:UnregisterEvent("PLAYER_GUILD_UPDATE")
 		QueryGuildEventLog()
