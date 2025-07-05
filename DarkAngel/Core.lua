@@ -111,7 +111,7 @@ local fuckingOptions_local={
 	reverseSort=false,
 	mmenuqcopy=1,
 	mmenuleavefocus=1,
-	mmenucloserank=false,
+	mmenucloserank=1,
 
 	AW_raid68=1,
 	AW_skada68=false,
@@ -176,6 +176,7 @@ local fuckingOptions_g_local={
 	inviter_stop=false,
 	inviter_repeat=false,
 	inviter_autostop=false,
+	inviter_inv_pattern=false,
 	
 	
 	guildInviterEnabled=false,
@@ -533,13 +534,13 @@ function DA:OnGuildDataAvailable(guildName,delayednoguild)
 	
 	
 end
-local DA_loadedModules = {}
+DA.IsModuleLoaded = {}
 function DA:ModuleLoaded(name)
 
-    DA_loadedModules[name] = true
+    DA.IsModuleLoaded[name] = true
 
     for modName,_  in pairs(self.modules) do 
-        if not DA_loadedModules[modName] then
+        if not DA.IsModuleLoaded[modName] then
             return
         end
     end

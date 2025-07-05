@@ -940,6 +940,8 @@ end
 
 --Flask disp
 do
+L['DESCr-aw_flaskdisp_manual']=[[|cffff9999Show players that took a flask|r
+Shift-click - open a flask dispenser module]]
 L["options"]=true
 L["Distribution of flasks is completed! Got flasks"]=true
 L["already working"]=true

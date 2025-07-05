@@ -935,6 +935,8 @@ end
 
 --Flask disp
 do
+L['DESCr-aw_flaskdisp_manual']=[[|cffff9999Показать игроков получивших фласку|r
+Shift-клик - включить раздатчик фласок]]
 L["options"]='настройки'
 L["Distribution of flasks is completed! Got flasks"]="Раздача фласок завершена! Фласки получили"
 L["already working"]="уже работает раздача"

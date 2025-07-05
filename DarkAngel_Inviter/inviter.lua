@@ -77,7 +77,7 @@ PhrasesFrame:RegisterForDrag("LeftButton")
 PhrasesFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 PhrasesFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
 
-DA_Inviter.OptionsFr=DA.FrameCreater(nil,DA_Inviter,250,95,{"TOPLEFT", DA_Inviter, "TOPRIGHT", 3, 0})
+DA_Inviter.OptionsFr=DA.FrameCreater(nil,DA_Inviter,250,125,{"TOPLEFT", DA_Inviter, "TOPRIGHT", 3, 0})
 DA.CloseButtonCreater(nil,DA_Inviter.OptionsFr,{"TOPRIGHT", DA_Inviter.OptionsFr, "TOPRIGHT", -2,-1},10,10,'x')
 
 DA.OptionsButtonCreater(nil,DA_Inviter,{"TOPRIGHT", DA_Inviter, "TOPRIGHT", -20,-5},12,12,function(self)
@@ -150,7 +150,7 @@ local function AddInQueue(_, event, message, author, _,addit2, _)
 		end
 	end
 	if event=="CHAT_MSG_GUILD" then
-		if fuckingOptions.SR_gc and author~=UnitName('player') and string.sub(message,0,1)=="+" then
+		if fuckingOptions.SR_gc and author~=UnitName('player') and string.sub(message,0,#fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern)==fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern then
 			if UnitInRaid(author) then else
 				local index={}
 				for k,v in pairs(DA.listinvite_bulk) do
@@ -163,7 +163,7 @@ local function AddInQueue(_, event, message, author, _,addit2, _)
 	
 	
 	if event=="CHAT_MSG_WHISPER" then
-		if fuckingOptions.SR_pm and string.sub(message,0,1)=="+" then
+		if fuckingOptions.SR_pm and string.sub(message,0,#fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern)==fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern then
 			if UnitInRaid(author) then 
 			else
 				local index={}
@@ -173,7 +173,7 @@ local function AddInQueue(_, event, message, author, _,addit2, _)
 				
 				if index[author] then 
 					return 
-				else 
+				else
 					table.insert(DA.listinvite_bulk,tostring(author)) 
 				end
 			end
@@ -773,24 +773,32 @@ function(self) self.t:SetBlendMode("BLEND") end
 )
 
 --opt
+
+if not fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern then
+	fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern="+"
+end
+local eb_inviter_pattern = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-20},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_inv_pattern",'DA_CurrentGuild'},1,255,'text')
+DA.FontCreater(nil,"Invite pattern",{"BOTTOMLEFT",eb_inviter_pattern,"TOPLEFT",5,-2},eb_inviter_pattern,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+
+
 if not fuckingOptions_g[DA_CurrentGuild].inviter_stop then
 	fuckingOptions_g[DA_CurrentGuild].inviter_stop=L['raidinv_stop_msg']
 end
-local eb_inviter_stop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-20},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_stop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_stop",'DA_CurrentGuild'},1,255,'text')
+local eb_inviter_stop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-50},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_stop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_stop",'DA_CurrentGuild'},1,255,'text')
 DA.FontCreater(nil,"Stop message",{"BOTTOMLEFT",eb_inviter_stop,"TOPLEFT",5,-2},eb_inviter_stop,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	
+
 
 if not fuckingOptions_g[DA_CurrentGuild].inviter_repeat then
 	fuckingOptions_g[DA_CurrentGuild].inviter_repeat=L['Type + in guild chat if you are still not in raid']
 end
-local eb_inviter_repeat = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-50},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_repeat,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_repeat",'DA_CurrentGuild'},1,255,'text')
+local eb_inviter_repeat = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-80},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_repeat,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_repeat",'DA_CurrentGuild'},1,255,'text')
 DA.FontCreater(nil,"Repeat message",{"BOTTOMLEFT",eb_inviter_repeat,"TOPLEFT",5,-2},eb_inviter_repeat,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 
 
 if not fuckingOptions_g[DA_CurrentGuild].inviter_autostop then
 	fuckingOptions_g[DA_CurrentGuild].inviter_autostop=L['Invite auto-stopped']
 end
-local eb_inviter_autostop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-80},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_autostop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_autostop",'DA_CurrentGuild'},1,255,'text')
+local eb_inviter_autostop = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-110},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_autostop,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_autostop",'DA_CurrentGuild'},1,255,'text')
 DA.FontCreater(nil,"Auto-stop message",{"BOTTOMLEFT",eb_inviter_autostop,"TOPLEFT",5,-2},eb_inviter_autostop,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 
 

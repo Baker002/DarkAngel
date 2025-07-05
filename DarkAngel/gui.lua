@@ -562,7 +562,7 @@ local f = CreateFrame("EditBox", name, rel)
 	f:SetMultiLine(allowMultiLine)
 	f:SetAutoFocus(allowAutoFocus)
 	f:SetFont(unpack(fonttype))
-	f:SetFrameLevel(rel:GetFrameLevel() + 1)
+	f:SetFrameLevel(rel:GetFrameLevel() + 2)
 	
     if scOnEscapePressed then
 		f:SetScript("OnEscapePressed", scOnEscapePressed)
@@ -639,7 +639,7 @@ local f = CreateFrame("EditBox", name, rel)
 	f:SetMultiLine(allowMultiLine)
 	f:SetAutoFocus(allowAutoFocus)
 	f:SetFont(unpack(fonttype))
-	f:SetFrameLevel(rel:GetFrameLevel() + 1)
+	f:SetFrameLevel(rel:GetFrameLevel() + 2)
 	f.stored=false
 	
 --	28/255, 32/255, 50/255
@@ -1637,75 +1637,41 @@ do
 		DAOptMenuFrame.epgpawardFrame.t:SetTexture(0.03, 0.04, 0.07, 0.8)
 			do 
 				local function awardfunc(name,epgp,value,reason)
-					
-					DA.AddRecentAward(name,epgp,value,reason)
-					
+					local get_main_or_local = (FEP_L_gMain[DA_CurrentGuild][name] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]]) or (FEP_gMain[name])
+					local main = get_main_or_local and ( 
+						( (DA.DecodeNote(get_main_or_local)=='m' or DA.DecodeNote(get_main_or_local)=='f') and get_main_or_local ) 
+						or (DA.DecodeNote(get_main_or_local)=='t' and 
+							FEP_gMain[get_main_or_local] and (DA.DecodeNote(FEP_gMain[get_main_or_local])=='m' or DA.DecodeNote(FEP_gMain[get_main_or_local])=='f') and FEP_gMain[get_main_or_local])
+					)
+					if not main then
+						print('Player is not found in guild')
+						DAOptMenuFrame.epgpawardFrame.start:Enable()
+						return
+					end
+				
 					if epgp=='ep' then
-						if FEP_gMain[name] then
-							if DA.DecodeNote(FEP_gMain[name])=='m' then
-								DA.EPawardfunc(name,value,reason)
-							elseif DA.DecodeNote(FEP_gMain[name])=='t' and FEP_gMain[FEP_gMain[name]] and DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' then
-								DA.EPawardfunc(FEP_gMain[name],value,reason)
-							end
-						elseif FEP_L_gMain[DA_CurrentGuild][name] then
-							if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] and DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])=='m' then
-								DA.EPawardfunc(FEP_L_gMain[DA_CurrentGuild][name],value,reason,nil,name)
-								
-							end
-						end
+						DA.EPawardfunc(main,value,reason)
 					elseif epgp=='gp' then
-						if FEP_gMain[name] then
-							if DA.DecodeNote(FEP_gMain[name])=='m' then
-								DA.GPawardfunc(name,value,reason)
-							elseif DA.DecodeNote(FEP_gMain[name])=='t' and FEP_gMain[FEP_gMain[name]] and DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' then
-								DA.GPawardfunc(FEP_gMain[name],value,reason)
-							end
-						elseif FEP_L_gMain[DA_CurrentGuild][name] then
-							if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] and DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])=='m' then
-								DA.GPawardfunc(FEP_L_gMain[DA_CurrentGuild][name],value,reason,nil,name)
-								
-							end
-						end
+						DA.GPawardfunc(main,value,reason)
 						
 					elseif epgp=='+dkp' then
-						if FEP_gMain[name] then
-							if DA.DecodeNote(FEP_gMain[name])=='m' then
-								DA.DKPawardfunc(name,value,reason)
-							elseif DA.DecodeNote(FEP_gMain[name])=='t' and FEP_gMain[FEP_gMain[name]] and DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' then
-								DA.DKPawardfunc(FEP_gMain[name],value,reason)
-							end
-						elseif FEP_L_gMain[DA_CurrentGuild][name] then
-							if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] and DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])=='m' then
-								DA.DKPawardfunc(FEP_L_gMain[DA_CurrentGuild][name],value,reason,nil,name)
-								
-							end
-						end
+						DA.DKPawardfunc(main,value,reason)
 					elseif epgp=='-dkp' then
-						if FEP_gMain[name] then
-							if DA.DecodeNote(FEP_gMain[name])=='m' then
-								DA.DKPawardfunc(name,-value,reason)
-							elseif DA.DecodeNote(FEP_gMain[name])=='t' and FEP_gMain[FEP_gMain[name]] and DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' then
-								DA.DKPawardfunc(FEP_gMain[name],-value,reason)
-							end
-						elseif FEP_L_gMain[DA_CurrentGuild][name] then
-							if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] and DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])=='m' then
-								DA.DKPawardfunc(FEP_L_gMain[DA_CurrentGuild][name],-value,reason,nil,name)
-								
-							end
-						end
+						DA.DKPawardfunc(main,-value,reason)
 					end
-				if DA.loaded_Modules['Awarder'] then
-					FEP_GatherRaid()
-					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
-				end
-				tinsert(DA_Fep_bulk,function() DAOptMenuFrame.epgpawardFrame.start:Enable() end)
-				tinsert(DA_Fep_bulk,function() if DarkAngelGuild:IsShown() then DA.GetGuildData();DA.GuildSetAllLines() end end)
-				DA.ResumeTimer('fep')
-
+					if DA.loaded_Modules['Awarder'] then
+						FEP_GatherRaid()
+						tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
+					end
+					tinsert(DA_Fep_bulk,function() DAOptMenuFrame.epgpawardFrame.start:Enable() end)
+					tinsert(DA_Fep_bulk,function() if DarkAngelGuild:IsShown() then DA.GetGuildData();DA.GuildSetAllLines() end end)
+					DA.ResumeTimer('fep')
+					
+					DA.AddRecentAward(name,epgp,value,reason)
 				end
 				
 				
-				DAOptMenuFrame.epgpawardFrame.Dropdown = DA.FrameCreater('HSETBVNHXA',DAOptMenuFrame.epgpawardFrame,270,111,{"TOPLEFT",DAOptMenuFrame.epgpawardFrame,"BOTTOMLEFT",2,-2})
+				DAOptMenuFrame.epgpawardFrame.Dropdown = DA.FrameCreater(nil,DAOptMenuFrame.epgpawardFrame,270,111,{"TOPLEFT",DAOptMenuFrame.epgpawardFrame,"BOTTOMLEFT",2,-2})
 					DA.CloseButtonCreater(nil,DAOptMenuFrame.epgpawardFrame.Dropdown,{"BOTTOMLEFT", DAOptMenuFrame.epgpawardFrame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
 				for i=1,20 do
 					DAOptMenuFrame.epgpawardFrame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DAOptMenuFrame.epgpawardFrame.Dropdown,{"TOPLEFT", DAOptMenuFrame.epgpawardFrame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
@@ -1713,6 +1679,7 @@ do
 					end,nil,nil,'left')
 				end
 				local function getcoloredval(epgp,value)
+					value=tonumber(value)
 					if epgp=='ep' then
 						if value>0 then
 							return "|cffaaffff+"..value.." EP|r"
@@ -1771,23 +1738,20 @@ do
 					awardfunc(DAOptMenuFrame.player,string.lower(DAOptMenuFrame.epgpawardFrame.epgp.fs:GetText()),tonumber(value),tostring(reason))
 				end,nil,nil)
 				
-				local epgpdkpfunc
-				if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-					epgpdkpfunc=function(self)
+				local function epgpdkpfunc(self)
+					if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 						if self.fs:GetText()=='EP' then
 							self.fs:SetText('GP')
 							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
-						elseif self.fs:GetText()=='GP' then
+						else
 							self.fs:SetText('EP')
 							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
 						end
-					end
-				elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
-					epgpdkpfunc=function(self)
+					elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 						if self.fs:GetText()=='+DKP' then
 							self.fs:SetText('-DKP')
 							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
-						elseif self.fs:GetText()=='-DKP' then
+						else
 							self.fs:SetText('+DKP')
 							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
 						end
@@ -3870,7 +3834,7 @@ do
 		do
 			--main
 			do
-				DarkAngelGUI.Guild.micromenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,155,{"TOPLEFT",DarkAngelGUI.Guild,'TOPRIGHT',3,0},nil)
+				DarkAngelGUI.Guild.micromenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,140,{"TOPLEFT",DarkAngelGUI.Guild,'TOPRIGHT',3,0},nil)
 				
 				DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.micromenu,{"TOPRIGHT", DarkAngelGUI.Guild.micromenu, "TOPRIGHT", -5,-5},10,10,'x')
 				
@@ -4223,9 +4187,9 @@ do
 			
 			-- checkboxes
 			do
-				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",8,-138},15,15,L['copy'],function(self) fuckingOptions.mmenuqcopy=(self:GetChecked() or false) end,{'fuckingOptions','mmenuqcopy'},'mmenuqcopy')
-				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",60,-138},15,15,L['focus'],function(self) fuckingOptions.mmenuleavefocus=(self:GetChecked() or false) end,{'fuckingOptions','mmenuleavefocus'},'mmenuleavefocus')
-				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",120,-138},15,15,L['rank'],function(self) fuckingOptions.mmenucloserank=(self:GetChecked() or false) end,{'fuckingOptions','mmenucloserank'},'mmenucloserank')
+				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"CENTER",DarkAngelGUI.Guild.micromenu,"TOPLEFT",5,-5},7,7,nil,function(self) fuckingOptions.mmenuqcopy=(self:GetChecked() or false) end,{'fuckingOptions','mmenuqcopy'},'mmenuqcopy')
+				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"CENTER",DarkAngelGUI.Guild.micromenu,"TOPLEFT",13,-5},7,7,nil,function(self) fuckingOptions.mmenuleavefocus=(self:GetChecked() or false) end,{'fuckingOptions','mmenuleavefocus'},'mmenuleavefocus')
+				DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.micromenu,{"CENTER",DarkAngelGUI.Guild.micromenu,"TOPLEFT",21,-5},7,7,nil,function(self) fuckingOptions.mmenucloserank=(self:GetChecked() or false) end,{'fuckingOptions','mmenucloserank'},'mmenucloserank')
 			end
 			
 			
@@ -4235,7 +4199,7 @@ do
 		do
 			--bulk
 			do
-				DarkAngelGUI.Guild.bulkmenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,142,{"TOPLEFT",DarkAngelGUI.Guild,'TOPRIGHT',3,-158},nil)
+				DarkAngelGUI.Guild.bulkmenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,157,{"BOTTOMLEFT",DarkAngelGUI.Guild,'BOTTOMRIGHT',3,0},nil)
 					
 				DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPRIGHT", DarkAngelGUI.Guild.bulkmenu, "TOPRIGHT", -5,-5},10,10,'x')
 					
@@ -4268,31 +4232,39 @@ do
 					DarkAngelGUI.Guild.bulkmenu.applytoFrame:Hide()
 					DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
 				end)
-				for i,j in pairs({L['note'],L['officer note'],L['rank'],L['kick']}) do 
+				for i,j in ipairs({L['award'],L['note'],L['officer note'],L['rank'],L['kick']}) do 
 					DarkAngelGUI.Guild.bulkmenu.actionFrame['fr'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.actionFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.actionFrame, "TOPLEFT", 1,10-11*i},10,78,j,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 						DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:SetText(self.fs:GetText())
 						DarkAngelGUI.Guild.bulkmenu.actionFrame:Hide()
-						if self.fs:GetText()==L['note'] or self.fs:GetText()==L['officer note'] then
+						if i<4 then
 							--ranks
 							DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:Hide()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenufont:Hide()
 							--eb
-							DarkAngelGUI.Guild.bulkmenu.adnotebox:Show()
-						elseif self.fs:GetText()==L['rank'] then
+							if i~=1 then
+								DarkAngelGUI.Guild.bulkmenu.adnotebox:Show()
+								DarkAngelGUI.Guild.bulkmenu.award123Frame:Hide()
+							else
+								DarkAngelGUI.Guild.bulkmenu.adnotebox:Hide()
+								DarkAngelGUI.Guild.bulkmenu.award123Frame:Show()
+							end
+						elseif i==4 then
 							--ranks
 							DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:Show()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenufont:Show()
 							--eb
 							DarkAngelGUI.Guild.bulkmenu.adnotebox:Hide()
-						elseif self.fs:GetText()==L['kick'] then
+							DarkAngelGUI.Guild.bulkmenu.award123Frame:Hide()
+						elseif i==5 then
 							--ranks
 							DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:Hide()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
 							DarkAngelGUI.Guild.bulkmenu.adranksmenufont:Hide()
 							--eb
 							DarkAngelGUI.Guild.bulkmenu.adnotebox:Hide()
+							DarkAngelGUI.Guild.bulkmenu.award123Frame:Hide()
 						end
 						if DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() and DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() and (not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() or (DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() and DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText())) then
 							DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
@@ -4378,7 +4350,223 @@ do
 					end
 				end
 				DarkAngelGUI.Guild.bulkmenu.adranksmenufont=DA.FontCreater(nil,L["rank"],{"RIGHT",DarkAngelGUI.Guild.bulkmenu.adranksmenubtn,"LEFT",-1,0},DarkAngelGUI.Guild.bulkmenu.adranksmenubtn,15,170,{UIDarkAngelFontConsolas:GetFont(), 9,'outline'},'right',{0.85,1,1,0.8})
-
+				
+				
+				--Award
+				DarkAngelGUI.Guild.bulkmenu.award123Frame=CreateFrame("Frame",nil,DarkAngelGUI.Guild.bulkmenu)
+				DarkAngelGUI.Guild.bulkmenu.award123Frame:SetSize(1,1)
+				-- DarkAngelGUI.Guild.bulkmenu.award123Frame:SetFrameLevel()
+				DarkAngelGUI.Guild.bulkmenu.award123Frame:SetPoint("TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",3,-51)
+					do 
+						DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown = DA.FrameCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,270,111,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPRIGHT",2,-59})
+							DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown,{"BOTTOMLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
+						for i=1,20 do
+							DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
+								
+							end,nil,nil,'left')
+						end
+						local function getcoloredval(epgp,value)
+							value=tonumber(value)
+							if epgp=='ep' then
+								if value>0 then
+									return "|cffaaffff+"..value.." EP|r"
+								else
+									return "|cffff00ff"..value.." EP|r"
+								end
+							elseif epgp=='gp' then
+								if value>0 then
+									return "|cffedf500+"..value.." GP|r"
+								else
+									return "|cffff0000"..value.." GP|r"
+								end
+							elseif epgp=='+dkp' then
+								if value>0 then
+									return "|cffaaffff+"..value.." DKP|r"
+								else
+									return "|cffff00ff"..value.." DKP|r"
+								end
+							elseif epgp=='-dkp' then
+								if value>0 then
+									return "|cffff00ff-"..value.." DKP|r"
+								else
+									return "|cffaaffff-"..value.." DKP|r"
+								end
+							end
+							
+						end
+						local AWDropdown_rerender
+						
+						
+						local function epgpdkpfunc(self)
+							if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+								if self.fs:GetText()=='EP' then
+									self.fs:SetText('GP')
+									self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+								else
+									self.fs:SetText('EP')
+									self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+								end
+							elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+								if self.fs:GetText()=='+DKP' then
+									self.fs:SetText('-DKP')
+									self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+								else
+									self.fs:SetText('+DKP')
+									self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+								end
+							end
+						end
+						DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 1, -9},15,30,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
+						
+						DarkAngelGUI.Guild.bulkmenu.award123Frame.reason=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 35, -10},{90,11},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end,
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end, --enter here
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end,
+							function(self) 	
+								if self:GetParent():IsShown() then
+									self.t:SetBlendMode('blend');
+									self.focusgained=1
+									self:HighlightText()
+									AWDropdown_rerender()
+								end
+							end,
+							function(self)
+								if self:GetParent():IsShown() and self.focusgained then
+									AWDropdown_rerender()
+								end
+							end
+						)
+						DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:SetText("test")
+							DA.FontCreater(nil,L['reason'],{"BOTTOMLEFT",DarkAngelGUI.Guild.bulkmenu.award123Frame.reason,"TOPLEFT",3,-3},DarkAngelGUI.Guild.bulkmenu.award123Frame.reason,15,170,{UIDarkAngelFontConsolas:GetFont(), 10},'left',{0.85,1,1,0.8})
+							DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.reason,{"TOPRIGHT",DarkAngelGUI.Guild.bulkmenu.award123Frame.reason,"TOPRIGHT",0,0},5,5,'x','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 6},function() DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:SetText("") end,nil,nil,'left')
+					
+						DarkAngelGUI.Guild.bulkmenu.award123Frame.value=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 35, -32},{90,11},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end,
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end, --enter here
+							function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end,
+							function(self) 	
+								if self:GetParent():IsShown() then
+									self.t:SetBlendMode('blend');
+									self.focusgained=1
+									AWDropdown_rerender()
+								end
+							end,
+							function(self)
+								if self:GetParent():IsShown() and self.focusgained then
+									AWDropdown_rerender()
+								end
+							end
+						)
+							DA.FontCreater(nil,L['value'],{"BOTTOMLEFT",DarkAngelGUI.Guild.bulkmenu.award123Frame.value,"TOPLEFT",3,-3},DarkAngelGUI.Guild.bulkmenu.award123Frame.value,15,170,{UIDarkAngelFontConsolas:GetFont(), 10},'left',{0.85,1,1,0.8})
+							DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.value,{"TOPRIGHT",DarkAngelGUI.Guild.bulkmenu.award123Frame.value,"TOPRIGHT",0,0},5,5,'x','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 6},function() DarkAngelGUI.Guild.bulkmenu.award123Frame.value:SetText("") end,nil,nil,'left')
+						
+						local function SetEpgp(epgp,value)
+							local btn = DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp
+							if epgp=='ep' then
+								btn:SetText("EP")
+								btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+							elseif epgp=='gp' then
+								btn:SetText("GP")
+								btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+							elseif epgp=='+dkp' then
+								btn:SetText("+DKP")
+								btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+							elseif epgp=='-dkp' then
+								btn:SetText("-DKP")
+								btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+							end
+							
+						end
+						local function gatherFilteredEntries()
+							local result={}
+							local t = DA_Guild_Info[DA_CurrentGuild].RecentAwards
+							local count = #t
+							if count== 0 then return result end
+							
+							
+							local reason = tostring(DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:GetText())
+								if reason=="" or reason:gsub("%s+","")=="" then
+									reason=nil
+								end
+							local value = tostring(DarkAngelGUI.Guild.bulkmenu.award123Frame.value:GetText())
+								if value=="0" or value=="" or value:gsub("%s+","")=="" then
+									value=nil
+								end
+							local perfectmatch={}
+							local anymatch={}
+							
+							for i=count,1,-1 do
+								local e = t[i]
+								if (not value or e[3] and tostring(e[3]):find(value) )
+								and (not reason or e[4] and tostring(e[4]):find(reason) )
+								then
+									tinsert(perfectmatch, e)
+									
+								elseif (not value or e[3] and tostring(e[3]):find(value) )
+								or (not reason or e[4] and tostring(e[4]):find(reason) )
+								then
+									tinsert(anymatch, e)
+								end
+							end
+							
+							for _,j in ipairs(perfectmatch) do
+								tinsert(result,j)
+							end
+							
+							for _,j in ipairs(anymatch) do
+								tinsert(result,j)
+							end
+							
+							return result
+						end
+						function AWDropdown_rerender()
+							local entries = gatherFilteredEntries()
+							if #entries == 0 then
+								DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide()
+								return
+							end
+							
+							local displaydate
+							local counted = 0
+							for i=1,20 do
+								local entry = entries[i]
+								
+								if not entry then
+									DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]:Hide()
+								else
+									
+									local name,epgp,value,reason,timest = unpack(entry)
+									local dat,tim = unpack(timest)
+									
+									local printdate
+									if not displaydate then
+										displaydate=dat
+										printdate=true
+									elseif displaydate==dat then
+									else
+										printdate=true
+										displaydate=dat
+									end
+									
+									local TimeText = ((printdate and "|cff85aaaa"..dat or string.rep(" ", #dat)) .. " |r"..tim )
+									
+									DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]:SetText(TimeText .. "  |r"..name.. "  |r"..getcoloredval(epgp,value).. " |r("..reason.."|r)")
+									DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]:SetScript("OnClick",function() 
+										DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:ClearFocus()
+										DarkAngelGUI.Guild.bulkmenu.award123Frame.value:ClearFocus()
+										DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:SetText(reason)
+										DarkAngelGUI.Guild.bulkmenu.award123Frame.value:SetText(value)
+										SetEpgp(epgp,value)
+									end)
+									DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]:Show()
+									counted = counted + 1
+								end
+							end
+							DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:SetSize(270,((counted * 11) + 1))
+							DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Show()
+						end
+					
+					end
 				--EB (hidden)
 				DarkAngelGUI.Guild.bulkmenu.adnotebox=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",5,-51},{133,12},"",false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
 					function(self) 		self:ClearFocus(); self.focusgained=nil end,
@@ -4440,14 +4628,14 @@ do
 					DarkAngelGUI.Guild.bulkmenu.adranksmenufont:Hide()
 					--eb
 					DarkAngelGUI.Guild.bulkmenu.adnotebox:Hide()
-					
+					DarkAngelGUI.Guild.bulkmenu.award123Frame:Hide()
 					DarkAngelGUI.Guild.bulkmenu.stoper:Disable()
 				end
 			end
 
 			----retwink menu----
 			do
-				DarkAngelGUI.Guild.bulkmenu.assignedto=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",10,-92},{100,12},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+				DarkAngelGUI.Guild.bulkmenu.assignedto=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",10,-107},{100,12},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.astdropfr:Hide() end,
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.astdropfr:Hide() end , --enter here
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.astdropfr:Hide() end,
@@ -4467,7 +4655,7 @@ do
 				DA.FontCreater(nil,L['re-twink twins assigned to'],{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.assignedto,"TOPLEFT",5,12},DarkAngelGUI.Guild.bulkmenu.assignedto,15,170,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'left',{0.85,1,1,0.8})
 				DarkAngelGUI.Guild.bulkmenu.astdropfr=DA.FrameCreater(nil,DarkAngelGUI.Guild.bulkmenu.assignedto,160,20,{"BOTTOMLEFT",DarkAngelGUI.Guild.bulkmenu.assignedto,"TOPLEFT"})
 				
-				DarkAngelGUI.Guild.bulkmenu.newmain=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",10,-122},{100,12},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+				DarkAngelGUI.Guild.bulkmenu.newmain=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",10,-137},{100,12},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.nmdropfr:Hide() end,
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.nmdropfr:Hide() end , --enter here
 					function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end self:ClearFocus(); self.focusgained=nil ;DarkAngelGUI.Guild.bulkmenu.nmdropfr:Hide() end,
@@ -4484,13 +4672,13 @@ do
 						end
 					end
 				)
-				DA.FontCreater(nil,L['to the new main'],{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.newmain,"TOPLEFT",5,12},DarkAngelGUI.Guild.bulkmenu.newmain,15,170,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'left',{0.85,1,1,0.8})
+					DA.FontCreater(nil,L['to the new main'],{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.newmain,"TOPLEFT",5,12},DarkAngelGUI.Guild.bulkmenu.newmain,15,170,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'left',{0.85,1,1,0.8})
 				DarkAngelGUI.Guild.bulkmenu.nmdropfr=DA.FrameCreater(nil,DarkAngelGUI.Guild.bulkmenu.newmain,160,20,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.newmain,"BOTTOMLEFT"})
 				
-				DarkAngelGUI.Guild.bulkmenu.ismakingnewmain=DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",137,-122},15,15,L["Make it new Main"],function(self) end)
+				DarkAngelGUI.Guild.bulkmenu.ismakingnewmain=DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",137,-137},15,15,L["Make it new Main"],function(self) end)
 				DarkAngelGUI.Guild.bulkmenu.ismakingnewmain.font:SetSize(80,30)
 				
-				DarkAngelGUI.Guild.bulkmenu.retvgobtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"center",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",163,-102},12,40,L["bulkstart"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self)
+				DarkAngelGUI.Guild.bulkmenu.retvgobtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"center",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",163,-117},12,40,L["bulkstart"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self)
 					DarkAngelGUI.Guild.bulkmenu.assignedto.focusgained=nil;DarkAngelGUI.Guild.bulkmenu.assignedto:ClearFocus()
 					DarkAngelGUI.Guild.bulkmenu.newmain.focusgained=nil;DarkAngelGUI.Guild.bulkmenu.newmain:ClearFocus()
 					if not CanEditOfficerNote() then
@@ -4502,13 +4690,13 @@ do
 					end
 				end)
 				
-				DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",85,-108},10,28,'swap','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+				DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",85,-123},10,28,'swap','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
 					local first=DarkAngelGUI.Guild.bulkmenu.assignedto:GetText()
 					local second=DarkAngelGUI.Guild.bulkmenu.newmain:GetText()
 					DarkAngelGUI.Guild.bulkmenu.assignedto:SetText(second)
 					DarkAngelGUI.Guild.bulkmenu.newmain:SetText(first)
 				end)
-				DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-92},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+				DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-107},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
 					DarkAngelGUI.Guild.precmatch:SetChecked(false);fuckingOptions.precisematchsearch=false
 					DarkAngelGUI.Guild.showlocals:SetChecked(1);fuckingOptions.showlocals=1
 					DarkAngelGUI.Guild.EB1:SetText(DarkAngelGUI.Guild.bulkmenu.assignedto:GetText())
@@ -4520,7 +4708,7 @@ do
 					DA.GetGuildData();DA.GuildSetAllLines()
 					
 				end)
-				DarkAngelGUI.Guild.bulkmenu.retvrunsrch2=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-122},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+				DarkAngelGUI.Guild.bulkmenu.retvrunsrch2=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-137},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
 					DarkAngelGUI.Guild.precmatch:SetChecked(false);fuckingOptions.precisematchsearch=false
 					DarkAngelGUI.Guild.showlocals:SetChecked(1);fuckingOptions.showlocals=1
 					DarkAngelGUI.Guild.EB1:SetText(DarkAngelGUI.Guild.bulkmenu.newmain:GetText())
@@ -5051,6 +5239,13 @@ elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['note'] then
 		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
 		return 
 	end
+elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['award'] then
+	mode='award'
+	if not CanEditOfficerNote() then
+		DA.Print(L['I am not allowed to edit officer notes'])
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+		return 
+	end
 elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['officer note'] then
 	mode='of.note'
 	if not CanEditOfficerNote() then
@@ -5069,6 +5264,10 @@ elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['rank'] then
 		DA.Print(L['I cant demote and/or promote'])
 		-- DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
 		-- return 
+	end
+	if not CanGuildDemote() and not CanGuildPromote() then
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+		return 
 	end
 elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['kick'] then
 	mode='kick'
@@ -5127,7 +5326,7 @@ if not DA_unlockallguild and DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()
 	return 
 end
 DarkAngelGUI.Guild.bulkmenu.stoper:Enable()
--- LKAGkao=playersarray
+
 
 if mode=='note' then
 	local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
@@ -5148,6 +5347,93 @@ elseif mode=='of.note' then
 		elseif pltbl[1]=='normal' then
 			tinsert(DA_Bulk_list,function() DA.SetOfficernote(pltbl[2],new) end)
 		end
+	end
+elseif mode=='award' then
+	-- local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
+	
+	DarkAngelGUI.Guild.bulkmenu.award123Frame.value.focusgained=nil
+	DarkAngelGUI.Guild.bulkmenu.award123Frame.value:ClearFocus()
+	DarkAngelGUI.Guild.bulkmenu.award123Frame.reason.focusgained=nil
+	DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:ClearFocus()
+	
+	
+	local reason=DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:GetText()
+	if reason=="" then reason='test' end
+		
+	local value=tonumber(DarkAngelGUI.Guild.bulkmenu.award123Frame.value:GetText())
+	if not value then self:Enable()	return	end
+	
+	
+	local function awardfunc(name,epgp,value,reason) 
+		if epgp=='ep' then
+			DA.EPawardfunc(name,value,reason)
+		elseif epgp=='gp' then
+			DA.GPawardfunc(name,value,reason)
+			
+		elseif epgp=='+dkp' then
+			DA.DKPawardfunc(name,value,reason)
+		elseif epgp=='-dkp' then
+			DA.DKPawardfunc(name,-value,reason)
+		end
+	
+	end
+	
+	DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide()
+	local award_roster={}
+	local is_alrdy_in_roster={}
+	for _,pltbl in pairs(playersarray) do
+		local pl_type = pltbl[1]
+		local name = pltbl[2]
+		if pl_type=='local' then
+			local main = FEP_L_gMain[DA_CurrentGuild][name]
+			local v_main = main and FEP_gMain[main] and (DA.DecodeNote(FEP_gMain[main])=='m' or DA.DecodeNote(FEP_gMain[main])=='f') and main
+			if v_main then
+				if not is_alrdy_in_roster[v_main] then 
+					is_alrdy_in_roster[v_main]=true
+					tinsert(award_roster,v_main)
+				else
+					DA.Print('skipped '..name..' - duplicate ('..v_main..')')
+				end
+			else
+				DA.Print('skipped '..name..' - bad local ('..main..')')
+			end
+		elseif pl_type=='normal' then
+			if FEP_gMain[name] then
+				local typ = DA.DecodeNote(FEP_gMain[name])
+				local main = ((typ=='m' or typ=='f') and name) 
+					or (typ=='t' and FEP_gMain[FEP_gMain[name]] and (DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' or DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='f') and FEP_gMain[name])
+				if main then
+					if not is_alrdy_in_roster[main] then 
+						is_alrdy_in_roster[main]=true
+						tinsert(award_roster,main)
+					else
+						DA.Print('skipped '..name..' - duplicate ('..main..')')
+					end
+				else	
+					DA.Print('skipped '..name..' - bad note ('..FEP_gMain[name]..')')
+				end
+			end
+		end
+	end
+	
+	if next(award_roster) then
+		local epgp = string.lower(DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp:GetText())
+		
+		for _,name in ipairs(award_roster) do
+			tinsert(DA_Bulk_list,function() awardfunc(name,epgp,value,reason) end)
+		end
+		tinsert(DA_Bulk_list,function() 
+			if DA.loaded_Modules['Awarder'] then
+				FEP_GatherRaid()
+				tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
+			end
+			DA.AddRecentAward('|cffce95fc/bulk/|r',epgp,value,reason)
+		end)
+		
+		tinsert(DA_Fep_bulk,function() if DarkAngelGuild:IsShown() then DA.GetGuildData();DA.GuildSetAllLines() end end)
+		DA.ResumeTimer('fep')
+			
+		
 	end
 elseif mode=='rank' then
 	local new=DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.rankid

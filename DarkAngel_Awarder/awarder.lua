@@ -4554,63 +4554,115 @@ DA.CreateScaler('DA_Awarder',0.8,2,{'fuckingOptions','Awarderscale'})
 end
 
 
-function FFGSetRCState(memberID,param2,allhide)
-if memberID then
-	for group=1,8 do
-		for i=1,5 do
-			local frame=_G["DA_AwarderGroup"..group.."frame"..i]
-			if frame and frame:IsShown() and frame.c and frame.c.name and ((type(memberID)=="number" and frame.c.name==({UnitName('raid'..memberID)})[1]) or (type(memberID)=="string" and frame.c.name==memberID))then
-				frame.rcicon:Show()
-				if param2 then
-					frame.rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-Ready")
-					frame.rcicon:SetNormalTexture(frame.rcicon.txt)
-					frame.rcicon:SetPushedTexture(frame.rcicon.txt)
-					return
-				else
-					frame.rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-NotReady")
-					frame.rcicon:SetNormalTexture(frame.rcicon.txt)
-					frame.rcicon:SetPushedTexture(frame.rcicon.txt)
-					return
+local READY_TEXTURES = {
+	ready = "Interface\\RaidFrame\\ReadyCheck-Ready",
+	not_ready = "Interface\\RaidFrame\\ReadyCheck-NotReady",
+	waiting = "Interface\\RaidFrame\\ReadyCheck-Waiting"
+}
+local function SetRaidIconTexture(icon, texture)
+	icon.txt:SetTexture(texture)
+	icon:SetNormalTexture(icon.txt) 
+	icon:SetPushedTexture(icon.txt)
+end
+local function FindMemberFrame(memberID)
+	for group = 1, 8 do
+		for i = 1, 5 do
+			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			if frame and frame:IsShown() and frame.c and frame.c.name then
+				local nameMatch = false
+				if type(memberID) == "number" then
+					nameMatch = frame.c.name == ({ UnitName("raid" .. memberID) })[1]
+				elseif type(memberID) == "string" then
+					nameMatch = frame.c.name == memberID
+				end
+				if nameMatch then
+					return frame
 				end
 			end
 		end
 	end
-
-elseif not allhide then
-	for group=1,8 do
-		for i=1,5 do
-			local frame=_G["DA_AwarderGroup"..group.."frame"..i]
-			if frame then
-				if frame:IsShown() then
-					frame.rcicon:Show()
-					frame.rcicon.txt:Show()
-					frame.rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
-					frame.rcicon:SetNormalTexture(frame.rcicon.txt)
-					frame.rcicon:SetPushedTexture(frame.rcicon.txt)
-				end
+end
+local function ShowAllWaitingIcons()
+	for group = 1, 8 do
+		for i = 1, 5 do
+			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			if frame and frame:IsShown() then
+				frame.rcicon:Show()
+				frame.rcicon.txt:Show()
+				SetRaidIconTexture(frame.rcicon, READY_TEXTURES.waiting)
 			end
 		end
 	end
 	FFG_ShowHideLittleBttns()
-	
-elseif allhide then
-	for group=1,8 do
-		for i=1,5 do
-			local frame=_G["DA_AwarderGroup"..group.."frame"..i]
+end
+local function HideAllReadyIcons()
+	for group = 1, 8 do
+		for i = 1, 5 do
+			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
 			if frame then
-				if frame:IsShown() then 
-					frame.rcicon:Hide() 
+				if frame:IsShown() then
+					frame.rcicon:Hide()
 					frame.rcicon.txt:Hide()
 				end
-				frame.rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
-				frame.rcicon:SetNormalTexture(frame.rcicon.txt)
-				frame.rcicon:SetPushedTexture(frame.rcicon.txt)
+				SetRaidIconTexture(frame.rcicon, READY_TEXTURES.waiting)
 			end
 		end
 	end
 	FFG_ShowHideLittleBttns(1)
 end
+function FFGSetRCState(memberID, param2, allhide)
+	if memberID then
+		local frame = FindMemberFrame(memberID)
+		if frame then
+			frame.rcicon:Show()
+			local texture = param2 and READY_TEXTURES.ready or READY_TEXTURES.not_ready
+			SetRaidIconTexture(frame.rcicon, texture)
+		end
+	elseif not allhide then
+		ShowAllWaitingIcons()
+	else
+		HideAllReadyIcons()
+	end
 end
+
+local function ShowAllFlaskIcons()
+	for group = 1, 8 do
+		for i = 1, 5 do
+			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			if frame then
+				if frame:IsShown() and frame.c and frame.c.name then
+					local name = frame.c.name
+						local texture = DA.TR_Names[name] and READY_TEXTURES.ready or READY_TEXTURES.not_ready
+						SetRaidIconTexture(frame.flaskicon, texture)
+					frame.flaskicon:Show()
+					frame.flaskicon.txt:Show()
+				end
+			end
+		end
+	end
+end
+local function HideAllFlaskIcons()
+	for group = 1, 8 do
+		for i = 1, 5 do
+			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			if frame then
+				if frame:IsShown() then
+					frame.flaskicon:Hide()
+					frame.flaskicon.txt:Hide()
+				end
+			end
+		end
+	end
+end
+function FFGSetFlaskIconsState(checking)
+	if checking then
+		ShowAllFlaskIcons()
+	else
+		HideAllFlaskIcons()
+	end
+end
+
+
 function FEP_ReNameRePushThings()
 
 	
@@ -5089,6 +5141,7 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 		end
 	end)
 	
+	
 	--rcicon 
 	do
 		_G[framename].rcicon=DA.CreateFFGButton2(nil,_G[framename],  {"RIGHT", _G[framename], "LEFT", 4, 0},  15,  15,  "",'')
@@ -5144,6 +5197,20 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 	
 	
 	FEP_CreateCBs(framename)
+	
+	--rcicon 
+	do
+		_G[framename].flaskicon=DA.CreateFFGButton2(nil,_G[framename],  {"CENTER", _G[framename], "CENTER", 35, 0},  15,  15,  "",'')
+		_G[framename].flaskicon:SetFrameLevel(_G[framename]:GetFrameLevel() +5)
+		_G[framename].flaskicon.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+		_G[framename].flaskicon.txt:SetAllPoints(_G[framename].flaskicon)
+		_G[framename].flaskicon.txt:SetTexture("")
+		_G[framename].flaskicon:SetNormalTexture(_G[framename].flaskicon.txt)
+		_G[framename].flaskicon:SetPushedTexture(_G[framename].flaskicon.txt)
+		_G[framename].flaskicon:SetHighlightTexture('')
+		_G[framename].flaskicon:Hide()
+		_G[framename].flaskicon.txt:Show()
+	end
 end
 
 end
@@ -5181,7 +5248,12 @@ end
 end
 
 
-
+function DA:Awarer_Highligt_Flasks()
+	FFGSetFlaskIconsState(1)
+end
+function DA:Awarer_Hide_Flasks()
+	FFGSetFlaskIconsState()
+end
 
 function FEP_OpenAssignment(data, state, main, mainmain,callb)
 local font1=DA_Awarder.AssignFrame.Pname1

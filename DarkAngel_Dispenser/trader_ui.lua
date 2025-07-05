@@ -71,6 +71,9 @@ end
 
 function Mod:OnGuildLoad()
 	self:Flasker_OptLoad()
+	if DA.IsModuleLoaded['Awarder'] then
+		self:CreateAwarderFlasksChecker()
+	end
 end
 
 DA_Flasker = DA.FrameCreater(nil,UIParent,60,60,{"TOPLEFT", UIParent, "CENTER", 0, 0})
@@ -412,3 +415,39 @@ minusFlBtn=DA.CreateFFGButton2(nil,  F.FlaskDispenser,  {"TOPRIGHT", F.FlaskDisp
 
 
 
+function Mod:CreateAwarderFlasksChecker()
+	local btn = DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,355},53,13,'f\nl\na\ns\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		if IsShiftKeyDown() then
+			if DA_Flasker:IsShown() then
+				DA_Flasker:Hide()
+			else
+				DA_Flasker:Show()
+				self.enabled = true
+				DA:Awarer_Highligt_Flasks() 
+				return
+			end
+		end
+		
+		if not self.enabled then
+			self.enabled = true
+			DA:Awarer_Highligt_Flasks() 
+		else
+			self.enabled = false
+			DA:Awarer_Hide_Flasks() 
+		end
+			
+	end,'aw_flaskdisp_manual')
+	
+	btn:HookScript("OnEnter",function(self)
+		self.enabled=false
+		DA:Awarer_Highligt_Flasks() 
+	end)
+	
+	btn:HookScript("OnLeave",function(self)
+		if not self.enabled then
+			DA:Awarer_Hide_Flasks()
+		end
+	end)
+	
+	
+end
