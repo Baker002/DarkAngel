@@ -370,8 +370,7 @@ function()
 end)
 DA.CreateFFGButton2(nil,  F,  {"CENTER", F, "TOPLEFT", 30, -42},  12,  50,  L['clear'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black', {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 	function(self)
-		DA.TR_Names=nil
-		DA.TR_Names={}
+		table.wipe(DA.TR_Names)
 		if TradeFrame:IsShown() then 
 			DA.TR_routine(nil,'TRADE_SHOW') 
 		end

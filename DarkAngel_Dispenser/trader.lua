@@ -282,11 +282,7 @@ function DA.TR_routine(_,event,ac1,ac2,...)
 		for i=1,40 do
 			local ax={GetRaidRosterInfo(i)}
 			if ax[1]==targetn then
-				local index={}
-				for k,v in pairs(DA.TR_Names) do
-					index[v]=k
-				end
-				if index[targetn] then 
+				if DA.TR_Names[targetn] then 
 					DA.Print("  Flask Dispenser:   "..targetn.."|cffFF0000 already have flask")
 					DA.Print("  Flask Dispenser:   "..targetn.."|cffFFaaaa already have flask")
 					TradePlayerItem6:Hide()
@@ -348,13 +344,17 @@ function DA.TR_routine(_,event,ac1,ac2,...)
 	end
 
 	if (event=="TRADE_ACCEPT_UPDATE" and ac1==1 and ac2==1 and targetn) then
-		local index={}
-		for k,v in pairs(DA.TR_Names) do
-			index[v]=k
-		end
-			if index[targetn] then TR_reset() return end
-		table.insert(DA.TR_Names,targetn)
 		
+		if DA.TR_Names[targetn] then 
+			TR_reset() 
+			return 
+		end
+		DA.TR_Names[targetn]=true
+		if not DA.TR_Names.names_list then
+			DA.TR_Names.names_list={}
+		end
+		tinsert(DA.TR_Names.names_list,targetn)
+
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_print then DA.Print(L["dispensed "]..targetn) end
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay then SendChatMessage("# "..L["dispensed "]..targetn,'RAID') end
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay then SendChatMessage("# "..L["dispensed "]..targetn,'GUILD') end
@@ -383,8 +383,7 @@ if working and DA.TR_SelSet==mod then
 elseif not working or (working and DA.TR_SelSet~=mod) then 
 
 	if working and DA.TR_SelSet~=mod then
-		DA.TR_Names=nil
-		DA.TR_Names={}
+		table.wipe(DA.TR_Names)
 		DA.Print(L["starting distribution from another set..."])
 	end
 	DA.TR_SelSet=mod
@@ -396,7 +395,7 @@ elseif not working or (working and DA.TR_SelSet~=mod) then
 		gt:RegisterEvent("TRADE_SHOW")
 		gt:RegisterEvent("TRADE_CLOSED")
 		gt:RegisterEvent("TRADE_REQUEST_CANCEL")
-		DA.TR_Names={}
+		table.wipe(DA.TR_Names)
 		if quickgive=='set' then
 			working=true
 			if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'raid') else DA.Print("|cff00ffff    Ready.")  end
@@ -456,28 +455,28 @@ function DA.TR_stop()
 		gt:UnregisterEvent("TRADE_SHOW")
 		gt:UnregisterEvent("TRADE_CLOSED")
 		gt:UnregisterEvent("TRADE_REQUEST_CANCEL")
-		if fuckingOptions_g[DA_CurrentGuild].dispenser_print_results and #DA.TR_Names>0 then 
-			DA.Print(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :")
-			DA.Print(table.concat(DA.TR_Names," "))
+		if fuckingOptions_g[DA_CurrentGuild].dispenser_print_results and next(DA.TR_Names) then 
+			DA.Print(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.names_list.."] :")
+			DA.Print(table.concat(DA.TR_Names.names_list," "))
 		end
 		
-		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay_results and #DA.TR_Names>0 then 
-			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","RAID")
-			local result = DA.ConcatStr(DA.TR_Names,255," ")
+		if fuckingOptions_g[DA_CurrentGuild].dispenser_rsay_results and next(DA.TR_Names) then 
+			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.names_list.."] :","RAID")
+			local result = DA.ConcatStr(DA.TR_Names.names_list,255," ")
 			for _, str in ipairs(result) do
 				SendChatMessage(str,'RAID')
 			end
 		end
 		
-		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay_results and #DA.TR_Names>0 then 
-			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.."] :","GUILD")
-			local result = DA.ConcatStr(DA.TR_Names,255," ")
+		if fuckingOptions_g[DA_CurrentGuild].dispenser_gsay_results and next(DA.TR_Names) then 
+			SendChatMessage(L["Distribution of flasks is completed! Got flasks"].." ["..#DA.TR_Names.names_list.."] :","GUILD")
+			local result = DA.ConcatStr(DA.TR_Names.names_list,255," ")
 			for _, str in ipairs(result) do
 				SendChatMessage(str,'GUILD')
 			end
 		end
 		
-		DA.TR_Names={}
+		table.wipe(DA.TR_Names)
 		if fuckingOptions_g[DA_CurrentGuild].dispenser_items_grp then
 			DA.Print(L["Grouping-up items"])
 			TR_groupup()
