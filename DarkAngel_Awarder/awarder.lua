@@ -5198,7 +5198,7 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 	
 	FEP_CreateCBs(framename)
 	
-	--rcicon 
+	--flaskicon 
 	do
 		_G[framename].flaskicon=DA.CreateFFGButton2(nil,_G[framename],  {"CENTER", _G[framename], "CENTER", 35, 0},  15,  15,  "",'')
 		_G[framename].flaskicon:SetFrameLevel(_G[framename]:GetFrameLevel() +5)
@@ -6816,7 +6816,7 @@ end
 
 DA:RegisterComm("DA_ass", 
 	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() and dtype=='raid' then
+		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() and dtype=='RAID' then
 			local name,class,raidID
 			for i=1,40 do
 				local na, _, _, _, _, cl, _, _, _, _, _ = GetRaidRosterInfo(i)
