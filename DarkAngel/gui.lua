@@ -1487,6 +1487,24 @@ end
 
 local Guild_Create_ScrollBar
 
+-- function DA.GetAwardingPlayer(name)
+-- local inLocal = FEP_L_gMain[DA_CurrentGuild][name]
+
+-- local inGuild = FEP_gMain[name] or (inLocal and FEP_gMain[inLocal])
+
+-- if not inGuild then return nil end
+
+-- local typ,_ = DA.DecodeNote(inGuild)
+	-- if typ=='m' or typ=='f' then
+		-- return name
+	-- elseif typ=='t' then
+		-- local tvinInGuild = FEP_gMain[inGuild]
+		-- if not tvinInGuild then return nil end
+		
+		-- local typ,_ = DA.DecodeNote(inGuild)
+		
+	-- end
+-- end
 function DA.CreateGUIs()
 ---- MAIN ----
 ---- MAIN ----
@@ -1639,9 +1657,9 @@ do
 				local function awardfunc(name,epgp,value,reason)
 					local get_main_or_local = (FEP_L_gMain[DA_CurrentGuild][name] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]]) or (FEP_gMain[name])
 					local main = get_main_or_local and ( 
-						( (DA.DecodeNote(get_main_or_local)=='m' or DA.DecodeNote(get_main_or_local)=='f') and get_main_or_local ) 
+						( (DA.DecodeNote(get_main_or_local)=='m' or DA.DecodeNote(get_main_or_local)=='f') and name ) 
 						or (DA.DecodeNote(get_main_or_local)=='t' and 
-							FEP_gMain[get_main_or_local] and (DA.DecodeNote(FEP_gMain[get_main_or_local])=='m' or DA.DecodeNote(FEP_gMain[get_main_or_local])=='f') and FEP_gMain[get_main_or_local])
+							FEP_gMain[get_main_or_local] and (DA.DecodeNote(FEP_gMain[get_main_or_local])=='m' or DA.DecodeNote(FEP_gMain[get_main_or_local])=='f') and get_main_or_local)
 					)
 					if not main then
 						print('Player is not found in guild')

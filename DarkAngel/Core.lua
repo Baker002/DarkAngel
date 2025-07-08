@@ -9,7 +9,7 @@
                                       .oOOOOOOOOOOOOOOOOo     OOOOO 
                     ..ooOOOOOOo..oooOOOOOOOOOOOOOOOOOOOOOOoooOOOOO' 
            .Oo...ooOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"' 
-       .oooOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"~~ 
+       .oooOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO""'
          \oOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO' 
           OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoOOOOOOOOOOOOOOO' 
          __\OO/"    "OOOOOOOOOOOOOOOOOOOO`OOOOOOOOOOOOO" 
@@ -282,6 +282,11 @@ do --variables
 end
 
 
+function DA.Print(msg)
+	print("[|cffed94edDarkAngel|cffffffff]: "..msg)
+end
+
+
 DA.GuildInfoFetched=false
 local gInfoFetcher=CreateFrame("Frame")
 local gInfo_countFetcher=0
@@ -296,7 +301,7 @@ gInfoFetcher:SetScript("OnUpdate",function(s)
 		s:SetScript("OnUpdate",nil)
 		DA.GuildInfoFetched=true
 		-- print('loaded')
-		DA:OnGuildUpdate()
+		DA:TryInitGuildData()
 	end
 	
 	gInfo_countFetcher = gInfo_countFetcher + 1
@@ -373,7 +378,7 @@ end)
 
 -- Initialization
 function DA:OnInitialize()
-
+	-- DA.Print('core init')
 	DA.OptionsUpd()
 
 	--fep processor
@@ -469,9 +474,10 @@ function DA:OnInitialize()
 
 end
 function DA:OnEnable()
+-- DA.Print('core OnEnable')
 	QueryGuildEventLog()
 	self.loadFrame=CreateFrame("Frame")
-	self.loadFrame:SetScript("OnEvent", function() self:OnGuildUpdate() end)
+	self.loadFrame:SetScript("OnEvent", function() DA:TryInitGuildData() end)
 	self.loadFrame:RegisterEvent("PLAYER_GUILD_UPDATE")
 	self:TryInitGuildData()	
 	
@@ -481,10 +487,12 @@ function DA:OnEnable()
 		self.tick=self.tick+1
 		local guildName,_,_= GetGuildInfo('player')
 		if self.tick>=15 and not guildName then
+			-- DA.Print('init_noguild triggered')
 			DA:OnGuildDataAvailable(guildName,'delayednoguild')
 			self:SetScript("OnUpdate",nil)
 			return
 		elseif guildName then
+			-- DA.Print('init_noguild cancelled')
 			self:SetScript("OnUpdate",nil)
 			return
 		end
@@ -493,10 +501,8 @@ function DA:OnEnable()
 	
 end
 local Dark_Angel_OnInit_completed
-function DA:OnGuildUpdate()
-    self:TryInitGuildData()
-end
 function DA:TryInitGuildData()
+-- DA.Print('core TryInit')
     if self.guildDataInitialized then return end
 
     local guildName = GetGuildInfo("player")
@@ -504,6 +510,7 @@ function DA:TryInitGuildData()
 	local ginfoloaded = GetGuildInfoText()~=""
 	
     if guildName and n and (ginfoloaded or DA.GuildInfoFetched) then
+		-- DA.Print('core Init passed')
         self.guildDataInitialized = true
 		self.loadFrame:UnregisterEvent("PLAYER_GUILD_UPDATE")
 		QueryGuildEventLog()
@@ -512,21 +519,27 @@ function DA:TryInitGuildData()
 end
 function DA:OnGuildDataAvailable(guildName,delayednoguild)
 	
+-- DA.Print('core gdata init')
 	if not guildName and not delayednoguild then
+		-- DA.Print('core gdata init failed')
 		return
 	end
 	
 	DA_CurrentGuild = guildName or 'n0-guild'
 		if Dark_Angel_OnInit_completed then
+			-- DA.Print('core gdata greset')
 			DA.ResumeTimer("greset")
 			return
 		else
+			-- DA.Print('core gdata init GUI')
 			Dark_Angel_OnInit(guildName)
 		end
 		
 	if not next(self.modules) then
+		-- DA.Print('core gdata init nomod')
 		DA:ModsAndGuildDataReady(nomods)
 	else
+		-- DA.Print('core gdata init mods')
 		self.GuildDataReady=true
 		DA:IfModsAndGuildDataReady()
 	end
@@ -536,7 +549,7 @@ function DA:OnGuildDataAvailable(guildName,delayednoguild)
 end
 DA.IsModuleLoaded = {}
 function DA:ModuleLoaded(name)
-
+-- print('[|cffed94edDarkAngel|cffffffff]: mod loaded',name)
     DA.IsModuleLoaded[name] = true
 
     for modName,_  in pairs(self.modules) do 
@@ -544,12 +557,13 @@ function DA:ModuleLoaded(name)
             return
         end
     end
-	
+	-- DA.Print('all mods loaded')
 	self.AllModulesLoaded=true
     self:IfModsAndGuildDataReady()
 end
 function DA:IfModsAndGuildDataReady()
 	if self.GuildDataReady and self.AllModulesLoaded then
+	
 		self.GuildDataReady=nil
 		self.AllModulesLoaded=nil
 		
@@ -565,13 +579,16 @@ function DA:ModsAndGuildDataReady(nomods)
 	DA.loaded_Modules={}
 	
 	if nomods then
-	
+		-- DA.Print('mod opt: no mods')
 	else
 		for modName,mod in pairs(self.modules) do
+			-- print('[|cffed94edDarkAngel|cffffffff]: init mod',modName)
 			if mod.OnGuildLoad then
+				-- print('[|cffed94edDarkAngel|cffffffff]: OnGuildLoad')
 				mod:OnGuildLoad()
 			end
 			if mod.AddModOptions then
+				-- print('[|cffed94edDarkAngel|cffffffff]: '.. modName,"options")
 				mod:AddModOptions(modOptTable)
 			end
 			DA.loaded_Modules[modName]=true
@@ -604,33 +621,55 @@ function DA:ModsAndGuildDataReady(nomods)
 	local spacing = 5
 
 	local anchors = {}
-
+	-- DA.Print("core settings mod options blocks")
+	-- DA.Print("====================")
 	for i, tbl in ipairs(modOptTable) do
-	
+		-- print('[|cffed94edDarkAngel|cffffffff]: Processing module index:', i)
+
 		local modName = tbl[1]
 		local modOptFrame = tbl[2]
 
+		-- print("[|cffed94edDarkAngel|cffffffff]: Module Name:", modName)
+		-- print("[|cffed94edDarkAngel|cffffffff]: Module Frame:", modOptFrame)
+
 		if DA.loaded_Modules[modName] then
+			-- print("[|cffed94edDarkAngel|cffffffff]:", modName, "is loaded")
+
 			if modName == "Tweaks" then
-				-- Position Tweaks frame based on existing loaded modules
+				-- print("[|cffed94edDarkAngel|cffffffff]: Special positioning logic for Tweaks")
+
 				if anchors["BidTracker"] then
+					-- DA.Print("Anchoring Tweaks to BidTracker")
 					modOptFrame:SetPoint("TOPLEFT", anchors["BidTracker"], "BOTTOMLEFT", 0, -spacing)
 				elseif anchors["Awarder"] then
+					-- DA.Print("Anchoring Tweaks to Awarder")
 					modOptFrame:SetPoint("TOPLEFT", anchors["Awarder"], "BOTTOMLEFT", 0, -spacing)
 				elseif anchors["Logger"] then
+					-- DA.Print("Anchoring Tweaks to Logger")
 					modOptFrame:SetPoint("TOPLEFT", anchors["Logger"], "TOPRIGHT", spacing, 0)
 				else
+					-- DA.Print("Anchoring Tweaks to default position")
 					modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
 				end
 			else
+				-- print("[|cffed94edDarkAngel|cffffffff]: Standard positioning for", modName)
 				modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
-				xOffset = xOffset + modOptFrame:GetWidth() + spacing
+				
+				local width = modOptFrame:GetWidth()
+				-- print("[|cffed94edDarkAngel|cffffffff]: Width of", modName, "frame:", width)
+
+				xOffset = xOffset + width + spacing
+				-- print("[|cffed94edDarkAngel|cffffffff]: New xOffset:", xOffset)
 
 				anchors[modName] = modOptFrame
+				-- print("[|cffed94edDarkAngel|cffffffff]: Anchor updated for", modName)
 			end
+		else
+			-- print("[|cffed94edDarkAngel|cffffffff]: ",modName, "is not loaded. Skipping.")
 		end
 	end
-		
+
+	-- DA.Print("====================")
 	
 	tinsert(DA_Fep_bulk,function()  end)
 	tinsert(DA_Fep_bulk,function()  end)
@@ -1288,10 +1327,6 @@ end
 
 function DA.IsInSameGuild(character)
 	if FEP_gMain[character] then return true else return false end
-end
-
-function DA.Print(msg)
-	print("[|cffed94edDarkAngel|cffffffff]: "..msg)
 end
 
 
