@@ -813,21 +813,16 @@ any |cffaaffffnote|r filled]==]
 L["DESCr-bckpio"]=[==[When processing, skip actual guild members that are having
 any |cffaaffffofficer note|r filled]==]
 L["DESCr-pricolsedit"]=[==[Edit list of jokes]==]
-L["DESCr-BulkHelp"]=[==[|cffffaaffApply to|r - players the bulk will be applied to:
-   |cffffaaffselected|r - select players in Guild list via 
+L["DESCr-BulkHelp"]=[==[|cffff9999Bulk actions menu|r
+|cffff9999Apply to|r - players the bulk will be applied to:
+   |cffff9999selected|r - select players in Guild list via 
       --Ctrl+click (one player) 
       --Shift+click (many players) -same way as you do in Windows
-   |cffffaaffall found|r - use all players from the Guild menu
-      useful when editing tvins, found via "twins" button
-      |cffff0000be careful not to kick all guild members using this option!|r
-|cffffaaffaction|r - select the bulk action^
-   |cffffaaffnote|r - set same public note
-   |cffffaaffof.note|r - set same officer note
-   |cffffaaffrank|r - set specific rank
-   |cffff8888kick|r - yes.
-   
-|cffffaaffStart|r - launch bulk
-|cffffaaffStop|r - try to stop the running bulk [ be careful, some operations are very fast :) ]]==]
+   |cffff9999all found|r - use all players found
+      (taking into account the current search criteria)
+
+|cffff9999Start|r - launch bulk
+|cffff9999Stop|r - try to stop the running bulk [ be careful, some operations are very fast ]]==]
 L['DESCr-BulkHelp2']=[==[If you are unsure of what you are doing,
 you can create a full guild backup in the 'Backup' tab :)
 With a backup, it will be possible to quickly roll back any changes, except, perhaps, a kick from the guild]==]

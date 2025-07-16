@@ -2430,7 +2430,7 @@ if DAOptMenuFrame and DAOptMenuFrame:IsShown() then else return end
 	
 	
 end
-local function FEP_UpdateFrames()
+function DA_Awarder.FEP_UpdateFrames()
 DA_standby_mainslist="@"
 local flag=0
 local flag2=0
@@ -2643,7 +2643,7 @@ local function FEP_Fill()
 		FEP_ClearArray()
 	else
 		FEP_RePackZamena()
-		FEP_UpdateFrames()
+		DA_Awarder.FEP_UpdateFrames()
 		if DA_Awarder.righside:IsShown() then
 			FEP_OpenSupportFrame()
 		end
@@ -2744,7 +2744,7 @@ local function FEP_Fill()
 		end
 	end
 	FEP_RePackZamena()
-	FEP_UpdateFrames()
+	DA_Awarder.FEP_UpdateFrames()
 	
 	
 	if DA_Awarder.righside:IsShown() then
@@ -3426,7 +3426,7 @@ do --main frame buttons
 	end)
 	DA_Awarder.CreateRaidBtn:Show()
 	
-	DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,255},53,13,'c\nh\ne\nc\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
+	DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,190},53,13,'c\nh\ne\nc\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
 		
 		local countplayer=0
 		local countfineplayer=0
@@ -3578,8 +3578,10 @@ do --main frame buttons
 				return a[2] > b[2]
 			end
 		end
-		local function re_render_EPGPValues()
-			FEP_GatherRaid()
+		local function re_render_EPGPValues(upd)
+			if not upd then
+				FEP_GatherRaid()
+			end
 			
 			local all_roster={}
 			local melee_roster={}
@@ -3910,47 +3912,49 @@ do --main frame buttons
 				end
 			end
 			
-			-- Construct HTML content
-			local htmlContent = L["Raid Role Summary"]..":\n"
+			local content = {L["Raid Role Summary"]..":"}
 			if naCount>0 then
-				htmlContent=htmlContent..L["N/A spec"]..": |cffff9999"..naCount.."|r\n\n"
+				tinsert(content, L["N/A spec"]..": |cffff9999"..naCount.."|r\n")
 			end
 			
 			if tankCount==0 then
-				htmlContent=htmlContent..TANK..": |cffff9999"..tankCount.."|r\n"
+				tinsert(content, TANK..": |cffff9999"..tankCount.."|r")
 			else
-				htmlContent=htmlContent..TANK..": |cffaaccff"..tankCount.."|r\n"
+				tinsert(content, TANK..": |cffaaccff"..tankCount.."|r")
 			end
 			if meleeCount==0 then
-				htmlContent=htmlContent..MELEE..": |cffff9999"..meleeCount.."|r\n"
+				tinsert(content, MELEE..": |cffff9999"..meleeCount.."|r")
 			else
-				htmlContent=htmlContent..MELEE..": |cffaaccff"..meleeCount.."|r\n"
+				tinsert(content, MELEE..": |cffaaccff"..meleeCount.."|r")
 			end
 			if rangedCount==0 then
-				htmlContent=htmlContent..RANGED..": |cffff9999"..rangedCount.."|r\n"
+				tinsert(content, RANGED..": |cffff9999"..rangedCount.."|r")
 			else
-				htmlContent=htmlContent..RANGED..": |cffaaccff"..rangedCount.."|r\n"
+				tinsert(content, RANGED..": |cffaaccff"..rangedCount.."|r")
 			end
 			if healerCount==0 then
-				htmlContent=htmlContent..HEALER..": |cffff9999"..healerCount.."|r\n"
+				tinsert(content, HEALER..": |cffff9999"..healerCount.."|r")
 			else
-				htmlContent=htmlContent..HEALER..": |cffaaccff"..healerCount.."|r\n"
+				tinsert(content, HEALER..": |cffaaccff"..healerCount.."|r")
 			end
 			
 			if zamCount>0 then
-				htmlContent=htmlContent.."\n"..L["Standby"]..": |cffffa022"..zamCount.."|r\n"
+				tinsert(content, "\n"..L["Standby"]..": |cffffa022"..zamCount.."|r")
 			end
 
-			htmlContent=htmlContent.."\n|cff507375<"..L["roleshelp_details"]:gsub("$1", ((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EPGP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and 'DKP')) ) .. ">"
+			tinsert(content, "\n|cff507375<"..L["roleshelp_details"]:gsub("$1", ((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EPGP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and 'DKP')) ) .. ">")
 			
-			return htmlContent
+			return table.concat(content,"\n")
 			
 			
 		end
 
-		DA_Awarder.RolesHelp=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,195},53,13,'r\no\nl\ne\ns','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
+		DA_Awarder.RolesHelp=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPRIGHT", -10,-85},13,13,'','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
 			re_render_EPGPValues()
 		end)
+		hooksecurefunc(DA_Awarder,"FEP_UpdateFrames",function() if DA_Awarder.EPGPValues:IsShown() and DA_Awarder.EPGPValues:IsVisible() then re_render_EPGPValues(1) end end)
+		
+		
 		DA_Awarder.RolesHelp:SetScript("OnEnter", function(self)
 			DA.myShowTooltip(self,GetRolesHelpFrame())
 		end)
@@ -3958,8 +3962,13 @@ do --main frame buttons
 		DA_Awarder.RolesHelp:SetScript("OnLeave", function(self)
 			DA.myHideTooltip()
 		end)
+		DA_Awarder.RolesHelp:SetNormalTexture("Interface\\Icons\\INV_Sword_126")
+		DA_Awarder.RolesHelp:GetNormalTexture():SetTexCoord(0,1,0,1)
+		DA_Awarder.RolesHelp:GetNormalTexture():SetBlendMode('blend')
 		
-		
+		DA_Awarder.RolesHelp:SetPushedTexture("Interface\\Icons\\INV_Sword_126")
+		DA_Awarder.RolesHelp:GetPushedTexture():SetTexCoord(0,1,0,1)
+		DA_Awarder.RolesHelp:GetPushedTexture():SetBlendMode('blend')
 	end
 		
 	DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,135},53,13,'s\nt\no\nc\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
@@ -4927,6 +4936,20 @@ DA_Awarder['moverBtn'..number]:SetScript("OnDragStop", function(self) catch_deci
 DA_Awarder['moverBtn'..number]:SetFrameLevel(DA_Awarder['moverFrame'..number]:GetFrameLevel() +1)
 DA_Awarder['moverBtn'..number]:EnableMouse(false)
 end
+local function SwapPlayers(player1,player2)
+	local id1,id2
+	for i=1,40 do
+		local name, _ = GetRaidRosterInfo(i)
+		if name==player1 then id1=i end
+		if name==player2 then id2=i end
+		
+		if id1 and id2 then break end
+	end
+
+	if not (id1 and id2) then return end
+
+	SwapRaidSubgroup(id1,id2)
+end
 function FEP_CreateGroupFrames(number)
 
 for i=1,5 do
@@ -5005,7 +5028,17 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 			if self:IsShown() and self.c and self.c.name then 
 				for grp=1,8 do
 					if _G["DA_AwarderGroup"..grp]:IsMouseOver() and grp~=self.storedgrp then
-						FEP_QeuePlayerGroupTransfer(self.c.name,grp) 
+						if IsShiftKeyDown() then
+							for pl=1,5 do
+								local targetframe = _G["DA_AwarderGroup"..grp..'frame'..pl]
+								if targetframe.c and targetframe.c.name and targetframe:IsMouseOver() then
+									SwapPlayers(self.c.name,targetframe.c.name)
+									break
+								end
+							end
+						else
+							FEP_QeuePlayerGroupTransfer(self.c.name,grp) 
+						end
 						break
 					end
 				end

@@ -182,6 +182,12 @@ local shadowmourneClasses = {
 	DEATHKNIGHT = true,
 	PALADIN = true,
 }
+local ValanyrClasses = {
+	SHAMAN = true,
+	DRUID = true,
+	PALADIN = true,
+	PRIEST = true,	--Valanir is bad for both priest healer specs, however, we'll let RL to decide
+}
 local tierTokens = {
 	-- ROGUE, DEATHKNIGHT, MAGE, DRUID
 	[52025] = { ROGUE = true, DEATHKNIGHT = true, MAGE = true, DRUID = true },
@@ -370,7 +376,7 @@ DA.FontCreater(nil,"Player",{"LEFT",DA_BidTracker,"TOPLEFT",70,-40},DA_BidTracke
 DA_BidTracker.winnerfont=DA.FontCreater(nil,"",{"LEFT",DA_BidTracker,"TOPLEFT",4,-187},DA_BidTracker,30,100,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'left')
 DA_BidTracker.pricebox=DA.EditBoxCreater2(nil,DA_BidTracker,{"LEFT", DA_BidTracker, "TOPLEFT",80,-187},{65,12},"1",false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},nil,1,nil,true)
 
-
+DA.CreateScaler('DA_BidTracker',0.8,2,{'fuckingOptions','BidTrackerScale'})
 
 for i=1,9 do
 	DA_BidTracker['loot'..i]=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOP", 0,-40-13*i},12,145,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
@@ -501,10 +507,25 @@ local itemID = tonumber(itemLink:match("item:(%d+)") or 0)
 	
 	if anyClassItems[itemID] then
 		return true
-	elseif shadowmourneItems[itemID] and shadowmourneClasses[className] then
-		return true
-	elseif tierTokens[itemID] and tierTokens[itemID][className] then
-		return true
+	elseif shadowmourneItems[itemID] then
+		if shadowmourneClasses[className] then
+			return true
+		else
+			return false
+		end
+	elseif tierTokens[itemID] then
+		if tierTokens[itemID][className] then
+			return true
+		else
+			return false
+		end
+	elseif itemID==45038 then --Valanyr
+		if ValanyrClasses[className] then
+			return true
+		else
+			return false
+		end
+	
 	end
 
 	
@@ -1191,6 +1212,7 @@ DA_BidTracker:SetScript("OnEvent",function(self,event,message,author)
 end)
 
 function Mod:OnInitialize()
+
 	--item bidder
 	DA.CreateTimer(nil,"itembidder",0,1,true,function(self)
 		DA_BidTracker.timerfont:SetText(25+DA_BidTracker.timer-time())

@@ -415,7 +415,7 @@ minusFlBtn=DA.CreateFFGButton2(nil,  F.FlaskDispenser,  {"TOPRIGHT", F.FlaskDisp
 
 
 function Mod:CreateAwarderFlasksChecker()
-	local btn = DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,355},53,13,'f\nl\na\ns\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	local btn = DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPRIGHT", -10,-102},13,13,'','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if IsShiftKeyDown() then
 			if DA_Flasker:IsShown() then
 				DA_Flasker:Hide()
@@ -448,5 +448,12 @@ function Mod:CreateAwarderFlasksChecker()
 		end
 	end)
 	
+	btn:SetNormalTexture("Interface\\Icons\\Trade_Alchemy")
+	btn:GetNormalTexture():SetTexCoord(0,1,0,1)
+	btn:GetNormalTexture():SetBlendMode('blend')
+	
+	btn:SetPushedTexture("Interface\\Icons\\Trade_Alchemy")
+	btn:GetPushedTexture():SetTexCoord(0,1,0,1)
+	btn:GetPushedTexture():SetBlendMode('blend')
 	
 end

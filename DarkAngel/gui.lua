@@ -1487,24 +1487,6 @@ end
 
 local Guild_Create_ScrollBar
 
--- function DA.GetAwardingPlayer(name)
--- local inLocal = FEP_L_gMain[DA_CurrentGuild][name]
-
--- local inGuild = FEP_gMain[name] or (inLocal and FEP_gMain[inLocal])
-
--- if not inGuild then return nil end
-
--- local typ,_ = DA.DecodeNote(inGuild)
-	-- if typ=='m' or typ=='f' then
-		-- return name
-	-- elseif typ=='t' then
-		-- local tvinInGuild = FEP_gMain[inGuild]
-		-- if not tvinInGuild then return nil end
-		
-		-- local typ,_ = DA.DecodeNote(inGuild)
-		
-	-- end
--- end
 function DA.CreateGUIs()
 ---- MAIN ----
 ---- MAIN ----
