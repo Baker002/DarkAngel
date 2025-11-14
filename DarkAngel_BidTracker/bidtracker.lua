@@ -313,7 +313,11 @@ DA_BidTracker.itemicon=DA.ButtonCreater(nil,DA_BidTracker,{"TOPLEFT",DA_BidTrack
 end)
 DA_BidTracker.itemicon:GetNormalTexture():SetBlendMode('blend')
 DA_BidTracker.itemicon:GetNormalTexture():SetTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot")
-DA_BidTracker.itemicon:GetNormalTexture():SetTexCoord(0,1,0,1)
+DA_BidTracker.itemicon:GetNormalTexture():SetTexCoord(0.02, 0.98, 0.02, 0.98)
+
+DA_BidTracker.itemicon:SetPushedTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot")
+DA_BidTracker.itemicon:GetPushedTexture():SetTexCoord(0,1,0,1)
+DA_BidTracker.itemicon:GetPushedTexture():SetBlendMode('blend')
 
 
 DA_BidTracker.itemfont=DA.FontCreater(nil,"",{"LEFT",DA_BidTracker.itemicon,"RIGHT",2,0},DA_BidTracker.itemicon,30,100,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
@@ -1292,6 +1296,7 @@ function Mod:start_new_bid_session(itemLink)
 	local itemID = tonumber(itemLink:match("item:(%d+)") or 0)
 	local icon=GetItemIcon(itemLink)
 	DA_BidTracker.itemicon:GetNormalTexture():SetTexture(itemTexture or icon)
+	DA_BidTracker.itemicon:GetPushedTexture():SetTexture(itemTexture or icon)
 	
 	DA_BidTracker.itemicon:SetScript("OnEnter", function(self)
 		if (itemLink or itemID) and DA_BidTracker.itemfont:GetText() and DA_BidTracker.itemfont:GetText()~="" and #DA_BidTracker.itemfont:GetText()>0 then

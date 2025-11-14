@@ -449,7 +449,7 @@ function Mod:CreateAwarderFlasksChecker()
 	end)
 	
 	btn:SetNormalTexture("Interface\\Icons\\Trade_Alchemy")
-	btn:GetNormalTexture():SetTexCoord(0,1,0,1)
+	btn:GetNormalTexture():SetTexCoord(0.02, 0.98, 0.02, 0.98)
 	btn:GetNormalTexture():SetBlendMode('blend')
 	
 	btn:SetPushedTexture("Interface\\Icons\\Trade_Alchemy")

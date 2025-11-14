@@ -2146,41 +2146,54 @@ local raidCompClasses = {
 }
 
 local function raidCompGetClassShort(class, spec, role)
-	if not class then return "0" end
+	if not class then 
+		return "0" 
+	end
 
-	-- if specID is provided (number)
+	-- direct spec
 	if spec then
 		local entry = raidCompClasses[class .. spec]
 		return entry and entry.letter or "0", true
 	end
 
 	if role then
+		-- special druid handling
 		if class=="DRUID" and (role=='melee' or role=='tank') then
-			return "v" , true --yes, we are tolerant to bear tanks
+			return "v", true
 		end
-		
+
 		local entry1 = raidCompClasses[class]
-		if entry1 and entry1.role == role then
-			return entry1.letter , entry1.only
+		if entry1 then
 		end
-		
+
+		if entry1 and entry1.role == role then
+			return entry1.letter, entry1.only
+		end
 		
 		for i = 1, 3 do
-			local entry = raidCompClasses[class .. i]
+			local key = class .. i
+			local entry = raidCompClasses[key]
+			if entry then
+			end
 			if entry and entry.role == role then
-				return entry.letter , entry.only
+				return entry.letter, entry.only
 			end
 		end
 		
 		return "0"
 	end
+	
+	-- n\a spec and role
+	local entry = raidCompClasses[class]
+	return entry and entry.letter or "0", false
+	
 end
 
-local function raidCompCleanup(t,rem)
+local function raidCompCleanup(t, rem)
+
 	while true do
-		local s = #t 
-		
-		if s==0 then
+		local s = #t
+		if s == 0 then
 			return
 		elseif t[s] == rem then
 			table.remove(t, s)
@@ -2189,6 +2202,7 @@ local function raidCompCleanup(t,rem)
 		end
 	end
 end
+
 function DA.CreateSnapshot(isauto)
 
 
@@ -2205,25 +2219,36 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 	for grp=1,8 do
 		for id=1,5 do
 			local frame = _G["DA_AwarderGroup"..grp.."frame"..id]
+
 			if frame then
+
 				if frame:IsShown() and frame.c then
-					counterplayers=counterplayers+1
+					counterplayers = counterplayers + 1
+
 					local name = frame.c.name
 					local class = frame.c.clas
 					local storedRole = frame.c.checkedSpec
 					local role = LGT:GetUnitRole(name)
-						local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
-						local specname = select(1,LGT:GetUnitTalentSpec(name),1)
-					local spec_ID = specname and ((spec_a and spec_a == specname and 1) or (spec_b and spec_b == specname and 2) or (spec_c and spec_c == specname and 3)) or nil
+
+					local spec_a, spec_b, spec_c = LGT:GetTreeNames(class)
+					local specname = select(1, LGT:GetUnitTalentSpec(name), 1)
+
+					local spec_ID = specname and (
+						(spec_a == specname and 1) or
+						(spec_b == specname and 2) or
+						(spec_c == specname and 3)
+					) or nil
+
 					local specShort, specCorrect = raidCompGetClassShort(class, spec_ID, storedRole or role)
-					
+
 					if specCorrect or (spec_ID and specShort) then
 						tinsert(raidCompSpec, specShort)
-						tinsert(raidCompNames, name)
+						tinsert(raidCompNames, name..";")
+
 					elseif specShort then	
 						specFailed = specFailed + 1
 						tinsert(raidCompSpec, specShort)
-						tinsert(raidCompNames, "@@+"..name)
+						tinsert(raidCompNames, "@@+"..name..";")
 							
 					else
 						tinsert(raidCompSpec, "0")
@@ -2252,7 +2277,7 @@ if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate
 		DA.Print(L["failed to detect specialization"]..": "..specFailed.." players")
 	end
 	
-	local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames,";")
+	local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames)
 	DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(RaidCompLink))
 	
 	tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks) , compLink = RaidCompLink})
@@ -2889,7 +2914,7 @@ end
 do --raid difficulty
 
 	
-	DA_Awarder.raiddifficultyBtn,DA_Awarder.raiddifficultyFrame=DA.CreateFFGDropFrame(DA_Awarder,"",10,25,{"CENTER",DA_Awarder,"TOPLEFT",170,-10},105,12,"TOP",nil,nil,nil,'Raid difficulty')
+	DA_Awarder.raiddifficultyBtn,DA_Awarder.raiddifficultyFrame=DA.CreateFFGDropFrame(DA_Awarder,"",10,25,{"CENTER",DA_Awarder,"TOPLEFT",175,-10},105,12,"TOP",nil,nil,nil,'Raid difficulty')
 
 	for i,j in ipairs({"10","25","10H","25H"}) do
 		DA_Awarder.raiddifficultyFrame[i]=DA.CreateFFGButton2(nil,DA_Awarder.raiddifficultyFrame,{"TOPLEFT", DA_Awarder.raiddifficultyFrame, "TOPLEFT", -25+26*i,-1},10,25,j,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
@@ -2919,7 +2944,7 @@ do --raid difficulty
 	end)
 end
 	
-	DA_Awarder.readycheck=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 110,-10},10,40,'ready','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	DA_Awarder.readycheck=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 120,-10},10,40,'ready','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if GetNumRaidMembers()>0 then
 			if IsRaidOfficer() then
 				self:Disable()
@@ -3368,13 +3393,24 @@ do --main frame buttons
 	
 	end
 
-	DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "BOTTOMLEFT", 40,95},13,52,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+	-- DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "BOTTOMLEFT", 40,95},13,52,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+		
+	-- end,nil,nil,'center')
+	DA_Awarder.refreshbtn = DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "TOPLEFT", 85,-10},10,10,'','',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if DA_Awarder.locker.getstate() then 
 			DA.Print(L['raid frames locked!'])
 		end
 		DA_Awarder.isinraidfont:SetText("NOT IN RAID")
-		FEP_GatherRaid()
-	end,nil,nil,'center')
+		FEP_GatherRaid()	
+	end)
+	
+	DA_Awarder.refreshbtn:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\btn-refresh3")
+	DA_Awarder.refreshbtn:GetNormalTexture():SetTexCoord(0,1,0,1)
+	DA_Awarder.refreshbtn:GetNormalTexture():SetBlendMode('blend')
+	
+	DA_Awarder.refreshbtn:SetPushedTexture("Interface\\AddOns\\DarkAngel\\template\\btn-refresh3")
+	DA_Awarder.refreshbtn:GetPushedTexture():SetTexCoord(-0.1,1.1,-0.1,1.1)
+	DA_Awarder.refreshbtn:GetPushedTexture():SetBlendMode('blend')
 	
 	
 	DA_Awarder.GiveAssistBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 295,-10},10,13,'A','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
@@ -3885,7 +3921,7 @@ do --main frame buttons
 			local naCount = 0
 			local zamCount = 0
 			
-			if GetNumRaidMembers()==0 then return L['You are not in raid'] end
+			if GetNumRaidMembers()==0 then return L['You are not in raid'].. "\n\n|cff507375<"..L["roleshelp_details"]:gsub("$1", ((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EPGP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and 'DKP')) ) .. ">" end
 			
 			for i = 1, 40 do
 				
@@ -3963,12 +3999,27 @@ do --main frame buttons
 			DA.myHideTooltip()
 		end)
 		DA_Awarder.RolesHelp:SetNormalTexture("Interface\\Icons\\INV_Sword_126")
-		DA_Awarder.RolesHelp:GetNormalTexture():SetTexCoord(0,1,0,1)
+		DA_Awarder.RolesHelp:GetNormalTexture():SetTexCoord(0.02, 0.98, 0.02, 0.98)
 		DA_Awarder.RolesHelp:GetNormalTexture():SetBlendMode('blend')
 		
 		DA_Awarder.RolesHelp:SetPushedTexture("Interface\\Icons\\INV_Sword_126")
 		DA_Awarder.RolesHelp:GetPushedTexture():SetTexCoord(0,1,0,1)
 		DA_Awarder.RolesHelp:GetPushedTexture():SetBlendMode('blend')
+		
+		
+		DA_Awarder.RolesHelp.refreshbtn = DA.CreateFFGButton2(nil,DA_Awarder.EPGPValues,{"center", DA_Awarder.EPGPValues, "TOPRIGHT", -10,-25},10,10,'','',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			FEP_GatherRaid()	
+		end)
+		
+		DA_Awarder.RolesHelp.refreshbtn:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\btn-refresh3")
+		DA_Awarder.RolesHelp.refreshbtn:GetNormalTexture():SetTexCoord(0,1,0,1)
+		DA_Awarder.RolesHelp.refreshbtn:GetNormalTexture():SetBlendMode('blend')
+		
+		DA_Awarder.RolesHelp.refreshbtn:SetPushedTexture("Interface\\AddOns\\DarkAngel\\template\\btn-refresh3")
+		DA_Awarder.RolesHelp.refreshbtn:GetPushedTexture():SetTexCoord(-0.1,1.1,-0.1,1.1)
+		DA_Awarder.RolesHelp.refreshbtn:GetPushedTexture():SetBlendMode('blend')
+		
+
 	end
 		
 	DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -10,135},53,13,'s\nt\no\nc\nk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
