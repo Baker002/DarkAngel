@@ -1487,6 +1487,19 @@ end
 
 local Guild_Create_ScrollBar
 
+local function IsInSameRaidWithMe(name)
+	if not IsInRaid() then return end
+	if GetNumRaidMembers()==0 then return end
+	
+	if UnitInRaid(name) then return true end
+	
+	for i=1,GetNumRaidMembers() do
+		local nam, _, _, _, _, _, _, _, _, _, _ = GetRaidRosterInfo(i)
+		if nam==name then return true end
+		
+	end
+	return
+end
 function DA.CreateGUIs()
 ---- MAIN ----
 ---- MAIN ----
@@ -1523,7 +1536,7 @@ do
 				DAOptMenuFrame.focus:SetPoint("CENTER",DAOptMenuFrame,"TOPRIGHT",-117,-27)
 				DAOptMenuFrame.MT:SetPoint("CENTER",DAOptMenuFrame,"TOPRIGHT",-123.5,-50)
 				DAOptMenuFrame.OT:SetPoint("CENTER",DAOptMenuFrame,"TOPRIGHT",-92,-50)
-				if DAOptMenuFrame.calledfrom=="DA_Awarder" then
+				if DAOptMenuFrame.calledfrom=="DA_Awarder" and DAOptMenuFrame.player and IsInSameRaidWithMe(DAOptMenuFrame.player) then
 					DAOptMenuFrame.target:Show()
 					DAOptMenuFrame.focus:Show()
 					DAOptMenuFrame.MT:Show()
@@ -5476,7 +5489,6 @@ tinsert(DA_Bulk_list,function()  DA.UpdateMicroMenu();DarkAngelGUI.Guild.bulkmen
 
 end
 
-
 function DA.OpenOptMenu(parent,name, in_guild_backup)
 DAOptMenuFrame:Hide()
 DAOptMenuFrame:SetPoint("TOPLEFT",parent,"BOTTOM")
@@ -5492,7 +5504,7 @@ else
 	DAOptMenuFrame.ismt=false
 end
 
-if DAOptMenuFrame.calledfrom=="DA_Awarder" then
+if DAOptMenuFrame.calledfrom=="DA_Awarder" and IsInSameRaidWithMe(name) then
 	DAOptMenuFrame:SetSize(141,104)
 	
 	if InCombatLockdown() then 
