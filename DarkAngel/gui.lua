@@ -6721,8 +6721,8 @@ elseif mode=="EPGP:PR" then
 		if reverseSort then
 			table.sort(data,function(a,b)
 				if a[7] == "online" and b[7] == "online" then
-					local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-					local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+					local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+					local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 					
 					if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 						return (a_ep/a_gp+base) < (b_ep/b_gp+base)
@@ -6739,8 +6739,8 @@ elseif mode=="EPGP:PR" then
 				elseif b[7] == "online" then
 					return false
 				else
-					local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-					local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+					local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+					local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 					
 					if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 						return (a_ep/a_gp+base) < (b_ep/b_gp+base)
@@ -6756,8 +6756,8 @@ elseif mode=="EPGP:PR" then
 		else
 			table.sort(data,function(a,b)
 				if a[7] == "online" and b[7] == "online" then
-					local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-					local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+					local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+					local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 					
 					if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 						return (a_ep/a_gp+base) > (b_ep/b_gp+base)
@@ -6774,8 +6774,8 @@ elseif mode=="EPGP:PR" then
 				elseif b[7] == "online" then
 					return false
 				else
-					local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-					local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+					local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+					local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 					
 					if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 						return (a_ep/a_gp+base) > (b_ep/b_gp+base)
@@ -6792,8 +6792,8 @@ elseif mode=="EPGP:PR" then
 	else
 		if reverseSort then
 			table.sort(data,function(a,b)
-				local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-				local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+				local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+				local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 				
 				if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 					return (a_ep/a_gp+base) < (b_ep/b_gp+base)
@@ -6807,8 +6807,8 @@ elseif mode=="EPGP:PR" then
 			end)
 		else
 			table.sort(data,function(a,b)
-				local a_typ,a_ep,a_gp,a_hrs=DA.DecodeNote(a[4][1])
-				local b_typ,b_ep,b_gp,b_hrs=DA.DecodeNote(b[4][1])
+				local a_typ,a_ep,a_gp,_=DA.DecodeNote(a[4][1])
+				local b_typ,b_ep,b_gp,_=DA.DecodeNote(b[4][1])
 				
 				if ((a_typ=="m" or a_typ=="f") and a_ep>=minep) and ((b_typ=="m" or b_typ=="f") and b_ep>=minep) then
 					return (a_ep/a_gp+base) > (b_ep/b_gp+base)
@@ -7391,16 +7391,14 @@ function DA.GetOfficerNoteColored(note)
 		
 		if (tz=='m' or tz=='f') and (net~=0 or tot~=0 or hrs~=0) then
 			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-				if not DA_Guild_Info[DA_CurrentGuild].base1 then 
-					if tot==0 then
-						return "|cff00ffffPR|r:"..net
-					else
-						return note.." |cff00ffffPR|r:"..math.floor(net/tot * 10) /10
-					end
-				elseif tot+DA_Guild_Info[DA_CurrentGuild].base1==0 or tot+DA_Guild_Info[DA_CurrentGuild].base1==1 then 
+				local base = (DA_Guild_Info[DA_CurrentGuild].base1 or 1) or (DA_Guild_Info[DA_CurrentGuild].base1==0 and 1)
+				
+				if base==1 and tot==0 then
 					return "|cff00ffffPR|r:"..net
+				elseif tot==0 then
+					return "|cff00ffffPR|r:"..(ceil((net/base)*10) / 10)
 				else
-					return note.." |cff00ffffPR|r:"..math.floor((net/tot+DA_Guild_Info[DA_CurrentGuild].base1) * 10) /10
+					return note.." |cff00ffffPR|r:"..(ceil((net/(tot+(base or 1)))*10) / 10)
 				end
 				
 			elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then

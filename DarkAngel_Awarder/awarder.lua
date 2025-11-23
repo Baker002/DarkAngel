@@ -3614,6 +3614,63 @@ do --main frame buttons
 				return a[2] > b[2]
 			end
 		end
+		local function getEPGP_PR(net,tot)
+			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+				local base = (DA_Guild_Info[DA_CurrentGuild].base1 or 1) or (DA_Guild_Info[DA_CurrentGuild].base1==0 and 1)
+				
+				if base==1 and tot==0 then
+					return net
+				elseif tot==0 then
+					return (ceil((net/base)*10) / 10)
+				else
+					return (ceil((net/(tot+(base or 1)))*10) / 10)
+				end
+			else
+				return net
+			end
+		end
+		local function getEPGPvalue(name)
+			local source,is_local
+			local value,special
+			
+			local localKey = FEP_L_gMain[DA_CurrentGuild][name]
+			if localKey and FEP_gMain[localKey] then
+				source = FEP_gMain[localKey]
+				is_local = true
+			elseif FEP_gMain[name] then
+				source = FEP_gMain[name]
+			else
+				return "N/A", 'd'
+			end
+			
+			local typ,ep,gp,_=DA.DecodeNote(source)
+			if typ=='m' then
+				value=getEPGP_PR(ep,gp)
+			elseif typ=='f' then
+				value=getEPGP_PR(ep,gp)
+				special='f'
+			elseif typ=='t' and not is_local then
+				local source_2 = FEP_gMain[source]
+				if source_2 then
+					local typ_t,ep_t,gp_t,_=DA.DecodeNote(source_2)
+					if typ_t=='m' then
+						value=getEPGP_PR(ep_t,gp_t)
+					elseif typ_t=='f' then
+						value=getEPGP_PR(ep_t,gp_t)
+						special='f'
+					elseif typ_t=='t' then
+						value=ep_t
+						special='d'
+					end
+				end
+			else
+				value=ep
+				special='d'
+			end
+			return value, special
+			
+			
+		end
 		local function re_render_EPGPValues(upd)
 			if not upd then
 				FEP_GatherRaid()
@@ -3641,42 +3698,7 @@ do --main frame buttons
 				local class=rtE.clas
 				local online=rtE.isonl
 				if name then
-					local value
-					local special
-					
-					if FEP_gMain[name] then
-						local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[name])
-						if typ=='m' then
-							value=ep
-						elseif typ=='f' then
-							value=ep
-							special='f'
-						elseif typ=='t' then
-							if FEP_gMain[FEP_gMain[name]] then
-								local typ_t,ep_t,gp_t,_=DA.DecodeNote(FEP_gMain[FEP_gMain[name]])
-								if typ_t=='m' then
-									value=ep_t
-								elseif typ_t=='f' then
-									value=ep_t
-									special='f'
-								elseif typ_t=='t' then
-									value=ep_t
-									special='d'
-								end
-							end
-						end
-					elseif FEP_L_gMain[DA_CurrentGuild][name] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] then
-						local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]])
-						if typ=='m' then
-							value=ep
-						elseif typ=='f' then
-							value=ep
-							special='f'
-						elseif typ=='t' then
-							value=ep_t
-							special='d'
-						end
-					end
+					local value, special = getEPGPvalue(name)
 					
 					local role=(LGT:GetUnitRole(name) or 
 					( active_RR[name] and LGT:GetUnitRole("raid"..i) ) or 
