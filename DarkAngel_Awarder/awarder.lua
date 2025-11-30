@@ -2944,10 +2944,9 @@ do --raid difficulty
 	end)
 end
 	
-	DA_Awarder.readycheck=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 120,-10},10,40,'ready','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	DA_Awarder.readycheck = DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "TOPLEFT", 105,-10},14,14,'','',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if GetNumRaidMembers()>0 then
 			if IsRaidOfficer() then
-				self:Disable()
 				-- timer
 				DA_Awarder.readycheckfont.timer=time()
 				DA_Awarder.readycheckfont:Show()
@@ -2960,15 +2959,25 @@ end
 			end
 		else
 			DA.Print(L['You are not in raid'])
-		end
-	end)
+		end	
+	end,'aw_readycheck')
+		
+		DA_Awarder.readycheck:SetNormalTexture("Interface\\RaidFrame\\ReadyCheck-Ready")
+		DA_Awarder.readycheck:GetNormalTexture():SetTexCoord(0,1,0,1)
+		DA_Awarder.readycheck:GetNormalTexture():SetBlendMode('blend')
+		
+		DA_Awarder.readycheck:SetPushedTexture("Interface\\RaidFrame\\ReadyCheck-Ready")
+		DA_Awarder.readycheck:GetPushedTexture():SetTexCoord(-0.1,1.1,-0.1,1.1)
+		DA_Awarder.readycheck:GetPushedTexture():SetBlendMode('blend')
+		
 	DA_Awarder.readycheckfont=DA.FontCreater(nil,"",{"LEFT", DA_Awarder.readycheck, "RIGHT", 2,0},DA_Awarder.readycheck,15,180,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},'left')
 	DA_Awarder.readycheckfont:Hide()
 	
 	local readychecker=CreateFrame('Frame')
 	readychecker:SetScript("OnEvent",function (self,event,param1,param2)
 		if event=='READY_CHECK' and IsRaidOfficer() then
-			DA_Awarder.readycheck:Disable()
+			DA_Awarder.readycheck:EnableMouse(false)
+			DA_Awarder.readycheck:SetNormalTexture("Interface\\Icons\\Spell_Holy_BorrowedTime")
 			FFGSetRCState()
 			FFGSetRCState(param1,true)
 			-- timer
@@ -2982,7 +2991,8 @@ end
 				FFGSetRCState(tonumber(memberID),param2)
 			end
 		elseif event=='READY_CHECK_FINISHED' then
-			DA_Awarder.readycheck:Enable()
+			DA_Awarder.readycheck:EnableMouse(true)
+			DA_Awarder.readycheck:SetNormalTexture("Interface\\RaidFrame\\ReadyCheck-Ready")
 			-- timer stop
 			DA_Awarder.readycheckfont:Hide()
 			DA.StopTimer('ready_check')
@@ -3393,9 +3403,6 @@ do --main frame buttons
 	
 	end
 
-	-- DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "BOTTOMLEFT", 40,95},13,52,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-		
-	-- end,nil,nil,'center')
 	DA_Awarder.refreshbtn = DA.CreateFFGButton2(nil,DA_Awarder,{"center", DA_Awarder, "TOPLEFT", 85,-10},10,10,'','',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if DA_Awarder.locker.getstate() then 
 			DA.Print(L['raid frames locked!'])

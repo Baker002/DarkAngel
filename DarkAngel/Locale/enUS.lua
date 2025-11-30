@@ -322,6 +322,7 @@ end
 
 --EP Awarder
 do
+L["DESCr-aw_readycheck"]=[[Run a ready check]]
 L["DESCr-aw_auto_locals"]=[[|cffff9999Automatic Locals|r
 When one of the "Trusted Players" creates a local binding, you will automatically save it as well]]
 L["DESCr-aw_auto_Ch_locals"]=[[If the received local binding modifies an existing one, it will be accepted automatically
@@ -593,6 +594,8 @@ end
 
 --Descriptions
 do
+L['DESCr-bt_open']=[==[Click Ctrl+Alt+O baka
+Btw, I recommend to get used to binds :)]==]
 L['DESCr-lootBtnSelect']=[==[Set looting method]==]
 L['DESCr-speedSelect']=[==[Raid invitations sending speed]==]
 L['DESCr-awgrpmover']=[==[|cffff9999   Drag|r

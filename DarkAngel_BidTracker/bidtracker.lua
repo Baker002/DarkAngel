@@ -1512,4 +1512,31 @@ function Mod:AddModOptions(modOptTable)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['ep-auc/dkp bid tracker'],function(self) fuckingOptions_g[DA_CurrentGuild].bidtracker=(self:GetChecked() or false);Mod:UpdateStateEvents() end,{'fuckingOptions_g','bidtracker','DA_CurrentGuild'},'bidtracker')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-30},15,15,L['only mine'],function(self) fuckingOptions_g[DA_CurrentGuild].bidtracker_onlymine=(self:GetChecked() or false) end,{'fuckingOptions_g','bidtracker_onlymine','DA_CurrentGuild'},nil)
 	
+	DA.CreateFFGButton2(nil,f,{"center", f, "TOPLEFT", 25,-41},10,30,'open','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		local obj = DarkAngelopt.scrollchild.addbinds_ch.font
+		local function colorChange_animate(colA, colB, colC)
+			if colA and colB and colC then
+				tinsert(DA_Fep_bulk, function() 
+					obj:SetTextColor(colA, colB, colC, 1)
+				end)
+			end
+			
+		end
+		for i=1,20 do
+			if i==20 then
+				break
+			else
+				local a = math.random(100)/100
+				local b = math.random(100)/100
+				local c = math.random(100)/100
+				
+				colorChange_animate(a,b,c)
+			end
+				
+		end	
+		
+		colorChange_animate(0.85, 1, 1, 1)
+		DA.ResumeTimer('fep')
+		
+	end,'bt_open')
 end

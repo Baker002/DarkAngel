@@ -1650,18 +1650,53 @@ do
 		DAOptMenuFrame.epgpawardFrame.t:SetTexture(0.03, 0.04, 0.07, 0.8)
 			do 
 				local function awardfunc(name,epgp,value,reason)
-					local get_main_or_local = (FEP_L_gMain[DA_CurrentGuild][name] and FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]]) or (FEP_gMain[name])
-					local main = get_main_or_local and ( 
-						( (DA.DecodeNote(get_main_or_local)=='m' or DA.DecodeNote(get_main_or_local)=='f') and name ) 
-						or (DA.DecodeNote(get_main_or_local)=='t' and 
-							FEP_gMain[get_main_or_local] and (DA.DecodeNote(FEP_gMain[get_main_or_local])=='m' or DA.DecodeNote(FEP_gMain[get_main_or_local])=='f') and get_main_or_local)
-					)
-					if not main then
-						print('Player is not found in guild')
+					local source,is_local
+					local main,special
+					
+					local localKey = FEP_L_gMain[DA_CurrentGuild][name]
+					if localKey and FEP_gMain[localKey] then
+						source = FEP_gMain[localKey]
+						is_local = true
+					elseif FEP_gMain[name] then
+						source = FEP_gMain[name]
+					else
+						DA.Print(name..' - Player is not found in guild')
 						DAOptMenuFrame.epgpawardFrame.start:Enable()
 						return
 					end
-				
+					
+					local typ,ep,gp,_=DA.DecodeNote(source)
+					if is_local and typ=='m' then
+						main = localKey
+					elseif typ=='m' then
+						main = name
+					elseif typ=='f' then
+						DA.Print(name..' - is frozen. Care to unfreeze?')
+						DAOptMenuFrame.epgpawardFrame.start:Enable()
+						return
+					elseif typ=='t' and not is_local then
+						local source_2 = FEP_gMain[source]
+						if source_2 then
+							local typ_t,ep_t,gp_t,_=DA.DecodeNote(source_2)
+							if typ_t=='m' then
+								main = ep_t
+							elseif typ_t=='f' then
+								DA.Print(name..' - has frozen main. Care to unfreeze?')
+								DAOptMenuFrame.epgpawardFrame.start:Enable()
+								return
+							elseif typ_t=='t' then
+								DA.Print(name..' - is duplicate twin')
+								DAOptMenuFrame.epgpawardFrame.start:Enable()
+								return
+							end
+						end
+					else
+						DA.Print(name..' - Player is not found in guild')
+						DAOptMenuFrame.epgpawardFrame.start:Enable()
+						return
+					end
+					
+					
 					if epgp=='ep' then
 						DA.EPawardfunc(main,value,reason)
 					elseif epgp=='gp' then
@@ -4934,7 +4969,7 @@ do
 		end
 		DA.CheckBtnCreater(nil,options_scrolled,{"CENTER",options_scrolled,"TOPLEFT",160,-60},15,15,L['guild window alias button'],function(self) fuckingOptions.gwinbtn=(self:GetChecked() or false) aliasshowhide() end,{'fuckingOptions','gwinbtn'},nil)
 		
-		DA.CheckBtnCreater(nil,options_scrolled,{"CENTER",options_scrolled,"TOPLEFT",15,-60},15,15,L['Additional binds'],
+		DarkAngelopt.scrollchild.addbinds_ch = DA.CheckBtnCreater(nil,options_scrolled,{"CENTER",options_scrolled,"TOPLEFT",15,-60},15,15,L['Additional binds'],
 			function(self) 
 				fuckingOptions.ctrlobind=(self:GetChecked() or false) 
 				if fuckingOptions.ctrlobind and not InCombatLockdown() then 
