@@ -1679,7 +1679,7 @@ do
 						if source_2 then
 							local typ_t,ep_t,gp_t,_=DA.DecodeNote(source_2)
 							if typ_t=='m' then
-								main = ep_t
+								main = source
 							elseif typ_t=='f' then
 								DA.Print(name..' - has frozen main. Care to unfreeze?')
 								DAOptMenuFrame.epgpawardFrame.start:Enable()
