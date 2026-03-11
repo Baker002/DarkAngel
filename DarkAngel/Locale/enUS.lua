@@ -1,10 +1,9 @@
 local debug = false
 local L = LibStub("AceLocale-3.0"):NewLocale("DarkAngel", "enUS", true, debug)
-
+L.lang = "enUS"
 --other
 L["Scale"]=true
 L['close']=true
-
 -- Opt Menu
 do
 L["Whisper"]=true
@@ -72,6 +71,8 @@ L['detposby']='possible by:\n|cffba8222'
 -- L['detnomsg']="|cff99ffaacmd, no msg |cffaaffff"
 L['detinvited']="|cff22a0ffInvited by |cff99ffaa"
 L['detkicked']="|cffffa022Kicked by |cff99ffaa"
+L['detrerankedby']="|cff22a0ffChange by |cffaaffff"
+
 
 L['deleted local']=true
 L['deleted data']=true
@@ -191,6 +192,9 @@ end
 
 --Gui2
 do
+L["It looks like your guild rank doesn't allow you to read guild chat"]=true
+L["It looks like your guild rank doesn't allow you to use guild chat"]=true
+L["Please select at least one option for accepting players into the raid"]=true
 L['DESCr-SR_lfg_messages']=[[In this menu you can come up with some secret phrases
 that the addon will track in global chat channels.
 As soon as such a phrase is detected, its author will be invited by the autoinviter.
@@ -313,7 +317,7 @@ L["You are too far away from player"]=true
 
 
 L["Bid raise settings"]=true
-L["Bound"]=true
+L["Up to"]=true
 L["Step"]=true
 L["Step in thousands"]=true
 L["'Bid confirmed' message"]=true
@@ -322,6 +326,12 @@ end
 
 --EP Awarder
 do
+L["DESCr-aw_sc_bossfights"]=[[Show only boss fights
+
+|cffff9999This affects all scada logs processing, not only this list|r]]
+L["DESCr-aw_sc_long"]=[[Show only long (>2min) fights
+
+|cffff9999This affects all scada logs processing, not only this list|r]]
 L["DESCr-aw_readycheck"]=[[Run a ready check]]
 L["DESCr-aw_auto_locals"]=[[|cffff9999Automatic Locals|r
 When one of the "Trusted Players" creates a local binding, you will automatically save it as well]]
@@ -359,7 +369,6 @@ L["Unlock raid"]="Unlock"
 L["Get standby %"]=true
 L['From EPGP settings']=true
 L['Use custom']=true
-L['options']=true
 L["No new locals found"]=true
 L["load"]=true
 L['lock raid']=true
@@ -594,7 +603,8 @@ end
 
 --Descriptions
 do
-L['DESCr-bt_open']=[==[Click Ctrl+Alt+O baka
+L['DESCr-bt_open']=[==[You got tricked :)
+Hit Ctrl+Alt+O baka
 Btw, I recommend to get used to binds :)]==]
 L['DESCr-lootBtnSelect']=[==[Set looting method]==]
 L['DESCr-speedSelect']=[==[Raid invitations sending speed]==]
@@ -679,8 +689,8 @@ The addon will also not allow bets that violate the multiplicity within the inte
 |cff22999919|r>|cffff999921|r/|cffff999924|r/|cffff999937|r/|cffff999999|r ...
 |cff22999919|r>|cff00ffff20|r/|cff00ffff25|r/|cff00ffff45|r/|cff00ffff70|r ...]]
 L['DESCr-auc_allow_lower']=[[|cffff9999Allow players to place not competitive bids|r
-These bids would be shown lower than the winning ones
-Otherwise, such new bids would not be processed, however, old low bids would stay]]
+Such bids would be shown lower than the winning ones
+Off: such new bids would not be processed, however, old low bids would stay]]
 L['DESCr-auc_thousands']=[[|cffff9999Thousands betting mode|r
 Bets made by players will be multiplied by 1000
 All settings in this screen will also be multiplied.
@@ -776,7 +786,7 @@ there may be a time discrepancy between the award messages and the moment when t
 when closing the award session in the QDKP addon
 
 If there are math teachers in the guild, they can use this with malicious intent]==]
-L['DESCr-disp_speed']=[==[Set speed at which an addon will create and gather stacks.
+L['DESCr-disp_speed']=[==[Set speed at which an addon will create and dispense stacks.
 Also affects global dispenser sequences.
 
 0.1 option is the fastest one
@@ -938,6 +948,18 @@ end
 
 --Flask disp
 do
+L["DESCr-dispenser_guide"]=[[|cffff9999Flask Dispenser|r
+The module can dispense up to 5 selected items for each of 4 roles:
+  Tank | Healer | Melee | Caster
+
+To add an item to the dispenser, simply drag it from your bag to the appropriate dispenser slot.
+For convenience, the most popular flasks/potions are available in the settings menu; you can drag them from there.
+To clear an item, right-click on the slot with an empty hand.
+
+If you want, you can create separate distribution sets for different raids.
+If you get tired of a set, remove all the items from it – empty sets are deleted upon restart.]]
+L['rename set']=true
+L["DESCr-dispenser_hide_on_set_selection"]=[[Hide sets on selection]]
 L['DESCr-aw_flaskdisp_manual']=[[|cffff9999Show players that took a flask|r
 Shift-click - open a flask dispenser module]]
 L["options"]=true
@@ -989,104 +1011,3 @@ L["minimaptooltip"]=[==[|cffa7faf7Click|r |cff12a39e- main window|r
 |cffa7faf7Ctrl+Alt+O|r |cff12a39e- Bid tool|r
 
 |cffa7faf7Right click|r |cff12a39e- all options|r]==]
-
-
-L["DA_Funlist"]={
-"Spider overdose",
-"Choked on an HP stone",
-"Allergic to light magic",
-"Impaled on a bone spike",
-"Tank's negligence",
-"Caught in a time loop",
-"Game crashed at the phase change",
-"Heroically fell during trash clearing",
-"Fell victim to market grannies",
-"Offered as a sacrifice to the fertility goddess",
-"Stolen by Amazons",
-"Death due to lack of health points",
-"Slipped on beer",
-"Forgot to wear the H.E.V. suit",
-"Sacrificium resuscitati daemonum bellator",
-"Didn't call the she-healer 'doctress'",
-"Summoned into a wall by a novice warlock",
-"Died on replacement duty at the tavern",
-"Showed the panda monk lack of respect",
-"Unpaid communal healing debt",
-"Insulted the RL's feelings",
-"Failed to dodge the wipe on trash",
-"Low-quality healthstone from the nether",
-"Broke the law prohibiting law-breaking",
-"Incorrect Jeeves exploitation",
-"Broke the piñata",
-"Fatal yawn",
-"Deadly spot",
-"Erotic tragedy",
-"Bell tower in the anus",
-"Caution - snake",
-"Brazilian porn on board",
-"Fell victim to a prolonged mole hunt",
-"Stool",
-"Converted to Islam",
-"Maid trap",
-"Got sucked off by vampires",
-"This is a fiasco, bro",
-"Oh my God, they killed Kenny",
-"Didn't work out, wasn't lucky",
-"E. coli in the Americano",
-"Negatively alive",
-"Stuffed with dumplings",
-"Strangled by a goose",
-"Scared to death by spirits",
-"Died like a jug",
-"Expired",
-"Died from a nut cracking",
-"Died from a light bulb in the ass",
-"Giglet pie",
-"Spontaneous combustion of the anus",
-"Standard hit from Saitama",
-"Plague infection while feeding squirrels in Dalaran",
-"Dies from cringe",
-"Charge, BS, release",
-"Health to the deceased",
-"Went to grandma's place",
-
-"got scammed by indians",
-"Wasted",
-"Got consumed by big dick energy",
-"Went to a farm",
-"Flushed down the toilet like a goldfish",
-"Got bonked and went to horny jail",
-"Punished for not wearing panties",
-"Too big of a dick overweighed him",
-"That's a fiesta, bro",
-"Brah...",
-"\"I am getting PTSD from this\"",
-"Got cancer",
-"Cracked his arse",
-"No nut November failed",
-"Drank too much piss",
-"decided to kick the bucket",
-"Yesterday he was fine, now look at him",
-"Down the drain he goes",
-"got crushed by big tiddies",
-"Hoe town summoned him",
-"Shot from a nerf gun",
-"You get what you deserve",
-"Should have stacked stamina gems",
-"Did not practice how to use CDs on manikin",
-"That's a fucking 50 DKP minus",
-"Healer's fault",
-"Snitches be lying dead in ditches",
-"Run over by a long vehicle",
-"Unprotected sex kills",
-"Got severe syphilis",
-"Anal infection",
-"Due to masturbation in a public place",
-"Harakiri would be a more noble way to go",
-"What a disgrace to all of us",
-"You call that a hit? That's a hit",
-"Sorry, I was lagging",
-"Press F to pay respect",
-"Decided to go buy more beer",
-}
-

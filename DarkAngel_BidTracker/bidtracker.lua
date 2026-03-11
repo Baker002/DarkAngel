@@ -1,5 +1,6 @@
 
-local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
+---@class DarkAngelAddon
+local DA = DarkAngel
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 local Mod = DA:NewModule("BidTracker")
@@ -206,13 +207,12 @@ local tierTokens = {
 }
 
 
-CreateFrame("GameTooltip", "DACItemCacheTooltip", nil, "GameTooltipTemplate")
 local function QueueItemForCache(itemID)
 
-	local itemname, itemLink, itemRarity, _, _, itemType, itemSubType, _, _, _, _ = GetItemInfo(itemID)
-	
+	local itemname, itemLink, _, _, _, itemType, itemSubType, _, _, _, _ = GetItemInfo(itemID)
+    local tooltip = DACItemCacheTooltip
+
     if not (itemname and itemLink) then
-        local tooltip = DACItemCacheTooltip
 		tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 		tooltip:SetHyperlink(string.format("|Hitem:%d:0:0:0:0:0:0:0|h[Unknown Item]|h", itemID))
 		tooltip:Hide()
@@ -221,7 +221,6 @@ local function QueueItemForCache(itemID)
 		if itemID==50191 then
 			fuckingOptions.localized_items_data["Weapon"]=itemType
 			fuckingOptions.localized_items_data["Axe1H"]=itemSubType
-				local tooltip = DACItemCacheTooltip or CreateFrame("GameTooltip", "DACItemCacheTooltip", nil, "GameTooltipTemplate")
 				tooltip:Show()
 				tooltip:SetOwner(UIParent, "ANCHOR_NONE")
 				tooltip:SetHyperlink("|Hitem:50191:0:0:0:0:0:0:0|h[Unknown Item]|h")
@@ -300,8 +299,10 @@ DA_BidTracker.itemicon=DA.ButtonCreater(nil,DA_BidTracker,{"TOPLEFT",DA_BidTrack
 		if (CursorHasItem() or (({GetCursorInfo()})[1] and ({GetCursorInfo()})[1]=='item')) and mouse=="LeftButton" then
 			if IsRaidOfficer() then
 				local _,_,z=GetCursorInfo()
-				local name,itemLink,_,_,_,_,_,_,_,texture=GetItemInfo(z);
-				SendChatMessage(itemLink,"raid_warning")
+				if z then
+					local name,itemLink,_,_,_,_,_,_,_,texture=GetItemInfo(z);
+					SendChatMessage(itemLink,"raid_warning")
+				end
 				ClearCursor()
 				return
 			else
@@ -923,7 +924,7 @@ local function Add_Check_Bid(value, name, isAllIn)
 			break
 		end
 	end
-	local classCC=DA.GetClassColorCode(class)
+	local classCC=DA.GetHexClassColorCode(class)
 	local usable=CanItemBeUsedByClass(DA_BidTracker.itemlink,class)
 	
 	local specname = select(1,LGT:GetUnitTalentSpec(name),1)
@@ -1024,12 +1025,8 @@ local function Add_Check_Bid(value, name, isAllIn)
 			DA_BidTracker['loot'..i]:SetScript("OnEnter", function(self)
 				self:RegisterEvent('MODIFIER_STATE_CHANGED')
 				if IsShiftKeyDown() then
-						GameTooltip:SetOwner(self,'ANCHOR_NONE')
-						GameTooltip:SetPoint('topleft',self,'bottomleft',0,-5)
-						GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
-						GameTooltip:SetText(DA.GetTwinsInfo(DA_BidTracker.bidsession_roster[i][2],DA_BidTracker.bidsession_roster[i][4]),0.45,0.65,0.65,1)
-						GameTooltip:Show()
-				elseif not IsShiftKeyDown() and GameTooltip:IsShown() then
+					DA.myShowTooltip(self,DA.GetTwinsInfo(DA_BidTracker.bidsession_roster[i][2],DA_BidTracker.bidsession_roster[i][4]),{UIDarkAngelFontConsolas:GetFont(), 10})
+				elseif not IsShiftKeyDown() and DA_Tooltip:IsShown() then
 					DA.myHideTooltip()
 				end
 			end)
@@ -1038,6 +1035,7 @@ local function Add_Check_Bid(value, name, isAllIn)
 				DA.myHideTooltip()
 			end)
 			DA_BidTracker['loot'..i]:SetScript("OnEvent", function(self)
+				---@diagnostic disable-next-line: undefined-field
 				if self:IsVisible() and self:IsMouseOver() and GetMouseFocus().myID==self.myID then
 					self:GetScript('OnEnter')(GetMouseFocus())
 				end
@@ -1439,10 +1437,10 @@ function Mod:BidTracker_Load()
 		end)
 	DA.FontCreater(nil,L["Bid raise settings"],{"LEFT",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",5,-5},DA_BidTracker.OptionsFr.BSC,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 	
-	DA.FontCreater(nil,L["Bound"],{"LEFT",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",32,-17},DA_BidTracker.OptionsFr.BSC,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	DA.FontCreater(nil,L["Step"],{"LEFT",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",77,-17},DA_BidTracker.OptionsFr.BSC,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	ZXCZESFXCZx=DA.HelpCreater(DA_BidTracker.OptionsFr.BSC,{"CENTER",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",125,-12},'LootTrackerOptHelp',12,12)
-	ZXCZESFXCZ=DA.HelpCreater(DA_BidTracker.OptionsFr,{"CENTER",DA_BidTracker.OptionsFr,"TOPLEFT",125,-12},'auc_classspecinf',12,12)
+	DA.FontCreater(nil,L["Up to"],{"LEFT",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",32,-17},DA_BidTracker.OptionsFr.BSC,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+	DA.FontCreater(nil,L["Step"],{"LEFT",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",79,-17},DA_BidTracker.OptionsFr.BSC,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+	DA.HelpCreater(DA_BidTracker.OptionsFr.BSC,{"CENTER",DA_BidTracker.OptionsFr.BSC,"TOPLEFT",125,-12},'LootTrackerOptHelp',12,12)
+	DA.HelpCreater(DA_BidTracker.OptionsFr,{"CENTER",DA_BidTracker.OptionsFr,"TOPLEFT",125,-12},'auc_classspecinf',12,12)
 	
 	local increments = {
 		[1] = 5,
@@ -1462,7 +1460,7 @@ function Mod:BidTracker_Load()
 		
 		DA_BidTracker.OptionsFr['opt'..i].del=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",12,0},10,15,"x",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() end)
 		DA_BidTracker.OptionsFr['opt'..i].bidlimit=DA.EditBoxCreater2(nil,DA_BidTracker.OptionsFr['opt'..i],{"LEFT", DA_BidTracker.OptionsFr['opt'..i], "LEFT",30,0},{35,12},"",false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},nil,1,nil,true)
-		DA_BidTracker.OptionsFr['opt'..i].bidincr=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",85,0},12,30,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
+		DA_BidTracker.OptionsFr['opt'..i].bidincr=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",90,0},12,30,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
 			local newValue = increments[tonumber(self:GetText())]
 			if newValue then
 				fuckingOptions_g[DA_CurrentGuild].aucoptsets[i][2] = newValue
@@ -1473,7 +1471,7 @@ function Mod:BidTracker_Load()
 	DA_BidTracker.OptionsFr.optlast=DA.FrameCreater(nil,DA_BidTracker.OptionsFr.BSC,DA_BidTracker.OptionsFr.BSC.width-5,15,{"TOPLEFT", DA_BidTracker.OptionsFr.BSC, "TOPLEFT", 2.5, -86})
 	DA_BidTracker.OptionsFr.optlast:Show()
 	DA.FontCreater(nil,"Any higher",{"LEFT",DA_BidTracker.OptionsFr.optlast,"LEFT",5,0},DA_BidTracker.OptionsFr.optlast,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	DA_BidTracker.OptionsFr.optlast.bidincr=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr.optlast,{"center", DA_BidTracker.OptionsFr.optlast, "LEFT",80,0},12,20,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
+	DA_BidTracker.OptionsFr.optlast.bidincr=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr.optlast,{"center", DA_BidTracker.OptionsFr.optlast, "LEFT",90,0},12,30,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self) 
 		local newValue = increments[tonumber(self:GetText())]
 		if newValue then
 			fuckingOptions_g[DA_CurrentGuild].aucoptsets.lastincr = newValue
@@ -1497,10 +1495,9 @@ function Mod:BidTracker_Load()
 	DA.CheckBtnCreater(nil,DA_BidTracker.OptionsFr,{"CENTER",DA_BidTracker.OptionsFr,"TOPLEFT",11,-204},15,15,L["'Bid confirmed' message"],function(self) fuckingOptions_g[DA_CurrentGuild].auc_bidconfirmed=(self:GetChecked() or false) end,{'fuckingOptions_g','auc_bidconfirmed','DA_CurrentGuild'},'auc_bidconfirmed')
 		
 	resort_and_rerender_auc_saves()
-	
+	table.insert(DA.RunOnGuildUpdate, resort_and_rerender_auc_saves)
 
 end
-
 
 function Mod:AddModOptions(modOptTable)
 	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,50)
@@ -1513,30 +1510,6 @@ function Mod:AddModOptions(modOptTable)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-30},15,15,L['only mine'],function(self) fuckingOptions_g[DA_CurrentGuild].bidtracker_onlymine=(self:GetChecked() or false) end,{'fuckingOptions_g','bidtracker_onlymine','DA_CurrentGuild'},nil)
 	
 	DA.CreateFFGButton2(nil,f,{"center", f, "TOPLEFT", 25,-41},10,30,'open','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-		local obj = DarkAngelopt.scrollchild.addbinds_ch.font
-		local function colorChange_animate(colA, colB, colC)
-			if colA and colB and colC then
-				tinsert(DA_Fep_bulk, function() 
-					obj:SetTextColor(colA, colB, colC, 1)
-				end)
-			end
-			
-		end
-		for i=1,20 do
-			if i==20 then
-				break
-			else
-				local a = math.random(100)/100
-				local b = math.random(100)/100
-				local c = math.random(100)/100
-				
-				colorChange_animate(a,b,c)
-			end
-				
-		end	
-		
-		colorChange_animate(0.85, 1, 1, 1)
-		DA.ResumeTimer('fep')
-		
+		DA.AnimateText(DarkAngelopt.scrollchild.addbinds_ch.font)
 	end,'bt_open')
 end

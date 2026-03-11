@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil, unbalanced-assignments
 ----------------------------------------------------------------------------------
 --
 -- LibCompress.lua

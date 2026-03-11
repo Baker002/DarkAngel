@@ -1,5 +1,6 @@
 
-local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
+---@class DarkAngelAddon
+local DA = DarkAngel
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local Mod = DA:NewModule("Inviter")
 
@@ -27,7 +28,7 @@ local convertedToRaid=false
 local Inviter_Started=false
 local InviterMsgFrame=CreateFrame("FRAME");
 DA.listinvite_bulk={}
-local SRwant2invite=SRwant2invite or "no"
+local SRwant2invite="no"
 DA.Inviter_responseFrame:SetScript("OnEvent",function(_,event,msg)
 	if not Inviter_Started then return end
 	
@@ -51,7 +52,7 @@ end)
 
 
 
-DA_Inviter=DA.FrameCreater("DA_Inviter",UIParent,400,200,{"CENTER", UIParent, "CENTER", 0, 0},"Interface\\AddOns\\DarkAngel\\template\\pict\\a62",1)
+DA_Inviter=DA.FrameCreater("DA_Inviter",UIParent,400,200,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_inviter]],1,1)
 DA_Inviter:RegisterForDrag("LeftButton")
 DA_Inviter:SetScript("OnDragStart", DA_Inviter.StartMoving)
 DA_Inviter:SetScript("OnDragStop", function(self)
@@ -184,11 +185,11 @@ local function AddInQueue(_, event, message, author, _,addit2, _)
 		if not convertedToRaid then
 			convertedToRaid=true
 			ConvertToRaid()
-			if DA_Inviter.initRaidLootMethod=='m' then
+			if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='m' then
 				SetLootMethod("master","player")
-			elseif DA_Inviter.initRaidLootMethod=='g' then
+			elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='g' then
 				SetLootMethod("group")
-			elseif DA_Inviter.initRaidLootMethod=='f' then
+			elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='f' then
 				SetLootMethod("freeforall")
 			end
 			SetRaidDifficulty(DA_Inviter.initRaidDifficulty)
@@ -462,17 +463,11 @@ do
 			end
 		end
 	end
-	
 	rerender_speedSelectFrame()
+	table.insert(DA.RunOnGuildUpdate, rerender_speedSelectFrame)
 	
 	DA_Inviter.startMenuFrame.silentstart=DA.CheckBtnCreater(nil,DA_Inviter.startMenuFrame,{"CENTER",DA_Inviter.startMenuFrame,"TOPLEFT",10,-35},15,15,L['start silently'],nil,nil,'silentlstart')
-		-- if DA_Inviter.initRaidLootMethod=='m' then
-			-- SetLootMethod("master","player")
-		-- elseif DA_Inviter.initRaidLootMethod=='g' then
-			-- SetLootMethod("group")
-		-- elseif DA_Inviter.initRaidLootMethod=='f' then
-			-- SetLootMethod("freeforall")
-		-- end
+	
 	local lootSelectTbl={
 		{"Master",'m'},
 		{"Group",'g'},
@@ -502,6 +497,7 @@ do
 		end
 	end
 	rerender_lootSelectFrame()
+	table.insert(DA.RunOnGuildUpdate, rerender_lootSelectFrame)
 	
 	DA.FontCreater(nil,L['Also invite:'],{"TOPLEFT", DA_Inviter.startMenuFrame, "TOPLEFT", 15, -45},DA_Inviter.startMenuFrame.silentstart,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 	
@@ -619,9 +615,38 @@ do
 		AddInQueue()
 				
 	end
-	
+	local function getGuildChatPermissions()
+		
+		if not IsInGuild() then
+			return nil, nil, true
+		end
+		local _, _, rankIndex = GetGuildInfo("player")
+		GuildControlSetRank(rankIndex)
+		local guildchat_listen, guildchat_speak = GuildControlGetRankFlags()
+
+		return guildchat_listen, guildchat_speak
+	end
+
 	DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter.startMenuFrame,  {"TOPLEFT", DA_Inviter.startMenuFrame, "TOPLEFT", 115, -1},  12,  50,  L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-		function(self)
+		function()
+			if not(fuckingOptions.SR_gc or fuckingOptions.SR_pm or fuckingOptions.SR_lfg) then
+				DA.Print(L["Please select at least one option for accepting players into the raid"])
+				return
+			end
+			local guildchat_listen, guildchat_speak, not_in_guild = getGuildChatPermissions()
+			  
+			if not_in_guild then
+				DA.Print(L["is not in guild"])
+				return
+			end
+			if not guildchat_listen then
+				DA.Print(L["It looks like your guild rank doesn't allow you to read guild chat"])
+				return
+			end
+			if not guildchat_speak then
+				DA.Print(L["It looks like your guild rank doesn't allow you to use guild chat"])
+				return
+			end
 			DA_Inviter.startMenuFrame.speedSelectTimerEB:ClearFocus()
 			if Inviter_Started==true then
 				DA_Inviter.stopbtn:Enable()
@@ -632,7 +657,7 @@ do
 				DA_Inviter.stopbtn:Enable()
 				convertedToRaid=false
 				Inviter_Started=true
-				DA_XTimers["inviter"].mytime=nil;DA_XTimers["inviter"].mytime2=nil;
+				DA.XTimers["inviter"].mytime=nil;DA.XTimers["inviter"].mytime2=nil;
 				DA.ResumeTimer('inviter')
 				
 				DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Raid inviter started'],0,1,1)
@@ -663,11 +688,11 @@ DA_Inviter.stopbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter
 			DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Raid inviter is already disabled'],1,0.2,0.2)
 			DA.listinvite_bulk=nil
 			DA.listinvite_bulk={}
-			DA.StopTimer("inviter");DA_XTimers["inviter"].mytime=nil;DA_XTimers["inviter"].mytime2=nil
+			DA.StopTimer("inviter");DA.XTimers["inviter"].mytime=nil;DA.XTimers["inviter"].mytime2=nil
 		else
 			DA.listinvite_bulk=nil
 			DA.listinvite_bulk={}
-			DA.StopTimer("inviter");DA_XTimers["inviter"].mytime=nil;DA_XTimers["inviter"].mytime2=nil
+			DA.StopTimer("inviter");DA.XTimers["inviter"].mytime=nil;DA.XTimers["inviter"].mytime2=nil
 			convertedToRaid=false
 			DA_Inviter.stopbtn:Disable()
 			DA_Inviter.startbtn:SetText(L['start'])
@@ -840,20 +865,20 @@ local function dungnamesrch(lok)
 	end
 end
 DA:RegisterComm("DA_join", 
-	function(message, dtype, sender)
+	function(_, _, sender)
 		if sender~=GetUnitName("player") and DA.IsInSameGuild(sender) and Inviter_Started and not UnitInRaid(sender) then
 			local index={}
 			for k,v in pairs(DA.listinvite_bulk) do
 			  index[v]=k
 			end
-			if index[author] then return else 
+			if index[sender] then return else 
 			table.insert(DA.listinvite_bulk,sender)
 			end
 		end 
 	end
 )
 DA:RegisterComm("DA_RTq", 
-	function(message, dtype, sender)
+	function(_, _, sender)
 		if sender~=GetUnitName("player") and DA.IsInSameGuild(sender) and IsRaidOfficer() and Inviter_Started then
 			local lead,loc=zdatasend()
 			local leadlock=nil
@@ -863,7 +888,7 @@ DA:RegisterComm("DA_RTq",
 	end
 )
 DA:RegisterComm("DA_RTa", 
-	function(message, dtype, sender)
+	function(message, _, sender)
 		if DA.IsInSameGuild(sender) then
 			if message=="text" then
 				DA_Inviter.askbtn:Enable()

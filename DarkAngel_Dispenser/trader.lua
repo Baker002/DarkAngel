@@ -1,5 +1,6 @@
 
-local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
+---@class DarkAngelAddon
+local DA = DarkAngel
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 
@@ -13,18 +14,25 @@ local TR_allprestack
 
 local function getFlaskNames()
 	local listflasks={}
-	if DarkAngel_FlaskDB[DA.TR_SelSet] then
-		local f=DarkAngel_FlaskDB[DA.TR_SelSet]
-		for _,i in pairs({'Flask','Potion','Dops'}) do
-			for _,j in pairs({'tank','heal','meel','rdd'}) do
-				if f[i] and f[i][j] and f[i][j][1] and f[i][j][2] and f[i][j][2]>0 then 
-					listflasks[f[i][j][1]]=true
-				end 
+	if DarkAngel_FlaskerDB[DA.TR_SelSet] then
+		for _,roleset in ipairs(DarkAngel_FlaskerDB[DA.TR_SelSet]) do
+			for n=1,5 do
+				local itemtbl = roleset[n]
+				if itemtbl and itemtbl.id then
+					local id = itemtbl.id
+					local name = itemtbl.nameLocalized
+					local count = itemtbl.count
+
+					local itemName, _, _, _, _, _, _, _, _, _ = GetItemInfo(id)
+					if id and count and count>0 then
+						listflasks[name or itemName] = true
+					end
+				end
 			end
 		end
 	else
 		print('error 36')
-		return
+		error()
 	end
 	
 	return listflasks
@@ -174,7 +182,6 @@ local function TR_makestack(flask,count,putinbag,putinslot,beforetrade)
 			end
 		end 
 	end 
-
 	local takefrombag,takefromslot=obtainbigstack(bigstacks,flask)
 	if takefrombag and takefromslot then
 		SplitContainerItem(takefrombag,takefromslot,count)
@@ -205,13 +212,20 @@ TR_allprestack = function (beforetrade)
 
 	local freespace=TR_lookforspace()
 	local queryflasks={}
-	if DarkAngel_FlaskDB[DA.TR_SelSet] then
-		local f=DarkAngel_FlaskDB[DA.TR_SelSet]
-		for _,i in pairs({'Flask','Potion','Dops'}) do
-			for _,j in pairs({'tank','heal','meel','rdd'}) do
-				if f[i] and f[i][j] and f[i][j][1] and f[i][j][2] and f[i][j][2]>0 and not TR_inspect(f[i][j][1],f[i][j][2],beforetrade) and canmakenewstack(f[i][j][1],f[i][j][2]) then 
-					tinsert(queryflasks,{f[i][j][1],f[i][j][2]})
-				end 
+	if DarkAngel_FlaskerDB[DA.TR_SelSet] then
+		for _,roleset in ipairs(DarkAngel_FlaskerDB[DA.TR_SelSet]) do
+			for n=1,5 do
+				local itemtbl = roleset[n]
+				if itemtbl and itemtbl.id then
+					local id = itemtbl.id
+					local name = itemtbl.nameLocalized
+					local count = itemtbl.count
+
+					local itemName, _, _, _, _, _, _, _, _, _ = GetItemInfo(id)
+					if id and count and count>0 and not TR_inspect(name or itemName,count,beforetrade) and canmakenewstack(name or itemName,count) then
+						tinsert(queryflasks,{name or itemName,count})
+					end
+				end
 			end
 		end
 	else
@@ -222,7 +236,7 @@ TR_allprestack = function (beforetrade)
 
 
 	queryflasks=removeExactDuplicates(queryflasks)
-	if #freespace>=#queryflasks then
+	if freespace and #freespace>=#queryflasks then
 		for i=1,#queryflasks do
 			tinsert(DA.flasker_bulk,function() TR_makestack(queryflasks[i][1],queryflasks[i][2],freespace[i][1],freespace[i][2],beforetrade) end)
 		end
@@ -240,10 +254,18 @@ TR_allprestack = function (beforetrade)
 end
 
 local function TR_giveall(role)
-	if DarkAngel_FlaskDB[DA.TR_SelSet] then
-		for _,i in pairs({'Flask','Potion','Dops'}) do
-			if DarkAngel_FlaskDB[DA.TR_SelSet][i][role][1] and DarkAngel_FlaskDB[DA.TR_SelSet][i][role][2] and DarkAngel_FlaskDB[DA.TR_SelSet][i][role][2]>0 then
-				TR_giveflask(DarkAngel_FlaskDB[DA.TR_SelSet][i][role][1],DarkAngel_FlaskDB[DA.TR_SelSet][i][role][2])
+	if DarkAngel_FlaskerDB[DA.TR_SelSet] and DarkAngel_FlaskerDB[DA.TR_SelSet][role] then
+		for n=1,5 do
+			local itemtbl = DarkAngel_FlaskerDB[DA.TR_SelSet][role][n]
+			if itemtbl and itemtbl.id then
+				local id = itemtbl.id
+				local name = itemtbl.nameLocalized
+				local count = itemtbl.count
+
+				local itemName, _, _, _, _, _, _, _, _, _ = GetItemInfo(id)
+				if id and count and count>0 then
+					TR_giveflask(name or itemName,count)
+				end
 			end
 		end
 	else
@@ -301,18 +323,18 @@ function DA.TR_routine(_,event,ac1,ac2,...)
 			local microrole=LGT:GetUnitRole(unitrg)
 			
 			if microrole=='tank' then
-				role="tank"
+				role=1
 				if (clas=="DEATHKNIGHT" and not UnitAura(unitrg, L['Frost Presence'] )) then
 					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(48263)), "WHISPER",nil,targetn)
 				elseif (clas=="PALADIN" and not UnitAura(unitrg, L['Righteous Fury'] )) then
 					SendChatMessage(L["DAdonotforgetbuff"]:gsub('$1',GetSpellLink(25780)), "WHISPER",nil,targetn)
 				end
 			elseif microrole=='healer' then
-				role="heal"
+				role=2
 			elseif microrole=='melee' then
-				role="meel"
+				role=3
 			elseif microrole=='caster' then
-				role="rdd"
+				role=4
 			else
 				DA.Print(microrole)
 				DA.Print(L['failed to detect specialization'])
@@ -372,78 +394,71 @@ end
 local gt = CreateFrame("Frame")
 gt:SetScript("OnEvent", DA.TR_routine)
 
-function DA.TR_start(mod)
+function DA.TR_start(set)
 
-if DarkAngel_FlaskDB[mod] then else DA.Print("error 364") end
+	if DarkAngel_FlaskerDB[set] then else DA.Print("error 364") end
 
-	
-if working and DA.TR_SelSet==mod then 
-	DA.Print(L["already working"])
-	return
-elseif not working or (working and DA.TR_SelSet~=mod) then 
 
-	if working and DA.TR_SelSet~=mod then
-		table.wipe(DA.TR_Names)
-		DA.Print(L["starting distribution from another set..."])
-	end
-	DA.TR_SelSet=mod
-	
-	
-	local quickgive=TR_allprestack('show')
-	if quickgive then
-		gt:RegisterEvent("TRADE_ACCEPT_UPDATE")
-		gt:RegisterEvent("TRADE_SHOW")
-		gt:RegisterEvent("TRADE_CLOSED")
-		gt:RegisterEvent("TRADE_REQUEST_CANCEL")
-		table.wipe(DA.TR_Names)
-		if quickgive=='set' then
-			working=true
-			if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'raid') else DA.Print("|cff00ffff    Ready.")  end
-			if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
-				if UnitIsRaidOfficer('player') then
-					SetRaidTarget('player',fuckingOptions_g[DA_CurrentGuild].dispenser_markself_n)
-				else
-					DA.Print(L["cant mark myself, not a raid officer"])
-				end
-			end
-			
-			if TradeFrame:IsShown() then 
-				DA.TR_routine(nil,'TRADE_SHOW') 
-			end
-		elseif quickgive=='q' then
-			tinsert(DA.flasker_bulk,function()  end)
-			tinsert(DA.flasker_bulk,function()  end)
-			tinsert(DA.flasker_bulk,function()  
-				TR_allprestack()
-				tinsert(DA.flasker_bulk,function()  end)
-				tinsert(DA.flasker_bulk,function()  end)
-				tinsert(DA.flasker_bulk,function() 
-					working=true
-					
-					if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'RAID') else DA.Print("|cff00ffff    Ready.") end
-					if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
-						if UnitIsRaidOfficer('player') then
-							SetRaidTarget('player',fuckingOptions_g[DA_CurrentGuild].dispenser_markself_n)
-						else
-							DA.Print(L["cant mark myself, not a raid officer"])
-						end
-					end
-					if TradeFrame:IsShown() then DA.TR_routine(nil,'TRADE_SHOW') end 
-				end)
-			end)
-			DA.ResumeTimer('flask_disp')
+	if working and DA.TR_SelSet==set then 
+		DA.Print(L["already working"])
+		return
+	elseif not working or (working and DA.TR_SelSet~=set) then 
+
+		if working and DA.TR_SelSet~=set then
+			table.wipe(DA.TR_Names)
+			DA.Print(L["starting distribution from another set..."])
 		end
-		
-		DA.ResumeTimer('flask_disp')
-		
+		DA.TR_SelSet=set
+
+		local quickgive=TR_allprestack('show')
+		if quickgive then
+			gt:RegisterEvent("TRADE_ACCEPT_UPDATE")
+			gt:RegisterEvent("TRADE_SHOW")
+			gt:RegisterEvent("TRADE_CLOSED")
+			gt:RegisterEvent("TRADE_REQUEST_CANCEL")
+			table.wipe(DA.TR_Names)
+			if quickgive=='set' then
+				working=true
+				if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'raid') else DA.Print("|cff00ffff    Ready.")  end
+				if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
+					if UnitIsRaidOfficer('player') then
+						SetRaidTarget('player',fuckingOptions_g[DA_CurrentGuild].dispenser_markself_n)
+					else
+						DA.Print(L["cant mark myself, not a raid officer"])
+					end
+				end
+
+				if TradeFrame:IsShown() then 
+					DA.TR_routine(nil,'TRADE_SHOW') 
+				end
+			elseif quickgive=='q' then
+				tinsert(DA.flasker_bulk,function()  end)
+				tinsert(DA.flasker_bulk,function()  end)
+				tinsert(DA.flasker_bulk,function()  
+					TR_allprestack()
+					tinsert(DA.flasker_bulk,function()  end)
+					tinsert(DA.flasker_bulk,function()  end)
+					tinsert(DA.flasker_bulk,function() 
+						working=true
+
+						if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'RAID') else DA.Print("|cff00ffff    Ready.") end
+						if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
+							if UnitIsRaidOfficer('player') then
+								SetRaidTarget('player',fuckingOptions_g[DA_CurrentGuild].dispenser_markself_n)
+							else
+								DA.Print(L["cant mark myself, not a raid officer"])
+							end
+						end
+						if TradeFrame:IsShown() then DA.TR_routine(nil,'TRADE_SHOW') end 
+					end)
+				end)
+				DA.ResumeTimer('flask_disp')
+			end
+
+			DA.ResumeTimer('flask_disp')
+
+		end
 	end
-	
-
-end
-
-
- 
-
 end
 
 function DA.TR_stop()

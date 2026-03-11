@@ -1,5 +1,6 @@
 
-local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
+---@class DarkAngelAddon
+local DA = DarkAngel
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local Mod = DA:NewModule("Backup")
 
@@ -722,8 +723,8 @@ function DA.UnpackBackup(db)
 	DA.Garbage_Collect()
 end
 
-
-function DA.StartBackup()
+local StopBackupRestoration
+local function StartBackupRestoration()
 local restore_GM_system=DarkAngelGUI.Backup.bcgmrank:GetChecked() or nil
 local restore_G_info=DarkAngelGUI.Backup.bcginfo:GetChecked() or nil
 local restore_G_motd=DarkAngelGUI.Backup.bcgannounce:GetChecked() or nil
@@ -780,13 +781,13 @@ end
 	
 	if restore_GM_system then
 		DA.Print('|cff99ffffNext|r: |cffffaaaaGM rank system')
-		if not DA_Unpacked or not DA_Unpacked.guildranks then DA.Print('error 2495; backup incorrectly loaded') DA.StopBackup() return end 
-		if GuildControlGetNumRanks()<5 then DA.Print('error 2497; probably guild GUI not fully loaded yet') DA.StopBackup() return end
+		if not DA_Unpacked or not DA_Unpacked.guildranks then DA.Print('error 2495; backup incorrectly loaded') StopBackupRestoration() return end 
+		if GuildControlGetNumRanks()<5 then DA.Print('error 2497; probably guild GUI not fully loaded yet') StopBackupRestoration() return end
 		insertpause()
 		local db=DA_Unpacked.guildranks
 		tinsert(DA_Bulk_list,function() 
 			if #db==0 then 
-				DA.Print('error 2500; backup incorrectly loaded') DA.StopBackup() return
+				DA.Print('error 2500; backup incorrectly loaded') StopBackupRestoration() return
 			elseif #db>GuildControlGetNumRanks() then
 				for i=1,#db-GuildControlGetNumRanks() do
 					GuildControlAddRank('temporary'..i)
@@ -835,7 +836,7 @@ end
 	end 
 	
 	if restore_bcnote or restore_bcofnote then
-		if not DA_Unpacked or not DA_Unpacked.pl_data then DA.Print('error 2617; backup incorrectly loaded') DA.StopBackup() return end 
+		if not DA_Unpacked or not DA_Unpacked.pl_data then DA.Print('error 2617; backup incorrectly loaded') StopBackupRestoration() return end 
 		
 		if restore_GM_system or restore_G_info or restore_G_motd then
 			if restore_bcnote and restore_bcofnote then
@@ -879,7 +880,7 @@ end
 		tinsert(DA_Bulk_list,function()  end)
 	end 
 	if restore_bcrank then
-		if not DA_Unpacked or not DA_Unpacked.pl_data then DA.Print('error 2661; backup incorrectly loaded') DA.StopBackup() return end 
+		if not DA_Unpacked or not DA_Unpacked.pl_data then DA.Print('error 2661; backup incorrectly loaded') StopBackupRestoration() return end 
 		if restore_bclocals or restore_GM_system or restore_G_info or restore_G_motd or restore_bcnote or restore_bcofnote then
 			tinsert(DA_Bulk_list,function() DA.Print('|cff99ffffNext|r: |cffffaaaaPlayer ranks') end)
 		else
@@ -894,7 +895,7 @@ tinsert(DA_Bulk_list,function() tinsert(DA_Bulk_list,function() DA.Print('|cff99
 	DA.ResumeTimer('bulkprocessor')
 		
 end
-function DA.StopBackup()
+StopBackupRestoration = function ()
 	if #DA_Bulk_list==0 then DA.Print('Backup is not running...') else DA.Print('|cffffaaaaBackup aborted') end
 	DA.StopTimer('bulkprocessor')
 	table.wipe(DA_Bulk_list)
@@ -939,7 +940,7 @@ end
 
 function Mod.Backup_Load()
 
-	DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",165,0},15,40,10,50,"Backup",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) Backup_ReRenderGuilds() end,function() DA.ResetScrollBoxes() end,"Interface\\AddOns\\DarkAngel\\template\\pict\\a51res2")
+	DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",165,0},15,40,10,50,"Backup",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) Backup_ReRenderGuilds() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_backup]])
 		
 		do	--auto 
 			
@@ -1058,14 +1059,14 @@ function Mod.Backup_Load()
 				DarkAngelGUI.Backup.guilds  = CreateFrame("Frame", nil, DarkAngelGUI.Backup)
 				DarkAngelGUI.Backup.guilds.width  = 160
 				DarkAngelGUI.Backup.guilds.height = 70
-				DarkAngelGUI.Backup.guilds:SetFrameStrata("FULLSCREEN_DIALOG")
+				DarkAngelGUI.Backup.guilds:SetFrameStrata("MEDIUM")
 				DarkAngelGUI.Backup.guilds:SetSize(DarkAngelGUI.Backup.guilds.width, DarkAngelGUI.Backup.guilds.height)
 				DarkAngelGUI.Backup.guilds:SetPoint("TOPLEFT", DarkAngelGUI.Backup, "TOPLEFT", 10, -150)
 				DarkAngelGUI.Backup.guilds:SetBackdropColor(1, 1, 1, 1)
 					do
 						DarkAngelGUI.Backup.guilds.t = DarkAngelGUI.Backup.guilds:CreateTexture(nil, "BACKGROUND")
 						DarkAngelGUI.Backup.guilds.t:SetAllPoints()
-						DarkAngelGUI.Backup.guilds.t:SetTexture(8/255, 12/255, 20/255, 0.6);
+						DarkAngelGUI.Backup.guilds.t:SetTexture(21/255, 18/255, 22/255, 0.6);
 						DarkAngelGUI.Backup.guilds.t:SetBlendMode("blend")
 						DarkAngelGUI.Backup.guilds.t:SetAlpha(0.7)
 
@@ -1081,7 +1082,7 @@ function Mod.Backup_Load()
 			end
 		
 		
-			DA.ScrollBarCreater("DA_Backups_G",DarkAngelGUI.Backup.guilds,{DarkAngelGUI.Backup.guilds.width+5, DarkAngelGUI.Backup.guilds.height-3},{"TOPLEFT", DarkAngelGUI.Backup.guilds, "TOPLEFT", 0, -1},1)
+			DA_Backups_G = DA.ScrollBarCreater("DA_Backups_G",DarkAngelGUI.Backup.guilds,{DarkAngelGUI.Backup.guilds.width+5, DarkAngelGUI.Backup.guilds.height-3},{"TOPLEFT", DarkAngelGUI.Backup.guilds, "TOPLEFT", 0, -1},1)
 			
 			local guilds=DarkAngelGUI.Backup.guilds
 			local guilds_Scrolled=DA_Backups_G.scrollchild
@@ -1102,14 +1103,14 @@ function Mod.Backup_Load()
 				DarkAngelGUI.Backup.backupo  = CreateFrame("Frame", nil, DarkAngelGUI.Backup)
 				DarkAngelGUI.Backup.backupo.width  = 226
 				DarkAngelGUI.Backup.backupo.height = 70
-				DarkAngelGUI.Backup.backupo:SetFrameStrata("FULLSCREEN_DIALOG")
+				DarkAngelGUI.Backup.backupo:SetFrameStrata("MEDIUM")
 				DarkAngelGUI.Backup.backupo:SetSize(DarkAngelGUI.Backup.backupo.width, DarkAngelGUI.Backup.backupo.height)
 				DarkAngelGUI.Backup.backupo:SetPoint("TOPLEFT", DarkAngelGUI.Backup, "TOPLEFT", 180, -150)
 				DarkAngelGUI.Backup.backupo:SetBackdropColor(1, 1, 1, 1)
 					do
 						DarkAngelGUI.Backup.backupo.t = DarkAngelGUI.Backup.backupo:CreateTexture(nil, "BACKGROUND")
 						DarkAngelGUI.Backup.backupo.t:SetAllPoints()
-						DarkAngelGUI.Backup.backupo.t:SetTexture(8/255, 12/255, 20/255, 0.6);
+						DarkAngelGUI.Backup.backupo.t:SetTexture(21/255, 18/255, 22/255, 0.6);
 						DarkAngelGUI.Backup.backupo.t:SetBlendMode("blend")
 						DarkAngelGUI.Backup.backupo.t:SetAlpha(0.7)
 
@@ -1125,7 +1126,7 @@ function Mod.Backup_Load()
 			end
 			
 		
-			DA.ScrollBarCreater("DA_Backups_B",DarkAngelGUI.Backup.backupo,{DarkAngelGUI.Backup.backupo.width+5, DarkAngelGUI.Backup.backupo.height-3},{"TOPLEFT", DarkAngelGUI.Backup.backupo, "TOPLEFT", 0, -1},1)
+			DA_Backups_B = DA.ScrollBarCreater("DA_Backups_B",DarkAngelGUI.Backup.backupo,{DarkAngelGUI.Backup.backupo.width+5, DarkAngelGUI.Backup.backupo.height-3},{"TOPLEFT", DarkAngelGUI.Backup.backupo, "TOPLEFT", 0, -1},1)
 			
 			local backupo=DarkAngelGUI.Backup.backupo
 			local backupo_Scrolled=DA_Backups_B.scrollchild
@@ -1167,7 +1168,9 @@ function Mod.Backup_Load()
 		do --open data btns
 		
 			DarkAngelGUI.Backup.showmotd=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-275},8,13,'?','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
-				
+				if DA_Unpacked and DA_Unpacked.motd then
+					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, GUILD_MOTD_LABEL .. "\n" .. DA_Unpacked.motd)
+				end
 			end)
 			DarkAngelGUI.Backup.showmotd:SetScript("OnEnter",function(self) 
 				if DA_Unpacked and DA_Unpacked.motd then
@@ -1178,7 +1181,9 @@ function Mod.Backup_Load()
 				DA.myHideTooltip()
 			end)
 			DarkAngelGUI.Backup.showGinfo=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-285},8,13,'?','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
-				
+				if DA_Unpacked and DA_Unpacked.ginfo then
+					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, GUILD_INFORMATION .. "\n" .. DA_Unpacked.ginfo)
+				end
 			end)
 			DarkAngelGUI.Backup.showGinfo:SetScript("OnEnter",function(self) 
 				if DA_Unpacked and DA_Unpacked.ginfo then
@@ -1193,7 +1198,7 @@ function Mod.Backup_Load()
 				if DA_Unpacked and (DA_Unpacked.pl_data or DA_Unpacked.localtvins ) then
 					DarkAngelGuild.custom_mode=1
 					DarkAngelGUI.Guild.micromenu:Hide()
-					DAOptMenuFrame.epgpawardFrame:Hide()
+					DA_RightClickMenu.epgpawardFrame:Hide()
 					DarkAngelGUI.Guild.bulkmenu:Hide()
 					DarkAngelGUI.Guild.bulkBtn:Disable()
 					
@@ -1225,12 +1230,12 @@ function Mod.Backup_Load()
 			DarkAngelGUI.Backup.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-232},12,40,'start','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
 				DarkAngelGUI.Backup.stopbtn:Enable()
-				DA.StartBackup()
+				StartBackupRestoration()
 			end)
 			
 			DarkAngelGUI.Backup.stopbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-247},12,40,L['stop'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
-				DA.StopBackup()
+				StopBackupRestoration()
 			end)
 			DarkAngelGUI.Backup.stopbtn:Disable()
 			
@@ -1280,7 +1285,7 @@ function Mod.Backup_Load()
 			DarkAngelGUI.Backup.passiverestofnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",275,-283},15,15,L['officer note'])
 			DarkAngelGUI.Backup.passiverestrank=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",275,-293},15,15,L['rank'])
 			
-			CreateFrame('Frame','DADckp_passive');_G['DADckp_passive']:SetScript("OnEvent",function(_,_,msg,...)
+			DADckp_passive = CreateFrame('Frame','DADckp_passive');_G['DADckp_passive']:SetScript("OnEvent",function(_,_,msg,...)
 				local msg=msg
 				local player=msg:match("(.+)%s"..L['joins_guild'])
 				GuildRoster()

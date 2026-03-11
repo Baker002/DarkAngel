@@ -1,9 +1,9 @@
 
-local DA=LibStub("AceAddon-3.0"):GetAddon("DarkAngel")
+---@class DarkAngelAddon
+local DA = DarkAngel
 local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 local Mod = DA:NewModule("Awarder")
-
 
 local localsToShare={}
 local locals_Bulk={}
@@ -176,7 +176,7 @@ function Mod:PublishLocal(name)
 end
 
 
-DA_Awarder=DA.FrameCreater(nil,UIParent,350,495,{"CENTER", UIParent, "CENTER", 0, 0},"Interface\\AddOns\\DarkAngel\\template\\fon_port2",1)
+DA_Awarder=DA.FrameCreater(nil,UIParent,350,495,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_awarder]],1)
 DA_Awarder:RegisterForDrag("LeftButton")
 DA_Awarder:SetScript("OnDragStart", DA_Awarder.StartMoving)
 DA_Awarder:SetScript("OnDragStop", function(self)
@@ -375,6 +375,7 @@ local function skada_db_set()
 	end
 end
 local function resetAddboxes()
+---@diagnostic disable-next-line: param-type-mismatch
 	DA_Awarder.boxesbtn:SetText(#DA_StoredCheckboxes[DA_SelSet])
 	for _,bab in pairs({'3','4','5','6','7','8'}) do
 		if DA_Awarder.boxesFrame[bab]:GetText()==tostring(#DA_StoredCheckboxes[DA_SelSet]) then
@@ -586,7 +587,7 @@ local function Trasher(cb)
 				cb:SetText(cb.last or "cb"..tostring(math.random(500)))
 				return 
 			elseif j[1]==cb:GetText() then
-				DA.Print(L["cannotset2"]:gsub('$1',cb:GetText()):gsub('$2',cb.internal):gsub('$3',i) , false)
+				DA.Print(L["cannotset2"]:gsub('$1',cb:GetText()):gsub('$2',cb.internal):gsub('$3',i))
 				cb:SetText(cb.last or "cb"..tostring(math.random(500)))
 				return 
 			end
@@ -622,8 +623,8 @@ local function skada_opt_refresh_bosses()
 	
 	local foundSkada={}
 	tinsert(foundSkada,{name='total',mobname='total'})
-	for setID,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
-		if DB.type=='raid' and DB.time>120 then
+	for _,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
+		if (not fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights or DB.type=='raid') and (not fuckingOptions_g[DA_CurrentGuild].aw_scada_long or DB.time>120) then
 			tinsert(foundSkada,DB)
 		end
 	end
@@ -776,9 +777,10 @@ local function skada_addit_gather()
 					local output={}
 					for i,j in pairs(DA_Awarder.autoopt.skadaassign.SKDTBL.players) do
 						if j.damagetakenspells then
-							for spellname,_ in pairs(j.damagetakenspells) do
-								if spellname and not output[spellname] then
-									output[spellname]=true
+							for spellname,sometbl in pairs(j.damagetakenspells) do
+								local spellID = sometbl.id
+								if spellname and spellID and not output[spellID] then
+									output[spellID]=true
 								end
 							end
 						end
@@ -868,7 +870,10 @@ local function skada_addit_render()
 				f_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
 				
 				f_Scrolled[i]:SetPoint("TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i)
-				if (DA_Awarder.autoopt.skadaassign.selmode=='fails_specif' or DA_Awarder.autoopt.skadaassign.selmode=='dispells_specif' or DA_Awarder.autoopt.skadaassign.selmode=='cc_done_specif') and tonumber(db[i]) and GetSpellLink(tonumber(db[i])) then
+				if (DA_Awarder.autoopt.skadaassign.selmode=='fails_specif'
+				or DA_Awarder.autoopt.skadaassign.selmode=='dispells_specif'
+				or DA_Awarder.autoopt.skadaassign.selmode=='dmg_taken_attack'
+				or DA_Awarder.autoopt.skadaassign.selmode=='cc_done_specif') and tonumber(db[i]) and GetSpellLink(tonumber(db[i])) then
 					local name, _, _, _, _, _ = GetSpellInfo(db[i])
 					f_Scrolled[i].fs:SetText(name.." [ID:"..db[i].."]")
 					f_Scrolled[i]:SetScript("OnEnter",function(self)
@@ -906,8 +911,10 @@ local function skada_addit_render()
 				end
 				f_Scrolled[i]:Show()
 			elseif db[i] then
-				
-				if (DA_Awarder.autoopt.skadaassign.selmode=='fails_specif' or DA_Awarder.autoopt.skadaassign.selmode=='dispells_specif' or DA_Awarder.autoopt.skadaassign.selmode=='cc_done_specif') and tonumber(db[i]) and GetSpellLink(tonumber(db[i])) then
+				if (DA_Awarder.autoopt.skadaassign.selmode=='fails_specif' 
+				or DA_Awarder.autoopt.skadaassign.selmode=='dispells_specif' 
+				or DA_Awarder.autoopt.skadaassign.selmode=='dmg_taken_attack'
+				or DA_Awarder.autoopt.skadaassign.selmode=='cc_done_specif') and tonumber(db[i]) and GetSpellLink(tonumber(db[i])) then
 					local name, _, _, _, _, _ = GetSpellInfo(db[i])
 					f_Scrolled[i]=DA.CreateFFGButton2(nil,f_Scrolled,{"TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i},10,150,name.." [ID:"..db[i].."]",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 						DA_Awarder.autoopt.skadaassign.main.addit_eb:SetText(db[i])
@@ -968,7 +975,7 @@ local function skada_isemptytbl(tbl)
 	end
 	return true
 end
-local function skada_checkRole(tbl,spec,q,role,inputrole)
+local function skada_checkRole(tbl,spec,role,inputrole)
 	for _, q in ipairs(inputrole) do
 		if tbl.rl[q] and (spec and spec == q or (not spec and q == 'tank' and role)) then
 			return true
@@ -1173,7 +1180,7 @@ do
 ---MAIN
 	DA_Awarder.autoopt.skadaassign.main=CreateFrame('frame')
 	DA_Awarder.autoopt.skadaassign.main:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.main:SetFrameStrata('FULLSCREEN_DIALOG')
+	DA_Awarder.autoopt.skadaassign.main:SetFrameStrata('MEDIUM')
 	DA_Awarder.autoopt.skadaassign.main:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.main:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
@@ -1417,7 +1424,7 @@ do
 do
 	DA_Awarder.autoopt.skadaassign.addit=CreateFrame('frame')
 	DA_Awarder.autoopt.skadaassign.addit:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.addit:SetFrameStrata('FULLSCREEN_DIALOG')
+	DA_Awarder.autoopt.skadaassign.addit:SetFrameStrata('MEDIUM')
 	DA_Awarder.autoopt.skadaassign.addit:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.addit:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
@@ -1430,7 +1437,7 @@ do
 	end,'center')
 
 	
-	DA.ScrollBarCreater("DA_Skada_addit_scr",DA_Awarder.autoopt.skadaassign.addit,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+	DA_Skada_addit_scr = DA.ScrollBarCreater("DA_Skada_addit_scr",DA_Awarder.autoopt.skadaassign.addit,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
 
 end
 ---BOSSES
@@ -1438,30 +1445,33 @@ end
 do
 	DA_Awarder.autoopt.skadaassign.bosses=CreateFrame('frame')
 	DA_Awarder.autoopt.skadaassign.bosses:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.bosses:SetFrameStrata('FULLSCREEN_DIALOG')
+	DA_Awarder.autoopt.skadaassign.bosses:SetFrameStrata('MEDIUM')
 	DA_Awarder.autoopt.skadaassign.bosses:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.bosses:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 	DA_Awarder.autoopt.skadaassign.bosses:Hide()
 
 	DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function(self)
+	function()
 		DA_Awarder.autoopt.skadaassign.bosses:Hide()
 		DA_Awarder.autoopt.skadaassign.main:Show()
 	end,'center')
 
 	
-	DA_Awarder.autoopt.skadaassign.bosses.refresh=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function(self)
+	DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+	function()
 		skada_opt_refresh_bosses()
 	end,'center')
+
+	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-6},12,12,"boss fights",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_bossfights','DA_CurrentGuild'}, 'aw_sc_bossfights')
+	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-15},12,12,"long",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_long=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_long','DA_CurrentGuild'}, 'aw_sc_long')
 
 
 	
 
 	DA_Awarder.autoopt.skadaassign.bosses.nobosses=DA.FontCreater(nil,L['Skada logs not found'],{"LEFT",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",10,-30},DA_Awarder.autoopt.skadaassign.bosses.back,15,110,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 	
-	DA.ScrollBarCreater("DA_Skada_bosses_scr",DA_Awarder.autoopt.skadaassign.bosses,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+	DA_Skada_bosses_scr = DA.ScrollBarCreater("DA_Skada_bosses_scr",DA_Awarder.autoopt.skadaassign.bosses,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
 
 end
 ---Modes
@@ -1469,7 +1479,7 @@ end
 do
 	DA_Awarder.autoopt.skadaassign.modes=CreateFrame('frame')
 	DA_Awarder.autoopt.skadaassign.modes:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.modes:SetFrameStrata('FULLSCREEN_DIALOG')
+	DA_Awarder.autoopt.skadaassign.modes:SetFrameStrata('MEDIUM')
 	DA_Awarder.autoopt.skadaassign.modes:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
 	DA_Awarder.autoopt.skadaassign.modes:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
@@ -1480,7 +1490,7 @@ do
 		DA_Awarder.autoopt.skadaassign.main:Show()
 	end,nil,nil,'center')
 	
-	DA.ScrollBarCreater("DA_Skada_modes_scr",DA_Awarder.autoopt.skadaassign.modes,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+	DA_Skada_modes_scr = DA.ScrollBarCreater("DA_Skada_modes_scr",DA_Awarder.autoopt.skadaassign.modes,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
 	
 	local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
 	
@@ -1642,13 +1652,13 @@ for i=1,8 do
 					self:RegisterEvent('MODIFIER_STATE_CHANGED')
 					local ppls,list=getstorednames(i)
 					if IsAltKeyDown() and not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cfffc3562"..L['alt-click to DELETE all saved characters'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
+						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cfffc3562"..L['alt-click to DELETE all saved characters'],{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb".."|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.." |cff6df7bb:\n|cff62ddf5"..list,1,{UIDarkAngelFontConsolas:GetFont(), 10})
+						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb".."|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.." |cff6df7bb:\n|cff62ddf5"..list,{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
-						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cff824452"..L['alt-click to DELETE all saved characters'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
+						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cff824452"..L['alt-click to DELETE all saved characters'],{UIDarkAngelFontConsolas:GetFont(), 10})
 					elseif GetMouseFocus():GetName()==self:GetName() and ppls==0 then
-						DA.myShowTooltip(self,txt[2].."\n\n|cffeef564 "..L['no people saved'],1,{UIDarkAngelFontConsolas:GetFont(), 10})
+						DA.myShowTooltip(self,txt[2].."\n\n|cffeef564 "..L['no people saved'],{UIDarkAngelFontConsolas:GetFont(), 10})
 					end
 				end)
 				
@@ -1839,8 +1849,23 @@ for i=1,8 do
 									break
 								end
 							end
-							local addit=db.addit or nil
+							local addit
+								if db.mode=="fails_specif" 
+								or db.mode=="dispells_specif" 
+								or db.mode=="dmg_taken_attack" 
+								or db.mode=="cc_done_specif" 
+								then
+									local spellID = tostring(db.addit)
+									local spellname, _, _, _, _, _ = GetSpellInfo(spellID)
+									addit = spellname.." [ID:"..spellID.."]"
+								else
+									addit = db.addit or nil
+								end
+							
 							local matem=db.matem.typ..((db.matem[1] and (" |cffeef564"..db.matem[1])) or "")..((db.matem[2] and (" |cff6df7bband |cffeef564"..db.matem[2])) or "")
+
+							
+
 							return txt[2].."\n\nBoss: |cff6df7bb"..boss.."\n|rMode: |cff6df7bb"..mode..((addit and ("\n      |cffeef564"..addit)) or "").."\n|rIf: |cff6df7bb"..matem
 						end
 					else
@@ -2375,81 +2400,81 @@ local function FEP_CheckNoteType(note)
 end 
 
 local function OptMenuUpdate()
-if DAOptMenuFrame and DAOptMenuFrame:IsShown() then else return end
+if DA_RightClickMenu and DA_RightClickMenu:IsShown() then else return end
 
 -- not InCombatLockdown()
 
 
-	if UnitInRaid(DAOptMenuFrame.player) then else DAOptMenuFrame:Hide() return end
+	if UnitInRaid(DA_RightClickMenu.player) then else DA_RightClickMenu:Hide() return end
 	
-	if DAOptMenuFrame.player and GetPartyAssignment('MAINTANK',DAOptMenuFrame.player, 1) then
-		DAOptMenuFrame.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
-		DAOptMenuFrame.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+	if DA_RightClickMenu.player and GetPartyAssignment('MAINTANK',DA_RightClickMenu.player, 1) then
+		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
 		
-		local ottxt="/run ClearPartyAssignment('MAINTANK','"..DAOptMenuFrame.player.."', 1);DAOptMenuFrame.ismt=false \n"
-		DAOptMenuFrame.MT:SetAttribute("macrotext", ottxt)
-		local ottxt2="/run if GetPartyAssignment('MAINTANK','"..DAOptMenuFrame.player.."', 1) then ClearPartyAssignment('MAINTANK','"..DAOptMenuFrame.player.."', 1) end;DAOptMenuFrame.ismt=false \n"; ottxt2=ottxt2.."/mainassist "..DAOptMenuFrame.player
-		DAOptMenuFrame.OT:SetAttribute("macrotext", ottxt2)
-	elseif DAOptMenuFrame.player and GetPartyAssignment('MAINASSIST',DAOptMenuFrame.player, 1) then
-		DAOptMenuFrame.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
-		DAOptMenuFrame.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+		local ottxt="/run ClearPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1);DA_RightClickMenu.ismt=false \n"
+		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
+		local ottxt2="/run if GetPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) then ClearPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) end;DA_RightClickMenu.ismt=false \n"; ottxt2=ottxt2.."/mainassist "..DA_RightClickMenu.player
+		DA_RightClickMenu.OT:SetAttribute("macrotext", ottxt2)
+	elseif DA_RightClickMenu.player and GetPartyAssignment('MAINASSIST',DA_RightClickMenu.player, 1) then
+		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
 		
-		local ottxt="/run DAOptMenuFrame.ismt=true \n"; ottxt=ottxt.."/maintank "..DAOptMenuFrame.player
-		DAOptMenuFrame.MT:SetAttribute("macrotext", ottxt)
-		local ottxt2="/run ClearPartyAssignment('MAINASSIST','"..DAOptMenuFrame.player.."', 1) ;DAOptMenuFrame.ismt=false \n"
-		DAOptMenuFrame.OT:SetAttribute("macrotext", ottxt2)
-	elseif DAOptMenuFrame.player then
-		DAOptMenuFrame.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
-		DAOptMenuFrame.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+		local ottxt="/run DA_RightClickMenu.ismt=true \n"; ottxt=ottxt.."/maintank "..DA_RightClickMenu.player
+		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
+		local ottxt2="/run ClearPartyAssignment('MAINASSIST','"..DA_RightClickMenu.player.."', 1) ;DA_RightClickMenu.ismt=false \n"
+		DA_RightClickMenu.OT:SetAttribute("macrotext", ottxt2)
+	elseif DA_RightClickMenu.player then
+		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
 		
-		local ottxt="/run DAOptMenuFrame.ismt=true \n"; ottxt=ottxt.."/maintank "..DAOptMenuFrame.player
-		DAOptMenuFrame.MT:SetAttribute("macrotext", ottxt)
-		local ottxt2="/run if GetPartyAssignment('MAINTANK','"..DAOptMenuFrame.player.."', 1) then ClearPartyAssignment('MAINTANK','"..DAOptMenuFrame.player.."', 1) end;DAOptMenuFrame.ismt=false \n"; ottxt2=ottxt2.."/mainassist "..DAOptMenuFrame.player
-		DAOptMenuFrame.OT:SetAttribute("macrotext", ottxt2)
+		local ottxt="/run DA_RightClickMenu.ismt=true \n"; ottxt=ottxt.."/maintank "..DA_RightClickMenu.player
+		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
+		local ottxt2="/run if GetPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) then ClearPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) end;DA_RightClickMenu.ismt=false \n"; ottxt2=ottxt2.."/mainassist "..DA_RightClickMenu.player
+		DA_RightClickMenu.OT:SetAttribute("macrotext", ottxt2)
 	end
 	
 	if UnitIsPartyLeader('player') then
 		if GetLootMethod()=='master' then
-			DAOptMenuFrame.lootername=false
+			DA_RightClickMenu.lootername=false
 			if GetNumRaidMembers()==0 then 
 			else
 				for i=1,GetNumRaidMembers() do
 					
 					local nam, _, _, _, _, _, _, _, _, _, isML = GetRaidRosterInfo(i)
 					if isML then
-						DAOptMenuFrame.lootername=nam
+						DA_RightClickMenu.lootername=nam
 						break
 					end
 				end
 			end
 		end
 		
-		DAOptMenuFrame.assist:SetAlpha(1)
-		DAOptMenuFrame.assist:Enable()
-		DAOptMenuFrame.looter:SetAlpha(1)
-		DAOptMenuFrame.looter:Enable()
-		if UnitIsPartyLeader(DAOptMenuFrame.player) then
-			DAOptMenuFrame.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
-		elseif UnitIsRaidOfficer(DAOptMenuFrame.player) then
-			DAOptMenuFrame.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+		DA_RightClickMenu.assist:SetAlpha(1)
+		DA_RightClickMenu.assist:Enable()
+		DA_RightClickMenu.looter:SetAlpha(1)
+		DA_RightClickMenu.looter:Enable()
+		if UnitIsPartyLeader(DA_RightClickMenu.player) then
+			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
+		elseif UnitIsRaidOfficer(DA_RightClickMenu.player) then
+			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
 		else
-			DAOptMenuFrame.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
 		end
 		
-		if GetLootMethod()=='master' and DAOptMenuFrame.lootername==DAOptMenuFrame.player then
-			if UnitIsPartyLeader(DAOptMenuFrame.player) then
-				DAOptMenuFrame.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
+		if GetLootMethod()=='master' and DA_RightClickMenu.lootername==DA_RightClickMenu.player then
+			if UnitIsPartyLeader(DA_RightClickMenu.player) then
+				DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
 			else
-				DAOptMenuFrame.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+				DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
 			end
 		else
-			DAOptMenuFrame.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp")
+			DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp")
 		end
 	else
-		DAOptMenuFrame.assist:SetAlpha(0.5)
-		DAOptMenuFrame.assist:Disable()
-		DAOptMenuFrame.looter:SetAlpha(0.5)
-		DAOptMenuFrame.looter:Disable()
+		DA_RightClickMenu.assist:SetAlpha(0.5)
+		DA_RightClickMenu.assist:Disable()
+		DA_RightClickMenu.looter:SetAlpha(0.5)
+		DA_RightClickMenu.looter:Disable()
 	end
 	
 	
@@ -2690,7 +2715,7 @@ local function FEP_Fill()
 		if _G['DA_AwarderGroup'.. group .. 'frame' .. player] then 
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player]:SetText(name)
 			
-			color=DA.GetClassColor(clas)
+			color=DA.GetNumericClassColor(clas)
 			
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetJustifyH('LEFT')
 			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetTextColor(unpack(color))
@@ -2857,7 +2882,7 @@ function FEP_GatherRaid()
 		for i=1,GetNumRaidMembers() do
 			local nam, rank, subgroup, _, _, fileName, _, online, _, role, isML = GetRaidRosterInfo(i)
 			if nam then
-				table.insert(DA_Awarder.raidtable,{name=nam,group=subgroup,clas=fileName,tankrole=(role or nil),isLA=rank,masterl=isML ,isonl=online , checkedSpec=(LGT:GetUnitRole("raid"..i) or LGT:GetUnitRole(tostring(name))) })
+				table.insert(DA_Awarder.raidtable,{name=nam,group=subgroup,clas=fileName,tankrole=(role or nil),isLA=rank,masterl=isML ,isonl=online , checkedSpec=(LGT:GetUnitRole("raid"..i) or LGT:GetUnitRole(tostring(nam))) })
 				if DA_raid_marks[nam] then
 				else
 					DA_raid_marks[nam]={}
@@ -2894,8 +2919,6 @@ local f = CreateFrame("EditBox", name, rel)
 	end
 	return f
 end
-
-
 
 function FEP_CreateGroups()
 
@@ -3016,7 +3039,7 @@ do --zamena frame
 		end
 	end,"ZamenaFrBtn")
 	
-	FEP_EditBoxCreater("FEP_ZamField",FEP_ZamFrame,{"TOPLEFT", FEP_ZamFrame, "TOPLEFT", 20, -20},{120,10},true,false,{"Fonts\\FRIZQT__.TTF", 10},
+	FEP_ZamField = FEP_EditBoxCreater("FEP_ZamField",FEP_ZamFrame,{"TOPLEFT", FEP_ZamFrame, "TOPLEFT", 20, -20},{120,10},true,false,{"Fonts\\FRIZQT__.TTF", 10},
 	function(self) self.t:SetBlendMode("ADD"); self.focusgained=nil;self:ClearFocus();DA_Standby[DA_CurrentGuild]=FEP_ZamField:GetText();FEP_GatherRaid() end,
 	nil,
 	function(self) self.t:SetBlendMode("ADD"); self.focusgained=nil;self:ClearFocus();DA_Standby[DA_CurrentGuild]=FEP_ZamField:GetText();FEP_GatherRaid() end,
@@ -3076,14 +3099,17 @@ do --zamena frame
 	-- pricols editor
 		do
 			
+			--check funlist
+			DA.CheckAndRestoreLocalizedTable("DA_StandbyFunList")
+			
 			local pricols=DA.CheckBtnCreater(nil,FEP_ZamFrame,{"TOPLEFT", FEP_ZamFrame, "BOTTOMLEFT", 18, 20},15,15,L['jokes'],function(self) fuckingOptions.pricols=(self:GetChecked() or false) end,{'fuckingOptions','pricols'},nil)
 		
 			FEP_ZamFrame.pricolsbtn,FEP_ZamFrame.pricolsFrame=DA.CreateFFGDropFrame(FEP_ZamFrame,"<>",15,15,{"CENTER", pricols, "CENTER", -16, 0},280,314,"TOPLEFT",nil,function() FEP_PrkField:SetText(getPricols()) end,function() DA_StandbyFunList=packPricols(FEP_PrkField:GetText()) end,'pricolsedit')
 			
-			DA.ScrollBarCreater("FEP_PrkSB",FEP_ZamFrame.pricolsFrame,{FEP_ZamFrame.pricolsFrame.width-10, FEP_ZamFrame.pricolsFrame.height-30},{"TOPLEFT", 5, -20},1)
+			FEP_PrkSB = DA.ScrollBarCreater("FEP_PrkSB",FEP_ZamFrame.pricolsFrame,{FEP_ZamFrame.pricolsFrame.width-10, FEP_ZamFrame.pricolsFrame.height-30},{"TOPLEFT", 5, -20},1)
 			
 			
-			FEP_EditBoxCreater("FEP_PrkField",FEP_PrkSB.scrollchild,{"TOPLEFT", FEP_PrkSB.scrollchild, "TOPLEFT", 10, -10},{FEP_ZamFrame.pricolsFrame:GetWidth()-40,FEP_ZamFrame.pricolsFrame:GetHeight()-20},true,false,{"Fonts\\FRIZQT__.TTF", 10},
+			FEP_PrkField = FEP_EditBoxCreater("FEP_PrkField",FEP_PrkSB.scrollchild,{"TOPLEFT", FEP_PrkSB.scrollchild, "TOPLEFT", 10, -10},{FEP_ZamFrame.pricolsFrame:GetWidth()-40,FEP_ZamFrame.pricolsFrame:GetHeight()-20},true,false,{"Fonts\\FRIZQT__.TTF", 10},
 			function(self) self.t:SetBlendMode("ADD"); self.focusgained=nil;self:ClearFocus();DA_StandbyFunList=packPricols(self:GetText()) end,
 			nil,
 			function(self) self.t:SetBlendMode("ADD"); self.focusgained=nil;self:ClearFocus();DA_StandbyFunList=packPricols(self:GetText()) end,
@@ -3131,37 +3157,74 @@ do --main frame buttons
 		end)
 		
 		
-		local gtypestr
-		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-			DA_Awarder.dkpWhispers:Hide()
-			DA_Awarder.AwardFrame.AwardStartBtn:SetText("+EP")
-			DA_Awarder.AwardFrame.Awardmodebtn,DA_Awarder.AwardFrame.AwardmodeFrame=DA.CreateFFGDropFrame(DA_Awarder.AwardFrame,"mode: +EP",15,80,{"CENTER",DA_Awarder.AwardFrame,"TOPLEFT",42,-35},50,60,"LEFT")
-			gtypestr={"+EP","-EP","+GP","-GP"}
-			
-		elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
-			DA_Awarder.AwardFrame.AwardStartBtn:SetText("+DKP")
-			DA_Awarder.AwardFrame.Awardmodebtn,DA_Awarder.AwardFrame.AwardmodeFrame=DA.CreateFFGDropFrame(DA_Awarder.AwardFrame,"mode: +DKP",15,70,{"CENTER",DA_Awarder.AwardFrame,"TOPLEFT",42,-35},50,33,"LEFT")
-			gtypestr={"+DKP","-DKP"}
-		end
-		if gtypestr then
-			for i,criteria in pairs(gtypestr) do
-				local btn=DA.CreateFFGButton2(nil,DA_Awarder.AwardFrame.AwardmodeFrame,{"CENTER", DA_Awarder.AwardFrame.AwardmodeFrame, "TOP", 0,0-12*i},10,40,criteria,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-					DA_Awarder.AwardFrame.Awardmodebtn:SetText('mode: '..self:GetText())
-					DA_Awarder.AwardFrame.AwardStartBtn:SetText(self:GetText())
-					
-					for kfk=1,4 do
-						if ({DA_Awarder.AwardFrame.AwardmodeFrame:GetChildren()})[kfk] then
-						(({DA_Awarder.AwardFrame.AwardmodeFrame:GetChildren()})[kfk]):GetFontString():SetTextColor(0.85,1,1,1)
-						end
+		local gtypestr={
+			epgp={
+				"+EP","-EP","+GP","-GP",
+				btnsize = 80,
+				framesize = 60
+			},
+			dkp={
+				"+DKP","-DKP",
+				btnsize = 70,
+				framesize = 33
+			}
+		}
+		DA_Awarder.dkpWhispers:Hide()
+		DA_Awarder.AwardFrame.AwardStartBtn:SetText("+EP")
+		DA_Awarder.AwardFrame.Awardmodebtn,DA_Awarder.AwardFrame.AwardmodeFrame=DA.CreateFFGDropFrame(DA_Awarder.AwardFrame,"mode: +EP",15,80,{"CENTER",DA_Awarder.AwardFrame,"TOPLEFT",42,-35},50,60,"LEFT")
+		local AFselectedMode="+EP"
+		
+		local function render_awardmode()
+			local awardFrame = DA_Awarder.AwardFrame
+			local frame = awardFrame.AwardmodeFrame
+			local fbtn = awardFrame.Awardmodebtn
+
+			local gkey = (DA_Guild_Info[DA_CurrentGuild].GuildType == "epgp") and "epgp" or "dkp"
+			local gdata = gtypestr[gkey]
+
+			local found
+
+			for i = 1, 4 do
+				local btn = frame[i]
+				local txt = gdata[i]
+
+				if txt then
+					btn:SetText(txt)
+					btn:Show()
+
+					if txt == AFselectedMode then
+						btn:GetFontString():SetTextColor(0.2,1,1,1)
+						found = i
+					else
+						btn:GetFontString():SetTextColor(0.85,1,1,1)
 					end
-					self:GetFontString():SetTextColor(0.2,1,1,1)
-					DA_Awarder.AwardFrame.AwardmodeFrame:Hide()
-				end)
-				if i==1 then
-					btn:GetFontString():SetTextColor(0.2,1,1,1)
+				else
+					btn:Hide()
 				end
 			end
+
+			if not found then
+				found = 1
+				AFselectedMode = gdata[1]
+				frame[1]:GetFontString():SetTextColor(0.2,1,1,1)
+			end
+
+			fbtn:SetSize(gdata.btnsize, 15)
+			frame:SetSize(50, gdata.framesize)
+
+			fbtn:SetText("mode: "..gdata[found])
+			awardFrame.AwardStartBtn:SetText(gdata[found])
 		end
+		for i,criteria in ipairs(gtypestr.epgp) do
+			DA_Awarder.AwardFrame.AwardmodeFrame[i] = DA.CreateFFGButton2(nil,DA_Awarder.AwardFrame.AwardmodeFrame,{"CENTER", DA_Awarder.AwardFrame.AwardmodeFrame, "TOP", 0,0-12*i},10,40,criteria,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+				AFselectedMode = criteria
+				render_awardmode()
+				DA_Awarder.AwardFrame.AwardmodeFrame:Hide()
+			end)
+		end
+		
+		render_awardmode()
+		table.insert(DA.RunOnGuildUpdate, render_awardmode)
 		
 	end
 	
@@ -3212,18 +3275,28 @@ do --main frame buttons
 					DA_Awarder.ZamOptFrm.manualEB:Show()
 				end
 			end,nil,nil,'left')
-			if fuckingOptions_g[DA_CurrentGuild].standby_method==j[2] then
-				DA_Awarder.ZamOptFrm.modebtn:SetText(j[1])
+		end
+		
+
+		DA_Awarder.ZamOptFrm.manualEB=DA.EditBoxCreater2(nil,DA_Awarder.ZamOptFrm,{"TOPLEFT",DA_Awarder.ZamOptFrm,"TOPLEFT",5,-35},{30,12},fuckingOptions_g[DA_CurrentGuild].manual_procent,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","manual_procent",'DA_CurrentGuild'},1,100,true)
+		
+		local function reRenderStandbyMethod()
+			for i,j in ipairs({
+			{L['From EPGP settings'],'epgp'},
+			{L['Use custom'],'manual'}
+			}) do
+				if fuckingOptions_g[DA_CurrentGuild].standby_method==j[2] then
+					DA_Awarder.ZamOptFrm.modebtn:SetText(j[1])
+				end
+			end
+			if fuckingOptions_g[DA_CurrentGuild].standby_method=='epgp' then
+				DA_Awarder.ZamOptFrm.manualEB:Hide()
+			else
+				DA_Awarder.ZamOptFrm.manualEB:Show()
 			end
 		end
-		
-		DA_Awarder.ZamOptFrm.manualEB=DA.EditBoxCreater2(nil,DA_Awarder.ZamOptFrm,{"TOPLEFT",DA_Awarder.ZamOptFrm,"TOPLEFT",5,-35},{30,12},fuckingOptions_g[DA_CurrentGuild].manual_procent,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","manual_procent",'DA_CurrentGuild'},1,100,true)
-		if fuckingOptions_g[DA_CurrentGuild].standby_method=='epgp' then
-			DA_Awarder.ZamOptFrm.manualEB:Hide()
-		else
-			DA_Awarder.ZamOptFrm.manualEB:Show()
-		end
-		
+		reRenderStandbyMethod()
+		table.insert(DA.RunOnGuildUpdate, reRenderStandbyMethod)
 	end
 	
 	do --locals
@@ -3329,7 +3402,7 @@ do --main frame buttons
 							end 
 							FEP_UpdatePrint() 
 						end)
-					DarkAngel.ResumeTimer('fep')
+					DA.ResumeTimer('fep')
 				else
 					DA.Print("guild's qDKP DB not found")
 				end
@@ -3386,7 +3459,7 @@ do --main frame buttons
 			DA_Awarder.qdkpexportbutton:Hide()
 			DA_Awarder.qdkpsyncbutton:Hide()
 		end
-		DA.ScrollBarCreater("DA_Locals_Frm",DA_Awarder.getlocalsFrame,{DA_Awarder.getlocalsFrame.width-5, DA_Awarder.getlocalsFrame.height-30},{"TOPLEFT", 5, -20},1)
+		DA_Locals_Frm = DA.ScrollBarCreater("DA_Locals_Frm",DA_Awarder.getlocalsFrame,{DA_Awarder.getlocalsFrame.width-5, DA_Awarder.getlocalsFrame.height-30},{"TOPLEFT", 5, -20},1)
 		local copyfr_Scrolled=DA_Locals_Frm.scrollchild
 
 		DA_Awarder.getlocalsFrame.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{DA_Awarder.getlocalsFrame.width-30,160},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
@@ -3552,8 +3625,8 @@ do --main frame buttons
 	
 	
 	do --roles help
-		
 		DA_Awarder.EPGPValues=DA.FrameCreater(nil,DA_Awarder,345,490,{"TOPLEFT", DA_Awarder, "TOPLEFT", 2.5, -2.5},nil,nil,1)
+		DA_Awarder.EPGPValues = DA_Awarder.EPGPValues
 		DA_Awarder.EPGPValues:RegisterForDrag("LeftButton")
 		DA_Awarder.EPGPValues:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 		DA_Awarder.EPGPValues:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
@@ -3568,34 +3641,43 @@ do --main frame buttons
 		local diffrow=9.35
 		
 		local startingpointY=-10
-		local startingpointY_tankheal=-470
-		
+		DA_Awarder.EPGPValues.all={}
+		DA_Awarder.EPGPValues.allPR={}
+		DA_Awarder.EPGPValues.meel={}
+		DA_Awarder.EPGPValues.meelPR={}
+		DA_Awarder.EPGPValues.ranged={}
+		DA_Awarder.EPGPValues.rangedPR={}
 		for i=1,40 do
-			DA_Awarder.EPGPValues['all'..i]=DA.FontCreater(nil,'all'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-			DA_Awarder.EPGPValues['allPR'..i]=DA.FontCreater(nil,'allPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.all[i]=DA.FontCreater(nil,'all'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.allPR[i]=DA.FontCreater(nil,'allPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 			
 			
-			DA_Awarder.EPGPValues['meel'..i]=DA.FontCreater(nil,'meel'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-			DA_Awarder.EPGPValues['meelPR'..i]=DA.FontCreater(nil,'meelPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.meel[i]=DA.FontCreater(nil,'meel'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.meelPR[i]=DA.FontCreater(nil,'meelPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 			
-			DA_Awarder.EPGPValues['ranged'..i]=DA.FontCreater(nil,'ranged'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-			DA_Awarder.EPGPValues['rangedPR'..i]=DA.FontCreater(nil,'rangedPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.ranged[i]=DA.FontCreater(nil,'ranged'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.rangedPR[i]=DA.FontCreater(nil,'rangedPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,startingpointY-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 		end
-		DA_Awarder.EPGPValues.all=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.all1,"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-		DA_Awarder.EPGPValues.meel=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.meel1,"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-		DA_Awarder.EPGPValues.ranged=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.ranged1,"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+
+		DA_Awarder.EPGPValues.all=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.all[1],"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+		DA_Awarder.EPGPValues.meel=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.meel[1],"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+		DA_Awarder.EPGPValues.ranged=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.ranged[1],"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 		
+		DA_Awarder.EPGPValues.tank={}
+		DA_Awarder.EPGPValues.tankPR={}
+		DA_Awarder.EPGPValues.heal={}
+		DA_Awarder.EPGPValues.healPR={}
 		for i=1,10 do
 			
-			DA_Awarder.EPGPValues['tank'..i]=DA.FontCreater(nil,'tank'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-			DA_Awarder.EPGPValues['tankPR'..i]=DA.FontCreater(nil,'tankPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffpointPR,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.tank[i]=DA.FontCreater(nil,'tank'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.tankPR[i]=DA.FontCreater(nil,'tankPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffpointPR,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 			
 			
-			DA_Awarder.EPGPValues['heal'..i]=DA.FontCreater(nil,'heal'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-			DA_Awarder.EPGPValues['healPR'..i]=DA.FontCreater(nil,'healPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.heal[i]=DA.FontCreater(nil,'heal'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+			DA_Awarder.EPGPValues.healPR[i]=DA.FontCreater(nil,'healPR'..i,{"LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,450-diffrow*i},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 		end
-		DA_Awarder.EPGPValues.tank=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.tank1,"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-		DA_Awarder.EPGPValues.heal=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.heal1,"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+		DA_Awarder.EPGPValues.tank=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.tank[1],"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+		DA_Awarder.EPGPValues.heal=DA.FontCreater(nil,"",{"LEFT",DA_Awarder.EPGPValues.heal[1],"LEFT",6,9.35},DA_Awarder.EPGPValues,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
 		local function getRoleFromSH(name)
 			if #DA_Awarder.raidtable>0 then
@@ -3763,31 +3845,31 @@ do --main frame buttons
 					local special=all_roster[i][4]
 					local group=(all_roster[i][2] and 	"[".."|cff00ffff"..all_roster[i][5].."|r]" or 
 														"|cfff27373["..all_roster[i][5].."]|r")
-					local classcolor=DA.GetClassColorCode(all_roster[i][6])
+					local classcolor=DA.GetHexClassColorCode(all_roster[i][6])
 					local online=all_roster[i][7]
-					DA_Awarder.EPGPValues['all'..i]:SetText(group..classcolor..name)
-					DA_Awarder.EPGPValues['all'..i]:Show()
+					DA_Awarder.EPGPValues.all[i]:SetText(group..classcolor..name)
+					DA_Awarder.EPGPValues.all[i]:Show()
 					
 					if not value then
-						DA_Awarder.EPGPValues['allPR'..i]:SetText("|cffb27373N/A")
+						DA_Awarder.EPGPValues.allPR[i]:SetText("|cffb27373N/A")
 					elseif special=='d' then
-						DA_Awarder.EPGPValues['allPR'..i]:SetText("|cffff88ff"..value)
+						DA_Awarder.EPGPValues.allPR[i]:SetText("|cffff88ff"..value)
 					elseif special=='f' then
-						DA_Awarder.EPGPValues['allPR'..i]:SetText("|cff8888ff"..value)
+						DA_Awarder.EPGPValues.allPR[i]:SetText("|cff8888ff"..value)
 					else
-						DA_Awarder.EPGPValues['allPR'..i]:SetText(value)
+						DA_Awarder.EPGPValues.allPR[i]:SetText(value)
 					end
-					DA_Awarder.EPGPValues['allPR'..i]:Show()
+					DA_Awarder.EPGPValues.allPR[i]:Show()
 				else
-					DA_Awarder.EPGPValues['all'..i]:Hide()
-					DA_Awarder.EPGPValues['allPR'..i]:Hide()
+					DA_Awarder.EPGPValues.all[i]:Hide()
+					DA_Awarder.EPGPValues.allPR[i]:Hide()
 				end
 			end
 			if #all_roster==0 then
-				DA_Awarder.EPGPValues['all1']:SetText("--")
-				DA_Awarder.EPGPValues['all1']:Show()
-				DA_Awarder.EPGPValues['allPR1']:SetText("--")
-				DA_Awarder.EPGPValues['allPR1']:Show()
+				DA_Awarder.EPGPValues.all[1]:SetText("--")
+				DA_Awarder.EPGPValues.all[1]:Show()
+				DA_Awarder.EPGPValues.allPR[1]:SetText("--")
+				DA_Awarder.EPGPValues.allPR[1]:Show()
 			end
 			--Melee
 			for i=1,40 do
@@ -3796,31 +3878,31 @@ do --main frame buttons
 					local value=melee_roster[i][2]
 					local special=melee_roster[i][3]
 					local group=melee_roster[i][4]
-					local classcolor=DA.GetClassColorCode(melee_roster[i][5])
+					local classcolor=DA.GetHexClassColorCode(melee_roster[i][5])
 					local online=melee_roster[i][6]
-					DA_Awarder.EPGPValues['meel'..i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
-					DA_Awarder.EPGPValues['meel'..i]:Show()
+					DA_Awarder.EPGPValues.meel[i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
+					DA_Awarder.EPGPValues.meel[i]:Show()
 					
 					if not value then
-						DA_Awarder.EPGPValues['meelPR'..i]:SetText("|cffb27373N/A")
+						DA_Awarder.EPGPValues.meelPR[i]:SetText("|cffb27373N/A")
 					elseif special=='d' then
-						DA_Awarder.EPGPValues['meelPR'..i]:SetText("|cffff88ff"..value)
+						DA_Awarder.EPGPValues.meelPR[i]:SetText("|cffff88ff"..value)
 					elseif special=='f' then
-						DA_Awarder.EPGPValues['meelPR'..i]:SetText("|cff8888ff"..value)
+						DA_Awarder.EPGPValues.meelPR[i]:SetText("|cff8888ff"..value)
 					else
-						DA_Awarder.EPGPValues['meelPR'..i]:SetText(value)
+						DA_Awarder.EPGPValues.meelPR[i]:SetText(value)
 					end
-					DA_Awarder.EPGPValues['meelPR'..i]:Show()
+					DA_Awarder.EPGPValues.meelPR[i]:Show()
 				else
-					DA_Awarder.EPGPValues['meel'..i]:Hide()
-					DA_Awarder.EPGPValues['meelPR'..i]:Hide()
+					DA_Awarder.EPGPValues.meel[i]:Hide()
+					DA_Awarder.EPGPValues.meelPR[i]:Hide()
 				end
 			end
 			if #melee_roster==0 then
-				DA_Awarder.EPGPValues['meel1']:SetText("--")
-				DA_Awarder.EPGPValues['meel1']:Show()
-				DA_Awarder.EPGPValues['meelPR1']:SetText("--")
-				DA_Awarder.EPGPValues['meelPR1']:Show()
+				DA_Awarder.EPGPValues.meel[1]:SetText("--")
+				DA_Awarder.EPGPValues.meel[1]:Show()
+				DA_Awarder.EPGPValues.meelPR[1]:SetText("--")
+				DA_Awarder.EPGPValues.meelPR[1]:Show()
 			end
 			--Ranged
 			for i=1,40 do
@@ -3829,31 +3911,31 @@ do --main frame buttons
 					local value=ranged_roster[i][2]
 					local special=ranged_roster[i][3]
 					local group=ranged_roster[i][4]
-					local classcolor=DA.GetClassColorCode(ranged_roster[i][5])
+					local classcolor=DA.GetHexClassColorCode(ranged_roster[i][5])
 					local online=ranged_roster[i][6]
-					DA_Awarder.EPGPValues['ranged'..i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
-					DA_Awarder.EPGPValues['ranged'..i]:Show()
+					DA_Awarder.EPGPValues.ranged[i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
+					DA_Awarder.EPGPValues.ranged[i]:Show()
 					
 					if not value then
-						DA_Awarder.EPGPValues['rangedPR'..i]:SetText("|cffb27373N/A")
+						DA_Awarder.EPGPValues.rangedPR[i]:SetText("|cffb27373N/A")
 					elseif special=='d' then
-						DA_Awarder.EPGPValues['rangedPR'..i]:SetText("|cffff88ff"..value)
+						DA_Awarder.EPGPValues.rangedPR[i]:SetText("|cffff88ff"..value)
 					elseif special=='f' then
-						DA_Awarder.EPGPValues['rangedPR'..i]:SetText("|cff8888ff"..value)
+						DA_Awarder.EPGPValues.rangedPR[i]:SetText("|cff8888ff"..value)
 					else
-						DA_Awarder.EPGPValues['rangedPR'..i]:SetText(value)
+						DA_Awarder.EPGPValues.rangedPR[i]:SetText(value)
 					end
-					DA_Awarder.EPGPValues['rangedPR'..i]:Show()
+					DA_Awarder.EPGPValues.rangedPR[i]:Show()
 				else
-					DA_Awarder.EPGPValues['ranged'..i]:Hide()
-					DA_Awarder.EPGPValues['rangedPR'..i]:Hide()
+					DA_Awarder.EPGPValues.ranged[i]:Hide()
+					DA_Awarder.EPGPValues.rangedPR[i]:Hide()
 				end
 			end
 			if #ranged_roster==0 then
-				DA_Awarder.EPGPValues['ranged1']:SetText("--")
-				DA_Awarder.EPGPValues['ranged1']:Show()
-				DA_Awarder.EPGPValues['rangedPR1']:SetText("--")
-				DA_Awarder.EPGPValues['rangedPR1']:Show()
+				DA_Awarder.EPGPValues.ranged[1]:SetText("--")
+				DA_Awarder.EPGPValues.ranged[1]:Show()
+				DA_Awarder.EPGPValues.rangedPR[1]:SetText("--")
+				DA_Awarder.EPGPValues.rangedPR[1]:Show()
 			end
 			--Tank
 			for i=1,10 do
@@ -3862,37 +3944,37 @@ do --main frame buttons
 					local value=tanks_roster[i][2]
 					local special=tanks_roster[i][3]
 					local group=tanks_roster[i][4]
-					local classcolor=DA.GetClassColorCode(tanks_roster[i][5])
+					local classcolor=DA.GetHexClassColorCode(tanks_roster[i][5])
 					local online=tanks_roster[i][6]
-					DA_Awarder.EPGPValues['tank'..i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
-					DA_Awarder.EPGPValues['tank'..i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
-					DA_Awarder.EPGPValues['tank'..i]:Show()
+					DA_Awarder.EPGPValues.tank[i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
+					DA_Awarder.EPGPValues.tank[i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
+					DA_Awarder.EPGPValues.tank[i]:Show()
 					
 					if not value then
-						DA_Awarder.EPGPValues['tankPR'..i]:SetText("|cffb27373N/A")
+						DA_Awarder.EPGPValues.tankPR[i]:SetText("|cffb27373N/A")
 					elseif special=='d' then
-						DA_Awarder.EPGPValues['tankPR'..i]:SetText("|cffff88ff"..value)
+						DA_Awarder.EPGPValues.tankPR[i]:SetText("|cffff88ff"..value)
 					elseif special=='f' then
-						DA_Awarder.EPGPValues['tankPR'..i]:SetText("|cff8888ff"..value)
+						DA_Awarder.EPGPValues.tankPR[i]:SetText("|cff8888ff"..value)
 					else
-						DA_Awarder.EPGPValues['tankPR'..i]:SetText(value)
+						DA_Awarder.EPGPValues.tankPR[i]:SetText(value)
 					end
 					
 					
-					DA_Awarder.EPGPValues['tankPR'..i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
-					DA_Awarder.EPGPValues['tankPR'..i]:Show()
+					DA_Awarder.EPGPValues.tankPR[i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
+					DA_Awarder.EPGPValues.tankPR[i]:Show()
 				else
-					DA_Awarder.EPGPValues['tank'..i]:Hide()
-					DA_Awarder.EPGPValues['tankPR'..i]:Hide()
+					DA_Awarder.EPGPValues.tank[i]:Hide()
+					DA_Awarder.EPGPValues.tankPR[i]:Hide()
 				end
 			end	
 			if #tanks_roster==0 then
-				DA_Awarder.EPGPValues['tank1']:SetText("--")
-				DA_Awarder.EPGPValues['tank1']:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,-diffrow*(meel_ranged_end+2.5)-diffrow)
-				DA_Awarder.EPGPValues['tank1']:Show()
-				DA_Awarder.EPGPValues['tankPR1']:SetText("--")
-				DA_Awarder.EPGPValues['tankPR1']:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow)
-				DA_Awarder.EPGPValues['tankPR1']:Show()
+				DA_Awarder.EPGPValues.tank[1]:SetText("--")
+				DA_Awarder.EPGPValues.tank[1]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole,-diffrow*(meel_ranged_end+2.5)-diffrow)
+				DA_Awarder.EPGPValues.tank[1]:Show()
+				DA_Awarder.EPGPValues.tankPR[1]:SetText("--")
+				DA_Awarder.EPGPValues.tankPR[1]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow)
+				DA_Awarder.EPGPValues.tankPR[1]:Show()
 			end
 			--Healer
 			for i=1,10 do	
@@ -3901,37 +3983,37 @@ do --main frame buttons
 					local value=healers_roster[i][2]
 					local special=healers_roster[i][3]
 					local group=healers_roster[i][4]
-					local classcolor=DA.GetClassColorCode(healers_roster[i][5])
+					local classcolor=DA.GetHexClassColorCode(healers_roster[i][5])
 					local online=healers_roster[i][6]
-					DA_Awarder.EPGPValues['heal'..i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
-					DA_Awarder.EPGPValues['heal'..i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
-					DA_Awarder.EPGPValues['heal'..i]:Show()
+					DA_Awarder.EPGPValues.heal[i]:SetText("[|cff00ffff"..group.."|r]"..classcolor..name)
+					DA_Awarder.EPGPValues.heal[i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
+					DA_Awarder.EPGPValues.heal[i]:Show()
 					
 					if not value then
-						DA_Awarder.EPGPValues['healPR'..i]:SetText("|cffb27373N/A")
+						DA_Awarder.EPGPValues.healPR[i]:SetText("|cffb27373N/A")
 					elseif special=='d' then
-						DA_Awarder.EPGPValues['healPR'..i]:SetText("|cffff88ff"..value)
+						DA_Awarder.EPGPValues.healPR[i]:SetText("|cffff88ff"..value)
 					elseif special=='f' then
-						DA_Awarder.EPGPValues['healPR'..i]:SetText("|cff8888ff"..value)
+						DA_Awarder.EPGPValues.healPR[i]:SetText("|cff8888ff"..value)
 					else
-						DA_Awarder.EPGPValues['healPR'..i]:SetText(value)
+						DA_Awarder.EPGPValues.healPR[i]:SetText(value)
 					end
 					
 					
-					DA_Awarder.EPGPValues['healPR'..i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
-					DA_Awarder.EPGPValues['healPR'..i]:Show()
+					DA_Awarder.EPGPValues.healPR[i]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow*i)
+					DA_Awarder.EPGPValues.healPR[i]:Show()
 				else
-					DA_Awarder.EPGPValues['heal'..i]:Hide()
-					DA_Awarder.EPGPValues['healPR'..i]:Hide()
+					DA_Awarder.EPGPValues.heal[i]:Hide()
+					DA_Awarder.EPGPValues.healPR[i]:Hide()
 				end
 			end
 			if #healers_roster==0 then
-				DA_Awarder.EPGPValues['heal1']:SetText("--")
-				DA_Awarder.EPGPValues['heal1']:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,-diffrow*(meel_ranged_end+2.5)-diffrow)
-				DA_Awarder.EPGPValues['heal1']:Show()
-				DA_Awarder.EPGPValues['healPR1']:SetText("--")
-				DA_Awarder.EPGPValues['healPR1']:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow)
-				DA_Awarder.EPGPValues['healPR1']:Show()
+				DA_Awarder.EPGPValues.heal[1]:SetText("--")
+				DA_Awarder.EPGPValues.heal[1]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2,-diffrow*(meel_ranged_end+2.5)-diffrow)
+				DA_Awarder.EPGPValues.heal[1]:Show()
+				DA_Awarder.EPGPValues.healPR[1]:SetText("--")
+				DA_Awarder.EPGPValues.healPR[1]:SetPoint("LEFT",DA_Awarder.EPGPValues,"TOPLEFT",startingpointX+diffrole*2+diffpointPR,-diffrow*(meel_ranged_end+2.5)-diffrow)
+				DA_Awarder.EPGPValues.healPR[1]:Show()
 			end
 			
 			DA_Awarder.EPGPValues.all:SetText( (#all_roster==0 and "(|cffff88ff0|r)" or "(|cff00ffff"..#all_roster.."|r)") .. (ALL or 'All') )
@@ -4353,267 +4435,267 @@ if fuckingOptions.EnableZamena then
 	FEP_ZamWHframe:RegisterEvent("CHAT_MSG_WHISPER");
 end
 
-do --SETS
+	do --SETS
 
-	if not DA_SelSet then DA_SelSet='default' end
-	local naborscount=countCHsets()
-	
-	
-	DA_Awarder.naborbtn,DA_Awarder.naborFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,40,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 55,-10},90,20+11*naborscount,"TOP",nil,function() DA_Awarder.boxesFrame:Hide() end)
-	
-	DA.FontCreater(nil,L['profile'],{"RIGHT",DA_Awarder.naborbtn,"LEFT",-2,0},DA_Awarder.naborbtn,15,60,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
-	
-	--nabors exp
-	do
-		
-		DA_Awarder.naborFrame.exportBtn=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"CENTER", DA_Awarder.naborFrame, "BOTTOM", 17,10},13,43,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
-			if DA_Awarder.naborFrame.exportFrame:IsShown() then
-				DA_Awarder.naborFrame.exportFrame:Hide()
-			else
-				DA_Awarder.naborFrame.exportFrame:Show()
-			end
-			DA_Awarder.boxesFrame:Hide()
-		end)
-		
-		DA_Awarder.naborFrame.exportFrame=DA.FrameCreater(nil,DA_Awarder.naborFrame,130,38,{"BOTTOMLEFT", DA_Awarder.naborFrame, "BOTTOMRIGHT", 2, 0})
-		
-		DA_Awarder.naborFrame.exportFrame.apply=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-		function(self)
-			if DA_Awarder.naborFrame.exportFrame.EB:GetText() and DA_Awarder.naborFrame.exportFrame.EB:GetText()~="" then
-				DA_StoredCheckboxes=nil
-				DA_StoredCheckboxes=DA.stringToTable(DA_Awarder.naborFrame.exportFrame.EB:GetText())
-				DA_SelSet='default'
-				
-				resetAddboxes()
-				FEP_ReNameRePushThings();FEP_ReNameRePushThings()	
-				FEP_ResetAllChecks()
-				FEP_RecalculateAllBtnEP()
-			end
-		end)
-		
-		DA_Awarder.naborFrame.exportFrame.exp=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",90,-26},12,45,L['export'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-		function(self)
-			DA_Awarder.naborFrame.exportFrame.EB:SetText('')
-			DA_Awarder.naborFrame.exportFrame.EB:SetText(DA.tableToString(DA_StoredCheckboxes))
-			DA_Awarder.naborFrame.exportFrame.EB:SetCursorPosition(5)
-		end)
-		
-		DA_Awarder.naborFrame.exportFrame.EB=DA.EditBoxCreater(nil,DA_Awarder.naborFrame.exportFrame,{"TOPLEFT", DA_Awarder.naborFrame.exportFrame, "TOPLEFT", 5, -2},{120,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-			function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-			function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
-			function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-			function(self) 	
-				self.t:SetBlendMode("BLEND")
-				self.focusgained=1
-				self:HighlightText()
-			end,
-			nil,nil,nil,1
-		)
-		
-
-	end
-	
-	ReRenderNaborsList()
-	
-	local function createnaborname()
-		local cnt=1
-		while DA_StoredCheckboxes['New'..cnt] do
-			cnt=cnt+1
-		end
-		return 'New'..cnt
-	end
-	
-	local addnabor=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"CENTER", DA_Awarder.naborFrame, "BOTTOM", -25,10},13,30,'+++','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+		if not DA_SelSet then DA_SelSet='default' end
 		local naborscount=countCHsets()
-			if naborscount>9 then DA.Print('there is too much') return end
-			
-			local newnaborname=createnaborname()
-			
-			DA_StoredCheckboxes[newnaborname]={
-				{'raid',4500,
-					rl={
-						raid=true
-					},
-					cl={},
-				},
-				{'tank_heal',500,
-					rl={
-						tank=true,
-						healer=true, 
-					},
-					cl={},
-				},
-				{'bis',500,
-					rl={},
-					cl={},
-				},
-			}
-			DA_StoredCheckboxes_remembered[newnaborname]={
-				raid={},
-				tank_heal={},
-				bis={},
-			}
-			
-			ReRenderNaborsList()
-	end)
-
-	local function setnaborname(cb)
-		local text=cb:GetText()
-		if not text then
-			DA_Awarder.naboredit:SetText(DA_SelSet)
-		elseif DA_SelSet=='default' then
-			DA.Print('error: cannot edit name for default set')
-			DA_Awarder.naboredit:SetText(DA_SelSet)
-		elseif text==DA_SelSet then
 		
-		elseif DA_StoredCheckboxes[text] then
-			DA.Print('error: name '..text..' is already in use for another set')
-			DA_Awarder.naboredit:SetText(DA_SelSet)
-		elseif text:gsub('%!', ''):gsub('%@', ''):gsub('%#', ''):gsub('%$', ''):gsub('%%', ''):gsub('%^', ''):gsub('%&', ''):gsub('%*', ''):gsub('%(', ''):gsub('%)', ''):gsub('%_', ''):gsub('%=', ''):gsub('%+', ''):gsub('%-', ''):gsub('% ', '')~=text then
-			DA.Print('error: !@#$%... characters and spaces are not allowed')
-			DA_Awarder.naboredit:SetText(DA_SelSet)
-		elseif tonumber(text:sub(1,1)) then
-			DA.Print('error: first character of name cannot be number')
-			DA_Awarder.naboredit:SetText(DA_SelSet)
-		else
-			DA_StoredCheckboxes[text]=DA_StoredCheckboxes[DA_SelSet]
-			DA_StoredCheckboxes_remembered[text]=DA_StoredCheckboxes_remembered[DA_SelSet]
-			DA_StoredCheckboxes[DA_SelSet]=nil
-			DA_StoredCheckboxes_remembered[DA_SelSet]=nil
-			DA_SelSet=text
-			
-			
-			DA_Awarder.naborbtn:SetText(text)
-			FEP_ReNameRePushThings()
-			FEP_ReNameRePushThings()
-		end
-	end
-	
-	DA_Awarder.naboredit=FEP_EditBoxCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 203,-10},{50,10},false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-		function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
-		function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
-		function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
-		function(self) self.t:SetBlendMode("BLEND"); self.focusgained=1; end,
-		nil,{28/255, 32/255, 50/255, 1})
-	DA_Awarder.naboredit:Hide()
-	DA_Awarder.naboredit:SetText(DA_SelSet)
-	DA.FontCreater(nil,L['setname'],{"RIGHT",DA_Awarder.naboredit,"LEFT",-2,0},DA_Awarder.naboredit,15,50,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
-	
-	local function FEP_DopDop(n)
-		if n<3 then print('error 2039') return end
 		
-		if n<#DA_StoredCheckboxes[DA_SelSet] then
-			for i=1,8 do
-				if i>n and DA_StoredCheckboxes[DA_SelSet][i] then 
-					DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]]=nil
-					DA_StoredCheckboxes[DA_SelSet][i]=nil
+		DA_Awarder.naborbtn,DA_Awarder.naborFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,40,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 55,-10},90,20+11*naborscount,"TOP",nil,function() DA_Awarder.boxesFrame:Hide() end)
+		
+		DA.FontCreater(nil,L['profile'],{"RIGHT",DA_Awarder.naborbtn,"LEFT",-2,0},DA_Awarder.naborbtn,15,60,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
+		
+		--nabors exp
+		do
+			
+			DA_Awarder.naborFrame.exportBtn=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"CENTER", DA_Awarder.naborFrame, "BOTTOM", 17,10},13,43,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+				if DA_Awarder.naborFrame.exportFrame:IsShown() then
+					DA_Awarder.naborFrame.exportFrame:Hide()
+				else
+					DA_Awarder.naborFrame.exportFrame:Show()
 				end
-			end
-		elseif n==#DA_StoredCheckboxes[DA_SelSet] then
-		
-		elseif n>#DA_StoredCheckboxes[DA_SelSet] then
-			for i=1,n do
-				if not DA_StoredCheckboxes[DA_SelSet][i] then 
-					DA_StoredCheckboxes[DA_SelSet][i]={'cb'..i,0,rl={},cl={}}
-				end
-				if not DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]] and DA_StoredCheckboxes[DA_SelSet][i].rl.saved then 
-					DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]]={}
-				end
-			end
-		
-		end
-	end
-	
-	DA_Awarder.boxesbtn,DA_Awarder.boxesFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,15,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 140,-10},85,18,"TOP",nil,function() DA_Awarder.naborFrame:Hide() end)
-	
-	DA.FontCreater(nil,L['criterias'],{"RIGHT",DA_Awarder.boxesbtn,"LEFT",-2,0},DA_Awarder.boxesbtn,15,65,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
-	for h,naborname in ipairs({'3','4','5','6','7','8'}) do
-			DA_Awarder.boxesFrame[naborname]=DA.CreateFFGButton2(nil,DA_Awarder.boxesFrame,{"CENTER", DA_Awarder.boxesFrame, "TOPLEFT", -7+14*h,-7},12,12,naborname,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
-			function(self)
 				DA_Awarder.boxesFrame:Hide()
-				FEP_DopDop(tonumber(self:GetText()))
-				DA_Awarder.boxesbtn:SetText(self:GetText())
-				
-				FEP_RecalculateAllBtnEP();FEP_ResetAllChecks()
-				
-				for _,bab in pairs({'3','4','5','6','7','8'}) do
+			end)
+			
+			DA_Awarder.naborFrame.exportFrame=DA.FrameCreater(nil,DA_Awarder.naborFrame,130,38,{"BOTTOMLEFT", DA_Awarder.naborFrame, "BOTTOMRIGHT", 2, 0})
+			
+			DA_Awarder.naborFrame.exportFrame.apply=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			function(self)
+				if DA_Awarder.naborFrame.exportFrame.EB:GetText() and DA_Awarder.naborFrame.exportFrame.EB:GetText()~="" then
+					DA_StoredCheckboxes=nil
+					DA_StoredCheckboxes=DA.stringToTable(DA_Awarder.naborFrame.exportFrame.EB:GetText())
+					DA_SelSet='default'
 					
-					if DA_Awarder.boxesFrame[bab]:GetText()==tostring(#DA_StoredCheckboxes[DA_SelSet]) then
-						DA_Awarder.boxesFrame[bab]:GetFontString():SetTextColor(0.2,1,1,1)
-					else
-						DA_Awarder.boxesFrame[bab]:GetFontString():SetTextColor(0.85,1,1,1)
+					resetAddboxes()
+					FEP_ReNameRePushThings();FEP_ReNameRePushThings()	
+					FEP_ResetAllChecks()
+					FEP_RecalculateAllBtnEP()
+				end
+			end)
+			
+			DA_Awarder.naborFrame.exportFrame.exp=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",90,-26},12,45,L['export'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			function(self)
+				DA_Awarder.naborFrame.exportFrame.EB:SetText('')
+				DA_Awarder.naborFrame.exportFrame.EB:SetText(DA.tableToString(DA_StoredCheckboxes))
+				DA_Awarder.naborFrame.exportFrame.EB:SetCursorPosition(5)
+			end)
+			
+			DA_Awarder.naborFrame.exportFrame.EB=DA.EditBoxCreater(nil,DA_Awarder.naborFrame.exportFrame,{"TOPLEFT", DA_Awarder.naborFrame.exportFrame, "TOPLEFT", 5, -2},{120,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
+				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+				function(self) 	
+					self.t:SetBlendMode("BLEND")
+					self.focusgained=1
+					self:HighlightText()
+				end,
+				nil,nil,nil,1
+			)
+			
+
+		end
+		
+		ReRenderNaborsList()
+		
+		local function createnaborname()
+			local cnt=1
+			while DA_StoredCheckboxes['New'..cnt] do
+				cnt=cnt+1
+			end
+			return 'New'..cnt
+		end
+		
+		local addnabor=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"CENTER", DA_Awarder.naborFrame, "BOTTOM", -25,10},13,30,'+++','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+			local naborscount=countCHsets()
+				if naborscount>9 then DA.Print('there is too much') return end
+				
+				local newnaborname=createnaborname()
+				
+				DA_StoredCheckboxes[newnaborname]={
+					{'raid',4500,
+						rl={
+							raid=true
+						},
+						cl={},
+					},
+					{'tank_heal',500,
+						rl={
+							tank=true,
+							healer=true, 
+						},
+						cl={},
+					},
+					{'bis',500,
+						rl={},
+						cl={},
+					},
+				}
+				DA_StoredCheckboxes_remembered[newnaborname]={
+					raid={},
+					tank_heal={},
+					bis={},
+				}
+				
+				ReRenderNaborsList()
+		end)
+
+		local function setnaborname(cb)
+			local text=cb:GetText()
+			if not text then
+				DA_Awarder.naboredit:SetText(DA_SelSet)
+			elseif DA_SelSet=='default' then
+				DA.Print('error: cannot edit name for default set')
+				DA_Awarder.naboredit:SetText(DA_SelSet)
+			elseif text==DA_SelSet then
+			
+			elseif DA_StoredCheckboxes[text] then
+				DA.Print('error: name '..text..' is already in use for another set')
+				DA_Awarder.naboredit:SetText(DA_SelSet)
+			elseif text:gsub('%!', ''):gsub('%@', ''):gsub('%#', ''):gsub('%$', ''):gsub('%%', ''):gsub('%^', ''):gsub('%&', ''):gsub('%*', ''):gsub('%(', ''):gsub('%)', ''):gsub('%_', ''):gsub('%=', ''):gsub('%+', ''):gsub('%-', ''):gsub('% ', '')~=text then
+				DA.Print('error: !@#$%... characters and spaces are not allowed')
+				DA_Awarder.naboredit:SetText(DA_SelSet)
+			elseif tonumber(text:sub(1,1)) then
+				DA.Print('error: first character of name cannot be number')
+				DA_Awarder.naboredit:SetText(DA_SelSet)
+			else
+				DA_StoredCheckboxes[text]=DA_StoredCheckboxes[DA_SelSet]
+				DA_StoredCheckboxes_remembered[text]=DA_StoredCheckboxes_remembered[DA_SelSet]
+				DA_StoredCheckboxes[DA_SelSet]=nil
+				DA_StoredCheckboxes_remembered[DA_SelSet]=nil
+				DA_SelSet=text
+				
+				
+				DA_Awarder.naborbtn:SetText(text)
+				FEP_ReNameRePushThings()
+				FEP_ReNameRePushThings()
+			end
+		end
+		
+		DA_Awarder.naboredit=FEP_EditBoxCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 203,-10},{50,10},false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
+			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
+			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil setnaborname(self) end end,
+			function(self) self.t:SetBlendMode("BLEND"); self.focusgained=1; end,
+			nil,{28/255, 32/255, 50/255, 1})
+		DA_Awarder.naboredit:Hide()
+		DA_Awarder.naboredit:SetText(DA_SelSet)
+		DA.FontCreater(nil,L['setname'],{"RIGHT",DA_Awarder.naboredit,"LEFT",-2,0},DA_Awarder.naboredit,15,50,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
+		
+		local function FEP_DopDop(n)
+			if n<3 then print('error 2039') return end
+			
+			if n<#DA_StoredCheckboxes[DA_SelSet] then
+				for i=1,8 do
+					if i>n and DA_StoredCheckboxes[DA_SelSet][i] then 
+						DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]]=nil
+						DA_StoredCheckboxes[DA_SelSet][i]=nil
 					end
 				end
-				self:GetFontString():SetTextColor(0.2,1,1,1)
-				FEP_ReNameRePushThings();FEP_ReNameRePushThings()
-			end)
-			if tostring(naborname)==tostring(#DA_StoredCheckboxes[DA_SelSet]) then
-				DA_Awarder.boxesFrame[naborname]:GetFontString():SetTextColor(0.2,1,1,1)
-			else
-				DA_Awarder.boxesFrame[naborname]:GetFontString():SetTextColor(0.85,1,1,1)
-			end
-	end
-	DA_Awarder.boxesbtn:SetText(#DA_StoredCheckboxes[DA_SelSet])
-	
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-25},15,15,L['AW_raid68'],function(self) fuckingOptions.AW_raid68=(self:GetChecked() or false) end,{'fuckingOptions','AW_raid68'},'AW_raid68')
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-35},15,15,L['AW_roles68'],function(self) fuckingOptions.AW_roles68=(self:GetChecked() or false) end,{'fuckingOptions','AW_roles68'},'AW_roles68')
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-45},15,15,L['AW_saved68'],function(self) fuckingOptions.AW_saved68=(self:GetChecked() or false) end,{'fuckingOptions','AW_saved68'},'AW_saved68')
-	
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 110,-30},15,15,L['AW_skada68'],function(self) fuckingOptions.AW_skada68=(self:GetChecked() or false) end,{'fuckingOptions','AW_skada68'},'AW_skada68')
-	DA_Awarder.autoopt.selectdb_BTN,DA_Awarder.autoopt.selectdb_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt,"",13,78,{"CENTER",DA_Awarder.autoopt,"TOPLEFT",170,-45},10,80,"TOP",nil,
-		function()
-			for i,name in ipairs(getSkadadatabasenames()) do
-				if DA_Awarder.autoopt.selectdb_FRM['scdb'..i] then
-					DA_Awarder.autoopt.selectdb_FRM['scdb'..i].fs:SetText(name)
-					DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetScript("OnClick",function(self) 
-						DA_Awarder.autoopt.selectdb_FRM:Hide()
-						if self.fs:GetText()=='SkadaCharDB' or self.fs:GetText()=='SkadaStorageDB' then
-							DA_StoredCheckboxes[DA_SelSet].skadamode=self.fs:GetText()
-							DA_Awarder.autoopt.selectdb_BTN:SetText(DA_StoredCheckboxes[DA_SelSet].skadamode)
-						end
-					end)
-					DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetPoint("TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i)
-				else
-					DA_Awarder.autoopt.selectdb_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.selectdb_FRM,{"TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i},10,78,name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
-						DA_Awarder.autoopt.selectdb_FRM:Hide()
-						if self.fs:GetText()=='SkadaCharDB' or self.fs:GetText()=='SkadaStorageDB' then
-							DA_StoredCheckboxes[DA_SelSet].skadamode=self.fs:GetText()
-							DA_Awarder.autoopt.selectdb_BTN:SetText(DA_StoredCheckboxes[DA_SelSet].skadamode)
-						end
-					end,nil,nil,'left')
+			elseif n==#DA_StoredCheckboxes[DA_SelSet] then
+			
+			elseif n>#DA_StoredCheckboxes[DA_SelSet] then
+				for i=1,n do
+					if not DA_StoredCheckboxes[DA_SelSet][i] then 
+						DA_StoredCheckboxes[DA_SelSet][i]={'cb'..i,0,rl={},cl={}}
+					end
+					if not DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]] and DA_StoredCheckboxes[DA_SelSet][i].rl.saved then 
+						DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][i][1]]={}
+					end
 				end
-				DA_Awarder.autoopt.selectdb_FRM:SetSize(80,i*10)
+			
 			end
 		end
-	)
-	
-	skada_db_check_if_one()
-	skada_db_set()
-	
-	DA.FontCreater(nil,L["Skada db"],{"RIGHT",DA_Awarder.autoopt.selectdb_BTN,"LEFT",-3,0},DA_Awarder.autoopt.selectdb_BTN,15,80,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'right',{0.85,1,1,0.8})
-	
-	DA.ButtonCreater(nil,DA_Awarder.autoopt,{"LEFT",DA_Awarder.autoopt.selectdb_BTN,"RIGHT",6,0},16,16,"?",'',function()
-		if _G['SkadaCharDB'] then
-			if _G['SkadaCharDB'].sets then
-				DA.Print('SkadaCharDB |cff88ffff'..#SkadaCharDB.sets..' |rlogs stored')
-			end
-		else
-			DA.Print('SkadaCharDB - |cffaf8888not found')
+		
+		DA_Awarder.boxesbtn,DA_Awarder.boxesFrame=DA.CreateFFGDropFrame(DA_Awarder.autoopt,DA_SelSet,13,15,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 140,-10},85,18,"TOP",nil,function() DA_Awarder.naborFrame:Hide() end)
+		
+		DA.FontCreater(nil,L['criterias'],{"RIGHT",DA_Awarder.boxesbtn,"LEFT",-2,0},DA_Awarder.boxesbtn,15,65,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'right',{0.75,0.85,0.85,0.8})
+		for h,naborname in ipairs({'3','4','5','6','7','8'}) do
+				DA_Awarder.boxesFrame[naborname]=DA.CreateFFGButton2(nil,DA_Awarder.boxesFrame,{"CENTER", DA_Awarder.boxesFrame, "TOPLEFT", -7+14*h,-7},12,12,naborname,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+				function(self)
+					DA_Awarder.boxesFrame:Hide()
+					FEP_DopDop(tonumber(self:GetText()))
+					DA_Awarder.boxesbtn:SetText(self:GetText())
+					
+					FEP_RecalculateAllBtnEP();FEP_ResetAllChecks()
+					
+					for _,bab in pairs({'3','4','5','6','7','8'}) do
+						
+						if DA_Awarder.boxesFrame[bab]:GetText()==tostring(#DA_StoredCheckboxes[DA_SelSet]) then
+							DA_Awarder.boxesFrame[bab]:GetFontString():SetTextColor(0.2,1,1,1)
+						else
+							DA_Awarder.boxesFrame[bab]:GetFontString():SetTextColor(0.85,1,1,1)
+						end
+					end
+					self:GetFontString():SetTextColor(0.2,1,1,1)
+					FEP_ReNameRePushThings();FEP_ReNameRePushThings()
+				end)
+				if tostring(naborname)==tostring(#DA_StoredCheckboxes[DA_SelSet]) then
+					DA_Awarder.boxesFrame[naborname]:GetFontString():SetTextColor(0.2,1,1,1)
+				else
+					DA_Awarder.boxesFrame[naborname]:GetFontString():SetTextColor(0.85,1,1,1)
+				end
 		end
-		if _G['SkadaStorageDB'] then
-			if _G['SkadaStorageDB'].sets then
-				DA.Print('SkadaStorageDB |cff88ffff'..#SkadaStorageDB.sets..' |rlogs stored')
+		DA_Awarder.boxesbtn:SetText(#DA_StoredCheckboxes[DA_SelSet])
+		
+		DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-25},15,15,L['AW_raid68'],function(self) fuckingOptions.AW_raid68=(self:GetChecked() or false) end,{'fuckingOptions','AW_raid68'},'AW_raid68')
+		DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-35},15,15,L['AW_roles68'],function(self) fuckingOptions.AW_roles68=(self:GetChecked() or false) end,{'fuckingOptions','AW_roles68'},'AW_roles68')
+		DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 20,-45},15,15,L['AW_saved68'],function(self) fuckingOptions.AW_saved68=(self:GetChecked() or false) end,{'fuckingOptions','AW_saved68'},'AW_saved68')
+		
+		DA.CheckBtnCreater(nil,DA_Awarder.autoopt,{"CENTER", DA_Awarder.autoopt, "TOPLEFT", 110,-30},15,15,L['AW_skada68'],function(self) fuckingOptions.AW_skada68=(self:GetChecked() or false) end,{'fuckingOptions','AW_skada68'},'AW_skada68')
+		DA_Awarder.autoopt.selectdb_BTN,DA_Awarder.autoopt.selectdb_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt,"",13,78,{"CENTER",DA_Awarder.autoopt,"TOPLEFT",170,-45},10,80,"TOP",nil,
+			function()
+				for i,name in ipairs(getSkadadatabasenames()) do
+					if DA_Awarder.autoopt.selectdb_FRM['scdb'..i] then
+						DA_Awarder.autoopt.selectdb_FRM['scdb'..i].fs:SetText(name)
+						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetScript("OnClick",function(self) 
+							DA_Awarder.autoopt.selectdb_FRM:Hide()
+							if self.fs:GetText()=='SkadaCharDB' or self.fs:GetText()=='SkadaStorageDB' then
+								DA_StoredCheckboxes[DA_SelSet].skadamode=self.fs:GetText()
+								DA_Awarder.autoopt.selectdb_BTN:SetText(DA_StoredCheckboxes[DA_SelSet].skadamode)
+							end
+						end)
+						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetPoint("TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i)
+					else
+						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.selectdb_FRM,{"TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i},10,78,name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+							DA_Awarder.autoopt.selectdb_FRM:Hide()
+							if self.fs:GetText()=='SkadaCharDB' or self.fs:GetText()=='SkadaStorageDB' then
+								DA_StoredCheckboxes[DA_SelSet].skadamode=self.fs:GetText()
+								DA_Awarder.autoopt.selectdb_BTN:SetText(DA_StoredCheckboxes[DA_SelSet].skadamode)
+							end
+						end,nil,nil,'left')
+					end
+					DA_Awarder.autoopt.selectdb_FRM:SetSize(80,i*10)
+				end
 			end
-		else
-			DA.Print('SkadaStorageDB - |cffaf8888not found')
-		end
-	end)
+		)
+		
+		skada_db_check_if_one()
+		skada_db_set()
+		
+		DA.FontCreater(nil,L["Skada db"],{"RIGHT",DA_Awarder.autoopt.selectdb_BTN,"LEFT",-3,0},DA_Awarder.autoopt.selectdb_BTN,15,80,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'right',{0.85,1,1,0.8})
+		
+		DA.ButtonCreater(nil,DA_Awarder.autoopt,{"LEFT",DA_Awarder.autoopt.selectdb_BTN,"RIGHT",6,0},16,16,"?",'',function()
+			if _G['SkadaCharDB'] then
+				if _G['SkadaCharDB'].sets then
+					DA.Print('SkadaCharDB |cff88ffff'..#SkadaCharDB.sets..' |rlogs stored')
+				end
+			else
+				DA.Print('SkadaCharDB - |cffaf8888not found')
+			end
+			if _G['SkadaStorageDB'] then
+				if _G['SkadaStorageDB'].sets then
+					DA.Print('SkadaStorageDB |cff88ffff'..#SkadaStorageDB.sets..' |rlogs stored')
+				end
+			else
+				DA.Print('SkadaStorageDB - |cffaf8888not found')
+			end
+		end)
 
-	
-end
+		
+	end
 
 do --Assister module
-	DA.ScrollBarCreater("FEP_Assist",DA_Awarder.righside,{DA_Awarder.righside.width-5, DA_Awarder.righside.height-30},{"TOPLEFT", 5, -20},1)
+	FEP_Assist = DA.ScrollBarCreater("FEP_Assist",DA_Awarder.righside,{DA_Awarder.righside.width-5, DA_Awarder.righside.height-30},{"TOPLEFT", 5, -20},1)
 
 	local assister=DA_Awarder.righside
 	local assister_Scrolled=FEP_Assist.scrollchild
@@ -4622,8 +4704,7 @@ do --Assister module
 	DA_Awarder.standby_inAssister=DA.CheckBtnCreater(nil,assister,{"CENTER",assister,"TOPLEFT",140,-10},15,15,L['6-8 standby'],function(self) fuckingOptions.sixeight=(self:GetChecked() or false) ;DA_Awarder.standby_inMain:SetChecked(self:GetChecked());GuildRoster();FEP_GatherRaid()	end,{'fuckingOptions','sixeight'},nil)
 	
 
-
-	assister.EB1=DA.EditBoxCreater(nil,assister_Scrolled,{"TOPLEFT", assister_Scrolled, "TOPLEFT", 5, -10},{DA_Awarder.righside.width-30,60},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+	DA_Awarder.righside.EB1=DA.EditBoxCreater(nil,assister_Scrolled,{"TOPLEFT", assister_Scrolled, "TOPLEFT", 5, -10},{DA_Awarder.righside.width-30,60},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 10},
 				function(self) 		self.t:SetBlendMode('add');self:ClearFocus(); self.focusgained=nil  end,
 				function(self) 		self.t:SetBlendMode('add');self:ClearFocus(); self.focusgained=nil   end, --enter here
 				function(self) 		self.t:SetBlendMode('add');self:ClearFocus(); self.focusgained=nil  end,
@@ -4987,13 +5068,13 @@ end
 
 function FEP_CreateGroup(number,posx,posy)
 local gr  = CreateFrame("Frame", "DA_AwarderGroup"..number, DA_Awarder)
-gr:SetFrameStrata("FULLSCREEN_DIALOG")
+gr:SetFrameStrata("MEDIUM")
 gr:SetSize(156, 80)
 gr:SetPoint("TOPLEFT", DA_Awarder, "TOPLEFT", posx, posy)
 gr:SetBackdropColor(1, 1, 1, 1)
 local grtxt = gr:CreateTexture(nil, "BACKGROUND")
 grtxt:SetAllPoints()
-grtxt:SetTexture(8/255, 12/255, 20/255, 0.4);
+grtxt:SetTexture(21/255, 18/255, 22/255, 0.4);
 grtxt:SetBlendMode("blend")
 gr:EnableMouse(true)
 gr:EnableMouseWheel(true)
@@ -5008,7 +5089,7 @@ DA_Awarder['moverFrame'..number] = DA.FrameCreater(nil,gr,156, 80,{"TOPLEFT", gr
 	DA_Awarder['moverFrame'..number].t:SetTexture(0.7, 1, 1, 0.6)
 	DA_Awarder['moverFrame'..number]:Hide()
 
-DA_Awarder['moverBtn'..number] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..number,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover','left')
+DA_Awarder['moverBtn'..number] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..number,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover')
 DA_Awarder['moverBtn'..number]:SetMovable(true)
 DA_Awarder['moverBtn'..number]:RegisterForDrag("LeftButton")
 DA_Awarder['moverBtn'..number]:SetScript("OnDragStart", function(self) catch_show_frames(number); self:StartMoving(); DA.myHideTooltip() end)
@@ -5083,7 +5164,7 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 				elseif btntype=='RightButton' then
 					local ofnot=self.main
 					if ofnot=='not in guild' then ofnot=nil end
-					DAOptMenuFrame.calledfrom="DA_Awarder"
+					DA_RightClickMenu.calledfrom="DA_Awarder"
 					DA.OpenOptMenu(self,self.c.name)
 					
 				end
@@ -5096,11 +5177,11 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 	_G[framename]:EnableMouse(true)
 	_G[framename]:EnableMouseWheel(true)
 	_G[framename]:SetMovable(true)
-	_G[framename]:SetResizable(enable)
+	_G[framename]:SetResizable(false)
 	_G[framename]:SetMinResize(100, 100)
 	_G[framename]:RegisterForDrag("LeftButton")
 	_G[framename]:RegisterForClicks("AnyUp")
-	_G[framename]:SetScript("OnDragStart", function(...) if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then _G[framename].StartMoving(...);_G[framename].ismoving=true;GameTooltip:Hide() end end)
+	_G[framename]:SetScript("OnDragStart", function(...) if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then _G[framename].StartMoving(...);_G[framename].ismoving=true;DA_Tooltip:Hide() end end)
 	_G[framename]:SetScript("OnDragStop", function(self) 
 			self:StopMovingOrSizing(); 
 			self.ismoving=false;
@@ -5130,43 +5211,24 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 	_G[framename]:SetScript("OnEnter", function(self)
 		self:RegisterEvent('MODIFIER_STATE_CHANGED')
 			if IsShiftKeyDown() and self.main and self.state and self.c and self.c.name then
+				local tooltipText=""
 				if self.state=='mnormal' or self.state=='pum' or self.state=='tnormal' or self.state=='put' then
-					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
-					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
-					GameTooltip:SetText(DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
-					
-					GameTooltip:Show()
+					tooltipText = DA.GetTwinsInfo(self.c.name,self.main)
 				elseif self.state=='f' then
-					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
-					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
-					GameTooltip:SetText(L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
-					GameTooltip:Show()
+					tooltipText = L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main)
 					
 				elseif self.state=='tf' then
-					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
-					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
-					GameTooltip:SetText(L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main),0.45,0.65,0.65,1)
-					GameTooltip:Show()
+					tooltipText = L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main)
 					
 				elseif self.state=='pb' then
-					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
-					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
 					if CanEditOfficerNote() then
-						GameTooltip:SetText(L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1'],0.45,0.65,0.65,1)
+						tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1']
 					else
-						GameTooltip:SetText(L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2'],0.45,0.65,0.65,1)
+						tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2']
 					end
-					GameTooltip:Show()
 					
 				elseif self.state=='n' then
-					GameTooltip:SetOwner(self,'ANCHOR_NONE')
-					GameTooltip:SetPoint('TOPLEFT',self,'bottomleft',0,-5)
-					GameTooltipTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 10)
-					local adtxt="lol"
+					local adtxt=""
 					if CanGuildInvite() then
 						adtxt=L['AW_not_in_guild1']
 					else
@@ -5234,13 +5296,13 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					
 					elseif self.main and (self.main=='not in guild' or not FEP_gMain[self.main]) then
 						origmessg=adtxt
-						
 					end
-					GameTooltip:SetText(origmessg,0.45,0.65,0.65,1)
-					GameTooltip:Show()
+					tooltipText = origmessg
 				end
-			
-			elseif not IsShiftKeyDown() and GameTooltip:IsShown() then
+				
+				DA.myShowTooltip(self, tooltipText, {UIDarkAngelFontConsolas:GetFont(), 10})
+
+			elseif not IsShiftKeyDown() and DA_Tooltip:IsShown() then
 				DA.myHideTooltip()
 			end
 		end)
@@ -5573,7 +5635,7 @@ end
 function FEP_OpenSupportFrame()
 
 local assister=DA_Awarder.righside
-local assister_Scrolled=FEP_Assist.scrollchild
+--local assister_Scrolled=FEP_Assist.scrollchild
 local eb1=DA_Awarder.righside.EB1
 
 eb1:SetText('')
@@ -5682,7 +5744,7 @@ function DA_fakeep(name,epgp,value,comment,nochat,inr)
 		DA.Print("incorrect value")
 		return
 	end
-	
+
 	if inr then
 		if epgp=="ep" or epgp=="EP" or epgp=="e" or epgp=="E" then
 			SendAddonMessage("EPGP","LOG:"..DA.GetEPGPTimestamp().."\031EP\031"..name.."\031"..comment.."\031"..value, "raid")
@@ -5949,7 +6011,7 @@ DA.ResumeTimer('fep')
 
 
 for i=1,#ignored do
-	DA.Print(DA.GetColorName(ignored[i]).." --"..L["ignored"])
+	DA.Print(DA.GetStoredColorName(ignored[i]).." --"..L["ignored"])
 end
 DA_standby_mainslist="@"
 if fuckingOptions.ZamenaClearAfterAward and FEP_ZamFrame.AwardCB:GetChecked() then
@@ -6138,300 +6200,314 @@ end
 
 function FEP_AutoCBs(specific)
 
-if DA_Awarder.locker.getstate() and not DA_Awarder.raidtable[1] then 
-	return
-end
-
-local skadabossnames
-local ranksTable
-do--group skada boss names +officer
-	for IDcrit,crittable in ipairs(DA_StoredCheckboxes[DA_SelSet]) do
-		if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss then
-			if not skadabossnames then
-				skadabossnames={}
-				skadabossnames.a_counter=0
-			end
-			if not skadabossnames[crittable.rl.skada.boss] then
-				skadabossnames[crittable.rl.skada.boss]={}
-			end
-			if not skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode] then
-				skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode]={}
-			end
-			if crittable.rl.skada.addit then
-				skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode][crittable.rl.skada.addit]=crittable.rl.skada.addit
-			end
-			skadabossnames.a_counter=skadabossnames.a_counter+1
-			
-		end
-		if not ranksTable and crittable.rl.officer and type(crittable.rl.officer)=='table' then
-			if not ranksTable then
-				ranksTable={}
-			end
-		end
+	if DA_Awarder.locker.getstate() and not DA_Awarder.raidtable[1] then 
+		return
 	end
-	ISAUHGSGASDAS=skadabossnames
-end
 
-if ranksTable then
-	for k=1,DA.GetNumGMembers() do
-		local name, _, rankIndex, _ = GetGuildRosterInfo(k);
-		ranksTable[name]=rankIndex
-	end
-end
-
-local skadaDB
-do--gather skada boss DB
-	if skadabossnames then
-	
-		skada_db_version_check()
-		
-		if DA_Awarder.autoopt.skadaassign.skada_version then
-			skadaDB={}
-			local b_counter=0
-			
-			local idcrt = specific or 1
-			local endValue = specific and idcrt or #DA_StoredCheckboxes[DA_SelSet]
-			for IDcrit = idcrt, endValue do
-				local crittable=DA_StoredCheckboxes[DA_SelSet][IDcrit]
-				if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss=='total' then
-					if _G[DA_StoredCheckboxes[DA_SelSet].skadamode].total then
-						skadaDB['total']=_G[DA_StoredCheckboxes[DA_SelSet].skadamode].total
-					end
-					break
+	local skadabossnames
+	local ranksTable
+	do--group skada boss names +officer
+		for IDcrit,crittable in ipairs(DA_StoredCheckboxes[DA_SelSet]) do
+			if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss then
+				if not skadabossnames then
+					skadabossnames={}
+					skadabossnames.a_counter=0
+				end
+				if not skadabossnames[crittable.rl.skada.boss] then
+					skadabossnames[crittable.rl.skada.boss]={}
+				end
+				if not skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode] then
+					skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode]={}
+				end
+				if crittable.rl.skada.addit then
+					skadabossnames[crittable.rl.skada.boss][crittable.rl.skada.mode][crittable.rl.skada.addit]=crittable.rl.skada.addit
+				end
+				skadabossnames.a_counter=skadabossnames.a_counter+1
+				
+			end
+			if not ranksTable and crittable.rl.officer and type(crittable.rl.officer)=='table' then
+				if not ranksTable then
+					ranksTable={}
 				end
 			end
+		end
+		--ISAUHGSGASDAS=skadabossnames
+	end
+
+	if ranksTable then
+		for k=1,DA.GetNumGMembers() do
+			local name, _, rankIndex, _ = GetGuildRosterInfo(k);
+			ranksTable[name]=rankIndex
+		end
+	end
+
+	local skadaDB
+	do--gather skada boss DB
+		if skadabossnames then
+		
+			skada_db_version_check()
 			
-			for setID,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
-				if DB.type=='raid' and DB.time>120 and skadabossnames[DB.mobname] and (not skadaDB or not skadaDB[DB.mobname]) then
-					skadaDB[DB.mobname]=DB
-					b_counter=b_counter+1
-					if b_counter==skadabossnames.a_counter then
+			if DA_Awarder.autoopt.skadaassign.skada_version then
+				skadaDB={}
+				local b_counter=0
+				
+				local idcrt = specific or 1
+				local endValue = specific and idcrt or #DA_StoredCheckboxes[DA_SelSet]
+				for IDcrit = idcrt, endValue do
+					local crittable=DA_StoredCheckboxes[DA_SelSet][IDcrit]
+					if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss=='total' then
+						if _G[DA_StoredCheckboxes[DA_SelSet].skadamode].total then
+							skadaDB['total']=_G[DA_StoredCheckboxes[DA_SelSet].skadamode].total
+						end
 						break
 					end
 				end
-			end
-			
-		else
-			DA.Print(L['failed to determine Skada version. Report this bug'])
-		end
-	end
-end
-
-local Skada_Result
-local Skada_Result_sorted
-if skadabossnames and skadaDB then
-	Skada_Result={}
-	Skada_Result_sorted={}
-	OKASGALSKG=skadaDB
-	
-	for boss,modetable in pairs(skadabossnames) do
-	if boss~='a_counter' then
-		if skadaDB[boss] then
-			Skada_Result[boss]={}
-			local combattime=skadaDB[boss].time
-			
-			if modetable["dmg"] 
-				or modetable["dmg_dps"] 
-				or modetable["dmg_specif"]
-				or modetable["dmg_taken"]
-				or modetable["dmg_taken_attack"]
-				or modetable["healing"]
-				or modetable["healing_hps"]
-				or modetable["death"]
-				or modetable["fails"]
-				or modetable["fails_specif"]
-				or modetable["dispells"]
-				or modetable["dispells_specif"]
-				or modetable["cc_done"]
-				or modetable["cc_done_specif"]
-				or modetable["sunders"] 
-			then
-				for _,entable in ipairs(skadaDB[boss].players) do
-					if not Skada_Result[boss][entable.name] then
-						Skada_Result[boss][entable.name]={}
-					end
-					
-					if modetable["dmg"] then
-						Skada_Result[boss][entable.name].dmg=entable.damage
-					end
-					
-					if modetable["dmg_dps"] then
-						Skada_Result[boss][entable.name].dmg_dps=(entable.damage and (entable.damage/combattime)) or nil
-					end
-					if modetable["dmg_specif"] then
-						if entable.damagespells then
-							if not Skada_Result[boss][entable.name].dmg_specif then
-								Skada_Result[boss][entable.name].dmg_specif={}
-							end
-							
-							for _,spelltable in pairs(entable.damagespells) do
-								if spelltable and spelltable.targets then
-									for target,targetdata in pairs(spelltable.targets) do
-										if modetable["dmg_specif"][target] and (targetdata.total or targetdata.amount) then
-											if not Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]] then
-												Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]]=0
-											end
-											Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]]=Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]] + (targetdata.total or targetdata.amount)
-										end
-									end
-								end
-							end
-						end
-					end
-					if modetable["dmg_taken"] then
-						Skada_Result[boss][entable.name].dmg_taken=entable.damagetaken
-					end
-					if modetable["dmg_taken_attack"] then
-						if entable.damagetakenspells then
-							if not Skada_Result[boss][entable.name].dmg_taken_attack then
-								Skada_Result[boss][entable.name].dmg_taken_attack={}
-							end
-							
-							
-							for spellname,spelltable in pairs(entable.damagetakenspells) do
-								if modetable["dmg_taken_attack"][spellname] and (spelltable.amount or spelltable.hitamount) then
-									if not Skada_Result[boss][entable.name].dmg_taken_attack[modetable["dmg_taken_attack"][spellname]] then
-										Skada_Result[boss][entable.name].dmg_taken_attack[modetable["dmg_taken_attack"][spellname]]=0
-									end
-									Skada_Result[boss][entable.name].dmg_taken_attack[modetable["dmg_taken_attack"][spellname]]=Skada_Result[boss][entable.name].dmg_taken_attack[modetable["dmg_taken_attack"][spellname]] + (spelltable.amount or spelltable.hitamount)
-								end
-							end
-						end
-					end
-					if modetable["healing"] then
-						Skada_Result[boss][entable.name].healing=(entable.heal and entable.heal+(entable.absorb or 0)) or nil
-					end
-					if modetable["healing_hps"] then
-						Skada_Result[boss][entable.name].healing_hps=(entable.heal and ((entable.heal+(entable.absorb or 0))/combattime)) or nil
-					end
-					if modetable["death"] then
-						Skada_Result[boss][entable.name].death=entable.death
-					end
-					if modetable["fails"] then
-						Skada_Result[boss][entable.name].fails=entable.fail
-					end
-					if modetable["fails_specif"] then
-						if entable.failspells then
-							if not Skada_Result[boss][entable.name].fails_specif then
-								Skada_Result[boss][entable.name].fails_specif={}
-							end
-							
-							for spellID,fails_numb in pairs(entable.failspells) do
-								if modetable["fails_specif"][tostring(spellID)] and fails_numb then
-									if not Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]] then
-										Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]]=0
-									end
-									Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]]=Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]] + fails_numb
-								end
-							end
-						end
-					end
-					if modetable["dispells"] then
-						Skada_Result[boss][entable.name].dispells=entable.dispel
-					end
-					if modetable["dispells_specif"] then
-						if entable.dispelspells then
-							if not Skada_Result[boss][entable.name].dispells_specif then
-								Skada_Result[boss][entable.name].dispells_specif={}
-							end
-							
-							
-							for _,cleansespelltbl in pairs(entable.dispelspells) do
-								for spellID,dispelled_numb in pairs(cleansespelltbl.spells) do
-									if modetable["dispells_specif"][tostring(spellID)] and dispelled_numb then
-										if not Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]] then
-											Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]]=0
-										end
-										Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]]=Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]] + dispelled_numb
-									end
-								end
-							end
-						end
-					end
-					if modetable["cc_done"] then
-						Skada_Result[boss][entable.name].cc_done=entable.ccdone
-					end
-					if modetable["cc_done_specif"] then
-						if entable.ccdonespells then
-							if not Skada_Result[boss][entable.name].cc_done_specif then
-								Skada_Result[boss][entable.name].cc_done_specif={}
-							end
-							
-							for used_cc_id,cc_tbl in pairs(entable.ccdonespells) do
-								if modetable["cc_done_specif"][tostring(used_cc_id)] and cc_tbl and cc_tbl.count then
-									Skada_Result[boss][entable.name].cc_done_specif[modetable["cc_done_specif"][tostring(used_cc_id)]]=cc_tbl.count
-								end
-							end
-						end
-					end
-					if modetable["sunders"]  then
-						Skada_Result[boss][entable.name].sunders=entable.sunder
-					end
-					
 				
-				
-				end
-			end
-			if modetable["dmg_taken_mob"] then
-				for _,entable in ipairs(skadaDB[boss].enemies) do
-					if entable.damagespells and type(entable.damagespells)=='table' and modetable["dmg_taken_mob"][entable.name] then
-						for _,spellTBL in pairs(entable.damagespells) do
-							if spellTBL.targets and type(spellTBL.targets)=='table' then
-								for name,amounts in pairs(spellTBL.targets) do
-									if name and amounts.amount then
-										if not Skada_Result[boss][name] then
-											Skada_Result[boss][name]={}
-										end
-										if not Skada_Result[boss][name].dmg_taken_mob then
-											Skada_Result[boss][name].dmg_taken_mob={}
-										end
-										if not Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]] then
-											Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]]=0
-										end
-										Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]]=Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]] + amounts.amount
-									end
-								end
-							end
+				for _,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
+					if (not fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights or DB.type=='raid') 
+					and (not fuckingOptions_g[DA_CurrentGuild].aw_scada_long or DB.time>120) 
+					and	 skadabossnames[DB.mobname] 
+					and (not skadaDB or not skadaDB[DB.mobname]) 
+					then
+						skadaDB[DB.mobname]=DB
+						b_counter=b_counter+1
+						if b_counter==skadabossnames.a_counter then
+							break
 						end
 					end
 				end
-			end
-			
-			
 				
-		end
-	end
-	end
-
-	OKASGALSKH=Skada_Result
-	
-	for _,crittable in ipairs(DA_StoredCheckboxes[DA_SelSet]) do
-		if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss and crittable.rl.skada.matem and (crittable.rl.skada.matem.typ=='intop' or crittable.rl.skada.matem.typ=='notintop') and Skada_Result[crittable.rl.skada.boss] then
-			local boss=crittable.rl.skada.boss
-			local criteria=crittable.rl.skada.mode
-			local addit=crittable.rl.skada.addit
-			if not Skada_Result_sorted[boss] then
-				Skada_Result_sorted[boss]={}
-			end
-			if not Skada_Result_sorted[boss][criteria] then
-				Skada_Result_sorted[boss][criteria]={}
-			end
-			if addit then
-				Skada_Result_sorted[boss][criteria][addit]=skada_resort_table(boss,Skada_Result[boss],criteria,addit)
 			else
-				Skada_Result_sorted[boss][criteria]=skada_resort_table(boss,Skada_Result[boss],criteria)
+				DA.Print(L['failed to determine Skada version. Report this bug'])
 			end
-			
-			
 		end
 	end
-	OKASGALSKMx=Skada_Result_sorted
-		
-end
 
-if #DA_Standby[DA_CurrentGuild]>0 then
-	FEP_ZamFrame:Show()
-end
+	local Skada_Result
+	local Skada_Result_sorted
+	if skadabossnames and skadaDB then
+		Skada_Result={}
+		Skada_Result_sorted={}
+		--OKASGALSKG=skadaDB
+		
+		for boss,modetable in pairs(skadabossnames) do
+			if boss~='a_counter' then
+				if skadaDB[boss] then
+					Skada_Result[boss]={}
+					local combattime=skadaDB[boss].time
+					
+					if modetable["dmg"] 
+						or modetable["dmg_dps"] 
+						or modetable["dmg_specif"]
+						or modetable["dmg_taken"]
+						or modetable["dmg_taken_attack"]
+						or modetable["healing"]
+						or modetable["healing_hps"]
+						or modetable["death"]
+						or modetable["fails"]
+						or modetable["fails_specif"]
+						or modetable["dispells"]
+						or modetable["dispells_specif"]
+						or modetable["cc_done"]
+						or modetable["cc_done_specif"]
+						or modetable["sunders"] 
+					then
+						for _,entable in ipairs(skadaDB[boss].players) do
+							if not Skada_Result[boss][entable.name] then
+								Skada_Result[boss][entable.name]={}
+							end
+							
+							if modetable["dmg"] then
+								Skada_Result[boss][entable.name].dmg=entable.damage
+							end
+							
+							if modetable["dmg_dps"] then
+								Skada_Result[boss][entable.name].dmg_dps=(entable.damage and (entable.damage/combattime)) or nil
+							end
+							if modetable["dmg_specif"] then
+								if entable.damagespells then
+									if not Skada_Result[boss][entable.name].dmg_specif then
+										Skada_Result[boss][entable.name].dmg_specif={}
+									end
+									
+									for _,spelltable in pairs(entable.damagespells) do
+										if spelltable and spelltable.targets then
+											for target,targetdata in pairs(spelltable.targets) do
+												if modetable["dmg_specif"][target] and (targetdata.total or targetdata.amount) then
+													if not Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]] then
+														Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]]=0
+													end
+													Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]]=Skada_Result[boss][entable.name].dmg_specif[modetable["dmg_specif"][target]] + (targetdata.total or targetdata.amount)
+												end
+											end
+										end
+									end
+								end
+							end
+
+							if modetable["dmg_taken"] then
+								Skada_Result[boss][entable.name].dmg_taken=entable.damagetaken
+							end
+							if modetable["dmg_taken_attack"] then
+
+								if entable.damagetakenspells then
+
+									if not Skada_Result[boss][entable.name].dmg_taken_attack then
+										Skada_Result[boss][entable.name].dmg_taken_attack = {}
+									end
+									for spellname, spelltable in pairs(entable.damagetakenspells) do
+										local dmg = spelltable and (spelltable.amount or spelltable.hitamount)
+										local spellID = spelltable.id
+
+										if (modetable["dmg_taken_attack"][spellID] or modetable["dmg_taken_attack"][tostring(spellID)]) and dmg then
+											local key = modetable["dmg_taken_attack"][spellID] or modetable["dmg_taken_attack"][tostring(spellID)]
+
+											if not Skada_Result[boss][entable.name].dmg_taken_attack[key] then
+												Skada_Result[boss][entable.name].dmg_taken_attack[key] = 0
+											end
+
+											Skada_Result[boss][entable.name].dmg_taken_attack[key] =
+												Skada_Result[boss][entable.name].dmg_taken_attack[key] + dmg
+
+										end
+									end
+								
+								end
+							end
+
+							if modetable["healing"] then
+								Skada_Result[boss][entable.name].healing=(entable.heal and entable.heal+(entable.absorb or 0)) or nil
+							end
+							if modetable["healing_hps"] then
+								Skada_Result[boss][entable.name].healing_hps=(entable.heal and ((entable.heal+(entable.absorb or 0))/combattime)) or nil
+							end
+							if modetable["death"] then
+								Skada_Result[boss][entable.name].death=entable.death
+							end
+							if modetable["fails"] then
+								Skada_Result[boss][entable.name].fails=entable.fail
+							end
+							if modetable["fails_specif"] then
+								if entable.failspells then
+									if not Skada_Result[boss][entable.name].fails_specif then
+										Skada_Result[boss][entable.name].fails_specif={}
+									end
+									
+									for spellID,fails_numb in pairs(entable.failspells) do
+										if modetable["fails_specif"][tostring(spellID)] and fails_numb then
+											if not Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]] then
+												Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]]=0
+											end
+											Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]]=Skada_Result[boss][entable.name].fails_specif[modetable["fails_specif"][tostring(spellID)]] + fails_numb
+										end
+									end
+								end
+							end
+							if modetable["dispells"] then
+								Skada_Result[boss][entable.name].dispells=entable.dispel
+							end
+							if modetable["dispells_specif"] then
+								if entable.dispelspells then
+									if not Skada_Result[boss][entable.name].dispells_specif then
+										Skada_Result[boss][entable.name].dispells_specif={}
+									end
+									
+									
+									for _,cleansespelltbl in pairs(entable.dispelspells) do
+										for spellID,dispelled_numb in pairs(cleansespelltbl.spells) do
+											if modetable["dispells_specif"][tostring(spellID)] and dispelled_numb then
+												if not Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]] then
+													Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]]=0
+												end
+												Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]]=Skada_Result[boss][entable.name].dispells_specif[modetable["dispells_specif"][tostring(spellID)]] + dispelled_numb
+											end
+										end
+									end
+								end
+							end
+							if modetable["cc_done"] then
+								Skada_Result[boss][entable.name].cc_done=entable.ccdone
+							end
+							if modetable["cc_done_specif"] then
+								if entable.ccdonespells then
+									if not Skada_Result[boss][entable.name].cc_done_specif then
+										Skada_Result[boss][entable.name].cc_done_specif={}
+									end
+									
+									for used_cc_id,cc_tbl in pairs(entable.ccdonespells) do
+										if modetable["cc_done_specif"][tostring(used_cc_id)] and cc_tbl and cc_tbl.count then
+											Skada_Result[boss][entable.name].cc_done_specif[modetable["cc_done_specif"][tostring(used_cc_id)]]=cc_tbl.count
+										end
+									end
+								end
+							end
+							if modetable["sunders"]  then
+								Skada_Result[boss][entable.name].sunders=entable.sunder
+							end
+							
+						
+						
+						end
+					end
+					if modetable["dmg_taken_mob"] then
+						for _,entable in ipairs(skadaDB[boss].enemies) do
+							if entable.damagespells and type(entable.damagespells)=='table' and modetable["dmg_taken_mob"][entable.name] then
+								for _,spellTBL in pairs(entable.damagespells) do
+									if spellTBL.targets and type(spellTBL.targets)=='table' then
+										for name,amounts in pairs(spellTBL.targets) do
+											if name and amounts.amount then
+												if not Skada_Result[boss][name] then
+													Skada_Result[boss][name]={}
+												end
+												if not Skada_Result[boss][name].dmg_taken_mob then
+													Skada_Result[boss][name].dmg_taken_mob={}
+												end
+												if not Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]] then
+													Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]]=0
+												end
+												Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]]=Skada_Result[boss][name].dmg_taken_mob[modetable["dmg_taken_mob"][entable.name]] + amounts.amount
+											end
+										end
+									end
+								end
+							end
+						end
+					end
+					
+					
+						
+				end
+			end
+		end
+		-- OKASGALSKH=Skada_Result
+		
+		for _,crittable in ipairs(DA_StoredCheckboxes[DA_SelSet]) do
+			if crittable.rl.skada and type(crittable.rl.skada)=='table' and crittable.rl.skada.boss and crittable.rl.skada.matem and (crittable.rl.skada.matem.typ=='intop' or crittable.rl.skada.matem.typ=='notintop') and Skada_Result[crittable.rl.skada.boss] then
+				local boss=crittable.rl.skada.boss
+				local criteria=crittable.rl.skada.mode
+				local addit=crittable.rl.skada.addit
+				if not Skada_Result_sorted[boss] then
+					Skada_Result_sorted[boss]={}
+				end
+				if not Skada_Result_sorted[boss][criteria] then
+					Skada_Result_sorted[boss][criteria]={}
+				end
+				if addit then
+					Skada_Result_sorted[boss][criteria][addit]=skada_resort_table(boss,Skada_Result[boss],criteria,addit)
+				else
+					Skada_Result_sorted[boss][criteria]=skada_resort_table(boss,Skada_Result[boss],criteria)
+				end
+				
+				
+			end
+		end
+		-- OKASGALSKMx=Skada_Result_sorted
+			
+	end
+
+	if #DA_Standby[DA_CurrentGuild]>0 then
+		FEP_ZamFrame:Show()
+	end
 
 	for pl=1,40 do
 		
@@ -6499,15 +6575,15 @@ end
 					if roleempty and clasempty then
 					else
 						if roleempty then
-							passed = skada_checkClass(crittable,CLASS,q,{'WARRIOR', 'DEATHKNIGHT', 'PALADIN', 'PRIEST', 'SHAMAN', 'DRUID', 'ROGUE', 'MAGE', 'WARLOCK', 'HUNTER'})
+							passed = skada_checkClass(crittable,CLASS,{'WARRIOR', 'DEATHKNIGHT', 'PALADIN', 'PRIEST', 'SHAMAN', 'DRUID', 'ROGUE', 'MAGE', 'WARLOCK', 'HUNTER'})
 						elseif clasempty then
-							passed = skada_checkRole(crittable,spec,q,role,{'tank', 'healer', 'melee', 'caster'})
+							passed = skada_checkRole(crittable,spec,role,{'tank', 'healer', 'melee', 'caster'})
 						else
-							local rolePassed = skada_checkRole(crittable,spec,q,role,{'tank', 'healer', 'melee', 'caster'})
-							local classPassed = skada_checkClass(crittable,CLASS,q,{'WARRIOR', 'DEATHKNIGHT', 'PALADIN', 'PRIEST', 'SHAMAN', 'DRUID', 'ROGUE', 'MAGE', 'WARLOCK', 'HUNTER'})
+							local rolePassed = skada_checkRole(crittable,spec,role,{'tank', 'healer', 'melee', 'caster'})
+							local classPassed = skada_checkClass(crittable,CLASS,{'WARRIOR', 'DEATHKNIGHT', 'PALADIN', 'PRIEST', 'SHAMAN', 'DRUID', 'ROGUE', 'MAGE', 'WARLOCK', 'HUNTER'})
 							
 							if crittable.andcl and rolePassed and classPassed or
-							   (not crittable.andcl and (rolePassed or classPassed)) then
+							(not crittable.andcl and (rolePassed or classPassed)) then
 								passed = true
 							end
 						end
@@ -6541,13 +6617,10 @@ end
 		end
 	end
 	
-	
-	
-	
-GuildRoster()
-FEP_GatherRaid()
-tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
-DA.ResumeTimer('fep')
+	GuildRoster()
+	FEP_GatherRaid()
+	tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
+	DA.ResumeTimer('fep')
 end
 
 
@@ -6715,7 +6788,7 @@ FEP_GatherRaid()
   
   
 end
-local f = CreateFrame("Frame","FEP_ZamWHframe")
+FEP_ZamWHframe = CreateFrame("Frame","FEP_ZamWHframe")
 FEP_ZamWHframe:SetScript("OnEvent", FEP_Standby)
 function FEP_ResetAllChecks()
 for group=1,8 do
@@ -6773,7 +6846,6 @@ DA.ResumeTimer('fep')
 
 end
 
-DA_StandbyFunList=DA_StandbyFunList or L["DA_Funlist"]
 function FEP_GetRandomFun()
 if #DA_StandbyFunList==0 then
 	DA.Print(L['funny phrases not found. Using backup'])
@@ -6943,7 +7015,7 @@ DA:RegisterComm("DA_ass",
 			
 			if IsAllowedPlayer(sender,'assist') then
 				PromoteToAssistant(name)
-				DA.Print(L["Promoted to Raid Assistant: "]..DA.GetClassColorCode(class)..name)
+				DA.Print(L["Promoted to Raid Assistant: "]..DA.GetHexClassColorCode(class)..name)
 			end
 			
 		end
@@ -7182,9 +7254,11 @@ function Mod:AddModOptions(modOptTable)
 		re_render_byrankbtn_highlight()
 		DarkAngelGUI.opt.assistperm_byrankbtn:Hide()
 		re_highlight_assist()
+		table.insert(DA.RunOnGuildUpdate, re_render_byrankbtn)
+		table.insert(DA.RunOnGuildUpdate, re_render_byrankbtn_highlight)
+		table.insert(DA.RunOnGuildUpdate, re_highlight_assist)
 		
 	end
 
-	
 	
 end
