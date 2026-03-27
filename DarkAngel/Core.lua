@@ -288,23 +288,15 @@ function DA.GetPlayerGuildIndex(name)
 end
 local lastGuildUpdate = 0
 function DA.GetNumGMembers()
+	if not IsInGuild() then
+		return 0;
+	end
     if (time() - lastGuildUpdate > 10) then
         GuildRoster()
         lastGuildUpdate = time()
     end
 
-    local wasOfflineHidden = not GetGuildRosterShowOffline()
-    if wasOfflineHidden then
-        SetGuildRosterShowOffline(true)
-    end
-	
-	local count = GetNumGuildMembers()
-	
-    if wasOfflineHidden then
-        SetGuildRosterShowOffline(false)
-    end
-
-    return count
+	return GetNumGuildMembers(true)
 end
 local GC_flag_IDs={
 	guildchat_listen=1,

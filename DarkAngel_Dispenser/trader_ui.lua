@@ -395,39 +395,7 @@ function Mod:Flasker_OptLoad()
 		DA.CheckBtnCreater(nil,F.optionsFrame,{"CENTER",oncomplete,"CENTER",0,-30},15,15,L['results in raid'],function(self) fuckingOptions_g[DA_CurrentGuild].dispenser_rsay_results=(self:GetChecked() or false) end,{'fuckingOptions_g','dispenser_rsay_results','DA_CurrentGuild'},nil)
 		DA.CheckBtnCreater(nil,F.optionsFrame,{"CENTER",oncomplete,"CENTER",0,-45},15,15,L['results in guild'],function(self) fuckingOptions_g[DA_CurrentGuild].dispenser_gsay_results=(self:GetChecked() or false) end,{'fuckingOptions_g','dispenser_gsay_results','DA_CurrentGuild'},nil)
 
-	Dispenser_ReRender()
-
-end
-
-F.Controls=DA.FrameCreater(nil,F,70,90,{"TOPLEFT", F,"TOPRIGHT",2,0},nil,1)
-F.optionsFrame=DA.FrameCreater(nil,F,360,100,{'BOTTOMLEFT',F,'TOPLEFT',0,2},nil,1)
-F.optionsFrame:RegisterForDrag("LeftButton")
-F.optionsFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-F.optionsFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
-F.optionsFrame.add:SetFrameLevel(0)
-	DA.CloseButtonCreater(nil,F.optionsFrame,{"TOPRIGHT", F.optionsFrame, "TOPRIGHT", -3,-3},10,10,'x')
-do --contents
-	F.Controls:EnableMouse(true)
-	F.Controls:SetMovable(true)
-	F.Controls:SetResizable(false)
-	F.Controls:SetMinResize(100, 100)
-	F.Controls:RegisterForDrag("LeftButton")
-	F.Controls:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-	F.Controls:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
-
-	F.Controls:Show()
-
-
-	for _, t in ipairs({
-		{"T\nA\nN\nK",2},
-		{"H\nE\nA\nL",-38},
-		{"M\nE\nL\nE",-78},
-		{"C\nA\nS\nT",-118}
-	}) do
-		DA.FontCreater(nil,t[1],{"TOPLEFT", F, "TOPLEFT", -5, t[2]},F,60,17,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"})
-	end
-	create_flask_buttons()
-
+		
 	do --SETS
 
 		_,F.Controls.naborFrame=DA.CreateFFGDropFrame(F.Controls,"<"..L['profile']..">",12,(F.Controls.width)-6,{"CENTER", F.Controls, "TOP", 0, -12},70,110 +17,"BOTTOM",nil,function() end)
@@ -496,6 +464,40 @@ do --contents
 
 		
 	end
+
+	Dispenser_ReRender()
+
+
+end
+
+F.Controls=DA.FrameCreater(nil,F,70,90,{"TOPLEFT", F,"TOPRIGHT",2,0},nil,1)
+F.optionsFrame=DA.FrameCreater(nil,F,360,100,{'BOTTOMLEFT',F,'TOPLEFT',0,2},nil,1)
+F.optionsFrame:RegisterForDrag("LeftButton")
+F.optionsFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
+F.optionsFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
+F.optionsFrame.add:SetFrameLevel(0)
+	DA.CloseButtonCreater(nil,F.optionsFrame,{"TOPRIGHT", F.optionsFrame, "TOPRIGHT", -3,-3},10,10,'x')
+do --contents
+	F.Controls:EnableMouse(true)
+	F.Controls:SetMovable(true)
+	F.Controls:SetResizable(false)
+	F.Controls:SetMinResize(100, 100)
+	F.Controls:RegisterForDrag("LeftButton")
+	F.Controls:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
+	F.Controls:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
+
+	F.Controls:Show()
+
+
+	for _, t in ipairs({
+		{"T\nA\nN\nK",2},
+		{"H\nE\nA\nL",-38},
+		{"M\nE\nL\nE",-78},
+		{"C\nA\nS\nT",-118}
+	}) do
+		DA.FontCreater(nil,t[1],{"TOPLEFT", F, "TOPLEFT", -5, t[2]},F,60,17,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"})
+	end
+	create_flask_buttons()
 
 
 	F.Controls.startflBtn = DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", -(F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black', {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)

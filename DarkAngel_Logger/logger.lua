@@ -1410,13 +1410,13 @@ local function IsGINFOLoggingRequired()
 end
 function Mod:StartScan()
 
-if DA_CurrentGuild~="n0-guild" then else return end
-if ({GetGuildInfo("player")})[1] then else return end
-if not DA.GuildInfoFetched then return end
+	if DA_CurrentGuild~="n0-guild" then else return end
+	if ({GetGuildInfo("player")})[1] then else return end
+	if not DA.GuildInfoFetched then return end
 
 	QueryGuildEventLog()
 
-local DA_gRoster=DA.RegatherGuildNotes(true)
+	local DA_gRoster=DA.RegatherGuildNotes(true)
 	
 	FDCutStoredText()
 	

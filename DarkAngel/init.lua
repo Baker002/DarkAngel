@@ -1455,11 +1455,10 @@ if firstrun and not enabled then return end
 									-- Search for the Main character
 										if tonumber(EP) == nil and tonumber(GP) == nil then
 											if RaidRoll_DBPC[UnitName("player")]["RR_RollCheckBox_Enable_Alt_Mode"] == true then
-												SetGuildRosterShowOffline(true);
 												
 												character = officernote
 												
-												for j=1,GetNumGuildMembers() do
+												for j=1,GetNumGuildMembers(true) do
 													name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName = GetGuildRosterInfo(j);
 													
 													if strlower(character) == strlower(name) then

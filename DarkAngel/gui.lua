@@ -1156,6 +1156,7 @@ end
 
 function DA.myShowTooltip(self, text, fontleft1, pointy)
     local tt = DA_Tooltip
+	tt:Hide()
 	tt:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile="true",tileSize="16",edgeSize="16",insets={bottom="5",left="5",right="5",top="5"}})
 	tt:SetBackdropColor(0, 0, 0, 0.85)
 	tt:SetBackdropBorderColor(0.2, 0.2, 0.2, 1.0)
@@ -7881,7 +7882,9 @@ Guild_Create_ScrollBar = function ()
 		end)
 		row:SetScript("OnLeave", function(self)
 			self:UnregisterEvent('MODIFIER_STATE_CHANGED')
-			DA.myHideTooltip()
+			if DA_Tooltip:IsShown() then
+				DA.myHideTooltip()
+			end
 		end)
 
 

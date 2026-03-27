@@ -1206,8 +1206,11 @@ DA_BidTracker:SetScript("OnEvent",function(self,event,message,author)
 		if self.bidsession_active then
 			if fuckingOptions_g[DA_CurrentGuild].auc_allin and message=='all in' then
 				Add_Check_Bid(nil,author,true)
-			elseif message:match("^%d+$") then
-				Add_Check_Bid(message:match("^%d+$"),author)
+			else
+				local bid = message:match("^%s?(%d+)%s?$")
+				if bid then
+					Add_Check_Bid(bid,author)
+				end
 			end
 		end
 	end

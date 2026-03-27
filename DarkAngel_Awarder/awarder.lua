@@ -7,6 +7,233 @@ local Mod = DA:NewModule("Awarder")
 
 local localsToShare={}
 local locals_Bulk={}
+local DA_SelSet=false
+local DA_locals_UpdList={}
+local skada_list_modes_total={
+	dmg=true,
+	dmg_dps=true,
+	dmg_taken=true,
+	healing=true,
+	healing_hps=true,
+	death=true,
+	fails=true,
+	dispells=true,
+	cc_done=true,
+	sunders=true
+}
+local skada_list_modes={
+	{"damage done","dmg"},
+	{"damage done (DPS)","dmg_dps"},
+	{"damage done to enemy","dmg_specif"},
+	{"damage taken","dmg_taken"},
+	{"damage taken from mob","dmg_taken_mob"},
+	{"damage taken from spell","dmg_taken_attack"},
+	{"healing","healing"},
+	{"healing (HPS)","healing_hps"},
+	{"death","death"},
+	{"fails","fails"},
+	{"fails (specific)","fails_specif"},
+	{"dispells","dispells"},
+	{"dispells (specific)","dispells_specif"},
+	{"crowd control","cc_done"},
+	{"crowd control (specific)","cc_done_specif"},
+	{"sunders","sunders"},
+}
+local skada_list_matematics={
+	{"exists (any value)","any"},
+	{"  in top X","intop"},
+	{"  not in top X","notintop"},
+	{"  >= X",">="},
+	{"  > X",">"},
+	{"  <= X","<="},
+	{"  <= X or n/a","mx_or_na"},
+	{"  < X","<"},
+	{"  A < X < B","between"},
+	{"  = X","equal"},
+	{"  not = X","notequal"},
+	{"0 or not exists","0_or_na"},
+	{"not exists","na"},
+}
+DA_standby_mainslist=DA_standby_mainslist or "@"
+DA_StoredCheckboxes=DA_StoredCheckboxes or {
+	default={
+		{'raid',12000,
+			rl={
+				raid=true
+			},
+			cl={},
+		}, 
+		{'tank_heal',1000,
+			rl={
+				tank=true,
+				healer=true,
+			},
+			cl={},
+		},
+		{'bis',1000,
+			rl={},
+			cl={},
+		},
+		{'dps',1000,
+			rl={},
+			cl={},
+		},
+		{'trash',1000,
+			rl={},
+			cl={},
+		},
+		
+	},	
+	icc={
+		{'raid',12000,
+			rl={
+				raid=true
+			},
+			cl={},
+		},
+		{'tank_heal',1000,
+			rl={
+				tank=true,
+				healer=true,
+			},
+			cl={},
+		},
+		{'bis',1000,
+			rl={},
+			cl={},
+		},
+	},
+	ruby={
+		{'raid',4500,
+			rl={
+				raid=true
+			},
+			cl={},
+		},
+		{'tank_heal',500,
+			rl={
+				tank=true,
+				healer=true,
+			},
+			cl={},
+		},
+		{'bis',500,
+			rl={},
+			cl={},
+		},
+	},
+}
+local raidCompClasses = {
+	["DEATHKNIGHT"] = { letter = "L", role = "melee" },
+	["DEATHKNIGHT1"] = { letter = "K", role = "tank" , only=true},
+	["DEATHKNIGHT2"] = { letter = "L", role = "melee" },
+	["DEATHKNIGHT3"] = { letter = "M", role = "melee" },
+
+	["PRIEST"] = { letter = "q", role = "caster" , only=true},
+	["PRIEST1"] = { letter = "n", role = "healer" },
+	["PRIEST2"] = { letter = "p", role = "healer" },
+	["PRIEST3"] = { letter = "q", role = "caster" , only=true},
+
+	["DRUID"] = { letter = "x", role = "caster" , only=true},
+	["DRUID1"] = { letter = "x", role = "caster" , only=true},
+	["DRUID2"] = { letter = "v", role = "melee" , only=true},
+	["DRUID3"] = { letter = "w", role = "healer" , only=true},
+
+	["ROGUE"] = { letter = "j", role = "melee" },
+	["ROGUE1"] = { letter = "k", role = "melee" },
+	["ROGUE2"] = { letter = "j", role = "melee" },
+	["ROGUE3"] = { letter = "m", role = "melee" },
+
+	["HUNTER"] = { letter = "F", role = "melee" },
+	["HUNTER1"] = { letter = "C", role = "melee" },
+	["HUNTER2"] = { letter = "F", role = "melee" },
+	["HUNTER3"] = { letter = "D", role = "melee" },
+
+	["SHAMAN"] = { letter = "r", role = "caster" , only=true},
+	["SHAMAN1"] = { letter = "r", role = "caster" , only=true},
+	["SHAMAN2"] = { letter = "t", role = "melee" , only=true},
+	["SHAMAN3"] = { letter = "s", role = "healer" , only=true},
+
+	["MAGE"] = { letter = "b", role = "caster" },
+	["MAGE1"] = { letter = "d", role = "caster" },
+	["MAGE2"] = { letter = "b", role = "caster" },
+	["MAGE3"] = { letter = "c", role = "caster" },
+
+	["WARLOCK"] = { letter = "z", role = "caster" },
+	["WARLOCK1"] = { letter = "z", role = "caster" },
+	["WARLOCK2"] = { letter = "B", role = "caster" },
+	["WARLOCK3"] = { letter = "y", role = "caster" },
+
+	["PALADIN"] = { letter = "G", role = "melee" , only=true },
+	["PALADIN1"] = { letter = "H", role = "healer" , only=true},
+	["PALADIN2"] = { letter = "J", role = "tank" , only=true},
+	["PALADIN3"] = { letter = "G", role = "melee" , only=true},
+
+	["WARRIOR"] = { letter = "h", role = "melee" },
+	["WARRIOR1"] = { letter = "f", role = "melee" },
+	["WARRIOR2"] = { letter = "h", role = "melee" },
+	["WARRIOR3"] = { letter = "g", role = "tank" , only=true},
+}
+
+local function raidCompGetClassShort(class, spec, role)
+	if not class then 
+		return "0" 
+	end
+
+	-- direct spec
+	if spec then
+		local entry = raidCompClasses[class .. spec]
+		return entry and entry.letter or "0", true
+	end
+
+	if role then
+		-- special druid handling
+		if class=="DRUID" and (role=='melee' or role=='tank') then
+			return "v", true
+		end
+
+		local entry1 = raidCompClasses[class]
+		if entry1 then
+		end
+
+		if entry1 and entry1.role == role then
+			return entry1.letter, entry1.only
+		end
+		
+		for i = 1, 3 do
+			local key = class .. i
+			local entry = raidCompClasses[key]
+			if entry then
+			end
+			if entry and entry.role == role then
+				return entry.letter, entry.only
+			end
+		end
+		
+		return "0"
+	end
+	
+	-- n\a spec and role
+	local entry = raidCompClasses[class]
+	return entry and entry.letter or "0", false
+	
+end
+
+local function raidCompCleanup(t, rem)
+
+	while true do
+		local s = #t
+		if s == 0 then
+			return
+		elseif t[s] == rem then
+			table.remove(t, s)
+		else
+			return
+		end
+	end
+end
+
+
 function Mod:OnInitialize()
 
 	DA_Awarder:SetScale(fuckingOptions.Awarderscale)
@@ -132,13 +359,101 @@ function Mod:OnEnable()
 	DA:ModuleLoaded("Awarder")
 end
 
+local function skada_opt_refresh_bosses()
+	
+	if DA_StoredCheckboxes[DA_SelSet].skadamode and _G[DA_StoredCheckboxes[DA_SelSet].skadamode] then
+		DA_Awarder.autoopt.skadaassign.bosses.nobosses:Hide()
+	else
+		DA_Awarder.autoopt.skadaassign.bosses.nobosses:Show()
+		return
+	end
+	
+	local foundSkada={}
+	tinsert(foundSkada,{name='total',mobname='total'})
+	for _,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
+		if (not fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights or DB.type=='raid') and (not fuckingOptions_g[DA_CurrentGuild].aw_scada_long or DB.time>120) then
+			tinsert(foundSkada,DB)
+		end
+	end
+	
+	local skadaframe_Scrolled=DA_Skada_bosses_scr.scrollchild
+	
+	
+	for i=1,50 do 
+		if foundSkada[i] and skadaframe_Scrolled[i] then
+			skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
+			
+			skadaframe_Scrolled[i]:SetPoint("TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i)
+			skadaframe_Scrolled[i].fs:SetText(foundSkada[i].name)
+			skadaframe_Scrolled[i]:SetScript("OnClick",function(self)
+				DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText(foundSkada[i].mobname)
+				DA_Awarder.autoopt.skadaassign.SKDTBL=foundSkada[i]
+				if foundSkada[i].mobname=='total' and DA_Awarder.autoopt.skadaassign.selmode and not skada_list_modes_total[DA_Awarder.autoopt.skadaassign.selmode] then
+					DA_Awarder.autoopt.skadaassign.selmode=nil
+					DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('')
+					DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
+				end
+				DA_Awarder.autoopt.skadaassign.bosses:Hide()
+				DA_Awarder.autoopt.skadaassign.main:Show()
+			
+			end)
+			
+			if skadaframe_Scrolled[i].fs:GetStringWidth()>220 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>200 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>180 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>160 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>155 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
+			else
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
+			end
+			skadaframe_Scrolled[i]:Show()
+		elseif foundSkada[i] then
+			skadaframe_Scrolled[i]=DA.CreateFFGButton2(nil,skadaframe_Scrolled,{"TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,foundSkada[i].name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+				DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText(foundSkada[i].mobname)
+				DA_Awarder.autoopt.skadaassign.SKDTBL=foundSkada[i]
+				if foundSkada[i].mobname=='total' and DA_Awarder.autoopt.skadaassign.selmode and not skada_list_modes_total[DA_Awarder.autoopt.skadaassign.selmode] then
+					DA_Awarder.autoopt.skadaassign.selmode=nil
+					DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('')
+					DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
+				end
+				DA_Awarder.autoopt.skadaassign.bosses:Hide()
+				DA_Awarder.autoopt.skadaassign.main:Show()
+			end,nil,nil,'left')
+			if skadaframe_Scrolled[i].fs:GetStringWidth()>220 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>200 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>180 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>160 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
+			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>155 then
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
+			else
+				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
+			end
+			
+			skadaframe_Scrolled[i].fs:SetSize(230,15)
+		elseif skadaframe_Scrolled[i] then
+			skadaframe_Scrolled[i]:Hide()
+		end
+	end
+end
 function Mod:OnGuildLoad()
-		fepgrupdframe:RegisterEvent("RAID_ROSTER_UPDATE") 
-		fepgrupdframe:RegisterEvent("PARTY_CONVERTED_TO_RAID")
-		fepgrupdframe:RegisterEvent("PARTY_LEADER_CHANGED");
-		fepgrupdframe:RegisterEvent("PARTY_MEMBERS_CHANGED");
-		fepgrupdframe:SetScript("OnEvent", FEP_eventupd)
-		
+	fepgrupdframe:RegisterEvent("RAID_ROSTER_UPDATE") 
+	fepgrupdframe:RegisterEvent("PARTY_CONVERTED_TO_RAID")
+	fepgrupdframe:RegisterEvent("PARTY_LEADER_CHANGED");
+	fepgrupdframe:RegisterEvent("PARTY_MEMBERS_CHANGED");
+	fepgrupdframe:SetScript("OnEvent", FEP_eventupd)
+
+	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-6},12,12,"boss fights",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_bossfights','DA_CurrentGuild'}, 'aw_sc_bossfights')
+	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-15},12,12,"long",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_long=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_long','DA_CurrentGuild'}, 'aw_sc_long')
+
 	if UnitInRaid('player') then 
 		tinsert(DA_Fep_bulk,function()  end)
 		tinsert(DA_Fep_bulk,function()  end)
@@ -248,7 +563,6 @@ for i=1,GuildControlGetNumRanks() do
 	DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function() end,nil,nil,'left')
 end
 
-local DA_SelSet=false
 local function OpenOfficerCriteriaAssignment(ID)
 
 	for i=1,GuildControlGetNumRanks() do 
@@ -298,51 +612,6 @@ DA.CloseButtonCreater(nil,DA_Awarder.autoopt.skadaassign,{"TOPLEFT", DA_Awarder.
 DA_Awarder.autoopt.skadaassign:SetScript("OnHide",function() DA.AWAutoOptions() end)
 
 
-local skada_list_modes_total={
-	dmg=true,
-	dmg_dps=true,
-	dmg_taken=true,
-	healing=true,
-	healing_hps=true,
-	death=true,
-	fails=true,
-	dispells=true,
-	cc_done=true,
-	sunders=true
-}
-local skada_list_modes={
-	{"damage done","dmg"},
-	{"damage done (DPS)","dmg_dps"},
-	{"damage done to enemy","dmg_specif"},
-	{"damage taken","dmg_taken"},
-	{"damage taken from mob","dmg_taken_mob"},
-	{"damage taken from spell","dmg_taken_attack"},
-	{"healing","healing"},
-	{"healing (HPS)","healing_hps"},
-	{"death","death"},
-	{"fails","fails"},
-	{"fails (specific)","fails_specif"},
-	{"dispells","dispells"},
-	{"dispells (specific)","dispells_specif"},
-	{"crowd control","cc_done"},
-	{"crowd control (specific)","cc_done_specif"},
-	{"sunders","sunders"},
-}
-local skada_list_matematics={
-	{"exists (any value)","any"},
-	{"  in top X","intop"},
-	{"  not in top X","notintop"},
-	{"  >= X",">="},
-	{"  > X",">"},
-	{"  <= X","<="},
-	{"  <= X or n/a","mx_or_na"},
-	{"  < X","<"},
-	{"  A < X < B","between"},
-	{"  = X","equal"},
-	{"  not = X","notequal"},
-	{"0 or not exists","0_or_na"},
-	{"not exists","na"},
-}
 
 
 local function getSkadadatabasenames()
@@ -612,91 +881,6 @@ local function Trasher(cb)
 end
 
 
-local function skada_opt_refresh_bosses()
-	
-	if DA_StoredCheckboxes[DA_SelSet].skadamode and _G[DA_StoredCheckboxes[DA_SelSet].skadamode] then
-		DA_Awarder.autoopt.skadaassign.bosses.nobosses:Hide()
-	else
-		DA_Awarder.autoopt.skadaassign.bosses.nobosses:Show()
-		return
-	end
-	
-	local foundSkada={}
-	tinsert(foundSkada,{name='total',mobname='total'})
-	for _,DB in ipairs(_G[DA_StoredCheckboxes[DA_SelSet].skadamode].sets) do
-		if (not fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights or DB.type=='raid') and (not fuckingOptions_g[DA_CurrentGuild].aw_scada_long or DB.time>120) then
-			tinsert(foundSkada,DB)
-		end
-	end
-	
-	local skadaframe_Scrolled=DA_Skada_bosses_scr.scrollchild
-	
-	
-	for i=1,50 do 
-		if foundSkada[i] and skadaframe_Scrolled[i] then
-			skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
-			
-			skadaframe_Scrolled[i]:SetPoint("TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i)
-			skadaframe_Scrolled[i].fs:SetText(foundSkada[i].name)
-			skadaframe_Scrolled[i]:SetScript("OnClick",function(self)
-				DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText(foundSkada[i].mobname)
-				DA_Awarder.autoopt.skadaassign.SKDTBL=foundSkada[i]
-				if foundSkada[i].mobname=='total' and DA_Awarder.autoopt.skadaassign.selmode and not skada_list_modes_total[DA_Awarder.autoopt.skadaassign.selmode] then
-					DA_Awarder.autoopt.skadaassign.selmode=nil
-					DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('')
-					DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
-				end
-				DA_Awarder.autoopt.skadaassign.bosses:Hide()
-				DA_Awarder.autoopt.skadaassign.main:Show()
-			
-			end)
-			
-			if skadaframe_Scrolled[i].fs:GetStringWidth()>220 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>200 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>180 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>160 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>155 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
-			else
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
-			end
-			skadaframe_Scrolled[i]:Show()
-		elseif foundSkada[i] then
-			skadaframe_Scrolled[i]=DA.CreateFFGButton2(nil,skadaframe_Scrolled,{"TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,foundSkada[i].name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
-				DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText(foundSkada[i].mobname)
-				DA_Awarder.autoopt.skadaassign.SKDTBL=foundSkada[i]
-				if foundSkada[i].mobname=='total' and DA_Awarder.autoopt.skadaassign.selmode and not skada_list_modes_total[DA_Awarder.autoopt.skadaassign.selmode] then
-					DA_Awarder.autoopt.skadaassign.selmode=nil
-					DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('')
-					DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
-				end
-				DA_Awarder.autoopt.skadaassign.bosses:Hide()
-				DA_Awarder.autoopt.skadaassign.main:Show()
-			end,nil,nil,'left')
-			if skadaframe_Scrolled[i].fs:GetStringWidth()>220 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>200 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>180 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>160 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
-			elseif skadaframe_Scrolled[i].fs:GetStringWidth()>155 then
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
-			else
-				skadaframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
-			end
-			
-			skadaframe_Scrolled[i].fs:SetSize(230,15)
-		elseif skadaframe_Scrolled[i] then
-			skadaframe_Scrolled[i]:Hide()
-		end
-	end
-end
 local function skada_modes_preshow()
 	local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
 	
@@ -1175,7 +1359,7 @@ end
 local re_highlight_difficulty
 
 
-do 
+do
 ---MAIN
 ---MAIN
 	DA_Awarder.autoopt.skadaassign.main=CreateFrame('frame')
@@ -1462,12 +1646,6 @@ do
 	function()
 		skada_opt_refresh_bosses()
 	end,'center')
-
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-6},12,12,"boss fights",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_bossfights=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_bossfights','DA_CurrentGuild'}, 'aw_sc_bossfights')
-	DA.CheckBtnCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",115,-15},12,12,"long",function(self) fuckingOptions_g[DA_CurrentGuild].aw_scada_long=(self:GetChecked() or false);skada_opt_refresh_bosses() end,{'fuckingOptions_g','aw_scada_long','DA_CurrentGuild'}, 'aw_sc_long')
-
-
-	
 
 	DA_Awarder.autoopt.skadaassign.bosses.nobosses=DA.FontCreater(nil,L['Skada logs not found'],{"LEFT",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",10,-30},DA_Awarder.autoopt.skadaassign.bosses.back,15,110,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 	
@@ -2043,189 +2221,6 @@ function DA.AWAutoOptions()
 	
 	skada_db_check_if_one()
 	skada_db_set()
-end
----- variables
-
-local DA_locals_UpdList={}
-DA_standby_mainslist=DA_standby_mainslist or "@"
-
-DA_StoredCheckboxes=DA_StoredCheckboxes or {
-	default={
-		{'raid',12000,
-			rl={
-				raid=true
-			},
-			cl={},
-		}, 
-		{'tank_heal',1000,
-			rl={
-				tank=true,
-				healer=true,
-			},
-			cl={},
-		},
-		{'bis',1000,
-			rl={},
-			cl={},
-		},
-		{'dps',1000,
-			rl={},
-			cl={},
-		},
-		{'trash',1000,
-			rl={},
-			cl={},
-		},
-		
-	},	
-	icc={
-		{'raid',12000,
-			rl={
-				raid=true
-			},
-			cl={},
-		},
-		{'tank_heal',1000,
-			rl={
-				tank=true,
-				healer=true,
-			},
-			cl={},
-		},
-		{'bis',1000,
-			rl={},
-			cl={},
-		},
-	},
-	ruby={
-		{'raid',4500,
-			rl={
-				raid=true
-			},
-			cl={},
-		},
-		{'tank_heal',500,
-			rl={
-				tank=true,
-				healer=true,
-			},
-			cl={},
-		},
-		{'bis',500,
-			rl={},
-			cl={},
-		},
-	},
-}
-
-local raidCompClasses = {
-	["DEATHKNIGHT"] = { letter = "L", role = "melee" },
-	["DEATHKNIGHT1"] = { letter = "K", role = "tank" , only=true},
-	["DEATHKNIGHT2"] = { letter = "L", role = "melee" },
-	["DEATHKNIGHT3"] = { letter = "M", role = "melee" },
-
-	["PRIEST"] = { letter = "q", role = "caster" , only=true},
-	["PRIEST1"] = { letter = "n", role = "healer" },
-	["PRIEST2"] = { letter = "p", role = "healer" },
-	["PRIEST3"] = { letter = "q", role = "caster" , only=true},
-
-	["DRUID"] = { letter = "x", role = "caster" , only=true},
-	["DRUID1"] = { letter = "x", role = "caster" , only=true},
-	["DRUID2"] = { letter = "v", role = "melee" , only=true},
-	["DRUID3"] = { letter = "w", role = "healer" , only=true},
-
-	["ROGUE"] = { letter = "j", role = "melee" },
-	["ROGUE1"] = { letter = "k", role = "melee" },
-	["ROGUE2"] = { letter = "j", role = "melee" },
-	["ROGUE3"] = { letter = "m", role = "melee" },
-
-	["HUNTER"] = { letter = "F", role = "melee" },
-	["HUNTER1"] = { letter = "C", role = "melee" },
-	["HUNTER2"] = { letter = "F", role = "melee" },
-	["HUNTER3"] = { letter = "D", role = "melee" },
-
-	["SHAMAN"] = { letter = "r", role = "caster" , only=true},
-	["SHAMAN1"] = { letter = "r", role = "caster" , only=true},
-	["SHAMAN2"] = { letter = "t", role = "melee" , only=true},
-	["SHAMAN3"] = { letter = "s", role = "healer" , only=true},
-
-	["MAGE"] = { letter = "b", role = "caster" },
-	["MAGE1"] = { letter = "d", role = "caster" },
-	["MAGE2"] = { letter = "b", role = "caster" },
-	["MAGE3"] = { letter = "c", role = "caster" },
-
-	["WARLOCK"] = { letter = "z", role = "caster" },
-	["WARLOCK1"] = { letter = "z", role = "caster" },
-	["WARLOCK2"] = { letter = "B", role = "caster" },
-	["WARLOCK3"] = { letter = "y", role = "caster" },
-
-	["PALADIN"] = { letter = "G", role = "melee" , only=true },
-	["PALADIN1"] = { letter = "H", role = "healer" , only=true},
-	["PALADIN2"] = { letter = "J", role = "tank" , only=true},
-	["PALADIN3"] = { letter = "G", role = "melee" , only=true},
-
-	["WARRIOR"] = { letter = "h", role = "melee" },
-	["WARRIOR1"] = { letter = "f", role = "melee" },
-	["WARRIOR2"] = { letter = "h", role = "melee" },
-	["WARRIOR3"] = { letter = "g", role = "tank" , only=true},
-}
-
-local function raidCompGetClassShort(class, spec, role)
-	if not class then 
-		return "0" 
-	end
-
-	-- direct spec
-	if spec then
-		local entry = raidCompClasses[class .. spec]
-		return entry and entry.letter or "0", true
-	end
-
-	if role then
-		-- special druid handling
-		if class=="DRUID" and (role=='melee' or role=='tank') then
-			return "v", true
-		end
-
-		local entry1 = raidCompClasses[class]
-		if entry1 then
-		end
-
-		if entry1 and entry1.role == role then
-			return entry1.letter, entry1.only
-		end
-		
-		for i = 1, 3 do
-			local key = class .. i
-			local entry = raidCompClasses[key]
-			if entry then
-			end
-			if entry and entry.role == role then
-				return entry.letter, entry.only
-			end
-		end
-		
-		return "0"
-	end
-	
-	-- n\a spec and role
-	local entry = raidCompClasses[class]
-	return entry and entry.letter or "0", false
-	
-end
-
-local function raidCompCleanup(t, rem)
-
-	while true do
-		local s = #t
-		if s == 0 then
-			return
-		elseif t[s] == rem then
-			table.remove(t, s)
-		else
-			return
-		end
-	end
 end
 
 function DA.CreateSnapshot(isauto)
