@@ -119,7 +119,7 @@ DA_Flasker = DA.FrameCreater(nil,UIParent,100,180,{"TOPLEFT", UIParent, "CENTER"
 local F = DA_Flasker
 F.cont={}
 DA.CloseButtonCreater(nil,F,{"CENTER",F,"TOPRIGHT",-5,-5},8,8,'x',F:GetFrameLevel()+3)
-SDFSDHGSDFSXCV = DA.HelpCreater(F,{"CENTER",F,"TOPRIGHT",-15,-5},'dispenser_guide',8,8)
+DA.HelpCreater(F,{"CENTER",F,"TOPRIGHT",-15,-5},'dispenser_guide',8,8)
 
 F.add:SetFrameLevel(0)
 F:RegisterForDrag("LeftButton")
@@ -238,13 +238,13 @@ local function create_flask_buttons()
 					end
 				end
 			end)
-			f.m = DA.ButtonCreater(nil,f.pm_Frame,{"LEFT", f.pm_Frame, "LEFT", 1, 0},8,8,"-",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',function(self)
+			f.m = DA.ButtonCreater(nil,f.pm_Frame,{"LEFT", f.pm_Frame, "LEFT", 1, 0},8,8,"-",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],function(self)
 				if tonumber(f.c:GetText())>1 then
 					f.c:SetText(tostring(tonumber(f.c:GetText())-1 ))
 					DarkAngel_FlaskerDB[TR_SelectedSet_UI][role][dispenseID].count=tonumber(f.c:GetText())
 				end
 			end)
-			f.p = DA.ButtonCreater(nil,f.pm_Frame,{"RIGHT", f.pm_Frame, "RIGHT", -1, 0},8,8,"+",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',function(self)
+			f.p = DA.ButtonCreater(nil,f.pm_Frame,{"RIGHT", f.pm_Frame, "RIGHT", -1, 0},8,8,"+",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],function(self)
 				if tonumber(f.c:GetText())< (select(8,GetItemInfo(DarkAngel_FlaskerDB[TR_SelectedSet_UI][role][dispenseID].id)) or 20 )then
 					f.c:SetText(tostring(tonumber(f.c:GetText())+1 ))
 					DarkAngel_FlaskerDB[TR_SelectedSet_UI][role][dispenseID].count=tonumber(f.c:GetText())
@@ -406,7 +406,7 @@ function Mod:Flasker_OptLoad()
 		F.Controls.naborFrame:SetScript("OnDragStop", function(self) self:GetParent():GetParent():StopMovingOrSizing() end)
 		F.Controls.naborFrame.frcont = {}
 		for i=1,10 do
-			F.Controls.naborFrame.frcont[i] = DA.CreateFFGButton2(nil,F.Controls.naborFrame, {"TOPLEFT", F.Controls.naborFrame, "TOPLEFT", 2,10-11*i},10,F.Controls.naborFrame.width-4,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
+			F.Controls.naborFrame.frcont[i] = DA.CreateFFGButton2(nil,F.Controls.naborFrame, {"TOPLEFT", F.Controls.naborFrame, "TOPLEFT", 2,10-11*i},10,F.Controls.naborFrame.width-4,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
 				if DarkAngel_FlaskerDB[i] and TR_SelectedSet_UI~=i then
 					TR_SelectedSet_UI = i
 					Dispenser_ReRender()
@@ -421,7 +421,7 @@ function Mod:Flasker_OptLoad()
 			F.Controls.naborFrame.frcont[i]:Hide()
 		end
 		
-		DA.CreateFFGButton2(nil,F.Controls.naborFrame,{"CENTER", F.Controls.naborFrame, "BOTTOM", -19,9},12,28,'+++','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+		DA.CreateFFGButton2(nil,F.Controls.naborFrame,{"CENTER", F.Controls.naborFrame, "BOTTOM", -19,9},12,28,'+++',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 			local naborscount=#DarkAngel_FlaskerDB
 			if naborscount>9 then DA.Print('there is too much') return end
 			
@@ -446,22 +446,25 @@ function Mod:Flasker_OptLoad()
 			end
 		end
 		
-		F.Controls.naboredit=FEP_EditBoxCreater(nil,F.Controls,{"CENTER", F.Controls, "TOP", 0,-26},{(F.Controls.width)-6,12},false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil rename_set(self) end end,
-			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil rename_set(self) end end,
-			function(self) self.t:SetBlendMode("ADD"); self:ClearFocus();self:SetCursorPosition(0); if self.focusgained then self.focusgained=nil rename_set(self) end end,
-			function(self) self.t:SetBlendMode("BLEND"); self.focusgained=1; end,
-			nil,{28/255, 32/255, 50/255, 1})
+		F.Controls.naboredit=DA.EditBoxCreater(nil,F.Controls,{"CENTER", F.Controls, "TOP", 0,-26},{(F.Controls.width)-6,12},"",false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
+			function(self) 		if self.focusgained then self.t:SetBlendMode("ADD") self:ClearFocus(); self.focusgained=nil; self:HighlightText(0,0); rename_set(self) end end,
+			function(self) 		if self.focusgained then self.t:SetBlendMode("ADD") self:ClearFocus(); self.focusgained=nil; self:HighlightText(0,0); rename_set(self) end end, --enter here
+			function(self) 		if self.focusgained then self.t:SetBlendMode("ADD") self:ClearFocus(); self.focusgained=nil; self:HighlightText(0,0); rename_set(self) end end,
+			function(self)
+				if self:GetParent():IsShown() then
+					self.t:SetBlendMode('blend');
+					self.focusgained=1
+					self:HighlightText()
+				end
+			end
+		)
 		F.Controls.naboredit:HookScript("OnEnter",function(self)
 			DA.myShowTooltip(self,L["rename set"])
 		end)
 		F.Controls.naboredit:HookScript("OnLeave",function(self)
 			DA.myHideTooltip()
 		end)
-		F.Controls.naboredit:SetText("")
 		
-		
-
 		
 	end
 
@@ -500,7 +503,7 @@ do --contents
 	create_flask_buttons()
 
 
-	F.Controls.startflBtn = DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", -(F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black', {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	F.Controls.startflBtn = DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", -(F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,L['start'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if not IsInRaid() then
 			DA.Print(L['You are not in raid'])
 			return
@@ -527,7 +530,7 @@ do --contents
 
 	end)
 
-	F.Controls.stopflBtn=DA.CreateFFGButton2(nil,  F.Controls,  {"CENTER", F.Controls, "TOP", (F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,  L["stop"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black', {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	F.Controls.stopflBtn=DA.CreateFFGButton2(nil,  F.Controls,  {"CENTER", F.Controls, "TOP", (F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,  L["stop"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		DA.TR_stop()
 		self:Disable()
 		F.Controls.startflBtn:Enable()
@@ -535,14 +538,14 @@ do --contents
 	F.Controls.stopflBtn:Disable()
 
 
-	DA.CreateFFGButton2(nil,  F.Controls,  {"CENTER", F.Controls, "TOP", 0, -65},  12,  F.Controls.width-6,  L['clear'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black', {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	DA.CreateFFGButton2(nil,  F.Controls,  {"CENTER", F.Controls, "TOP", 0, -65},  12,  F.Controls.width-6,  L['clear'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		table.wipe(DA.TR_Names)
 		if TradeFrame:IsShown() then
 			DA.TR_routine(nil,'TRADE_SHOW')
 		end
 	end,'disp_clear')
 
-	DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", 0, -80}, 12, F.Controls.width-6 , L['options'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+	DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", 0, -80}, 12, F.Controls.width-6 , L['options'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 		if F.optionsFrame:IsShown() then
 			F.optionsFrame:Hide()
 		else
@@ -556,7 +559,7 @@ do --contents
 end
 
 function Mod:CreateAwarderFlasksChecker()
-	local btn = DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPRIGHT", -10,-102},13,13,'','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	local btn = DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPRIGHT", -10,-102},13,13,'',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		if IsShiftKeyDown() then
 			if DA_Flasker:IsShown() then
 				DA_Flasker:Hide()

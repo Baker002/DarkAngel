@@ -1,7 +1,7 @@
 ## Title: DarkAngel_Backup
 ## Author: Baker
 ## Interface: 30300
-## Notes: You have a backup? You bedda do mon!
+## Notes: You have a backup? You bedda do mon!  Allows you to create lightweight guild backups (manually or on a schedule) of player data, guild MOTD/Info/GM settings for restoration or migration. 
 ## SavedVariables: DA_BackupsDB
 ## SavedVariablesPerCharacter: DA_Backups_charDB
 ## Dependencies: DarkAngel

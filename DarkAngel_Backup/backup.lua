@@ -1167,7 +1167,7 @@ function Mod.Backup_Load()
 		
 		do --open data btns
 		
-			DarkAngelGUI.Backup.showmotd=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-275},8,13,'?','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.showmotd=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-275},8,13,'?',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				if DA_Unpacked and DA_Unpacked.motd then
 					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, GUILD_MOTD_LABEL .. "\n" .. DA_Unpacked.motd)
 				end
@@ -1180,7 +1180,7 @@ function Mod.Backup_Load()
 			DarkAngelGUI.Backup.showmotd:SetScript("OnLeave",function(self)
 				DA.myHideTooltip()
 			end)
-			DarkAngelGUI.Backup.showGinfo=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-285},8,13,'?','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.showGinfo=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-285},8,13,'?',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				if DA_Unpacked and DA_Unpacked.ginfo then
 					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, GUILD_INFORMATION .. "\n" .. DA_Unpacked.ginfo)
 				end
@@ -1194,7 +1194,7 @@ function Mod.Backup_Load()
 				DA.myHideTooltip()
 			end)
 		
-			DarkAngelGUI.Backup.seedata=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-250},38,13,'|cff87edd4>>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.seedata=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-250},38,13,'|cff87edd4>>',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				if DA_Unpacked and (DA_Unpacked.pl_data or DA_Unpacked.localtvins ) then
 					DarkAngelGuild.custom_mode=1
 					DarkAngelGUI.Guild.micromenu:Hide()
@@ -1209,7 +1209,7 @@ function Mod.Backup_Load()
 				end
 			end,'Backup_seedata')
 			
-			DarkAngelGUI.Backup.seeGMranks=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-295},9,13,'>>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.seeGMranks=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",119,-295},9,13,'>>',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				if DA_Unpacked and DA_Unpacked.guildranks then
 					DarkAngelGUI.Guild.OpenGC_Btn:Click()
 					DarkAngelGUI.Guild.GC:Show()

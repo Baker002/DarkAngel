@@ -100,7 +100,7 @@ DarklangelDefaultTables={
             "Press F to pay respect",
             "Decided to go buy more beer"
         },
-        ruRU=
+        ruRU =
         {
             "передозировка пауками",
             "подавился камнем на хп",
@@ -205,6 +205,20 @@ DarklangelDefaultTables={
             "Sorry, I was lagging",
             "Press F to pay respect",
             "Decided to go buy more beer",
+        }
+    },
+    inviter_LFG_samples = {
+        enUS = 
+        {
+            "<sample text>",
+            "not sure if this works here",
+            "flying to icecrown, brb"
+        },
+        ruRU =
+        {
+            "<sample text>",
+            "реги куплю один момент",
+            "куплю 25 тория"
         }
     }
 }

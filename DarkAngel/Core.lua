@@ -38,6 +38,80 @@ local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 
 
 -- Lua
+local da_simpleTimer = CreateFrame("Frame")
+da_simpleTimer.queue = {}
+da_simpleTimer.count = 0
+da_simpleTimer.nextTime = nil
+local function simpleTimer_Insert(execTime, callback)
+    local q = da_simpleTimer.queue
+    local n = da_simpleTimer.count + 1
+    da_simpleTimer.count = n
+
+    local i = n
+    while i > 1 and q[i - 1].time > execTime do
+        q[i] = q[i - 1]
+        i = i - 1
+    end
+
+    q[i] = {
+        time = execTime,
+        func = callback
+    }
+
+    da_simpleTimer.nextTime = q[1].time
+    da_simpleTimer:Show()
+end
+local function simpleTimer_Shift()
+    local q = da_simpleTimer.queue
+    local n = da_simpleTimer.count
+
+    if n == 1 then
+        q[1] = nil
+        da_simpleTimer.count = 0
+        da_simpleTimer.nextTime = nil
+        da_simpleTimer:Hide()
+        return
+    end
+
+    for i = 1, n - 1 do
+        q[i] = q[i + 1]
+    end
+
+    q[n] = nil
+    da_simpleTimer.count = n - 1
+    da_simpleTimer.nextTime = q[1].time
+end
+da_simpleTimer:Hide()
+da_simpleTimer:SetScript("OnUpdate", function(self,_)
+    local nextTime = self.nextTime
+    if not nextTime then
+        self:Hide()
+        return
+    end
+
+    local now = GetTime()
+    if now < nextTime then
+        return
+    end
+
+    while self.count > 0 and self.queue[1].time <= now do
+        local cb = self.queue[1].func
+        simpleTimer_Shift()
+
+        local ok, err = pcall(cb)
+        if not ok then
+            DA.Print("|cffff0000Timer Error:|r "..tostring(err))
+        end
+    end
+end)
+
+DA.TimerAfter = function(duration, callback)
+    if type(callback) ~= "function" then return end
+    if not duration or duration < 0 then duration = 0 end
+
+    simpleTimer_Insert(GetTime() + duration, callback)
+end
+
 function DA.Print(...)
 	print("[|cffed94edDarkAngel|cffffffff]:", ...)
 end
@@ -135,18 +209,26 @@ function DA.capitalizeFirstCharacter(inputString)
         return ""
     end
 end
-function DA.CheckAndRestoreLocalizedTable(tablename)
+function DA.CheckAndRestoreLocalizedTable(tablename, keepLocal)
 	local lang = L.lang
 	local default = DarklangelDefaultTables[tablename] and (DarklangelDefaultTables[tablename][lang] or DarklangelDefaultTables[tablename].enUS)
+	local localExport
 	if default then
-		if not _G[tablename] then
+		if not keepLocal and not _G[tablename] then
 			_G[tablename] = DA.DeepCopy(default)
+		elseif keepLocal then
+			localExport = DA.DeepCopy(default)
 		end
 		DarklangelDefaultTables[tablename] = nil
 		if not next(DarklangelDefaultTables) then --if there are no unused keys left, emptying the global so it would be eaten by gc
 			DarklangelDefaultTables=nil
 		end
+
+		if localExport then
+			return localExport
+		end
 	elseif not _G[tablename] then
+		DA.Print(tablename, 'not exist, creating new global')
 		_G[tablename] = {}
 	end
 end
@@ -155,20 +237,28 @@ end
 
 -- Widget helpers
 function DA.AnimateText(obj)
+	if not obj then return end
+
+	local fs = obj.fs or obj.font or obj.GetFontString and obj:GetFontString() or obj
+	local origcolors = obj.origcolors or (fs.GetTextColor and {fs:GetTextColor()})
+	if not origcolors then return end
+
+	if not obj.origcolors then obj.origcolors = origcolors end
+
 	obj:EnableMouse(false)
-	local origcolors = obj and obj.GetTextColor and {obj:GetTextColor()}
+
 	for i=1,18 do
 		local a = math.random(100)/100
 		local b = math.random(100)/100
 		local c = math.random(100)/100
 
-		tinsert(DA_Fep_bulk, function() 
-			obj:SetTextColor(a, b, c, 1)
+		tinsert(DA_Fep_bulk, function()
+			fs:SetTextColor(a, b, c, 1)
 		end)
 	end
 
 	tinsert(DA_Fep_bulk, function() 
-		obj:SetTextColor(unpack(origcolors))
+		fs:SetTextColor(unpack(origcolors))
 		obj:EnableMouse(true)
 	end)
 
@@ -209,6 +299,50 @@ end
 
 
 -- Guild helpers
+local guildInfoCache = ""
+local guildInfoEmptyHits = 0
+local guildMOTDCache = ""
+local guildMOTDEmptyHits = 0
+function DA.GetGuildInfoTextCached()
+	if not IsInGuild() then
+		return ""
+	end
+
+	local txt = GetGuildInfoText()
+
+	if txt == "" then
+		guildInfoEmptyHits = guildInfoEmptyHits + 1
+
+		if guildInfoEmptyHits >= 3 then
+			guildInfoCache = ""
+		end
+	else
+		guildInfoCache = txt
+		guildInfoEmptyHits = 0
+	end
+
+	return guildInfoCache
+end
+function DA.GetGuildRosterMOTDCached()
+	if not IsInGuild() then
+		return ""
+	end
+
+	local txt = GetGuildRosterMOTD()
+
+	if txt == "" then
+		guildMOTDEmptyHits = guildMOTDEmptyHits + 1
+
+		if guildMOTDEmptyHits >= 3 then
+			guildMOTDCache = ""
+		end
+	else
+		guildMOTDCache = txt
+		guildMOTDEmptyHits = 0
+	end
+
+	return guildMOTDCache
+end
 function DA.CheckEPGPGuildInfo()
 	if IsInGuild() and GetGuildInfoText() and #GetGuildInfoText() and #GetGuildInfoText()>0 and GetGuildInfoText()~='' then
 		if string.find(GetGuildInfoText(),"@BASE_GP:") and string.match(GetGuildInfoText(),"@BASE_GP:(%d+)") and tonumber(string.match(GetGuildInfoText(),"@BASE_GP:(%d+)")) then
@@ -530,13 +664,35 @@ function DA.GetTwinsInfo(name,ofnote,iszamena)
 			result=result..(spacesraidID(string.sub(found[i][1],11,-3),found[i][3])..found[i][1].. string.rep(" ",16-#(string.sub(found[i][1],11,-3)):gsub('[\128-\191]', ''))..found[i][2].."\n")
 		end
 		if not iszamena then
-			result=result.."|cff507375<"..L["Hold Ctrl to see more details"]..">"
+			result=result..L["hold_ctrl_for_more"]
 		end
 	end
 	
 	return result
 end
+function DA.IsFullGuildRaid(fullGuildSetting)
+	local members=0
+	local non_members=0
+	local Guild = FEP_gMain
+	local Assigned = FEP_L_gMain[DA_CurrentGuild]
+	for i=1,40 do
+		local name,_,_= GetRaidRosterInfo(i)
+		if name then
+			if Guild[name] or (Assigned[name] and Guild[Assigned[name]]) then
+				members = members + 1
+			elseif fullGuildSetting then
+				return false
+			else
+				non_members = non_members + 1
+			end
+		end
+	end
+	local raidMembers = members + non_members
+	if members/raidMembers >= 0.7 then
+		return true
+	end
 
+end
 
 
 -- EPGP/DKP stuff helpers
@@ -597,12 +753,13 @@ function DA.DetermineDKPorEPGPguild(frombackup)
 	end
 	
 	local gtype=Guild_determine(frombackup)
-	
 	if gtype=='no-type' then
-		if not DA_Guild_Info[DA_CurrentGuild].GuildType then
-			if not frombackup then DA.Print(L['addon_failed_recognize_gtype_set']) end
-			return 'epgp'
-		end
+		-- if not DA_Guild_Info[DA_CurrentGuild].GuildType then
+			if not frombackup then 
+				DA.Print(L['addon_failed_recognize_gtype_set'])
+				return 'epgp'
+			end
+		-- end
 	elseif gtype=='epgp' then
 		if not DA_Guild_Info[DA_CurrentGuild].GuildType then
 			if not frombackup then DA.Print("|cff00ffffEPGP|r mode") end
@@ -620,8 +777,6 @@ function DA.DetermineDKPorEPGPguild(frombackup)
 		end
 		return 'dkp'
 	end
-	
-
 end
 function DA.DecodeNote(note, custom_gtype)
 	if not note or note == "" or ({string.gsub(note,"%s","")})[1]=="" or note=="0,0" then

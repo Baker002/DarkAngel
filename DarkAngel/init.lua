@@ -72,6 +72,13 @@ local fuckingOptions_local={
 	txt1extra=false,
 	txt2extra=false,
 	
+	auc_bidBtnsTutorial=true,
+	auc_OnlyInGuild=false,
+	auc_OnlyInFullGuild=true,
+
+	Inviter_shareDiscordOnlyInGuild=true,
+	Inviter_shareDiscordOnlyInFullGuild=true,
+	
 	guildcopyauto=true,
 	logcopyauto=true,
 	
@@ -130,20 +137,6 @@ local fuckingOptions_local={
 		DA_BidTracker={'LEFT', 'LEFT', 148.686, 119.044},
 	},
 
-	--SR opt
-	SR_enab=1,
-	SR_discenab=false,
-	SR_gc=1,
-	SR_pm=1,
-	SR_lfg=1,
-	SR_autojoin=false,
-	SR_autoaccept=1,
-	SR_autostop=false,
-	SR_minutecount=1,
-	RTmessage="Raid Time +++++++++++",
-	RTdiscordlink="https://discord.gg/discord_link_here",
-	RTstoper=50,
-	RTlfgphrases='',
 	
 }
 local fucking2Options_char_local={
@@ -169,11 +162,27 @@ local fuckingOptions_g_local={
 	bidtracker_onlymine=true,
 	evaluateoffnote=false,
 	aw_send_whispers=1,
+
+	
+	--Inviter opt
 	initRaidLootMethod='m',
-	inviter_stop=false,
-	inviter_repeat=false,
-	inviter_autostop=false,
+	inviter_stop_message=false,
+	inviter_repeat_message=false,
+	inviter_autostop_message=false,
 	inviter_inv_pattern=false,
+	Inviter_RepeatAnons=1,
+	Inviter_shareDiscord=false,
+	Inviter_AcceptFromGuild=1,
+	Inviter_AcceptFromPM=1,
+	Inviter_AcceptFromLFG=false,
+	Inviter_AutoJoinRT=false,
+	Inviter_AutoAcceptOnJoinRT=1,
+	Inviter_AutoStop=false,
+	Inviter_TimeAutoStop=50,
+	Inviter_RepeatMsgOnTime=60,
+	Inviter_RTMessage="Raid Time +++++++++++",
+	Inviter_RTDiscord="https://discord.gg/discord_link",
+	Inviter_LFGPhrases='',
 	
 	
 	guildInviterEnabled=false,
@@ -223,6 +232,7 @@ local fuckingOptions_g_local={
 	
 	standby_method='epgp',
 	procepzamene=false,
+	procepzam_usemanual=false,
 	manual_procent=100,
 	
 	assistperm="Guild Rank",
@@ -230,16 +240,15 @@ local fuckingOptions_g_local={
 	assistperm_manual="",
 	
 	aucoptsets={
-		{20,1},
 		{100,5},
-		{200,10},
-		['lastincr']=20,
+		['lastincr']=10
 	},
 	auc_minimal=1,
 	auc_allow_lower=1,
 	auc_thousands=false,
+	auc_bidTime=25,
 	auc_thousands_step=false,
-	auc_RR_hide=false,
+	auc_RR_collab=true,
 	auc_allin=1,
 	auc_bidconfirmed=1,
 	
@@ -297,7 +306,6 @@ local IfModsAndGuildDataReady
 local OnGuildDataAvailable
 local TryInitGuildData
 local Run_OnGuildUpdate
-
 
 -- Initialization
 local gInfoFetcher=CreateFrame("Frame")
@@ -412,7 +420,7 @@ function DA:OnInitialize()
 			return
 		end
 
-		DA_Fep_bulk[1]() 
+		DA_Fep_bulk[1]()
 		table.remove(DA_Fep_bulk,1)
 	end) 
 	
@@ -442,8 +450,8 @@ function DA:OnInitialize()
 			DA.GetGuildData()
 			DA.GuildSetAllLines()
 		end
-	end) 
-	
+	end)
+
 	--rightclick optmenu hide
 	DA.CreateTimer(nil,"OptHider",0,0.2,function() if DA_RightClickMenu and DA_RightClickMenu:IsShown() then return true end end,function(self)
 		if (DA_RightClickMenu.parentbtn:IsMouseOver() or DA_RightClickMenu:IsMouseOver() or DA_RightClickMenu.epgpawardFrame:IsMouseOver() or DA_RightClickMenu.epgpawardFrame.Dropdown:IsMouseOver()) then 
@@ -462,17 +470,17 @@ function DA:OnInitialize()
 		end
 		
 	end) 
-	
+
 	--bulk processor
 	DA_Bulk_list={}
 	DA.CreateTimer(nil,"bulkprocessor",0,0.2,true,function(self)
 		if not DA_Bulk_list[1] then self:SetScript("OnUpdate",nil) return end
 		DA_Bulk_list[1]() 
 		table.remove(DA_Bulk_list,1)
-		
+
 		return
-	end)  
-	
+	end)
+
 	--guild reset timer
 	DA.CreateTimer(nil,"greset",9,10,true,function(self)
 		-- print('greset run')
@@ -481,7 +489,7 @@ function DA:OnInitialize()
 		DarkAngel_minimapBtn:Enable()
 		DarkAngel_minimapBtn:Show()
 		self:SetScript("OnUpdate",nil)
-	end) 
+	end)
 
 
 end
@@ -808,16 +816,6 @@ function DA.OptionsUpd_g()
 	end
 
 
-	--inviter processor
-	DA.CreateTimer(nil,"proc_invite_timer",0,fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer,true,function(self)
-		if DA.listinvite_bulk[1] then
-			InviteUnit(DA.listinvite_bulk[1])
-			table.remove(DA.listinvite_bulk,1)
-		else
-			self:SetScript("OnUpdate",nil)
-			self.time=0
-		end
-	end) 
 end
 function DA.Rewrite_Gopt()
 local guildName,_,_= GetGuildInfo('player')
@@ -938,13 +936,13 @@ local function Create_Slash_Functions()
 					if ammount<0 then
 						local _,ep,gp=DA.DecodeNote(FEP_gMain[FEP_gMain[target]])
 						if ep>=math.abs(ammount) then
-							DA.EPawardfunc(FEP_gMain[target],ammount,reason)
+							DA.EPawardfunc(FEP_gMain[target],ammount,reason,{target, false})
 						else
 							DA.Print('not enough EP. '..target..'['..FEP_gMain[target]..']'..' has '..ep..','..gp)
 							return
 						end
 					else
-						DA.EPawardfunc(FEP_gMain[target],ammount,reason)
+						DA.EPawardfunc(FEP_gMain[target],ammount,reason,{target, false})
 					end
 				elseif DA.DecodeNote(FEP_gMain[FEP_gMain[target]])=='f' then
 					DA.Print('target\'s main has frozen EPGP')
@@ -963,13 +961,13 @@ local function Create_Slash_Functions()
 			if ammount<0 then
 				local _,ep,gp=DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][target]])
 				if ep>=math.abs(ammount) then
-					DA.EPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,nil,target,1)
+					DA.EPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,{target,true})
 				else
 					DA.Print('not enough EP. '..target..'['..FEP_L_gMain[DA_CurrentGuild][target]..']'..' has '..ep..','..gp)
 					return
 				end
 			else
-				DA.EPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,nil,target,1)
+				DA.EPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,{target,true})
 			end
 		end
 		
@@ -1028,13 +1026,13 @@ local function Create_Slash_Functions()
 					if ammount<0 then
 						local _,ep,gp=DA.DecodeNote(FEP_gMain[FEP_gMain[target]])
 						if gp>=math.abs(ammount) then
-							DA.GPawardfunc(FEP_gMain[target],ammount,reason)
+							DA.GPawardfunc(FEP_gMain[target],ammount,reason,{target,false})
 						else
 							DA.Print('not enough GP. '..target..'['..FEP_gMain[target]..']'..' has '..ep..','..gp)
 							return
 						end
 					else
-						DA.GPawardfunc(FEP_gMain[target],ammount,reason)
+						DA.GPawardfunc(FEP_gMain[target],ammount,reason,{target,false})
 					end
 				elseif DA.DecodeNote(FEP_gMain[FEP_gMain[target]])=='f' then
 					DA.Print('target\'s main has frozen EPGP')
@@ -1053,13 +1051,13 @@ local function Create_Slash_Functions()
 			if ammount<0 then
 				local _,ep,gp=DA.DecodeNote(FEP_gMain[FEP_L_gMain[DA_CurrentGuild][target]])
 				if gp>=math.abs(ammount) then
-					DA.GPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,nil,target,1)
+					DA.GPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,{target,true})
 				else
 					DA.Print('not enough GP. '..target..'['..FEP_L_gMain[DA_CurrentGuild][target]..']'..' has '..ep..','..gp)
 					return
 				end
 			else
-				DA.GPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,nil,target,1)
+				DA.GPawardfunc(FEP_L_gMain[DA_CurrentGuild][target],ammount,reason,{target,true})
 			end
 		end
 		
@@ -1135,14 +1133,14 @@ function Dark_Angel_OnInit(guildinit)
 	end
 
 	
-	SendAddonMessage("DA_RTq",'DA_RTq', "guild")
+	SendAddonMessage("DA_RTq",'1', "guild")
 	
 
 end
 function DA.RunTweaks(param,firstrun)
 
-local enabled=fuckingOptions[param]
-if firstrun and not enabled then return end
+	local enabled=fuckingOptions[param]
+	if firstrun and not enabled then return end
 
 
 	if param=='epgpofficer' then

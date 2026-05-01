@@ -515,8 +515,23 @@ local function GetRankChangeAuthor(name,finalrank)
 	
 	return nil
 end
+local function filterReasons(reasons, epdif)
+	local found = false
+
+	for i = #reasons, 1, -1 do
+		local entry = reasons[i]
+		if entry[2] == epdif then
+			if not found then
+				found = true -- keep the first one
+			else
+				table.remove(reasons, i)
+			end
+		end
+	end
+	return reasons
+end
 local function TransLegitCheck(name,epdif,gpdif)
-	
+
 	local author='|cffff0000unknown'
 	local tvinspool={}
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
@@ -545,11 +560,11 @@ local function TransLegitCheck(name,epdif,gpdif)
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 		local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and jk.typ=="EP" and tvinspool[jk.name] and jk.logtype=='chat' then
-				epmsgcounter=epmsgcounter+jk.count
+				epmsgcounter=epmsgcounter+jk.gain
 				author=jk.author
 			end
 			if gpdif and jk.typ=="GP" and tvinspool[jk.name] and jk.logtype=='chat'  then
-				gpmsgcounter=gpmsgcounter+jk.count
+				gpmsgcounter=gpmsgcounter+jk.gain
 				author=jk.author
 			end
 			
@@ -563,17 +578,17 @@ local function TransLegitCheck(name,epdif,gpdif)
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 		local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and jk.typ=="EP" and tvinspool[jk.name] and jk.logtype=='cmd' then
-				eplogcounter=eplogcounter+jk.count
+				eplogcounter=eplogcounter+jk.gain
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,{jk.reason,jk.count,0})
+					tinsert(reasons,{jk.reason,jk.gain,0})
 				end
 			end
 			if gpdif and jk.typ=="GP" and tvinspool[jk.name] and jk.logtype=='cmd'  then
-				gplogcounter=gplogcounter+jk.count
+				gplogcounter=gplogcounter+jk.gain
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,{jk.reason,0,jk.count})
+					tinsert(reasons,{jk.reason,0,jk.gain})
 				end
 			end
 			
@@ -604,18 +619,15 @@ local function TransLegitCheck(name,epdif,gpdif)
 		for j=#DA_StoredGChat[DA_CurrentGuild],1,-1 do
 			local jk=DA_StoredGChat[DA_CurrentGuild][j]
 			if epdif and tvinspool[jk.name] and jk.logtype=='cmd' then
-				dkp_DA_counter=dkp_DA_counter+jk.count
+				dkp_DA_counter=dkp_DA_counter+jk.gain
 				author=jk.author
 				if jk.reason then
-					tinsert(reasons,{jk.reason,jk.count})
+					tinsert(reasons,{jk.reason,jk.gain})
 				end
 			end
 			if dkp_DA_counter==epdif then
 				break
 			end
-		end
-		if #reasons==0 then
-			reasons=nil
 		end
 		
 		--whispers
@@ -625,6 +637,9 @@ local function TransLegitCheck(name,epdif,gpdif)
 				if epdif and jk.typ=="dkp_pm" and jk.author and jk.gain then
 					dkpwhcounter=dkpwhcounter+jk.gain
 					author=jk.author
+					if jk.reason then
+						tinsert(reasons,{jk.reason,jk.gain})
+					end
 				end
 				
 				if dkpwhcounter==epdif then
@@ -639,10 +654,16 @@ local function TransLegitCheck(name,epdif,gpdif)
 			if epdif and jk.typ=="dkp_all" and jk.author and jk.gain then
 				dkppubl_allcounter=dkppubl_allcounter+jk.gain
 				author=jk.author
+				if jk.reason then
+					tinsert(reasons,{jk.reason,jk.gain})
+				end
 			end
 			if epdif and jk.typ=="dkp_all_p" and jk.author and jk.gain and jk.persona and tvinspool[jk.persona] then
 				dkppublcounter=dkppublcounter+jk.gain
 				author=jk.author
+				if jk.reason then
+					tinsert(reasons,{jk.reason,jk.gain})
+				end
 			end
 			
 			if dkppubl_allcounter==epdif or dkppublcounter==epdif then
@@ -650,6 +671,12 @@ local function TransLegitCheck(name,epdif,gpdif)
 			end
 		end
 		
+		if #reasons==0 then
+			reasons=nil
+		else
+			reasons = filterReasons(reasons)
+		end
+
 		if dkp_DA_counter==epdif then
 			return 'both',author,reasons
 		elseif (dkpwhcounter==epdif or dkppubl_allcounter==epdif or dkppublcounter==epdif) 
@@ -658,7 +685,7 @@ local function TransLegitCheck(name,epdif,gpdif)
 			or (epdif==dkppubl_allcounter+dkppublcounter) 
 			or (epdif==dkppubl_allcounter+dkpwhcounter+dkppublcounter) 
 			then
-			return 'both',author
+			return 'both',author,reasons
 		elseif dkp_DA_counter==epdif then
 			return 'log',author,reasons
 		end
@@ -1204,8 +1231,7 @@ local function tables_equal(t1, t2)
 
     return true
 end
-local function getGuildGMTblStrings()
-	local t=DA.GetGuilGMSettings()
+local function getGuildGMTblStrings(t)
 	local result={}
 		for i,e in ipairs(t) do
 			local r = DA.tableToString(e)
@@ -1213,7 +1239,9 @@ local function getGuildGMTblStrings()
 		end
 	return result
 end
-local function CheckGuildInfosChange()
+local re_schedule_CheckGuildInfosChange
+local guildInfoChecksSinceLoaded = 0
+local function CheckGuildInfosChange(scheduled, onlchange_PassedState)
 	local optTbl = fuckingOptions_g[DA_CurrentGuild]
 	local tmstmp
 	local isonlinechange
@@ -1221,10 +1249,50 @@ local function CheckGuildInfosChange()
 	local minlog=fuckingOptions_g[DA_CurrentGuild].minlog
 	local time_cap=curtime-fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
 
+	local GMTable
+	if optTbl.Log_GM then
+		GMTable=DA.GetGuilGMSettings()
+	end
+	
+
 	local dat,tim=string.match(date(), "(.+)%s(.+)")
-	if DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1 and GetTimestamp2()-DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1<2.2 then
+	if scheduled then
+		isonlinechange=onlchange_PassedState
+		guildInfoChecksSinceLoaded = 9
+	elseif DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1 and GetTimestamp2()-DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1<2.2 then
 		isonlinechange=true
 	end
+	if not scheduled and guildInfoChecksSinceLoaded < 3 then
+		local gInf = DA.GetGuildInfoTextCached()
+		local motd = DA.GetGuildRosterMOTDCached()
+		guildInfoChecksSinceLoaded = guildInfoChecksSinceLoaded + 1
+
+		local missing = {}
+		if optTbl.Log_ginfo and (not gInf or gInf == "") then
+			table.insert(missing, "Guild Info")
+		end
+		if optTbl.Log_gmotd and (not motd or motd == "") then
+			table.insert(missing, "Guild MOTD")
+		end
+		if optTbl.Log_GM and (not GMTable or not next(GMTable)) then
+			table.insert(missing, "Guild Ranks")
+		end
+		if optTbl.Log_GM and (
+			not GMTable
+			or not GMTable[2]
+			or not GMTable[2].bankpermissions
+			or not next(GMTable[2].bankpermissions)
+		) then
+			table.insert(missing, "Guild Bank Permissions")
+		end
+		if #missing > 0 then
+			re_schedule_CheckGuildInfosChange(isonlinechange)
+			DA.Print("[Debug]: Guild data not loaded  -> " .. table.concat(missing, ", ") .. ". Check rescheduled.")
+			return
+		end
+
+	end
+	
 	if isonlinechange then
 		tmstmp= {true,dat,tim, t=curtime}
 	else
@@ -1235,11 +1303,11 @@ local function CheckGuildInfosChange()
 	
 	
 	for _,t in ipairs({
-		{"Log_ginfo", "info", GetGuildInfoText, 'ginfo',{
+		{"Log_ginfo", "info", DA.GetGuildInfoTextCached, 'ginfo',{
 			L["Guild Information added"],
 			L["Guild Information removed"],
 			L["Guild Information changed"]}},
-		{"Log_gmotd", "motd", GetGuildRosterMOTD, 'gmotd',{
+		{"Log_gmotd", "motd", DA.GetGuildRosterMOTDCached, 'gmotd',{
 			L["Message of the day added"],
 			L["Message of the day removed"],
 			L["Message of the day changed"]}}
@@ -1251,7 +1319,6 @@ local function CheckGuildInfosChange()
 		local J_msg = t[5]
 		
 		local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
-		local option = optTbl[opt]
 		
 		if not opt then
 			table.wipe(DB)
@@ -1301,12 +1368,11 @@ local function CheckGuildInfosChange()
 	local J_short = '_GM'
 	
 	local DB = DA_Guild_Info[DA_CurrentGuild].LogINFO[short]
-	local option = optTbl[opt]
 	
 	if not opt then
 		table.wipe(DB)
 	else
-		local value = getGuildGMTblStrings()
+		local value = getGuildGMTblStrings(GMTable)
 		local note = Log_GetGuildInfo(short)
 		
 		if not note then --new logging method started, adding value without writing journal
@@ -1394,6 +1460,10 @@ local function CheckGuildInfosChange()
 	end
 	
 	DA_Guild_Info[DA_CurrentGuild].LogINFO.lastupdate1=GetTimestamp2()
+end
+
+re_schedule_CheckGuildInfosChange = function(passedState)
+	DA.TimerAfter(60, function() CheckGuildInfosChange('scheduled', passedState) end)
 end
 local function IsGINFOLoggingRequired()
 	local optTbl = fuckingOptions_g[DA_CurrentGuild]
@@ -1509,535 +1579,743 @@ function Mod.Logger_Load()
 			widget.font:SetTextColor(0.6, 0.6, 0.6, 0.6)
 		end
 	end
-
-do --log catchers
-	local my_name=GetUnitName('player')
-	local function split31(str)
-		local parts = {}
-		for part in string.gmatch(str, "([^%z\031]+)") do
-			table.insert(parts, part)
+	
+	
+	local function Try(msg, patterns)
+		for _, entry in ipairs(patterns) do
+			local pat = type(entry) == "table" and entry[1] or entry
+			local a, b, c, d, e = msg:match(pat)
+			if a then return entry, a, b, c, d, e end
 		end
-		return unpack(parts)
 	end
-	local function cmd_catch(_, _, prefix, message, _, author)
-		if prefix == "EPGP" then
-			if string.sub(message, 0, 4)=="LOG:" then
+	local function StripDKPPrefix(msg)
+		return msg:gsub("^QDKP2?>%s", "")
+	end
+	local function StripEPGPPrefix(msg)
+		return msg:gsub("^QDKP2?>%s", "")
+	end
+	local function stripDKPbankFromWhisper(msg)
+		return msg:gsub("%.%sYour%snew%snet%sDKP%samount.+", "")
+	end
+	
+	local DKP = {}
+	do	--dkp message parser
+		
+		DKP.patterns = {
+			raidAward = {
+				-- EN
+				{ "^Online%sRaid%smembers%sreceived%s(%-?%d+)%sDKP%sfor%s(.+)$", true },
+				{ "^Raid%smembers%sreceiv%a*%s(%-?%d+)%sDKP$", false },
+
+				-- RU
+				{ "^Участники%sрейда%sполучили%s(%-?%d+)%sDKP%sза%s(.+)$", true },
+				{ "^Участники%sрейда%sполучили%s(%-?%d+)%sDKP$", false },
+
+				-- FR (correct)
+				{ "^Les%smembres%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP%spour%s(.+)$", true },
+				{ "^Les%smembres%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP$", false },
+
+				-- FR (typo: menmbres)
+				{ "^Les%smenmbres%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP%spour%s(.+)$", true },
+				{ "^Les%smenmbres%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP$", false },
+
+				-- FR (singular: membre)
+				{ "^Les%smembre%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP%spour%s(.+)$", true },
+				{ "^Les%smembre%sdu%sraid%sconnectés%sreçoivent%s(%-?%d+)%sDKP$", false },
+
+			},
+
+			purchase = {
+				-- EN
+				{"^(.-)%s+%(([^()]+)%)%s+Purchases%s+(.+)%s+for%s+(%-?%d+)%s+DKP$",true},
+				{"^(.-)%s+Purchases%s+(.+)%s+for%s+(%-?%d+)%s+DKP$"},
+
+				-- RU
+				{"^(.-)%s+%(([^()]+)%)%s+Покупает%s+(.+)%s+за%s+(%-?%d+)%s+DKP$",true},
+				{"^(.-)%s+Покупает%s+(.+)%s+за%s+(%-?%d+)%s+DKP$"}
+			},
+
+			spends = {
+				guild={
+					{"^(.-)%s+%(([^()]+)%)%s+Spends%s+(%-?%d+)%s+DKP%sfor%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Spends%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+Spends%s+(%-?%d+)%s+DKP%sfor%s(.+)$", false, true},
+					{"^(.-)%s+Spends%s+(%-?%d+)%s+DKP$"},
+					
+					{"^(.-)%s+%(([^()]+)%)%s+Тратит%s+(%-?%d+)%s+DKP%sза%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Тратит%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+%(([^()]+)%)%s+Тратит%s+(%-?%d+)%s+DKP%sза%s(.+)$", false, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Тратит%s+(%-?%d+)%s+DKP$"},
+					
+					{"^(.-)%s+%(([^()]+)%)%s+Dépense%s+(%-?%d+)%s+DKP%spour%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Dépense%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+%(([^()]+)%)%s+Dépense%s+(%-?%d+)%s+DKP%spour%s(.+)$", false, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Dépense%s+(%-?%d+)%s+DKP$"}
+				},
+
+				whisper ={
+					{"^Spends%s+(-?%d+)%s+DKP%sfor%s(.+)$", true},
+					{"^Spends%s+(-?%d+)%s+DKP$"},
+					
+					{"^Тратит%s+(-?%d+)%s+DKP%sза%s(.+)$", true},
+					{"^Тратит%s+(-?%d+)%s+DKP$"},
+					
+					{"^Dépense%s+(-?%d+)%s+DKP%spour%s(.+)$", true},
+					{"^Dépense%s+(-?%d+)%s+DKP$"}
+				}
+			},
+			gains = {
+				guild={
+					{"^(.-)%s+%(([^()]+)%)%s+Gains%s+(%-?%d+)%s+DKP%sfor%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Gains%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+Gains%s+(%-?%d+)%s+DKP%sfor%s(.+)$", false, true},
+					{"^(.-)%s+Gains%s+(%-?%d+)%s+DKP$"},
+					
+					{"^(.-)%s+%(([^()]+)%)%s+Получает%s+(%-?%d+)%s+DKP%sза%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Получает%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+%(([^()]+)%)%s+Получает%s+(%-?%d+)%s+DKP%sза%s(.+)$", false, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Получает%s+(%-?%d+)%s+DKP$"},
+					
+					{"^(.-)%s+%(([^()]+)%)%s+Gagne%s+(%-?%d+)%s+DKP%spour%s(.+)$", true, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Gagne%s+(%-?%d+)%s+DKP$", true},
+					{"^(.-)%s+%(([^()]+)%)%s+Gagne%s+(%-?%d+)%s+DKP%spour%s(.+)$", false, true},
+					{"^(.-)%s+%(([^()]+)%)%s+Gagne%s+(%-?%d+)%s+DKP$"}
+				},
+
+				whisper ={
+					{"^Gains%s+(-?%d+)%s+DKP%sfor%s(.+)$", true},
+					{"^Gains%s+(-?%d+)%s+DKP$"},
+					
+					{"^Получает%s+(-?%d+)%s+DKP%sза%s(.+)$", true},
+					{"^Получает%s+(-?%d+)%s+DKP$"},
+					
+					{"^Gagne%s+(-?%d+)%s+DKP%spour%s(.+)$", true},
+					{"^Gagne%s+(-?%d+)%s+DKP$"}
+				}
+			}
+		}
+		function DKP.ParseRaidAward(msg)
+			local entry, amount, reason = Try(msg, DKP.patterns.raidAward)
+			if not entry then return end
+
+			return {
+				type = "raidAward",
+				amount = tonumber(amount),
+				reason = entry[2] and reason or nil
+			}
+		end
+		function DKP.ParsePurchase(msg)
+			local entry, a, b, c, d = Try(msg, DKP.patterns.purchase)
+			if not entry then return end
+			
+			if a then
+				return {
+					type = "purchase",
+					nick = entry[2] and b or a,
+					reason = entry[2] and c or b,
+					amount = entry[2] and tonumber(d) or tonumber(c)
+				}
+			end
+		end
+		function DKP.ParseSpends(msg, isWhisper)
+			
+			if isWhisper then
+				local entry, amount, reason = Try(msg, DKP.patterns.spends.whisper)
+				if not entry then return end
+
+				return {
+					type = "spends",
+					amount = tonumber(amount),
+					reason = entry[2] and stripDKPbankFromWhisper(reason) or nil
+				}
+			end
+			local entry, a, b, c, d = Try(msg, DKP.patterns.spends.guild)
+			if not entry then return end
+			return {
+				type = "spends", 
+				nick = entry[2] and b or a, 
+				amount = entry[2] and tonumber(c) or tonumber(b),
+				reason = 
+					(entry[3] and entry[2] and d) 
+					or (entry[3] and c)
+					or nil 
+			}
+		end
+		function DKP.ParseGains(msg, isWhisper)
+			if isWhisper then
+				local entry, amount, reason = Try(msg, DKP.patterns.gains.whisper)
+				if not entry then return end
+
+				return {
+					type = "gains",
+					amount = tonumber(amount),
+					reason = entry[2] and stripDKPbankFromWhisper(reason) or nil
+				}
+			end
+
+			local entry, a, b, c, d = Try(msg, DKP.patterns.gains.guild)
+			if not entry then return end
+			return {
+				type = "gains", 
+				nick = entry[2] and b or a, 
+				amount = entry[2] and tonumber(c) or tonumber(b),
+				reason = 
+					(entry[3] and entry[2] and d) 
+					or (entry[3] and c)
+					or nil 
+			}
+		end
+		
+		function DKP.ParseGuildMsg(msg)
+			if not msg:find("^QDKP2?>%s") then
+				return
+			end
+			msg = StripDKPPrefix(msg)
+
+			return
+				DKP.ParseRaidAward(msg) or
+				DKP.ParsePurchase(msg) or
+				DKP.ParseSpends(msg, false) or
+				DKP.ParseGains(msg, false)
+		end
+		function DKP.ParseWhisper(msg)
+			if not msg:find("^QDKP2?>%s") then
+				return
+			end
+			msg = StripDKPPrefix(msg)
+
+			return
+				DKP.ParseSpends(msg, true) or
+				DKP.ParseGains(msg, true)
+		end
+	end
+	
+	local EPGP = {}
+	do	--epgp message parser
+		EPGP.patterns={
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sto%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sto%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\208\180\208\187\209\143%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\208\180\208\187\209\143%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sgehen an%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sgehen an%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sa%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%sa%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\195\160%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\195\160%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\231\187\153%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\231\187\153%s(.+)$"},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\231\181\166%s(.+)%s%(([^()]+)%)$", true},
+			{"([-,+]?%d+)%s([E,G]P)%s%(([^()]+)%)%s\231\181\166%s(.+)$"}
+		}
+		function EPGP.Parse(msg)
+			local entry, amount, type, reason, n1, n2 = Try(msg, EPGP.patterns)
+			if not entry then return end
+
+			return {
+				amount = tonumber(amount),
+				type = type,
+				reason = reason,
+				nick = entry[2] and n2 or n1
+			}
+		end
+		function EPGP.ParseGuildMsg(msg)
+			if not msg:find("EPGP:%s") then
+				return
+			end
+			msg = StripEPGPPrefix(msg)
+			return EPGP.Parse(msg)
+		end
+	end
+
+
+	do --log catchers
+		local my_name=GetUnitName('player')
+		local function split31(str)
+			local parts = {}
+			for part in string.gmatch(str, "([^%z\031]+)") do
+				table.insert(parts, part)
+			end
+			return unpack(parts)
+		end
+		local function cmd_catch(_, _, prefix, message, _, author)
+			if prefix == "EPGP" then
+				if string.sub(message, 0, 4)=="LOG:" then
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					local _, typ, name, reason, value = split31(message)
+					if typ and name and tonumber(value) then
+						tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, typ=typ, name=name, gain=tonumber(value), reason=reason})
+						table.wipe(DA_Scaner_bulk)
+					end
+				end
+			elseif prefix == "DA_log" then
 				if author==my_name then
 					DA.SetTimerTime("scan_schedule",3)
 				else
 					DA.SetTimerTime("scan_schedule",25)
 				end
-				local _, typ, name, reason, value = split31(message)
-				if typ and name and tonumber(value) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, typ=typ, name=name, count=tonumber(value), reason=reason})
+				local name, value, reason = split31(message)
+				if name and tonumber(value) then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=name, gain=tonumber(value), reason=reason})
 					table.wipe(DA_Scaner_bulk)
 				end
-			end
-		elseif prefix == "DA_log" then
-			if author==my_name then
-				DA.SetTimerTime("scan_schedule",3)
-			else
-				DA.SetTimerTime("scan_schedule",25)
-			end
-			local name, value, reason = split31(message)
-			if name and tonumber(value) then
-				tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="cmd",	author=author, name=name, count=tonumber(value), reason=reason})
-				table.wipe(DA_Scaner_bulk)
 			end
 		end
-	end
-	local afp = CreateFrame("Frame")
-	afp:SetScript("OnEvent", cmd_catch)
-	afp:RegisterEvent("CHAT_MSG_ADDON");
-
-	local function chat_catch(_, event, message, author)
-
-		if message and author then else return end
+		local afp = CreateFrame("Frame")
+		afp:SetScript("OnEvent", cmd_catch)
+		afp:RegisterEvent("CHAT_MSG_ADDON");
 		
-		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and event=='CHAT_MSG_GUILD' then
-			local count=string.match(message,"EPGP:%s(.%d+)%s")
-			local typ=string.match(message,"EPGP:%s.%d+%s(.-)%s%(")
-			local character=string.match(message,"EPGP:%s.%d+%s.-%(.+%)%s"..L['fepfor'].."%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sдля%s(.+)$") or string.match(message,"EPGP:%s.%d+%s.-%(.+%)%sto%s(.+)$")
-				if tonumber(count) and typ and character then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="chat",	author=author, name=character,typ=typ,count=tonumber(count)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				end
-		elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 		
+		local function chat_catch(_, event, message, author)
 
-			if event=='CHAT_MSG_WHISPER' then
-				local gain=string.match(message,"QDKP2?>%sGains%s(%d+)%sDKP")
-				local spend=string.match(message,"QDKP2?>%sSpends%s(%d+)%sDKP")
-				if spend then spend="-"..spend end
-				
-				
-				local all_p_persona_g,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
-				
-				local all_p_persona_s,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				
-				local all_p_persona_p,all_p_purch=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
-				if all_p_purch then all_p_purch="-"..all_p_purch end
-				
-				local altern = tonumber(all_p_gains) or tonumber(all_p_spends) or tonumber(all_p_purch)
-				
-				if tonumber(gain) or tonumber(spend) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=(tonumber(gain) or tonumber(spend))})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				elseif altern then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=altern})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-				end
-			elseif event=='CHAT_MSG_GUILD' then
-				local all_dkp=string.match(message,"QDKP2?>%sOnline%sRaid%smembers%sreceived%s(%d+)")
-				if tonumber(all_dkp) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all', gain=tonumber(all_dkp)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
+			if message and author then else return end
 			
-				local all_p_persona,all_p_gains=string.match(message,"QDKP2?>%s(.-)%sGains%s(%d+)%sDKP") 
-				if all_p_persona and tonumber(all_p_gains) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_gains)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sSpends%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				if all_p_persona and tonumber(all_p_spends) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				local all_p_persona,all_p_spends=string.match(message,"QDKP2>%s(.-)%sPurchases%s.+for%s(%d+)%sDKP")
-				if all_p_spends then all_p_spends="-"..all_p_spends end
-				if all_p_persona and tonumber(all_p_spends) then
-					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_all_p', persona=all_p_persona, gain=tonumber(all_p_spends)})
-					if author==my_name then
-						DA.SetTimerTime("scan_schedule",3)
-					else
-						DA.SetTimerTime("scan_schedule",25)
-					end
-					table.wipe(DA_Scaner_bulk)
-					return
-				end
-				
-				
-			end
-			
-		end
-	end
-	local dfj = CreateFrame("Frame")
-	dfj:SetScript("OnEvent", chat_catch)
-	dfj:RegisterEvent("CHAT_MSG_GUILD");
-	dfj:RegisterEvent("CHAT_MSG_WHISPER");
-end	
+			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and event=='CHAT_MSG_GUILD' then
+				local data = EPGP.ParseGuildMsg(message)
 
----- 2 TAB ------
----- 2 TAB ------
----- 2 TAB ------
-DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",90,0},15,30,10,30,"Log",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) LogSetAllLines();DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_log]])
-do
-	-- DA.ScrollBarCreater("DarkAngelLog",DarkAngelGUI.Log,{DarkAngelGUI.Log.width-5, DarkAngelGUI.Log.height-70},{"TOPLEFT", 5, -62})
-	Log_Create_ScrollBar()
-	DA.HelpCreater(DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",9,-9},'LogHelp',15,15)
-		
-		DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() Mod:StartScan() end)
-		
-		--info/motd details
-		do
-			DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,280,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
-			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"TOPRIGHT", DarkAngelGUI.Log.GinfoFrame, "TOPRIGHT", -5,-5},10,10,'x')
-			
-			DarkAngelGinfoFrame = DA.ScrollBarCreater("DarkAngelGinfoFrame",DarkAngelGUI.Log.GinfoFrame,{DarkAngelGUI.Log.GinfoFrame.width-5, DarkAngelGUI.Log.GinfoFrame.height-30},{"TOPLEFT", 5, -20},1)
-			local ginf_Scrolled=DarkAngelGinfoFrame.scrollchild
+				if not data then return end
 
-			local ginf_eb = DA.EditBoxCreater(nil,ginf_Scrolled,{"TOPLEFT", ginf_Scrolled, "TOPLEFT", 5, -2},{250,270},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				nil, --enter here
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				function(self) 	
-					self.t:SetBlendMode("BLEND")
-					self.focusgained=1
-				end,
-				nil,nil,nil,1
-			)
-			
-			local comp=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",15,-12},15,15,"compare",function() DarkAngelGUI.Log.GinfoFrame.re_render() end)
-			comp:SetChecked(true)
-			
-			
-			local gmpreview = DA.CreateFFGButton2(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",130,-12},10,105,'gm editor preview','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
 				
-				local entry = DarkAngelGUI.Log.GinfoFrame.tbl
-				if not entry then return end
+				local gain = data.amount
+				local typ = data.type
+				local reason = data.reason
+				local character = data.nick
+				if tonumber(gain) and typ and character then
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),logtype="chat",	author=author, name=character,typ=typ,gain=gain, reason=reason})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+				end
 				
-				local gc=DarkAngelGUI.Guild.GC
-				gc.ranksroster=nil
-				gc.ranksroster=packGMTable(entry[1])
-				
-				gc.finish_import()
-				gc:Show()
-			end)
-			gmpreview:Hide()
+			elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 			
-			
-			DarkAngelGUI.Log.GinfoFrame.re_render = function ()
-				local entry = DarkAngelGUI.Log.GinfoFrame.tbl
-				
-				if not entry then return end
-				
-				if comp:GetChecked() and entry[3] then
-					ginf_eb:SetText(entry[3])
-				else
+				if event=='CHAT_MSG_WHISPER' then
+					local data = DKP.ParseWhisper(message)
 					
-					if type(entry[1])=='table' then
-						ginf_eb:SetText(DA.tableToString(entry[1]))
+					if not data then return end
+
+					local value = data.amount
+					local reason = data.reason
+					if data.type == "spends" then
+						value = -value
+					end
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ='dkp_pm', gain=value, reason=reason})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
 					else
-						ginf_eb:SetText(entry[1])
+						DA.SetTimerTime("scan_schedule",25)
 					end
+					table.wipe(DA_Scaner_bulk)
+					
+				elseif event=='CHAT_MSG_GUILD' then
+					local data = DKP.ParseGuildMsg(message)
+					
+					if not data then return end
+
+					local persona = data.nick
+					local value = data.amount
+					local reason = data.reason
+					if data.type == "purchase" or data.type == "spends" then
+						value = -value
+					end
+					tinsert(DA_StoredGChat[DA_CurrentGuild],{stamp=GetTimestamp2(),author=author, typ=persona and 'dkp_all_p' or 'dkp_all', persona=persona, gain=value, reason=reason})
+					if author==my_name then
+						DA.SetTimerTime("scan_schedule",3)
+					else
+						DA.SetTimerTime("scan_schedule",25)
+					end
+					table.wipe(DA_Scaner_bulk)
+					
 				end
-				DarkAngelGUI.Log.GinfoFrame:Show()
 				
-				if entry.isgm then
-					gmpreview:Show()
-				else
-					gmpreview:Hide()
-				end
 			end
-			
-			
-			
-		
 		end
-		
-		local copyFrame_Update
-		--copy
-		do
-			DarkAngelGUI.Log.copybtn,DarkAngelGUI.Log.copyFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Log,L["copy"],12,35,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-6},80,175,"TOP",nil,function() copyFrame_Update() end)
+		local dfj = CreateFrame("Frame")
+		dfj:SetScript("OnEvent", chat_catch)
+		dfj:RegisterEvent("CHAT_MSG_GUILD");
+		dfj:RegisterEvent("CHAT_MSG_WHISPER");
+	end	
+
+	---- 2 TAB ------
+	---- 2 TAB ------
+	---- 2 TAB ------
+	DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",90,0},15,30,10,30,"Log",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) LogSetAllLines();DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_log]])
+	do
+		-- DA.ScrollBarCreater("DarkAngelLog",DarkAngelGUI.Log,{DarkAngelGUI.Log.width-5, DarkAngelGUI.Log.height-70},{"TOPLEFT", 5, -62})
+		Log_Create_ScrollBar()
+		DA.HelpCreater(DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",9,-9},'LogHelp',15,15)
 			
-			local search_patterns={
-				{"time", "TimeText"},
-				{"type", "TagText"},
-				{"name", "plname"},
-				{"change", "note"},
-				{"value1", "colorEPchange"},
-				{"value2", "colorGPchange"},
-				{"total", "total"},
-				
-			}
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() Mod:StartScan() end)
 			
-			for i,criteria in pairs(search_patterns) do
-				DarkAngelGUI.Log.copyFrame[criteria[1]]=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPLEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10,5-12*i},15,15,criteria[1],function() copyFrame_Update() end)
-				if i~=7 then
-					DarkAngelGUI.Log.copyFrame[criteria[1]]:SetChecked(true)
-				end
-			end
-			--separator
+			--info/motd details
 			do
-				DarkAngelGUI.Log.copyFrame.separator=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -115},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end, --enter here
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
+				DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,280,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
+				DA.CloseButtonCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"TOPRIGHT", DarkAngelGUI.Log.GinfoFrame, "TOPRIGHT", -5,-5},10,10,'x')
+				
+				DarkAngelGinfoFrame = DA.ScrollBarCreater("DarkAngelGinfoFrame",DarkAngelGUI.Log.GinfoFrame,{DarkAngelGUI.Log.GinfoFrame.width-5, DarkAngelGUI.Log.GinfoFrame.height-30},{"TOPLEFT", 5, -20},1)
+				local ginf_Scrolled=DarkAngelGinfoFrame.scrollchild
+
+				local ginf_eb = DA.EditBoxCreater(nil,ginf_Scrolled,{"TOPLEFT", ginf_Scrolled, "TOPLEFT", 5, -2},{250,270},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+					function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+					nil, --enter here
+					function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
 					function(self) 	
-						if self:GetParent():IsShown() then
-							
-							self.t:SetBlendMode("BLEND")
-							self.focusgained=1
-						end
+						self.t:SetBlendMode("BLEND")
+						self.focusgained=1
 					end,
-					function(self)
-						if self.focusgained then
-							fuckingOptions.lcopyfrsep=self:GetText()
-							copyFrame_Update()
+					nil,nil,nil,1
+				)
+				
+				local comp=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",15,-12},15,15,"compare",function() DarkAngelGUI.Log.GinfoFrame.re_render() end)
+				comp:SetChecked(true)
+				
+				
+				local gmpreview = DA.CreateFFGButton2(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",130,-12},10,105,'gm editor preview',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+					
+					local entry = DarkAngelGUI.Log.GinfoFrame.tbl
+					if not entry then return end
+					
+					local gc=DarkAngelGUI.Guild.GC
+					gc.ranksroster=nil
+					gc.ranksroster=packGMTable(entry[1])
+					
+					gc.finish_import()
+					gc:Show()
+				end)
+				gmpreview:Hide()
+				
+				
+				DarkAngelGUI.Log.GinfoFrame.re_render = function ()
+					local entry = DarkAngelGUI.Log.GinfoFrame.tbl
+					
+					if not entry then return end
+					
+					if comp:GetChecked() and entry[3] then
+						ginf_eb:SetText(entry[3])
+					else
+						
+						if type(entry[1])=='table' then
+							ginf_eb:SetText(DA.tableToString(entry[1]))
+						else
+							ginf_eb:SetText(entry[1])
 						end
 					end
-				)
-				DarkAngelGUI.Log.copyFrame.separator:HighlightText()
-				DarkAngelGUI.Log.copyFrame.separator:SetText(fuckingOptions.lcopyfrsep)
-				DA.FontCreater(nil,L['separator'],{"LEFT",DarkAngelGUI.Log.copyFrame.separator,"LEFT",-5,13},DarkAngelGUI.Log.copyFrame.separator,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
-			end
-			--numlines
-			do
-				DarkAngelGUI.Log.copyFrame.numlines=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -155},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end, --enter here
-					function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
-					function(self) 	
-						if self:GetParent():IsShown() then
-							
-							self.t:SetBlendMode("BLEND")
-							self.focusgained=1
-							if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end 
-						end
-					end,
-					function(self)
-						if self.focusgained and tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
-							fuckingOptions.lcopyfrnumlines=self:GetText()
-							copyFrame_Update()
-						end
-					end,1
-				)
-				DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.lcopyfrnumlines)
-				
-				DA.FontCreater(nil,L['lines to print'],{"LEFT",DarkAngelGUI.Log.copyFrame.numlines,"TOPLEFT",-5,5},DarkAngelGUI.Log.copyFrame.numlines,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
-				
-			end
-			
-			local CopyFrameAdditional=DA.FrameCreater(nil,DarkAngelGUI.Log.copyFrame,499,175,{"BOTTOMLEFT",DarkAngelGUI.Log.copyFrame,"BOTTOMRIGHT"})
-			CopyFrameAdditional:Show()
-			DA.CloseButtonCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x',CopyFrameAdditional:GetFrameLevel()+3)
-			
-			DarkAngelLog_CopyFrame = DA.ScrollBarCreater("DarkAngelLog_CopyFrame",CopyFrameAdditional,{CopyFrameAdditional.width-5, CopyFrameAdditional.height-30},{"TOPLEFT", 5, -20},1)
-			local copyfr_Scrolled=DarkAngelLog_CopyFrame.scrollchild
-
-			CopyFrameAdditional.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 7},
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
-				function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
-				function(self) 	
-					self.t:SetBlendMode("BLEND")
-					self.focusgained=1
-					self:HighlightText()
-				end,
-				nil,nil,nil,1
-			)
-			
-			
-			DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
-				copyFrame_Update(1)
-			end)
-			
-			DA.CheckBtnCreater(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",75,-12},15,15,"auto",function(self) fuckingOptions.logcopyauto=(self:GetChecked() or false) end,{'fuckingOptions','logcopyauto'})
-			
-			
-			
-			copyFrame_Update = function(manual)
-				if not DarkAngelGUI.Log.copyFrame:IsShown() then return end
-				if not fuckingOptions.logcopyauto and not manual then return end
-				
-				local unlocked
-				local search={}
-				for i,c in pairs(search_patterns) do
-					if DarkAngelGUI.Log.copyFrame[c[1]]:GetChecked() then
-						unlocked=true
-						search[c[2]]=true
+					DarkAngelGUI.Log.GinfoFrame:Show()
+					
+					if entry.isgm then
+						gmpreview:Show()
+					else
+						gmpreview:Hide()
 					end
 				end
-
-				local editbox=CopyFrameAdditional.EB
-				local oldtext = editbox:GetText()
 				
-				if not unlocked then DA.Print(L['select at least one criteria']) return end
 				
-				local separator=DarkAngelGUI.Log.copyFrame.separator:GetText()
-				if not separator or separator == "" then 
-					DA.Print("separating data with single spacing")
-					separator=" "
+				
+			
+			end
+			
+			local copyFrame_Update
+			--copy
+			do
+				DarkAngelGUI.Log.copybtn,DarkAngelGUI.Log.copyFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Log,L["copy"],12,35,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-6},80,175,"TOP",nil,function() copyFrame_Update() end)
+				
+				local search_patterns={
+					{"time", "TimeText"},
+					{"type", "TagText"},
+					{"name", "plname"},
+					{"change", "note"},
+					{"value1", "colorEPchange"},
+					{"value2", "colorGPchange"},
+					{"total", "total"},
+					
+				}
+				
+				for i,criteria in pairs(search_patterns) do
+					DarkAngelGUI.Log.copyFrame[criteria[1]]=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPLEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10,5-12*i},15,15,criteria[1],function() copyFrame_Update() end)
+					if i~=7 then
+						DarkAngelGUI.Log.copyFrame[criteria[1]]:SetChecked(true)
+					end
 				end
-				
-				
-
-				if not tonumber(fuckingOptions.lcopyfrnumlines) or tonumber(fuckingOptions.lcopyfrnumlines)<=0 then 
-					fuckingOptions.lcopyfrnumlines=1000
-					DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.lcopyfrnumlines)
-				end
-				
-				local result = {}
-				
-				for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
-					local player = DA_LogRoster[i]
-					if player then
-						local line = {}
-						for _,patt in ipairs(search_patterns) do
-							if search[patt[2]] and player[patt[2]] then
-								local ss,_ = tostring(player[patt[2]]):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
-								tinsert(line, ss)
+				--separator
+				do
+					DarkAngelGUI.Log.copyFrame.separator=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -115},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end, --enter here
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil;self:HighlightText()  end,
+						function(self) 	
+							if self:GetParent():IsShown() then
+								
+								self.t:SetBlendMode("BLEND")
+								self.focusgained=1
+							end
+						end,
+						function(self)
+							if self.focusgained then
+								fuckingOptions.lcopyfrsep=self:GetText()
+								copyFrame_Update()
 							end
 						end
-						if next(line) then
-							tinsert(result, table.concat(line, separator))
-						end
-					end
+					)
+					DarkAngelGUI.Log.copyFrame.separator:HighlightText()
+					DarkAngelGUI.Log.copyFrame.separator:SetText(fuckingOptions.lcopyfrsep)
+					DA.FontCreater(nil,L['separator'],{"LEFT",DarkAngelGUI.Log.copyFrame.separator,"LEFT",-5,13},DarkAngelGUI.Log.copyFrame.separator,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
 				end
-				
-				local newtext = table.concat(result, "\n")
-				if oldtext ~= newtext then
-					-- editbox:Hide()
-					editbox:SetText(newtext)
-					-- editbox:Show()
+				--numlines
+				do
+					DarkAngelGUI.Log.copyFrame.numlines=DA.EditBoxCreater(nil,DarkAngelGUI.Log.copyFrame,{"LEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10, -155},{55,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end, --enter here
+						function(self) 		self.t:SetBlendMode("add") self:ClearFocus(); self.focusgained=nil; if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end end,
+						function(self) 	
+							if self:GetParent():IsShown() then
+								
+								self.t:SetBlendMode("BLEND")
+								self.focusgained=1
+								if not tonumber(self:GetText()) or tonumber(self:GetText())<=0 then self:SetText(10) end 
+							end
+						end,
+						function(self)
+							if self.focusgained and tonumber(self:GetText()) and tonumber(self:GetText())>0 then 
+								fuckingOptions.lcopyfrnumlines=self:GetText()
+								copyFrame_Update()
+							end
+						end,1
+					)
+					DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.lcopyfrnumlines)
+					
+					DA.FontCreater(nil,L['lines to print'],{"LEFT",DarkAngelGUI.Log.copyFrame.numlines,"TOPLEFT",-5,5},DarkAngelGUI.Log.copyFrame.numlines,15,170,{UIDarkAngelFontConsolas:GetFont(), 8},'left',{0.85,1,1,0.4})
 					
 				end
 				
+				local CopyFrameAdditional=DA.FrameCreater(nil,DarkAngelGUI.Log.copyFrame,499,175,{"BOTTOMLEFT",DarkAngelGUI.Log.copyFrame,"BOTTOMRIGHT"})
+				CopyFrameAdditional:Show()
+				DA.CloseButtonCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPRIGHT", CopyFrameAdditional, "TOPRIGHT", -5,-5},10,10,'x',CopyFrameAdditional:GetFrameLevel()+3)
+				
+				DarkAngelLog_CopyFrame = DA.ScrollBarCreater("DarkAngelLog_CopyFrame",CopyFrameAdditional,{CopyFrameAdditional.width-5, CopyFrameAdditional.height-30},{"TOPLEFT", 5, -20},1)
+				local copyfr_Scrolled=DarkAngelLog_CopyFrame.scrollchild
+
+				CopyFrameAdditional.EB=DA.EditBoxCreater(nil,copyfr_Scrolled,{"TOPLEFT", copyfr_Scrolled, "TOPLEFT", 5, -2},{462,390},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 7},
+					function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+					function(self) 		 self:ClearFocus(); self.focusgained=nil  end, --enter here
+					function(self) 		 self:ClearFocus(); self.focusgained=nil  end,
+					function(self) 	
+						self.t:SetBlendMode("BLEND")
+						self.focusgained=1
+						self:HighlightText()
+					end,
+					nil,nil,nil,1
+				)
+				
+				
+				DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+					copyFrame_Update(1)
+				end)
+				
+				DA.CheckBtnCreater(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",75,-12},15,15,"auto",function(self) fuckingOptions.logcopyauto=(self:GetChecked() or false) end,{'fuckingOptions','logcopyauto'})
+				
+				
+				
+				copyFrame_Update = function(manual)
+					if not DarkAngelGUI.Log.copyFrame:IsShown() then return end
+					if not fuckingOptions.logcopyauto and not manual then return end
+					
+					local unlocked
+					local search={}
+					for i,c in pairs(search_patterns) do
+						if DarkAngelGUI.Log.copyFrame[c[1]]:GetChecked() then
+							unlocked=true
+							search[c[2]]=true
+						end
+					end
+
+					local editbox=CopyFrameAdditional.EB
+					local oldtext = editbox:GetText()
+					
+					if not unlocked then DA.Print(L['select at least one criteria']) return end
+					
+					local separator=DarkAngelGUI.Log.copyFrame.separator:GetText()
+					if not separator or separator == "" then 
+						DA.Print("separating data with single spacing")
+						separator=" "
+					end
+					
+					
+
+					if not tonumber(fuckingOptions.lcopyfrnumlines) or tonumber(fuckingOptions.lcopyfrnumlines)<=0 then 
+						fuckingOptions.lcopyfrnumlines=1000
+						DarkAngelGUI.Log.copyFrame.numlines:SetText(fuckingOptions.lcopyfrnumlines)
+					end
+					
+					local result = {}
+					
+					for i=1,tonumber(fuckingOptions.lcopyfrnumlines) do
+						local player = DA_LogRoster[i]
+						if player then
+							local line = {}
+							for _,patt in ipairs(search_patterns) do
+								if search[patt[2]] and player[patt[2]] then
+									local ss,_ = tostring(player[patt[2]]):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
+									tinsert(line, ss)
+								end
+							end
+							if next(line) then
+								tinsert(result, table.concat(line, separator))
+							end
+						end
+					end
+					
+					local newtext = table.concat(result, "\n")
+					if oldtext ~= newtext then
+						-- editbox:Hide()
+						editbox:SetText(newtext)
+						-- editbox:Show()
+						
+					end
+					
+				end
+			
 			end
-		
-		end
-		
-		do --search checkboxes
-			-- for 
-			local newplayerCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",180,-10},15,15,L["new player"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_new=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_new','DA_CurrentGuild'})
-				DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-10},15,15,L['deserter'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_leaver=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_leaver','DA_CurrentGuild'})
-				DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-20},15,15,L["re-joined"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rejoin=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rejoin','DA_CurrentGuild'})
+			
+			do --search checkboxes
+				-- for 
+				local newplayerCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",180,-10},15,15,L["new player"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_new=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_new','DA_CurrentGuild'})
+					DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-10},15,15,L['deserter'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_leaver=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_leaver','DA_CurrentGuild'})
+					DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-20},15,15,L["re-joined"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rejoin=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rejoin','DA_CurrentGuild'})
 
-			DarkAngelGUI.Log.offnoteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",85,0},15,15,L["officer note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_offnote=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_offnote','DA_CurrentGuild'})
-				DarkAngelGUI.Log.twinkCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-10},15,15,L['twined'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink','DA_CurrentGuild'})
-				DarkAngelGUI.Log.twinksuspCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-20},15,15,L["suspic/twin"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink_susp=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink_susp','DA_CurrentGuild'})
-				DarkAngelGUI.Log.decayCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-30},15,15,L["decay"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_decay=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_decay','DA_CurrentGuild'})
-				DarkAngelGUI.Log.frozenCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-40},15,15,L['frozen'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_frozen=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_frozen','DA_CurrentGuild'})
+				DarkAngelGUI.Log.offnoteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",85,0},15,15,L["officer note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_offnote=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_offnote','DA_CurrentGuild'})
+					DarkAngelGUI.Log.twinkCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-10},15,15,L['twined'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink','DA_CurrentGuild'})
+					DarkAngelGUI.Log.twinksuspCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-20},15,15,L["suspic/twin"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink_susp=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink_susp','DA_CurrentGuild'})
+					DarkAngelGUI.Log.decayCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-30},15,15,L["decay"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_decay=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_decay','DA_CurrentGuild'})
+					DarkAngelGUI.Log.frozenCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-40},15,15,L['frozen'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_frozen=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_frozen','DA_CurrentGuild'})
 
-			DarkAngelGUI.Log.noteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",170,0},15,15,L["note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_note=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_note','DA_CurrentGuild'})
-				DarkAngelGUI.Log.rankCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-10},15,15,L["rank"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rank=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rank','DA_CurrentGuild'})
-				DarkAngelGUI.Log.ginfCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-20},15,15,L["guild info"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_ginfo=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_ginfo','DA_CurrentGuild'})
-				DarkAngelGUI.Log.motdCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-30},15,15,L["guild MOTD"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_gmotd=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_gmotd','DA_CurrentGuild'})
-				DarkAngelGUI.Log.gmCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-40},15,15,L['Guild GM system'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_GM=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_GM','DA_CurrentGuild'})
+				DarkAngelGUI.Log.noteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",170,0},15,15,L["note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_note=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_note','DA_CurrentGuild'})
+					DarkAngelGUI.Log.rankCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-10},15,15,L["rank"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rank=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rank','DA_CurrentGuild'})
+					DarkAngelGUI.Log.ginfCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-20},15,15,L["guild info"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_ginfo=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_ginfo','DA_CurrentGuild'})
+					DarkAngelGUI.Log.motdCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-30},15,15,L["guild MOTD"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_gmotd=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_gmotd','DA_CurrentGuild'})
+					DarkAngelGUI.Log.gmCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-40},15,15,L['Guild GM system'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_GM=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_GM','DA_CurrentGuild'})
 
-				-- FilterLog()
-		end
+					-- FilterLog()
+			end
 
-		local function logReRender()
-			for _, j in ipairs({
-				{"Log_offnote", "offnoteCB"},
-				{"Log_note",    "noteCB"},
-				{"Log_rank",    "rankCB"},
-				{"Log_ginfo",   "ginfCB"},
-				{"Log_gmotd",   "motdCB"},
-				{"Log_GM",      "gmCB"},
-			}) do
-				local key, cbName = j[1], j[2]
-				local state = fuckingOptions_g[DA_CurrentGuild][key]
+			local function logReRender()
+				for _, j in ipairs({
+					{"Log_offnote", "offnoteCB"},
+					{"Log_note",    "noteCB"},
+					{"Log_rank",    "rankCB"},
+					{"Log_ginfo",   "ginfCB"},
+					{"Log_gmotd",   "motdCB"},
+					{"Log_GM",      "gmCB"},
+				}) do
+					local key, cbName = j[1], j[2]
+					local state = fuckingOptions_g[DA_CurrentGuild][key]
 
-				if key == "Log_offnote" then
-					SetFontColor(DarkAngelGUI.Log.offnoteCB, state)
-					SetFontColor(DarkAngelGUI.Log.twinkCB, state)
-					SetFontColor(DarkAngelGUI.Log.twinksuspCB, state)
+					if key == "Log_offnote" then
+						SetFontColor(DarkAngelGUI.Log.offnoteCB, state)
+						SetFontColor(DarkAngelGUI.Log.twinkCB, state)
+						SetFontColor(DarkAngelGUI.Log.twinksuspCB, state)
 
-					if DA_Guild_Info[DA_CurrentGuild].GuildType == "epgp" then
-						SetFontColor(DarkAngelGUI.Log.decayCB, state)
-						SetFontColor(DarkAngelGUI.Log.frozenCB, state)
+						if DA_Guild_Info[DA_CurrentGuild].GuildType == "epgp" then
+							SetFontColor(DarkAngelGUI.Log.decayCB, state)
+							SetFontColor(DarkAngelGUI.Log.frozenCB, state)
+						else
+							DarkAngelGUI.Log.decayCB:Hide()
+							DarkAngelGUI.Log.frozenCB:Hide()
+						end
 					else
-						DarkAngelGUI.Log.decayCB:Hide()
-						DarkAngelGUI.Log.frozenCB:Hide()
-					end
-				else
-					SetFontColor(DarkAngelGUI.Log[cbName], state)
-				end
-			end
-		end
-		DarkAngelGUI.Log:HookScript("OnShow", logReRender)
-		table.insert(DA.RunOnGuildUpdate, logReRender)
-
-end
-
----- 3 TAB ------	
----- 3 TAB ------	
----- 3 TAB ------	
-DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",125,0},15,40,10,55,"Details",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_details]])
-do
-	-- DA.ScrollBarCreater("DarkAngelDetails",DarkAngelGUI.Details,{DarkAngelGUI.Details.width-5, DarkAngelGUI.Details.height-70},{"TOPLEFT", 5, -62})
-	Details_Create_ScrollBar()
-
-
-		DarkAngelGUI.Details.SearchEB = DA.EditBoxCreater(nil,DarkAngelGUI.Details,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 50, -40},{190,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
-			function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus();self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
-			function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus(); DA.RunLogSearch(self:GetText());self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
-			function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus(); DA.RunLogSearch(self:GetText());self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
-			function(self) 	
-				if self:GetParent():IsShown() then
-					if FEP_gMain and ( GetNumRaidMembers()==0 or #FEP_gMain<1 ) then 
-						DA.RegatherGuildNotes()
-					end
-					self.t:SetBlendMode("BLEND")
-					self.focusgained=1; 
-					if FEP_gMain then 
-					DA.DropdownHint(self:GetText(),self,DarkAngelGUI.Details.SearchTooltip,"DF","FEP_gMain","officernote",DarkAngelGUI.Details.SearchTooltip,30)
+						SetFontColor(DarkAngelGUI.Log[cbName], state)
 					end
 				end
-			end,
-			function(self) 
-				if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end
-				
-				if self:GetParent():IsShown() and self.focusgained then 
-					DA.DropdownHint(self:GetText(),self,DarkAngelGUI.Details.SearchTooltip,"DF","FEP_gMain","officernote",DarkAngelGUI.Details.SearchTooltip,30)
-					DA.RunLogSearch(self:GetText())
-				end 
 			end
-		)
-		DarkAngelGUI.Details.SearchEB.t:SetBlendMode("blend")
-		
-		DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,DarkAngelGUI.Details.SearchEB,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
-		DarkAngelGUI.Details.notific:Hide()
-		
-	DarkAngelGUI.Details.SearchTooltip = DA.FrameCreater(nil,DarkAngelGUI.Details.SearchEB,160,20,{"TOPLEFT",DarkAngelGUI.Details.SearchEB,"BOTTOMLEFT",-220,58})	
-		
-		local function run_search()
-			DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
-			DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
-			DarkAngelGUI.Details.SearchEB:ClearFocus()
-			Mod:StartScan() 
-		end
-		DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,127,0},18,50,L['Search'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
-		
-		DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,182,0},18,50,L['Target'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
-			DarkAngelGUI.Details.SearchEB:SetText(select(1,UnitName("target")) or UnitName("player"))
-			DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
-			DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
-			DarkAngelGUI.Details.SearchEB:ClearFocus()
-			Mod:StartScan()
-		end)
-		
-		do --search checkboxes
-			DarkAngelGUI.Details.CB_note=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details,"TOPLEFT",180,-10},15,15,L["note"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_note=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_note','DA_CurrentGuild'})
-			DarkAngelGUI.Details.CB_ofnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.CB_note,"CENTER",0,-10},15,15,L["officer note"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_offnote=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_offnote','DA_CurrentGuild'})
-			DarkAngelGUI.Details.CB_rank=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.CB_note,"CENTER",0,-20},15,15,L["rank"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_rank=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_rank','DA_CurrentGuild'})
-				
-		end
-		
+			DarkAngelGUI.Log:HookScript("OnShow", logReRender)
+			table.insert(DA.RunOnGuildUpdate, logReRender)
 
-		DarkAngelGUI.Details:HookScript("OnShow", function()
-			for _, j in ipairs({
-				{"Log_note",    "CB_note"},
-				{"Log_offnote", "CB_ofnote"},
-				{"Log_rank",    "CB_rank"},
-			}) do
-				local key, cbName = j[1], j[2]
-				local state = fuckingOptions_g[DA_CurrentGuild][key]
-				SetFontColor(DarkAngelGUI.Details[cbName], state)
+	end
+
+	---- 3 TAB ------	
+	---- 3 TAB ------	
+	---- 3 TAB ------	
+	DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",125,0},15,40,10,55,"Details",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_log]])
+	do
+		-- DA.ScrollBarCreater("DarkAngelDetails",DarkAngelGUI.Details,{DarkAngelGUI.Details.width-5, DarkAngelGUI.Details.height-70},{"TOPLEFT", 5, -62})
+		Details_Create_ScrollBar()
+
+
+			DarkAngelGUI.Details.SearchEB = DA.EditBoxCreater(nil,DarkAngelGUI.Details,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 50, -40},{190,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
+				function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus();self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
+				function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus(); DA.RunLogSearch(self:GetText());self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
+				function(self) 		 self.t:SetBlendMode("ADD") self:ClearFocus(); DA.RunLogSearch(self:GetText());self.focusgained=nil;DarkAngelGUI.Details.SearchTooltip:Hide() end,
+				function(self) 	
+					if self:GetParent():IsShown() then
+						if FEP_gMain and ( GetNumRaidMembers()==0 or #FEP_gMain<1 ) then 
+							DA.RegatherGuildNotes()
+						end
+						self.t:SetBlendMode("BLEND")
+						self.focusgained=1; 
+						if FEP_gMain then 
+						DA.DropdownHint(self:GetText(),self,DarkAngelGUI.Details.SearchTooltip,"DF","FEP_gMain","officernote",DarkAngelGUI.Details.SearchTooltip,30)
+						end
+					end
+				end,
+				function(self) 
+					if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end
+					
+					if self:GetParent():IsShown() and self.focusgained then 
+						DA.DropdownHint(self:GetText(),self,DarkAngelGUI.Details.SearchTooltip,"DF","FEP_gMain","officernote",DarkAngelGUI.Details.SearchTooltip,30)
+						DA.RunLogSearch(self:GetText())
+					end 
+				end
+			)
+			DarkAngelGUI.Details.SearchEB.t:SetBlendMode("blend")
+			
+			DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,DarkAngelGUI.Details.SearchEB,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
+			DarkAngelGUI.Details.notific:Hide()
+			
+		DarkAngelGUI.Details.SearchTooltip = DA.FrameCreater(nil,DarkAngelGUI.Details.SearchEB,160,20,{"TOPLEFT",DarkAngelGUI.Details.SearchEB,"BOTTOMLEFT",-220,58})	
+			
+			local function run_search()
+				DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
+				DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
+				DarkAngelGUI.Details.SearchEB:ClearFocus()
+				Mod:StartScan() 
 			end
-		end)
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,127,0},18,50,L['Search'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
+			
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,182,0},18,50,L['Target'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
+				DarkAngelGUI.Details.SearchEB:SetText(select(1,UnitName("target")) or UnitName("player"))
+				DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
+				DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
+				DarkAngelGUI.Details.SearchEB:ClearFocus()
+				Mod:StartScan()
+			end)
+			
+			do --search checkboxes
+				DarkAngelGUI.Details.CB_note=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details,"TOPLEFT",180,-10},15,15,L["note"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_note=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_note','DA_CurrentGuild'})
+				DarkAngelGUI.Details.CB_ofnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.CB_note,"CENTER",0,-10},15,15,L["officer note"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_offnote=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_offnote','DA_CurrentGuild'})
+				DarkAngelGUI.Details.CB_rank=DA.CheckBtnCreater(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.CB_note,"CENTER",0,-20},15,15,L["rank"],function(self) fuckingOptions_g[DA_CurrentGuild].DCB_rank=(self:GetChecked() or false) run_search() end,{'fuckingOptions_g','DCB_rank','DA_CurrentGuild'})
+					
+			end
+			
 
-end
+			DarkAngelGUI.Details:HookScript("OnShow", function()
+				for _, j in ipairs({
+					{"Log_note",    "CB_note"},
+					{"Log_offnote", "CB_ofnote"},
+					{"Log_rank",    "CB_rank"},
+				}) do
+					local key, cbName = j[1], j[2]
+					local state = fuckingOptions_g[DA_CurrentGuild][key]
+					SetFontColor(DarkAngelGUI.Details[cbName], state)
+				end
+			end)
+
+	end
 
 
 end
@@ -2593,7 +2871,11 @@ table.wipe(DA_DetailsRoster)
 		plDat.reason=reasons
 		local addits = {}
 		if reasons_packed then
-			tinsert(addits, "Reasons:\n"..reasons_packed.."\n|r")
+			if fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic then
+				tinsert(addits, L["simplified_dkp_tooltip"].."Reasons:\n"..reasons_packed.."\n|r")
+			else
+				tinsert(addits, "Reasons:\n"..reasons_packed.."\n|r")
+			end
 		end
 		if additType then
 			if additType=='officer' then
@@ -2727,7 +3009,6 @@ function Mod:OnGuildLoad()
 end
 
 
-
 function Mod:AddModOptions(modOptTable)
 	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,232)
 	f:Show()
@@ -2740,7 +3021,7 @@ function Mod:AddModOptions(modOptTable)
 			DA.Print("F "..GetPlayerScanLink(UnitName('player'))..(FEP_gMain[UnitName('player')] and GetPlayerScanLink(FEP_gMain[UnitName('player')]) or GetPlayerScanLink("example")))
 		end)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['Track suspicious changes'],function(self) fuckingOptions_g[DA_CurrentGuild].warnsuspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warnsuspic','DA_CurrentGuild'},'warnsuspic')
-		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-43},12,12,L['DKP improvement'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
+		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-43},12,12,L['DKP simplified'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
 		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-32},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print(L['detmanchange'].. GetPlayerScanLink(UnitName('player'))) 
 		end)
@@ -2823,15 +3104,15 @@ function Mod:AddModOptions(modOptTable)
 			}) do
 				microOpt[j[1]]=fuckingOptions_g[DA_CurrentGuild][j[1]]
 				if cr then
-					logF.buttons[i]=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",35,-10 - i*12},12,35,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"})
+					logF.buttons[i]=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",35,-10 - i*12},12,35,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"})
 					local btn=logF.buttons[i]
 					btn:EnableMouse(false)
 					DA.FontCreater(nil,j[2],{"LEFT",btn,"RIGHT",18,0},btn,15,180,{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},'left')
 					
-					btn.minus=DA.CreateFFGButton2(nil,btn,{"RIGHT",btn,"LEFT",-1,0},12,13,"<",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+					btn.minus=DA.CreateFFGButton2(nil,btn,{"RIGHT",btn,"LEFT",-1,0},12,13,"<",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 						selector_shift(btn, j[1], true)
 					end)
-					btn.plus=DA.CreateFFGButton2(nil,btn,{"LEFT",btn,"RIGHT",1,0},12,13,">",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+					btn.plus=DA.CreateFFGButton2(nil,btn,{"LEFT",btn,"RIGHT",1,0},12,13,">",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 						selector_shift(btn, j[1], false)
 					end)
 				end
@@ -2852,7 +3133,7 @@ function Mod:AddModOptions(modOptTable)
 		end
 		
 		
-		logF.resetBtn=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",40,-95},12,40,"reset",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		logF.resetBtn=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",40,-95},12,40,"reset",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 			selectors_upd()
 			
 			logF.resetBtn:Disable()

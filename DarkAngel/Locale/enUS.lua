@@ -1,3 +1,5 @@
+
+
 local debug = false
 local L = LibStub("AceLocale-3.0"):NewLocale("DarkAngel", "enUS", true, debug)
 L.lang = "enUS"
@@ -83,8 +85,10 @@ end
 
 --Guild
 do
+L["percentageAwardValueIsZero"] = "Player $1 has too few points — percentage-based award rounds to 0"
 L['roster from backup']=true
-L["Hold Ctrl to see more details"]=true
+L["hold_ctrl_for_more"]="|cff507375<Hold Ctrl to see more details>|r"
+L["simplified_dkp_tooltip"]="|cffc96d6d<[DKP simplified]: The list of reasons may contain duplicates and extra entries>|r\n"
 L['delete']=true
 L["locals"]=true
 L["online"]=true
@@ -192,15 +196,53 @@ end
 
 --Gui2
 do
+L['guild raid']=true
+L["DESCr-OnlyInGuildRaid"]=[[Only in guild raid]]
+L["DESCr-OnlyInFullGuildRaid"]=[[Strictly 100% of raid members must be in a guild or locally bound
+Off: minimum 70%]]
+L["DESCr-anyjoin"]=[[Join the first available raid announced in guild chat
+The addon will track raids created through this addon, or announcements starting with "RT+" or "РТ+"]]
+L["DESCr-ongRaidstt"]=[[Want to always be first into the raid? This menu is for you...
+|cff507375This window tracks all active guild raid times created through this addon and displays a convenient clickable roster]]
+L["inv_browser_join"]="found |cffffaaff$1|r raid(s)\n|cff507375<click to join>"
+L['DESCr-invprovidediscord']=[[If someone asks for Discord in raid chat, the addon will automatically send the link you enter in the field below (the example link will not be sent).
+Works only on messages with a clear request.
+|cff507375It often happens that a person is fully capable of typing "+" in guild chat, yet somehow unable to find the Discord link in the guild info.|r]]
+L['DESCr-Inviter_AdditInvitHelp']=[[In this menu, you can add players to the "invite queue" using other addon modules
+|cffff9999Make sure the required options are selected before you start the inviter|r
+
+--The Raid Snapshot option requires a previously saved raid "snapshot" and an active Awarder module. No magic here — if you didn’t save one, it won’t work. Shocking, I know.
+--The selective invite option via Guild Tool lets you pick raid members from the guild window using Shift or Ctrl — just like in Windows. Ever used Windows before?
+    |cff507375Well! Hello there! I don't believe we've been properly introduced.  I'm Bonzi!  What is your name?|r
+--The "all found online" option (Guild Tool) will add all players matching the specified search criteria to the queue, with an additional check to ensure they are actually online. Not offline.
+    |cff507375Want to build a raid of 25 DK tanks by setting class = Death Knight and note "bis tank"? No? Alright then.]]
+L['DESCr-invAutostpdsc']=[[Enabled: auto-invite will stop after N minutes
+(the field on the right, yes, that one).
+
+Disabled: where are you even looking... not there. Wait—no. Ah, never mind.
+Anyway, it’ll keep going... for a while. Probably long enough.]]
+L['DESCr-invRepMsgdsc']=[[Enabled: the addon takes your message (from the box below) and calmly reminds the guild
+about the raid at the interval set by the slider on the right. Yes, repeatedly.
+
+Disabled: one polite message at the start only,
+but only if "start silently" is disabled.
+
+It’s not spam. It’s persistence.]]
+L["I am missing required guild permissions:"]=true
 L["It looks like your guild rank doesn't allow you to read guild chat"]=true
 L["It looks like your guild rank doesn't allow you to use guild chat"]=true
 L["Please select at least one option for accepting players into the raid"]=true
-L['DESCr-SR_lfg_messages']=[[In this menu you can come up with some secret phrases
-that the addon will track in global chat channels.
-As soon as such a phrase is detected, its author will be invited by the autoinviter.
+L['DESCr-Inviter_AcceptFromLFG_messages']=[[Here you can come up with some secret phrases
+that the addon will monitor in global chat channels.
+As soon as such a phrase is detected, its author will be invited by the auto-inviter.
 
-Phrases are recognized wholly, not in a pattern. The design is very human
-You can add several phrases on a new line]]
+The message must be exactly equal to the phrase, not just contain it. The design is very human.
+You can add multiple phrases, each on a new line.
+
+Tip:
+  1. Keep the phrases short
+  2. The phrases should be simple, so no one guesses they’re a secret
+  3. Drink more water]]
 L['start silently']=true
 L['DESCr-silentlstart']=[[Do not send initial message when starting
 Announces on timer will be still sent, if enabled]]
@@ -210,9 +252,9 @@ L['Guild tool: selected']=true
 L['Guild tool: all found online']=true
 
 
-L['DESCr-inv_timer_tt']=[[|cffff9999Invite people to raid by timer|r
-If your server has a limit on the number of invites sent,
-some of them may not go through and will be skipped]]
+L['DESCr-inv_timer_tt']=[[|cffff9999Invite players to the raid using a timer|r
+If you are playing on an older server that penalizes you for sending invites too frequently,
+and/or the 'automatic invitations speed' does not work, this option is for you]]
 L['DESCr-inv_fast_tt']=[[|cffff9999Automatic invitations speed|r
 The addon will also track successful and unsuccessful invitations.
 In case of failure, the sending speed will be reduced and the failed invitations will be repeated]]
@@ -220,30 +262,25 @@ L['DESCr-inv_instant_tt']=[[|cffff9999Instant invites|r
 If your server does not have a limit on sending invites (for example, Warmane), this option is suitable for you
 Raid invitations will be sent without a timer, immediately (without checking for success)]]
 
-
-
 L['auto-stop timer re-set']=true
-L['Raid inviter is already disabled']=true
 L['Raid inviter started']=true
 L['Raid inviter is disabled now']=true
 L['LFG samples are nil, LFG inviter disabled']=true
 L['Ongoing raid']=true
 L['RL/assist']=true
-L['inv_RL']="\nRL: "
-L['inv_inv']="\nInviter: "
+L['inv_RL']="RL: "
 
 L["joining raid..."]=true
-L['Type + in guild chat if you are still not in raid']=true
 L["guild ping"]='ping'
 L['raidinv_stop_msg']='# raid inviter is disabled now, you may go fuck around (respectfully)'
 L['auto-stop']=true
 L['join raid']=true
 L['You are already in raid!']=true
-L['Cant find any raids']=true
-L["auto-anons RT each"]=true
+L['Cant find any raids']="Cant find any raids. Come back tomorrow"
+L["repeating announce"]=true
 L['provide discord if asked']=true
 L['send']=true
-L['auto-join RT']=true
+L['auto-join']=true
 L['auto-accept party']=true
 L['accept from guild chat']=true
 L['accept from pm']=true
@@ -253,14 +290,11 @@ L['empty set']=true
 L['You are not in raid']=true
 L['minutes_short']='min'
 L['Invite auto-stopped']=true
-
-L['DA_Default_LFG_samples']=[==[Secret phrase123
-you can create more each from new line]==]
+L["Player not found"]=true
 end
 
 --opt
 do
-L["Bidder module is disabled. Enable it in main addon options"]=true
 L["Store logs"]=true
 L["Trusted players"]=true
 L["Texture Options"]=true
@@ -270,26 +304,27 @@ L['+transp']=true
 L["texture presets"]=true
 L['guild window alias button']=true
 L['Additional binds']=true
-
 L["EPGP decay precising"]=true
 L['Group-up clear decay in Log']=true
 L['Print leavers in chat']=true
 L["example"]=true
 L['Track suspicious changes']=true
-L['DKP improvement']=true
-
+L['DKP simplified']=true
 L["Details for each player"]=true
 L["Store leavers data"]=true
-
 L['epgp: officer note warning']=true
 L['epgp: multiple masters warning']=true
 L['epgp: custom tvins and loot']=true
 L['epgp: EP Auc']=true
 L['raidroll_epgp: DarkAngel tvins']=true
-
 L['commands on whisper']=true
 L['only in raid']=true
-			
+end
+
+do -- Bid Tracker
+L["Minimal bid"]=true
+L["Bidder module is disabled. Enable it in main addon options"]=true
+L["Any higher"]=true
 L['ep-auc/dkp bid tracker']=true
 L['only mine']=true
 L["Bid tracker"]=true
@@ -311,17 +346,118 @@ L["Fill in the price"]=true
 L["Select winner"]=true
 L["Item or player not found"]=true
 L["Item not found"]=true
-L["Player not found"]=true
 L["Trade window opened with wrong player!!!"]=true
 L["You are too far away from player"]=true
-
-
 L["Bid raise settings"]=true
 L["Up to"]=true
 L["Step"]=true
+L['Allow lower bids']=true
+L["Auction Timer"]=true
+L['Bids in thousands']=true
 L["Step in thousands"]=true
 L["'Bid confirmed' message"]=true
 L["Allow 'all in'"]=true
+L["winner"]=true
+L["pause"]=true
+L["infinite"]=true
+L["DESCr-BT_winner"]=[[|cffff9999Announce the winner|r]]
+L["DESCr-BT_countdown"]=[[|cffff99995-second countdown|r
+Each second will be announced in a separate message
+|cffff9999Motivation for slow players|r]]
+L["DESCr-BT_timerpause"]=[[|cffff9999Pause countdown|r
+Pause until another bid is placed]]
+L["DESCr-BT_timerinf"]=[[|cffff9999Disable timer|r
+The countdown will resume if you press any of the buttons on the left or start another auction]]
+L["DESCr-BT_about"]=[[|cffff9999About Bid tracker|r
+This module allows you to start boss loot "auctions" the same way many guilds do with QDKP or EPGP-auction systems.
+|cff507375Addon supports both systems|r
+
+|cffff9999How to use|r
+  Drag an item from your bags into the appropriate slot in the module window to |cffd8d8a0start an auction|r.
+  If you do not have the item, you can simply make a raid warning (/rw) with the item link.
+After the announcement, the addon will track player bids in |cffd8d8a0raid chat|r as numbers and automatically run the auction.
+
+When finished, you can give the item to the winner from your bags or from the opened loot window, and also deduct the required amount from the player's balance.
+
+In the settings, you can change auction duration, bid acceptance and increment rules, as well as RaidRoll interaction.
+
+|cff507375If you have RaidRoll with the Loot Tracker module installed, auctions can be launched very conveniently from it.
+For a more detailed explanation, read the description of the "RaidRoll Interaction" option in settings (RaidRoll must be enabled).|r]]
+L["RaidRoll Interaction"]=true
+L['DESCr-auc_RR_collab']=[[|cffff9999RaidRoll interaction|r
+If an item announcement in /rw does not contain the word 'roll', Bid Tracker will suppress RaidRoll from opening.
+
+You can configure Main Spec / Off Spec roll messages in RaidRoll so that
+one announces an auction, while the other contains the word "roll" and starts a normal roll.
+
+|cff507375Example setup:
+Esc > Interface > Raid Roll > Loot Window :
+First template: Auction [Item]
+Second template: Roll [Item]|r]]
+L['DESCr-auc_bidconfirmed']=[[|cffff9999Send raid message confirming new bids accepted|r
+Will also print current bid for 'all in's if it is enabled]]
+L['DESCr-auc_allin']=[[|cffff9999Allow 'all in' bids|r
+Bid equan to the player's total score (message=number) would be also calculated as 'all in'
+
+'All in' bids are not subject to bid growth interwals]]
+L['DESCr-auc_classspecinf']=[[|cffff9999Checking by class\spec|r
+Color indication:
+|cff888888member cannot wear item|r
+can wear, but item does not match their spec
+|cff1ced93can wear, item by spec|r
+
+|cffff9999May work badly for some trinkets|r
+The check function is very simple, so it is still recommended to use the head when distributing loot :)
+
+The loots are recognized depending on stats and item type by following rules (simplified):
+[Spell Power]
+   SP+Spirit = healers, mainly priests and restoration druids
+   SP+MP5 = wider range of healers
+   SP+Hit = spellcasters, sorcerers, youkai and other ranged spellweavers
+   SP = all casters and healers, as well as beer amateurs
+[AttackPower]
+   leather/mail melee bastards: hunters, rogues, enh shamans, kitties, sometimes paladins
+[Strenght]
+   plate melee damage: warriors, paladins, death knights
+[Defense/Parry/Dodge]
+   tin cans
+
+Also, it should be noted that some items are prioritized by a strict spec,
+for example, staves with SP+Spirit are defined as a priority for holy priests, what else did you expect from me :)]]
+L['DESCr-LootTrackerOptHelp']=[[|cffff9999Setting up the rate growth|r
+In this menu you can define the conditions under which proceeding bets will be accepted and set the growth conditions at each interval.
+
+Please note that the "Step" value implies the required multiplier of the bet, and not the increase from the previous bet
+
+For example, by setting the intervals
+|cff22999920 — 1
+100 — 5
+300 — 20
+and higher — 25|r
+players will be forced to make bets of this format:
+|cff2299991, 2, 3 ... 19, 20,
+25, 30, 35, ... 95, 100
+100, 120, 140 ... 280, 300
+325, 350, 375, 400 ...|r
+
+The addon will also not allow bets that violate the multiplicity within the interval, the increase must be to the smallest or closest multiple within the interval:
+|cff22999919|r>|cffff999921|r/|cffff999924|r/|cffff999937|r/|cffff999999|r ...
+|cff22999919|r>|cff00ffff20|r/|cff00ffff25|r/|cff00ffff45|r/|cff00ffff70|r ...]]
+L['DESCr-auc_allow_lower']=[[|cffff9999Non-Competitive Bids|r
+Allow players to place bids lower than the current winning bid
+|cff507375In time, you will come to understand the value of this option]]
+L['DESCr-auc_thousands']=[[|cffff9999Thousands Betting Mode|r
+Small bids placed by players will be multiplied by 1000:
+    1=1000;     45=45000
+All settings on this screen will also be multiplied.
+
+Bids above 1000 will be processed normally:
+    2000=2000;  3121=3121]]
+L['DESCr-auc_bidBtnsTutorial']=[[If you are already familiar with the functions of the "winner" "5" "pause" and "infinite" buttons
+in the main window, and the explanatory tooltips are getting in your way, you can disable this option.]]
+L["guide"]=true
+L["bid_accepted"] = "'s bid accepted"
+L["all_in_bid_accepted"] = "'s ALL IN accepted"
 end
 
 --EP Awarder
@@ -366,7 +502,6 @@ L["N/A spec"]=true
 L['DESCr-Raid difficulty']="Raid difficulty"
 L["Lock raid"]="Lock"
 L["Unlock raid"]="Unlock"
-L["Get standby %"]=true
 L['From EPGP settings']=true
 L['Use custom']=true
 L["No new locals found"]=true
@@ -490,7 +625,7 @@ L['character already in raid']=true
 L['is already in raid']=true
 L['is already on standby']=true
 L['added on standby']=true
-L['added to Death Note']=true
+L['added to the Death Note']=true
 L["seems you got incorrect officer note in guild (double tvin). Contact officer to fix it"]=true
 L['seems your main got frozen epgp. Contact officer to fix it']=true
 L['seems you got frozen epgp. Contact officer to fix it']=true
@@ -522,6 +657,8 @@ L["suspic/twin"]=true
 L['un-freeze']=true
 L['invalid note']=true
 
+L["You have zero Skada logs available; skada checks are skipped"]=true
+
 L['AW_frozen']="|cff2299ffPlayer is frozen|r \nShift+RightClick to un-freeze.\n"
 L['AW_frozen_main']="|cff2299ffPlayer's main is frozen|r \nShift+RightClick to un-freeze.\n"
 L['AW_empty_note']="Empty officer note \nIs it someone's alt or new player?\n\nNote: \""
@@ -545,8 +682,8 @@ L['AW_local_ex12']="corrupted note, idk what it is #2 "
 
 L['Standby']=true
 L['group']=true
-L['clear all marks']=true
-L['reset all']=true
+-- L['clear all marks']=true
+-- L['reset all']=true
 end
 
 --GC
@@ -603,11 +740,30 @@ end
 
 --Descriptions
 do
+L["DESCr-procepzam_usemanual"]=[[|cffaaccffDetermines the standby percentage|r
+  |cffff9999Disabled|r:
+    The standby receives a percentage of the raid reward based on the EPGP addon settings in "O > Guild > Info" :
+      -EPGP-
+      @BASE_GP:1
+      @DECAY_P:30
+      @MIN_EP:0
+      |cffaaccff@EXTRAS_P:70|r << defines the percentage
+      -EPGP-
+
+  |cffaaccffEnabled|r:
+    The percentage is set manually.]]
 L['DESCr-bt_open']=[==[You got tricked :)
 Hit Ctrl+Alt+O baka
 Btw, I recommend to get used to binds :)]==]
+L['DESCr-whatthepricol']=[[Replaces boring standby confirmation messages with Death Note–style dramatic lines:
+
+[G] [Yourname]: Player1 added on standby
+becomes
+[G] [Yourname]: Player1 added to the Death Note (Didn't call the she-healer 'doctress').
+
+The quoted joke at the end is randomly selected from the list on the right.]]
 L['DESCr-lootBtnSelect']=[==[Set looting method]==]
-L['DESCr-speedSelect']=[==[Raid invitations sending speed]==]
+L['DESCr-speedSelect']=[==[Interval between raid invites]==]
 L['DESCr-awgrpmover']=[==[|cffff9999   Drag|r
 Move group members to another group
 
@@ -631,71 +787,11 @@ Need help? Just add water and enjoy the process!]]
 L['DESCr-Backup_seedata']=[[|cffff9999See player's stored data|r
 notes, officer notes, ranks, local twins, whichever is present in the backup]]
 L['DESCr-Backup_seeGMranks']=[[|cffff9999See stored guild ranks system|r]]
-L['DESCr-auc_bidconfirmed']=[[|cffff9999Send raid message confirming new bids accepted|r
-Will also print current bid for 'all in's if it is enabled]]
-L['DESCr-auc_allin']=[[|cffff9999Allow 'all in' bids|r
-Bid equan to the player's total score (message=number) would be also calculated as 'all in'
-
-'All in' bids are not subject to bid growth interwals]]
-L['DESCr-auc_classspecinf']=[[|cffff9999Checking by class\spec|r
-Color indication:
-|cff888888member cannot wear item|r
-can wear, but item does not match their spec
-|cff1ced93can wear, item by spec|r
-
-|cffff9999May work badly for some trinkets|r
-The check function is very simple, so it is still recommended to use the head when distributing loot :)
-
-The loots are recognized depending on stats and item type by following rules (simplified):
-[Spell Power]
-   SP+Spirit = healers, mainly priests and restoration druids
-   SP+MP5 = wider range of healers
-   SP+Hit = spellcasters, sorcerers, youkai and other ranged spellweavers
-   SP = all casters and healers, as well as beer amateurs
-[AttackPower]
-   leather/mail melee bastards: hunters, rogues, enh shamans, kitties, sometimes paladins
-[Strenght]
-   plate melee damage: warriors, paladins, death knights
-[Defense/Parry/Dodge]
-   tin cans
-
-Also, it should be noted that some items are prioritized by a strict spec,
-for example, staves with SP+Spirit are defined as a priority for holy priests, what else did you expect from me :)]]
 L['DESCr-do_decay_checks']=[[|cffff9999Enable EPGP Decay checks|r
 Useful for EPGP guilds that do Decay]]
 L['DESCr-auto_cbs']=[[|cffff9999Automatic checkbox setup|r
 |cff943838You'll learn of that first hand. When my work is complete, you will beg for mercy -- and I will deny you.
 Your anguished cries will be testament to my |cffbd0000unbridled |cff943838power...|r]]
-L['DESCr-auc_RR_hide']=[[|cffff9999Hide RaidRoll addon|r
-When the addon starts a new betting session, it will prevent the RaidRoll addon window from opening
-However, RaidRoll will still be running, tracking rolls. In this case, the RaidRoll window will pop up normally]]
-L['DESCr-LootTrackerOptHelp']=[[|cffff9999Setting up the rate growth|r
-In this menu you can define the conditions under which proceeding bets will be accepted and set the growth conditions at each interval.
-
-Please note that the "Step" value implies the required multiplier of the bet, and not the increase from the previous bet
-
-For example, by setting the intervals
-|cff22999920 — 1
-100 — 5
-300 — 20
-and higher — 25|r
-players will be forced to make bets of this format:
-|cff2299991, 2, 3 ... 19, 20,
-25, 30, 35, ... 95, 100
-100, 120, 140 ... 280, 300
-325, 350, 375, 400 ...|r
-
-The addon will also not allow bets that violate the multiplicity within the interval, the increase must be to the smallest or closest multiple within the interval:
-|cff22999919|r>|cffff999921|r/|cffff999924|r/|cffff999937|r/|cffff999999|r ...
-|cff22999919|r>|cff00ffff20|r/|cff00ffff25|r/|cff00ffff45|r/|cff00ffff70|r ...]]
-L['DESCr-auc_allow_lower']=[[|cffff9999Allow players to place not competitive bids|r
-Such bids would be shown lower than the winning ones
-Off: such new bids would not be processed, however, old low bids would stay]]
-L['DESCr-auc_thousands']=[[|cffff9999Thousands betting mode|r
-Bets made by players will be multiplied by 1000
-All settings in this screen will also be multiplied.
-
-|cffff9999exception: bets above 1000|r]]
 L['DESCr-desc_evaluate']="Show alternative officer notes"
 L['DESCr-desc_onlinefirst']="sort online and offline players separately; put online players at the top of the list"
 L['DESCr-desc_reverse']="reverse sort"
@@ -719,6 +815,7 @@ L['DESCr-gc_moveplayers']=[[Move players in the guild between ranks, as set in t
 Will be skipped if there is nothing to move
 
 |cffff9999Warn guild players before starting, there will be a LOT of spam :)]]
+L['DESCr-clallmarks-confirm_rightclick']="Clear all marks\n|cffff9999requires right click"
 L['DESCr-confirm_rightclick']="|cffff9999requires right click"
 L['DESCr-awlocalstt_ask']=[[An addon will try to check if there are any available locals in guild 
 (there should be someone else who has this addon)]]
