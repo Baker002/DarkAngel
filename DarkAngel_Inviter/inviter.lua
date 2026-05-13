@@ -51,7 +51,7 @@ local Raids_Create_ScrollBar
 local Inviter_UpdateRaidBrowser
 
 
-DA_Inviter=DA.FrameCreater("DA_Inviter",UIParent,272,200,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_inviter]],1,1)
+DA_Inviter=DA.FrameCreater("DA_Inviter",UIParent,272,163,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_inviter]],nil,1)
 DA_Inviter:RegisterForDrag("LeftButton")
 DA_Inviter:SetScript("OnDragStart", DA_Inviter.StartMoving)
 DA_Inviter:SetScript("OnDragStop", function(self)
@@ -74,7 +74,7 @@ DA.CloseButtonCreater(nil,DA_Inviter,{"TOPRIGHT", DA_Inviter, "TOPRIGHT", -5,-5}
 
 
 
-DA_Inviter.OptionsFr=DA.FrameCreater(nil,DA_Inviter,250,152,{"TOPLEFT", DA_Inviter, "TOPRIGHT", 3, 0})
+DA_Inviter.OptionsFr=DA.FrameCreater(nil,DA_Inviter,250,163,{"TOPLEFT", DA_Inviter, "TOPRIGHT", 3, 0})
 	DA_Inviter.OptionsFr:RegisterForDrag("LeftButton")
 	DA_Inviter.OptionsFr:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 	DA_Inviter.OptionsFr:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
@@ -96,6 +96,14 @@ DA_Inviter.addInvFr=DA.FrameCreater(nil,DA_Inviter,272,80,{"TOPLEFT", DA_Inviter
 DA.CloseButtonCreater(nil,DA_Inviter.addInvFr,{"TOPRIGHT", DA_Inviter.addInvFr, "TOPRIGHT", -2,-1},10,10,'x')
 
 DA_Inviter.ongoingRaidsFrame=DA.FrameCreater(nil,DA_Inviter,200,230,{"TOPRIGHT", DA_Inviter, "TOPLEFT", -3, 0})
+DA_Inviter.ongoingRaidsBtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPRIGHT", DA_Inviter, "TOPRIGHT", -35,-5},  12,  12,  "r",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],  {UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
+	if DA_Inviter.ongoingRaidsFrame:IsShown() then
+		DA_Inviter.ongoingRaidsFrame:Hide()
+	else
+		Inviter_UpdateRaidBrowser()
+		DA_Inviter.ongoingRaidsFrame:Show()
+	end
+end)
 	DA_Inviter.ongoingRaidsFrame:RegisterForDrag("LeftButton")
 	DA_Inviter.ongoingRaidsFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 	DA_Inviter.ongoingRaidsFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
@@ -341,10 +349,40 @@ function Mod:OnEnable()
 
 	DA:ModuleLoaded("Inviter")
 end
+local autoStopTime={}
+local writeNewTiming
+local function IsAutoStopTimeReached()
 
+	local endTime, stopH, stopM = autoStopTime.endTime, autoStopTime.stopH, autoStopTime.stopM
+	if endTime then
+		return time()-endTime >= 0
+	elseif stopH and stopM then
+		local h,m = tonumber(date("%H")),tonumber(date("%M"))
+		if stopH>h then
+			return false
+		elseif stopH<h or (stopH==h and stopM<=m) then
+			return true
+		end
+	
+	end
+	return false
+end
+
+
+local function getInviterAutostopTmstText()
+	local msg = fuckingOptions_g[DA_CurrentGuild].inviter_autostop_msg
+	local stopTime = fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop
+	if msg:find("$1") then 
+		if stopTime:find(":") then
+			return (msg:gsub("$1", "("..stopTime..")"))
+		end
+		return (msg:gsub("$1", "("..stopTime.." "..L['minutes_short']..")"))
+	end
+	return msg
+end
 function Mod:OnGuildLoad()
 	--inviter processor
-	DA.CreateTimer(nil,"proc_invite_timer",0,fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer,true,function(self)
+	DA.CreateTimer(nil,"proc_invite_timer",0,fuckingOptions.Inviter_manualTimerSpeed,true,function(self)
 		if listinvite_bulk[1] then
 			InviteUnit(listinvite_bulk[1])
 			table.remove(listinvite_bulk,1)
@@ -357,21 +395,20 @@ function Mod:OnGuildLoad()
 	--inviter timer
 	DA.CreateTimer(nil,"inviter",0,0.1,true,function(self)
 		self.mytime=self.mytime or time()
-		self.mytime2=self.mytime2 or time()
 		if listinvite_bulk[1] and UnitInRaid(listinvite_bulk[1]) then
 			repeat
 				if listinvite_bulk[1] and UnitInRaid(listinvite_bulk[1]) then table.remove(listinvite_bulk,1) end
 			until ((not listinvite_bulk[1]) or (not UnitInRaid(listinvite_bulk[1])))
 		end
 		if listinvite_bulk[1] then
-			if fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed=='timer' then
+			if fuckingOptions.Inviter_TimerMode=='timer' then
 				DA.ResumeTimer("proc_invite_timer")
-			elseif fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed=='fast' then
+			elseif fuckingOptions.Inviter_TimerMode=='fast' then
 				Inviter_responseFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 				Inviter_responseFrame:RegisterEvent("UI_ERROR_MESSAGE")
 
 				DA.ResumeTimer("proc_invite_fast")
-			elseif fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed=='instant' then
+			elseif fuckingOptions.Inviter_TimerMode=='instant' then
 				for _,name in ipairs(listinvite_bulk) do
 					if name and not UnitInRaid(name) then
 						InviteUnit(name)
@@ -384,16 +421,20 @@ function Mod:OnGuildLoad()
 		end
 
 		--autostop
-		if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop and time()-self.mytime2>=fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop*60 then
+		if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop and IsAutoStopTimeReached() then
 			self:SetScript("OnUpdate",nil)
+			listinvite_bulk=nil
+			listinvite_bulk={}
 			self.mytime=nil
-			self.mytime2=nil
 			convertedToRaid=false
 			DA_Inviter.stopbtn:Disable()
-			DA_Inviter.startbtn:SetText(L['start'])
+			DA_Inviter.startbtn:Enable()
 			Inviter_Started=false
-			DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Invite auto-stopped'],1,0.5,0.5)
-			SendChatMessage("# "..fuckingOptions_g[DA_CurrentGuild].inviter_autostop_message.." ("..fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop.." "..L['minutes_short']..")","guild")
+			DA.Print("  -->>"..getInviterAutostopTmstText())
+			if fuckingOptions_g[DA_CurrentGuild].inviter_autostop_msg:gsub("%s+","")~="" then
+				SendChatMessage(getInviterAutostopTmstText(),"guild")
+			end
+			
 			if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoJoinRT then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_CHANNEL");end
 			if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoAcceptOnJoinRT then else InviterMsgFrame:UnregisterEvent("PARTY_INVITE_REQUEST");end
 			if fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_WHISPER");end
@@ -470,7 +511,7 @@ function Mod:Inviter_Load()
 	do -- announce RT
 		local anonsRTEB
 		local anonsRTChbx = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -20},20,20,L['repeating announce'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_RepeatAnons=(self:GetChecked() or false);ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_RepeatAnons, anonsRTEB) end,{'fuckingOptions_g','Inviter_RepeatAnons','DA_CurrentGuild'},'invRepMsgdsc')
-		DA.FontCreater(nil,"Raid Time Inviter",{"LEFT",anonsRTChbx,"TOPLEFT",5,4},anonsRTChbx,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		DA.FontCreater(nil,"Raid Time Inviter",{"BOTTOMLEFT",anonsRTChbx,"TOPLEFT",-15,1},anonsRTChbx,14,180,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},'left')
 		DA_Inviter.silentstart=DA.CheckBtnCreater(nil,anonsRTChbx,{"CENTER",anonsRTChbx,"CENTER",13,-11},15,15,L['start silently'],nil,nil,'silentlstart')
 
 		local AnonsEBFLVL
@@ -546,78 +587,66 @@ function Mod:Inviter_Load()
 
 	end
 
-	do -- Accept From
-		DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -60},20,20,L['accept from guild chat'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromGuild','DA_CurrentGuild'},nil)
-		--приём через лс
-		DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -75},20,20,L['accept from pm'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromPM','DA_CurrentGuild'},nil)
-		--приём из лфг
-		local LFGEB
-		local LFGChbx = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -90},20,20,L['accept from global'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG=(self:GetChecked() or false);ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB) end,{'fuckingOptions_g','Inviter_AcceptFromLFG','DA_CurrentGuild'},nil)
-		if not fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases or #fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases==0 then fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases=DA.CheckAndRestoreLocalizedTable("inviter_LFG_samples", true) end
-
-		local LFGEBFrameLevel
-		local function lfgescfunc(self)
-			if self.focusgained then self.t:SetBlendMode("ADD");self:ClearFocus();self.focusgained=nil;
-			fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases = DA.PackEditBoxTextInTable(self:GetText());
-			self:SetText(DA.PackTableForEditBox(fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases))
-			self:SetMultiLine(false);self:SetSize(190,9.08);self:SetFrameLevel(LFGEBFrameLevel);self:SetCursorPosition(0) end
-		end
-		local function lfgonfocusfunc(self)
-			if self:GetParent():IsShown() then
-				LFGEBFrameLevel = self:GetFrameLevel()
-
-				self.t:SetBlendMode('blend');
-				self.focusgained=1
-				local text=self:GetText();
-				self:SetText("");self:SetMultiLine(true);self:SetText(text);
-				self:SetFrameLevel(LFGEBFrameLevel+20)
-			end
-		end
-		LFGEB = DA.EditBoxCreater(nil,LFGChbx,{"TOPLEFT", LFGChbx, "BOTTOMLEFT", 18, 1},{190,9.08},DA.PackTableForEditBox(fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases),false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},lfgescfunc,function(self) self:Insert("\n") end,lfgescfunc,lfgonfocusfunc)
-		LFGEB:SetCursorPosition(0)
-		LFGEB:HookScript("OnEnter",function(self)
-			if self:GetParent():IsShown() and not self.focusgained then
-				LFGEBFrameLevel = self:GetFrameLevel()
-				local text=self:GetText();
-				self:SetText("");self:SetMultiLine(true);self:SetText(text);
-				self:SetFrameLevel(LFGEBFrameLevel+20)
-			end
-		end)
-		LFGEB:HookScript("OnLeave",function(self)
-			if not self.focusgained then
-				DA.TimerAfter(0, function()
-					self:SetMultiLine(false);
-					self:SetSize(190,9.08);
-					self:SetFrameLevel(LFGEBFrameLevel)
-					self:SetCursorPosition(0)
-				end)
-			end
-		end)
-		LFGEBFrameLevel = LFGEB:GetFrameLevel()
-		DA.HelpCreater(LFGEB,{"RIGHT", LFGEB, "LEFT", -2, 0},'Inviter_AcceptFromLFG_messages',10,10)
-
-		ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB)
-		table.insert(DA.RunOnGuildUpdate, function() ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB) end)
-	end
+	-- Accept From
+	DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -60},20,20,L['accept from guild chat'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromGuild','DA_CurrentGuild'},nil)
+	--приём через лс
+	DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -75},20,20,L['accept from pm'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromPM','DA_CurrentGuild'},nil)
+	
 
 	do -- auto-stop
-		local autostopEb
-		local autostopChb = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -125},20,20,L['auto-stop'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop=(self:GetChecked() or false);ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop, autostopEb) end,{'fuckingOptions_g','Inviter_AutoStop','DA_CurrentGuild'},'invAutostpdsc')
-		autostopEb = DA.EditBoxCreater2(nil,DA_Inviter,{"LEFT", autostopChb, "RIGHT", 60, 0},{20,30},fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","Inviter_TimeAutoStop",'DA_CurrentGuild'},nil,nil,'text')
+		do -- prevent errors in saved var
+			if type(fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop)=='number' then
+				fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop = tostring(fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop)
+			end
+			local setting = fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop
+			
+			local stopH,stopM = setting:match("^(%d?%d):(%d?%d)$")
+			local simpleNumber = setting:match("^(%d+)$")
+			if stopH and stopM or simpleNumber then
+			else
+				fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop = "5"
+			end
+		end
+		DA_Inviter.autostopChb = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 25, -94},20,20,L['auto-stop'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop=(self:GetChecked() or false);writeNewTiming() end,{'fuckingOptions_g','Inviter_AutoStop','DA_CurrentGuild'},'invAutostpdsc')
+		DA_Inviter.autostopEb = DA.EditBoxCreater2(nil,DA_Inviter,{"LEFT", DA_Inviter.autostopChb, "RIGHT", 60, 0},{40,30},fuckingOptions_g[DA_CurrentGuild].Inviter_TimeAutoStop,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","Inviter_TimeAutoStop",'DA_CurrentGuild'},nil,nil,'text')
+		writeNewTiming = function()
+			local Eb = DA_Inviter.autostopEb
+			local Cb = DA_Inviter.autostopChb
+			local text = Eb:GetText():gsub("%s+","")
+			if text=="" or text:find("[^%d%s:]") then
+				table.wipe(autoStopTime)
+				fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop = false
+				Cb:SetChecked(false)
+				Eb:SetBadColor()
+				return
+			end
+			local stopH,stopM = text:match("^(%d?%d):(%d?%d)$")
+			if ((tonumber(stopH) or 99) <25) and ((tonumber(stopH) or 99) >=0) and ((tonumber(stopM) or 25) <60) and ((tonumber(stopM) or 25) >=0) then
+				autoStopTime.stopH, autoStopTime.stopM = tonumber(stopH), tonumber(stopM)
+				Eb:SetGoodColor()
+				return
+			end
+			local simpleNumber = text:match("^(%d+)$")
+			if simpleNumber then
+				autoStopTime.endTime = time() + (tonumber(simpleNumber)*60)
+				Eb:SetGoodColor()
+				return
+			end
 
-		ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop, autostopEb)
-		table.insert(DA.RunOnGuildUpdate, function() ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop, autostopEb) end)
+			table.wipe(autoStopTime)
+			fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop = false
+			Cb:SetChecked(false)
+			Eb:SetBadColor()
+		end
+		
+		DA_Inviter.autostopEb:HookScript("OnEscapePressed", writeNewTiming)
+		DA_Inviter.autostopEb:HookScript("OnEnterPressed", writeNewTiming)
+		DA_Inviter.autostopEb:HookScript("OnEditFocusLost", writeNewTiming)
+		
 	end
 
 	do -- auto-join
-		DA_Inviter.ongoingRaidsBtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 2, -2},  8,  30,  "raids",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],  {UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"},function()
-			if DA_Inviter.ongoingRaidsFrame:IsShown() then
-				DA_Inviter.ongoingRaidsFrame:Hide()
-			else
-				Inviter_UpdateRaidBrowser()
-				DA_Inviter.ongoingRaidsFrame:Show()
-			end
-		end)
+		
 		DA.HelpCreater(DA_Inviter.ongoingRaidsFrame,{"TOPLEFT", DA_Inviter.ongoingRaidsFrame, "TOPLEFT", 2, -2},'ongRaidstt',10,10)
 
 		if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoJoinRT then InviterMsgFrame:RegisterEvent("CHAT_MSG_ADDON") else InviterMsgFrame:UnregisterEvent("CHAT_MSG_ADDON") end
@@ -634,23 +663,23 @@ function Mod:Inviter_Load()
 		if not fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern then
 			fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern="+"
 		end
-		local eb_inviter_pattern = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-20},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_inv_pattern",'DA_CurrentGuild'},1,255,'text')
-		DA.FontCreater(nil,"Invite pattern",{"BOTTOMLEFT",eb_inviter_pattern,"TOPLEFT",5,-2},eb_inviter_pattern,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		local eb_inviter_pattern = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-20},{60,12},fuckingOptions_g[DA_CurrentGuild].inviter_inv_pattern,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_inv_pattern",'DA_CurrentGuild'},1,255,'text')
+		DA.FontCreater(nil,L["Invite trigger"],{"BOTTOMLEFT",eb_inviter_pattern,"TOPLEFT",0,-2},eb_inviter_pattern,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		eb_inviter_pattern:SetCursorPosition(0)
 
 		if not fuckingOptions_g[DA_CurrentGuild].inviter_stop_message then
 			fuckingOptions_g[DA_CurrentGuild].inviter_stop_message=L['raidinv_stop_msg']
 		end
 		local eb_inviter_stop_message = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-50},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_stop_message,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_stop_message",'DA_CurrentGuild'},1,255,'text')
-		DA.FontCreater(nil,"Stop message",{"BOTTOMLEFT",eb_inviter_stop_message,"TOPLEFT",5,-2},eb_inviter_stop_message,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		DA.FontCreater(nil,L["Stop message"],{"BOTTOMLEFT",eb_inviter_stop_message,"TOPLEFT",0,-2},eb_inviter_stop_message,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		eb_inviter_stop_message:SetCursorPosition(0)
 
-		if not fuckingOptions_g[DA_CurrentGuild].inviter_autostop_message then
-			fuckingOptions_g[DA_CurrentGuild].inviter_autostop_message=L['Invite auto-stopped']
+		if not fuckingOptions_g[DA_CurrentGuild].inviter_autostop_msg then
+			fuckingOptions_g[DA_CurrentGuild].inviter_autostop_msg=L['Invite auto-stopped']
 		end
-		local eb_inviter_autostop_message = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-80},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_autostop_message,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_autostop_message",'DA_CurrentGuild'},1,255,'text')
-		DA.FontCreater(nil,"Auto-stop message",{"BOTTOMLEFT",eb_inviter_autostop_message,"TOPLEFT",5,-2},eb_inviter_autostop_message,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-		eb_inviter_autostop_message:SetCursorPosition(0)
+		local eb_autostop_msg = DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",5,-80},{220,12},fuckingOptions_g[DA_CurrentGuild].inviter_autostop_msg,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","inviter_autostop_msg",'DA_CurrentGuild'},1,255,'text')
+		DA.FontCreater(nil,L["Auto-stop message"],{"BOTTOMLEFT",eb_autostop_msg,"TOPLEFT",0,-2},eb_autostop_msg,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		eb_autostop_msg:SetCursorPosition(0)
 
 		do -- Discord
 			local discordEB
@@ -713,49 +742,96 @@ function Mod:Inviter_Load()
 
 		end
 
-		do --invitations speedSelect
-			local speedSelectTbl={
-				{"Fastest",'fast',"inv_fast_tt"},
-				{"Instant",'instant',"inv_instant_tt"},
-				{"By Timer",'timer',"inv_timer_tt"},
-			}
-			local rerender_speedSelectFrame
-			DA_Inviter.OptionsFr.speedSelectBtn,DA_Inviter.OptionsFr.speedSelectFrame=DA.CreateFFGDropFrame(DA_Inviter.OptionsFr,"",12,50,{"CENTER",DA_Inviter.OptionsFr,"TOPLEFT",30,-141},52,34,"BOTTOM",nil,nil,nil,'speedSelect')
-			DA_Inviter.OptionsFr.speedSelectFrame:SetFrameLevel(200)
-			for id,ss in ipairs(speedSelectTbl) do
-				DA_Inviter.OptionsFr.speedSelectFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.OptionsFr.speedSelectFrame,{"TOPLEFT",DA_Inviter.OptionsFr.speedSelectFrame, "TOPLEFT",1, 10-11*id},10,50,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-					fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed=ss[2]
-					rerender_speedSelectFrame()
-					DA_Inviter.OptionsFr.speedSelectFrame:Hide()
-				end,ss[3],nil,'center')
-				DA_Inviter.OptionsFr.speedSelectFrame[id]:SetFrameLevel(201)
+		do --приём из лфг
+			local LFGEB
+			local LFGChbx = DA.CheckBtnCreater(nil,DA_Inviter.OptionsFr,{"TOPLEFT", DA_Inviter.OptionsFr, "TOPLEFT", 3, -120},20,20,L['accept from global'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG=(self:GetChecked() or false);ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB) end,{'fuckingOptions_g','Inviter_AcceptFromLFG','DA_CurrentGuild'},nil)
+			if not fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases or #fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases==0 then fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases=DA.CheckAndRestoreLocalizedTable("inviter_LFG_samples", true) end
 
+			local LFGEBFrameLevel
+			local function lfgescfunc(self)
+				if self.focusgained then self.t:SetBlendMode("ADD");self:ClearFocus();self.focusgained=nil;
+				fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases = DA.PackEditBoxTextInTable(self:GetText());
+				self:SetText(DA.PackTableForEditBox(fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases))
+				self:SetMultiLine(false);self:SetSize(190,9.08);self:SetFrameLevel(LFGEBFrameLevel);self:SetCursorPosition(0) end
 			end
-			DA.FontCreater(nil,"Invitations",{"BOTTOMLEFT",DA_Inviter.OptionsFr.speedSelectBtn,"TOPLEFT",0,-2},DA_Inviter.OptionsFr,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+			local function lfgonfocusfunc(self)
+				if self:GetParent():IsShown() then
+					LFGEBFrameLevel = self:GetFrameLevel()
 
-			DA_Inviter.OptionsFr.speedSelectTimerEB=DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT", DA_Inviter.OptionsFr.speedSelectBtn, "RIGHT",2,0},{20,12},fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer,false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},{"fuckingOptions_g","InvTimerSpeedTimer",'DA_CurrentGuild'},0.1,10,'textnum')
-			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEscapePressed", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer) end)
-			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEnterPressed", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer) end)
-			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEditFocusLost", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions_g[DA_CurrentGuild].InvTimerSpeedTimer) end)
-
-			rerender_speedSelectFrame=function()
-				for i,j in ipairs(speedSelectTbl) do
-					if fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed==j[2] then
-						DA_Inviter.OptionsFr.speedSelectFrame[i].fs:SetTextColor(0.2,1,1,1)
-						DA_Inviter.OptionsFr.speedSelectBtn:SetText(j[1])
-					else
-						DA_Inviter.OptionsFr.speedSelectFrame[i].fs:SetTextColor(0.85,1,1,1)
-					end
-				end
-				if fuckingOptions_g[DA_CurrentGuild].InvTimerSpeed == speedSelectTbl[3][2] then
-					DA_Inviter.OptionsFr.speedSelectTimerEB:Show()
-				else
-					DA_Inviter.OptionsFr.speedSelectTimerEB:Hide()
+					self.t:SetBlendMode('blend');
+					self.focusgained=1
+					local text=self:GetText();
+					self:SetText("");self:SetMultiLine(true);self:SetText(text);
+					self:SetFrameLevel(LFGEBFrameLevel+20)
 				end
 			end
-			rerender_speedSelectFrame()
-			table.insert(DA.RunOnGuildUpdate, rerender_speedSelectFrame)
+			LFGEB = DA.EditBoxCreater(nil,LFGChbx,{"TOPLEFT", LFGChbx, "BOTTOMLEFT", 18, 1},{190,9.08},DA.PackTableForEditBox(fuckingOptions_g[DA_CurrentGuild].Inviter_LFGPhrases),false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},lfgescfunc,function(self) self:Insert("\n") end,lfgescfunc,lfgonfocusfunc)
+			LFGEB:SetCursorPosition(0)
+			LFGEB:HookScript("OnEnter",function(self)
+				if self:GetParent():IsShown() and not self.focusgained then
+					LFGEBFrameLevel = self:GetFrameLevel()
+					local text=self:GetText();
+					self:SetText("");self:SetMultiLine(true);self:SetText(text);
+					self:SetFrameLevel(LFGEBFrameLevel+20)
+				end
+			end)
+			LFGEB:HookScript("OnLeave",function(self)
+				if not self.focusgained then
+					DA.TimerAfter(0, function()
+						self:SetMultiLine(false);
+						self:SetSize(190,9.08);
+						self:SetFrameLevel(LFGEBFrameLevel)
+						self:SetCursorPosition(0)
+					end)
+				end
+			end)
+			LFGEBFrameLevel = LFGEB:GetFrameLevel()
+			DA.HelpCreater(LFGEB,{"RIGHT", LFGEB, "LEFT", -2, 0},'Inviter_AcceptFromLFG_messages',10,10)
+
+			ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB)
+			table.insert(DA.RunOnGuildUpdate, function() ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG, LFGEB) end)
 		end
+
+		
+		do --invitations speedSelect
+			DA_Inviter.OptionsFr.speedSelectTimerEB=DA.EditBoxCreater2(nil,DA_Inviter.OptionsFr,{"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",157,-20},{20,12},fuckingOptions.Inviter_manualTimerSpeed,false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},{"fuckingOptions","Inviter_manualTimerSpeed"},0.1,10,'textnum')
+			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEscapePressed", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions.Inviter_manualTimerSpeed) end)
+			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEnterPressed", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions.Inviter_manualTimerSpeed) end)
+			DA_Inviter.OptionsFr.speedSelectTimerEB:HookScript("OnEditFocusLost", function() DA.SetTimerSpeed('proc_invite_timer',fuckingOptions.Inviter_manualTimerSpeed) end)
+			-- DA.FontCreater(nil,"Invitations speed",{"BOTTOMLEFT",DA_Inviter.OptionsFr.speedSelectTimerEB,"TOPLEFT",5,-2},DA_Inviter.OptionsFr.speedSelectTimerEB,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		
+			DA.CreateDropdownSelector({
+				rel = DA_Inviter.OptionsFr,
+				point = {"LEFT",DA_Inviter.OptionsFr,"TOPLEFT",90,-20},
+				width = 65,
+				height = 12,
+				frpoint = "BOTTOM",
+				title = {
+					L["Invitations speed"],
+					{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
+					{"BOTTOMLEFT","TOPLEFT",0,-2}
+				},
+				valuesroster = {
+					{ text = L["Auto"], value = 1 , deskr = "inv_fast_tt", funcOnSelection = function ()
+						DA_Inviter.OptionsFr.speedSelectTimerEB:Hide()
+					end},
+					{ text = L["Instant"], value = 2 , deskr = "inv_instant_tt", funcOnSelection = function ()
+						DA_Inviter.OptionsFr.speedSelectTimerEB:Hide()
+					end},
+					{ text = L["By Timer"], value = 3 , deskr = "inv_timer_tt", funcOnSelection = function ()
+						DA_Inviter.OptionsFr.speedSelectTimerEB:Show()
+					end},
+				},
+				justh = nil,
+				get = function()
+					return fuckingOptions.Inviter_TimerMode
+				end,
+				set = function(value)
+					fuckingOptions.Inviter_TimerMode = value
+				end
+			})
+		end
+		
 	end
 
 	do -- pre raid settings
@@ -770,14 +846,14 @@ function Mod:Inviter_Load()
 		end
 		DA_Inviter.difficultyBtns={}
 		for i,j in ipairs({"10","25","10H","25H"}) do
-			DA_Inviter.difficultyBtns[i]=DA.CreateFFGButton2(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 0+26*i,-155},12,25,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			DA_Inviter.difficultyBtns[i]=DA.CreateFFGButton2(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 0+26*i,-125},12,25,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 				DA_Inviter.initRaidDifficulty=i
 				re_render_difficultyBtns_Diff()
 			end,nil,nil,'center')
 		end
 		DA_Inviter.initRaidDifficulty=4
 		re_render_difficultyBtns_Diff()
-		DA.FontCreater(nil,"Raid Difficulty",{"LEFT",DA_Inviter.difficultyBtns[1],"TOPLEFT",0,4},DA_Inviter,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		DA.FontCreater(nil,L["Raid difficulty"],{"LEFT",DA_Inviter.difficultyBtns[1],"TOPLEFT",0,4},DA_Inviter.difficultyBtns[1],15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 
 
 		local lootSelectTbl={
@@ -786,18 +862,18 @@ function Mod:Inviter_Load()
 			{"Free",'f'},
 		}
 		local rerender_lootSelectFrame
-		DA_Inviter.lootBtn,DA_Inviter.lootFrame=DA.CreateFFGDropFrame(DA_Inviter,"",12,45,{"TOPLEFT",DA_Inviter,"TOPLEFT",135,-155},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect')
-		DA_Inviter.lootFrame:SetFrameLevel(200)
+		DA_Inviter.lootBtn,DA_Inviter.lootFrame=DA.CreateFFGDropFrame(DA_Inviter,"",12,45,{"TOPLEFT",DA_Inviter,"TOPLEFT",135,-125},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect')
+		-- DA_Inviter.lootFrame:SetFrameLevel(200)
 		for id,ss in ipairs(lootSelectTbl) do
 			DA_Inviter.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.lootFrame,{"TOPLEFT",DA_Inviter.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 				fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=ss[2]
 				rerender_lootSelectFrame()
 				DA_Inviter.lootFrame:Hide()
 			end,nil,nil,'center')
-			DA_Inviter.lootFrame[id]:SetFrameLevel(201)
+			-- DA_Inviter.lootFrame[id]:SetFrameLevel(201)
 
 		end
-		DA.FontCreater(nil,"Loot Method",{"LEFT",DA_Inviter.lootBtn,"TOPLEFT",0,4},DA_Inviter,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		DA.FontCreater(nil,L["Loot Method"],{"LEFT",DA_Inviter.lootBtn,"TOPLEFT",0,4},DA_Inviter,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		rerender_lootSelectFrame=function()
 			for i,j in ipairs(lootSelectTbl) do
 				if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod==j[2] then
@@ -966,12 +1042,12 @@ function Mod:Inviter_Load()
 				DA.Print(L["It looks like your guild rank doesn't allow you to use guild chat"])
 				return
 			end
-
+			writeNewTiming()
 			self:Disable()
 			DA_Inviter.stopbtn:Enable()
 			convertedToRaid=false
 			Inviter_Started=true
-			DA.XTimers["inviter"].mytime=nil;DA.XTimers["inviter"].mytime2=nil;
+			DA.XTimers["inviter"].mytime=nil
 			DA.ResumeTimer('inviter')
 
 			DEFAULT_CHAT_FRAME:AddMessage("      -->>"..L['Raid inviter started'],0,1,1)
@@ -986,12 +1062,12 @@ function Mod:Inviter_Load()
 			add_additional_invites()
 
 		end
-		DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 26, -178},  12,  50,  L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},startRT)
+		DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 26, -143},  12,  50,  L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},startRT)
 
 		local function stopRT(self)
 			listinvite_bulk=nil
 			listinvite_bulk={}
-			DA.StopTimer("inviter");DA.XTimers["inviter"].mytime=nil;DA.XTimers["inviter"].mytime2=nil
+			DA.StopTimer("inviter");DA.XTimers["inviter"].mytime=nil
 			convertedToRaid=false
 			self:Disable()
 			DA_Inviter.startbtn:Enable()
@@ -1007,7 +1083,7 @@ function Mod:Inviter_Load()
 		DA_Inviter.stopbtn:Disable()
 
 
-		DA_Inviter.addInvBtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"LEFT", DA_Inviter.stopbtn, "RIGHT", 6, 0},  12,  50,  "more...",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+		DA_Inviter.addInvBtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"LEFT", DA_Inviter.stopbtn, "RIGHT", 6, 0},  12,  50,  L["more..."],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			if DA_Inviter.addInvFr:IsShown() then
 				DA_Inviter.addInvFr:Hide()
 			else

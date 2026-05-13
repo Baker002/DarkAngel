@@ -46,11 +46,15 @@ local time_cap=time()-fuckingOptions_g[DA_CurrentGuild].storeleavers*86400
 			for p,m in pairs(FEP_L_gMain[DA_CurrentGuild]) do
 				if m==i and DA_Leavers[DA_CurrentGuild][m] then
 					FEP_L_gMain[DA_CurrentGuild][p]=nil
-					DA.Print(L['deleted local']..' |cff00ffff'..p..'|cffffffff [|cff00ffff'..m..'|cffffffff] '..L['old data'])
-					
+					if fuckingOptions_g[DA_CurrentGuild].printOldDeleted then
+						DA.Print(L['deleted local']..' |cff00ffff'..p..'|cffffffff [|cff00ffff'..m..'|cffffffff] '..L['old data'])
+					end
 				end
 			end
-			DA.Print(L['deleted data']..' |cff00ffff'..i..'|cffffffff [|cff00ffff'..(DA.Log_PlayerOfficerNote(DA_CurrentGuild,i) or "n/a") ..'|cffffffff] '..L['old data'])
+			
+			if fuckingOptions_g[DA_CurrentGuild].printOldDeleted then
+				DA.Print(L['deleted data']..' |cff00ffff'..i..'|cffffffff [|cff00ffff'..(DA.Log_PlayerOfficerNote(DA_CurrentGuild,i) or "n/a") ..'|cffffffff] '..L['old data'])
+			end
 			
 			DA_Leavers[DA_CurrentGuild][i]=nil
 			DarkAngel_FD[DA_CurrentGuild][i]=nil
@@ -710,7 +714,7 @@ local function docheck(name,oldep,oldgp,newep,newgp,officers)
 	local checked,author,reasons = TransLegitCheck(name,epdif,gpdif)
 	if not checked then
 		if fuckingOptions_g[DA_CurrentGuild].warnsuspic then
-			DA.Print(L['detmanchange'] .. GetPlayerScanLink(name)) 
+			DA.Print(L['detmanchange'] .. GetPlayerScanLink(name))
 		end
 		return {'off_unkn',officers, reasons=reasons}
 	elseif checked=='both' then
@@ -721,9 +725,9 @@ local function docheck(name,oldep,oldgp,newep,newgp,officers)
 		return {'off_alm',author,officers, reasons=reasons}
 	end
 end
-local function TransLegitAdditionals(name,oldtyp,oldep,oldgp,newtyp,newep,newgp,officers)
+local function TransLegitAdditionals(isonlinechange, name,oldtyp,oldep,oldgp,newtyp,newep,newgp,officers)
 
-	if (oldtyp==newtyp and (oldtyp=='m' or oldtyp=='f')) or (oldtyp=='m' and newtyp=='f') or (oldtyp=='f' and newtyp=='m') then
+	if isonlinechange and ((oldtyp==newtyp and (oldtyp=='m' or oldtyp=='f')) or (oldtyp=='m' and newtyp=='f') or (oldtyp=='f' and newtyp=='m')) then
 		return docheck(name,oldep,oldgp,newep,newgp,officers)
 	elseif oldtyp==newtyp and oldtyp=='t' or oldtyp~=newtyp then
 		return {'off_unkn',officers}
@@ -974,13 +978,14 @@ local function ScanCompare(db,firstrun)
 							local oldtyp,oldep,oldgp=DA.DecodeNote(officernote)
 							local newtyp,newep,newgp=DA.DecodeNote(val.o) 
 							
+							local TLA = TransLegitAdditionals(isonlinechange, player,oldtyp,oldep,oldgp,newtyp,newep,newgp,listofofficers)
 							
 							if opt_offnote==2 then
-								table.insert(fd.o, {val.o, tmstmp, addit=isonlinechange and TransLegitAdditionals(player,oldtyp,oldep,oldgp,newtyp,newep,newgp,listofofficers)})
+								table.insert(fd.o, {val.o, tmstmp, addit=isonlinechange and TLA})
 								
 							elseif opt_offnote==1 then
 								table.wipe(fd.o)
-								tinsert(fd.o,{val.o, tmstmp, addit=isonlinechange and TransLegitAdditionals(player,oldtyp,oldep,oldgp,newtyp,newep,newgp,listofofficers)})
+								tinsert(fd.o,{val.o, tmstmp, addit=isonlinechange and TLA})
 							end
 							if (newtyp=='f' or oldtyp=='f') and not (oldtyp=='t' or newtyp=='t') then
 								
@@ -991,7 +996,7 @@ local function ScanCompare(db,firstrun)
 											or (newtyp=='f' and 'f')
 											or (oldtyp=='f' and 'uf')
 										),
-										player,tmstmp,cepd(player,oldep..','..oldgp,newep..','..newgp),        total=val.o})
+										player,tmstmp,cepd(player,oldep..','..oldgp,newep..','..newgp),        reason=TLA, total=val.o})
 								end
 								
 							else
@@ -1020,11 +1025,11 @@ local function ScanCompare(db,firstrun)
 										if fuckingOptions.decaygroup and a:find('cffffffffcl') and b:find('cffffffffcl') then
 											FFDecayCount=FFDecayCount+1
 										else
-											table.insert(jr, {'decay',player,tmstmp,cepd(player,officernote,val.o),        total=val.o})
+											table.insert(jr, {'decay',player,tmstmp,cepd(player,officernote,val.o),        reason=TLA, total=val.o})
 										end
 										
 									else
-										table.insert(jr, {'ch',player,tmstmp,cepd(player,officernote,val.o),        total=val.o})
+										table.insert(jr, {'ch',player,tmstmp,cepd(player,officernote,val.o),        reason=TLA, total=val.o})
 									end
 								end
 							end
@@ -2033,15 +2038,13 @@ function Mod.Logger_Load()
 					{"change", "note"},
 					{"value1", "colorEPchange"},
 					{"value2", "colorGPchange"},
-					{"total", "total"},
+					{"reason", "reason"},
 					
 				}
 				
 				for i,criteria in pairs(search_patterns) do
 					DarkAngelGUI.Log.copyFrame[criteria[1]]=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.copyFrame,{"TOPLEFT", DarkAngelGUI.Log.copyFrame, "TOPLEFT", 10,5-12*i},15,15,criteria[1],function() copyFrame_Update() end)
-					if i~=7 then
-						DarkAngelGUI.Log.copyFrame[criteria[1]]:SetChecked(true)
-					end
+					DarkAngelGUI.Log.copyFrame[criteria[1]]:SetChecked(true)
 				end
 				--separator
 				do
@@ -2277,7 +2280,7 @@ function Mod.Logger_Load()
 			DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,DarkAngelGUI.Details.SearchEB,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
 			DarkAngelGUI.Details.notific:Hide()
 			
-		DarkAngelGUI.Details.SearchTooltip = DA.FrameCreater(nil,DarkAngelGUI.Details.SearchEB,160,20,{"TOPLEFT",DarkAngelGUI.Details.SearchEB,"BOTTOMLEFT",-220,58})	
+		DarkAngelGUI.Details.SearchTooltip = DA.FrameCreater(nil,DarkAngelGUI.Details.SearchEB,160,20,{"TOPLEFT",DarkAngelGUI.Details.SearchEB,"BOTTOMLEFT",-220,58})
 			
 			local function run_search()
 				DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
@@ -2285,9 +2288,9 @@ function Mod.Logger_Load()
 				DarkAngelGUI.Details.SearchEB:ClearFocus()
 				Mod:StartScan() 
 			end
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,127,0},18,50,L['Search'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 127,0},18,50,L['Search'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
 			
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,182,0},18,50,L['Target'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 182,0},18,50,L['Target'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
 				DarkAngelGUI.Details.SearchEB:SetText(select(1,UnitName("target")) or UnitName("player"))
 				DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
 				DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
@@ -2492,7 +2495,7 @@ Log_Create_ScrollBar = function()
 				row.buttons[4]:SetText(data.note or "")
 				row.buttons[5]:SetText(data.colorEPchange or "")
 				row.buttons[6]:SetText(data.colorGPchange or "")
-				row.buttons[7]:SetText(data.total or "")
+				row.buttons[7]:SetText(data.reason or data.total or "")
 			else
 				RowButtons[i]:Hide()
 			end
@@ -2576,7 +2579,7 @@ table.wipe(DA_LogRoster)
     for pos, data in ipairs(data1) do
         local tag, plname, timeTbl, changeTbl = unpack(data)
 		local timestamp, isOnline, dat, tim = timeTbl.t, unpack(timeTbl)
-        local total, note = data.total, data.note
+        local total, note, reason = data.total, data.note, data.reason
 		local colorEPchange, colorGPchange
 			if changeTbl then
 				colorEPchange,colorGPchange = unpack(changeTbl)
@@ -2601,6 +2604,13 @@ table.wipe(DA_LogRoster)
 		plDat.timestamp = timestamp
 		plDat.plname = plname
 		plDat.note = note
+		if reason and reason.reasons and type(reason.reasons)=='table' then
+			if #reason.reasons>1 then
+				plDat.reason = "|cffffffff<...>|r"
+			elseif #reason.reasons==1 then
+				plDat.reason = "|cffffffff"..reason.reasons[1][1].."|r"
+			end
+		end
 		plDat.total = total
 		plDat.colorEPchange=colorEPchange
 		plDat.colorGPchange=colorGPchange
@@ -3009,36 +3019,42 @@ function Mod:OnGuildLoad()
 end
 
 
-function Mod:AddModOptions(modOptTable)
-	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,232)
+DA.AddModOptions('Logger', function(_,optScrollFrame)
+	local f = DA.FrameCreater(nil,optScrollFrame.scrollchild,154,244)
 	f:Show()
-	tinsert(modOptTable, {'Logger',f})	
-	DA.FontCreater(nil,"Logger",{"LEFT",f,"TOPLEFT",5,-6},f,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		
 	
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['Print leavers in chat'],function(self) fuckingOptions.prntleav=(self:GetChecked() or false) end,{'fuckingOptions','prntleav'},nil)
+		
+	
+	local prntLeavers = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['Print leavers in chat'],function(self) fuckingOptions.prntleav=(self:GetChecked() or false) end,{'fuckingOptions','prntleav'},nil)
 		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-20},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print("F "..GetPlayerScanLink(UnitName('player'))..(FEP_gMain[UnitName('player')] and GetPlayerScanLink(FEP_gMain[UnitName('player')]) or GetPlayerScanLink("example")))
 		end)
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['Track suspicious changes'],function(self) fuckingOptions_g[DA_CurrentGuild].warnsuspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warnsuspic','DA_CurrentGuild'},'warnsuspic')
-		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-43},12,12,L['DKP simplified'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
+		DA.FontCreater(nil,"Logger",{"LEFT",f,"TOPLEFT",5,-6},prntLeavers,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['Old data notice'],function(self) fuckingOptions_g[DA_CurrentGuild].printOldDeleted=(self:GetChecked() or false) end,{'fuckingOptions_g','printOldDeleted','DA_CurrentGuild'},'OldDataDeletionPrint')
 		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-32},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+			DA.Print(L['deleted data']..' |cff00ffffBigguy|cffffffff [|cff00ffff12345|cffffffff] '..L['old data'])
+			DA.Print(L['deleted data']..' |cff00ffffSmolguy|cffffffff [|cff00ffffBigguy|cffffffff] '..L['old data'])
+			DA.Print(L['deleted data']..' |cff00ffffLilguy|cffffffff [|cff00ffffBigguy|cffffffff] '..L['old data'])
+			DA.Print(L['deleted local']..' |cff00ffffLocalkid|cffffffff [|cff00ffffBigguy|cffffffff] '..L['old data'])
+		end)
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-44},15,15,L['Track suspicious changes'],function(self) fuckingOptions_g[DA_CurrentGuild].warnsuspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warnsuspic','DA_CurrentGuild'},'warnsuspic')
+		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-55},12,12,L['DKP simplified'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
+		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-44},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print(L['detmanchange'].. GetPlayerScanLink(UnitName('player'))) 
 		end)
 		
-	DA.EditBoxCreater2(nil,f,{"LEFT",f,"TOPLEFT",10,-70},{30,12},fuckingOptions_g[DA_CurrentGuild].minlog,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","minlog",'DA_CurrentGuild'},1,nil,true,L["Minimum log"],nil,'minlog')
-	DA.EditBoxCreater2(nil,f,{"LEFT",f,"TOPLEFT",10,-84},{30,12},fuckingOptions_g[DA_CurrentGuild].storeleavers,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","storeleavers",'DA_CurrentGuild'},1,nil,true,L["Store leavers data"],nil,'maxleavers')
+	DA.EditBoxCreater2(nil,f,{"LEFT",f,"TOPLEFT",10,-82},{30,12},fuckingOptions_g[DA_CurrentGuild].minlog,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","minlog",'DA_CurrentGuild'},1,nil,true,L["Minimum log"],nil,'minlog')
+	DA.EditBoxCreater2(nil,f,{"LEFT",f,"TOPLEFT",10,-96},{30,12},fuckingOptions_g[DA_CurrentGuild].storeleavers,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","storeleavers",'DA_CurrentGuild'},1,nil,true,L["Store leavers data"],nil,'maxleavers')
 	
 	
-	local dodecaycheck=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-98},15,15,nil,function(self) fuckingOptions_g[DA_CurrentGuild].do_decay_checks=(self:GetChecked() or false) end,{'fuckingOptions_g','do_decay_checks','DA_CurrentGuild'},'do_decay_checks')
+	local dodecaycheck=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-110},15,15,nil,function(self) fuckingOptions_g[DA_CurrentGuild].do_decay_checks=(self:GetChecked() or false) end,{'fuckingOptions_g','do_decay_checks','DA_CurrentGuild'},'do_decay_checks')
 	DA.EditBoxCreater2(nil,dodecaycheck,{"LEFT",dodecaycheck,"RIGHT",2,0},{30,12},fuckingOptions.Decaydays,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions","Decaydays"},0,20,true,L["EPGP decay precising"],nil,'epgpdecayprec')
 	DA.CheckBtnCreater(nil,dodecaycheck,{"CENTER",dodecaycheck,"CENTER",10,-12},15,15,L['Group-up clear decay in Log'],function(self) fuckingOptions.decaygroup=(self:GetChecked() or false) end,{'fuckingOptions','decaygroup'},nil)
 	
-		local logF = DA.FrameCreater(nil,f,f:GetWidth()-4,105,{"TOPLEFT",f,"TOPLEFT",2,-125})
+		local logF = DA.FrameCreater(nil,f,f:GetWidth()-4,105,{"TOPLEFT",f,"TOPLEFT",2,-149})
 	do --logging methods
-		DA.FontCreater(nil,"Logging Config",{"LEFT",logF,"TOPLEFT",5,-6},logF,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 		
-		DA.HelpCreater(logF,{"CENTER",logF,"TOPLEFT",88,-7},'LogConfHelp',12,12)
 		
 		logF:Show()
 		local microOpt={}
@@ -3132,15 +3148,7 @@ function Mod:AddModOptions(modOptTable)
 			
 		end
 		
-		
-		logF.resetBtn=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",40,-95},12,40,"reset",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-			selectors_upd()
-			
-			logF.resetBtn:Disable()
-			logF.saveBtn:Disable()
-		end)
-		
-		logF.saveBtn=DA.CreateFFGButton2(nil,logF,{"CENTER",logF,"TOPLEFT",95,-95},12,40,"save",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		logF.saveBtn=DA.CreateFFGButton2(nil,logF,{"TOPRIGHT",logF,"TOPRIGHT",-1,-1},10,30,"save",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 			for crit,val in pairs(microOpt) do
 				fuckingOptions_g[DA_CurrentGuild][crit]=val
 			end
@@ -3150,13 +3158,26 @@ function Mod:AddModOptions(modOptTable)
 			logF.saveBtn:Disable()
 			
 			Mod:UpdateLogging()
-		end)	
+		end)
+
+		logF.resetBtn=DA.CreateFFGButton2(nil,logF,{"TOPRIGHT",logF.saveBtn,"BOTTOMRIGHT",0,-1},10,30,"reset",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			selectors_upd()
+			
+			logF.resetBtn:Disable()
+			logF.saveBtn:Disable()
+		end)
+		DA.HelpCreater(logF,{"TOPRIGHT",logF.resetBtn,"BOTTOMRIGHT",0,-1},'LogConfHelp',10,10)
+		
+		
+			
 		
 		
 		logF.resetBtn:Disable()
 		logF.saveBtn:Disable()
 		
 		selectors_upd(1)
+		DA.FontCreater(nil,L["Logging Config"],{"LEFT",logF,"TOPLEFT",5,-6},logF.buttons[1],15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		
 		table.insert(DA.RunOnGuildUpdate, selectors_upd)
 	end
 	
@@ -3165,61 +3186,50 @@ function Mod:AddModOptions(modOptTable)
 			dodecaycheck:Hide()
 			suspext:Show()
 			f:SetSize(154,203)
-			logF:SetPoint("TOPLEFT",f,"TOPLEFT",2,-95)
+			logF:SetPoint("TOPLEFT",f,"TOPLEFT",2,-107)
 		else
 			dodecaycheck:Show()
 			suspext:Hide()
 			f:SetSize(154,232)
-			logF:SetPoint("TOPLEFT",f,"TOPLEFT",2,-125)
+			logF:SetPoint("TOPLEFT",f,"TOPLEFT",2,-137)
 		end
 	end
 	logmodoptReRender()
 	table.insert(DA.RunOnGuildUpdate, logmodoptReRender)
 	
-	do --log clean
-		local logClean_rehighlight 
-		local cleanModes={
-			{L["4 days"], 345600},
-			{L["1 week"], 604800},
-			{L["2 weeks"], 1209600},
-			{L["3 weeks"], 1814400},
-			{L["1 month"], 2592000},
-			{L["2 months"], 5184000},
-			{L["3 months"], 7776000},
-
-		}
-		
-		
-		local logClean_Btn,logClean_Frame=DA.CreateFFGDropFrame(f,"",11,58,{"CENTER",f,"TOPLEFT",35,-55},60,#cleanModes*11,"BOTTOM",'center', function() logClean_rehighlight() end,nil,'logCleandesc')
-		DA.FontCreater(nil,L["Store logs"],{"LEFT",logClean_Btn,"RIGHT",2,0},logClean_Btn,15,180,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'left')
-					
-		for i=1,#cleanModes do 
-			logClean_Frame['btn'..i]=DA.CreateFFGButton2(nil,logClean_Frame,{"TOPLEFT", logClean_Frame, "TOPLEFT", 1,10-11*i},10,58,cleanModes[i][1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
-				fuckingOptions_g[DA_CurrentGuild].cleanlogonceper=cleanModes[i][2]
-				logClean_rehighlight()
-				logClean_Frame:Hide()
-			end,nil,nil,'center')
-			
-			if fuckingOptions_g[DA_CurrentGuild].cleanlogonceper==cleanModes[i][2] then
-				logClean_Btn:SetText(cleanModes[i][1])
-			end
-		end
-		
-		logClean_rehighlight=function()
-			local s = fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
-			for i=1,#cleanModes do
-				if cleanModes[i][2]==s then
-					logClean_Frame['btn'..i].fs:SetTextColor(0.2,1,1,1)
-					logClean_Btn:SetText(cleanModes[i][1])
-				else
-					logClean_Frame['btn'..i].fs:SetTextColor(0.85,1,1,1)
-				end
-			end
-		end
-		
-		logClean_rehighlight()
-		table.insert(DA.RunOnGuildUpdate, logClean_rehighlight)
-		
-	end
+	--log clean
+	DA.CreateDropdownSelector({
+		rel = f,
+		point = {"CENTER",f,"TOPLEFT",35,-67},
+		width = 60,
+		height = 12,
+		title = {
+			L["Store logs"],
+			{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			{"LEFT","RIGHT",2,0}
+		},
+		frpoint = "BOTTOM",
+		valuesroster = {
+			{text = L["4 days"], value = 345600},
+			{text = L["1 week"], value = 604800},
+			{text = L["2 weeks"], value = 1209600},
+			{text = L["3 weeks"], value = 1814400},
+			{text = L["1 month"], value = 2592000},
+			{text = L["2 months"], value = 5184000},
+			{text = L["3 months"], value = 7776000},
+		},
+		justh = nil,
+		isGuildDynamicValue = true,
+		get = function()
+			return fuckingOptions_g[DA_CurrentGuild].cleanlogonceper
+		end,
+		set = function(value)
+			fuckingOptions_g[DA_CurrentGuild].cleanlogonceper = value
+		end,
+		funcOnShow = nil,
+		funcOnHide = nil,
+		desrtag = "logCleandesc"
+	})
 	
-end
+	return f
+end)

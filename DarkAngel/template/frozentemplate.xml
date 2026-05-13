@@ -123,26 +123,29 @@
 		<DisabledCheckedTexture file="Interface\AddOns\DarkAngel\template\UI-CheckBox-Check-Disabled"/>
 	</CheckButton>
 	
-	<Texture name="UIDarkAngelScrollBarButton" virtual="true">
-		<TexCoords left="0.20" right="0.80" top="0.25" bottom="0.75"/>
+	<Texture name="UIDarkAngelScrollBarButtonUP" virtual="true">
+		<TexCoords left="0.08" right="1" top="0" bottom="0.65"/>
+	</Texture>
+	<Texture name="UIDarkAngelScrollBarButtonDOWN" virtual="true">
+		<TexCoords left="0.08" right="0.95" top="0.4" bottom="1"/>
 	</Texture>
 	<Button name="UIDarkAngelScrollUpButton" virtual="true">
 		<Size>
 			<AbsDimension x="18" y="16"/>
 		</Size>
-		<NormalTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Up"  alphaMode="ADD"/>
-		<PushedTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Down"  alphaMode="ADD"/>
-		<DisabledTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Disabled"  alphaMode="ADD"/>
-		<HighlightTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Highlight" alphaMode="ADD"/>
+		<NormalTexture inherits="UIDarkAngelScrollBarButtonUP" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Up"  alphaMode="ADD"/>
+		<PushedTexture inherits="UIDarkAngelScrollBarButtonUP" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Down"  alphaMode="ADD"/>
+		<DisabledTexture inherits="UIDarkAngelScrollBarButtonUP" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Disabled"  alphaMode="ADD"/>
+		<HighlightTexture inherits="UIDarkAngelScrollBarButtonUP" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollUpButton-Highlight" alphaMode="ADD"/>
 	</Button>
 	<Button name="UIDarkAngelScrollDownButton" virtual="true">
 		<Size>
 			<AbsDimension x="18" y="16"/>
 		</Size>
-		<NormalTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Up"  alphaMode="ADD"/>
-		<PushedTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Down"  alphaMode="ADD"/>
-		<DisabledTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Disabled"  alphaMode="ADD"/>
-		<HighlightTexture inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Highlight" alphaMode="ADD"/>
+		<NormalTexture inherits="UIDarkAngelScrollBarButtonDOWN" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Up"  alphaMode="ADD"/>
+		<PushedTexture inherits="UIDarkAngelScrollBarButtonDOWN" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Down"  alphaMode="ADD"/>
+		<DisabledTexture inherits="UIDarkAngelScrollBarButtonDOWN" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Disabled"  alphaMode="ADD"/>
+		<HighlightTexture inherits="UIDarkAngelScrollBarButtonDOWN" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-ScrollDownButton-Highlight" alphaMode="ADD"/>
 	</Button>
 	<Slider name="UIDarkAngelScrollBarSlider" virtual="true">
 		<Size>
@@ -179,7 +182,7 @@
 				self:GetParent():SetVerticalScroll(value);
 			</OnValueChanged>
 		</Scripts>
-		<ThumbTexture name="$parentThumbTexture" inherits="UIDarkAngelScrollBarButton" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-Knob" alphaMode="ADD">
+		<ThumbTexture name="$parentThumbTexture" file="Interface\AddOns\DarkAngel\template\UI-ScrollBar-Knob" alphaMode="ADD">
 			<Size>
 				<AbsDimension x="18" y="24"/>
 			</Size>
@@ -268,9 +271,34 @@
 		<Scripts>
 			<OnLoad>
 				ScrollFrame_OnLoad(self);
+				local scrollBar = _G[self:GetName() .. "ScrollBar"];
+				local _,m = scrollBar:GetMinMaxValues()
+				scrollBar:GetThumbTexture():SetTexCoord(0, 1, 0, 1)
+
+				if m==0 then
+					scrollBar:GetThumbTexture():Hide()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()
+				else
+					scrollBar:GetThumbTexture():Show()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Show()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Show()
+				end
 			</OnLoad>
 			<OnScrollRangeChanged>
 				ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
+				local scrollBar = _G[self:GetName() .. "ScrollBar"];
+				local _,m = scrollBar:GetMinMaxValues()
+				if m==0 then
+					scrollBar:GetThumbTexture():Hide()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()
+				else
+					scrollBar:GetThumbTexture():Show()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Show()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Show()
+				end
+
 			</OnScrollRangeChanged>
 			
 			<OnVerticalScroll>

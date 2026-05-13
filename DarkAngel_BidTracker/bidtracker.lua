@@ -271,7 +271,7 @@ local function canAwardForBid()
 	return true
 end
 
-DA_BidTracker=DA.FrameCreater(nil,UIParent,150,213,{"TOPLEFT", UIParent, "CENTER", 0, 0})
+DA_BidTracker=DA.FrameCreater(nil,UIParent,150,213,{"TOPLEFT", UIParent, "CENTER", 0, 0},nil,nil,1)
 	DA.CloseButtonCreater(nil,DA_BidTracker,{"center", DA_BidTracker, "TOPRIGHT", -8.5,-8.5},12,12,'x')
 	DA_BidTracker:RegisterForDrag("LeftButton")
 	DA_BidTracker:SetScript("OnDragStart", function(self) 
@@ -1298,9 +1298,6 @@ function Mod:OnEnable()
 	DA:ModuleLoaded("BidTracker")
 end
 
-
-
-
 function Mod:OnGuildLoad()
 	
 	--bidder timer
@@ -1330,6 +1327,7 @@ function Mod:OnGuildLoad()
 
 	self:BidTracker_Load()
 	self:UpdateStateEvents()
+
 end
 
 function Mod:UpdateStateEvents()
@@ -1643,20 +1641,21 @@ function Mod:BidTracker_Load()
 
 end
 
-function Mod:AddModOptions(modOptTable)
-	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,50)
+DA.AddModOptions('BidTracker', function(optFrame,optScrollFrame)
+	local f = DA.FrameCreater(nil,optScrollFrame.scrollchild,154,50)
 	f:Show()
-	tinsert(modOptTable, {'BidTracker',f})	
 	
-	DA.FontCreater(nil,"BidTracker",{"LEFT",f,"TOPLEFT",5,-6},f,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 	
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['ep-auc/dkp bid tracker'],function(self) fuckingOptions_g[DA_CurrentGuild].bidtracker=(self:GetChecked() or false);Mod:UpdateStateEvents() end,{'fuckingOptions_g','bidtracker','DA_CurrentGuild'},'bidtracker')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-30},15,15,L['only mine'],function(self) fuckingOptions_g[DA_CurrentGuild].bidtracker_onlymine=(self:GetChecked() or false) end,{'fuckingOptions_g','bidtracker_onlymine','DA_CurrentGuild'},nil)
 	
 	local OnlyGuildChbx = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-40},15,15,L['guild raid'],function(self) fuckingOptions.auc_OnlyInGuild=(self:GetChecked() or false) end,{'fuckingOptions','auc_OnlyInGuild'},"OnlyInGuildRaid")
 	DA.CheckBtnCreater(nil,f,{"CENTER", OnlyGuildChbx, "CENTER", 65, 0},15,15,"100%",function(self) fuckingOptions.auc_OnlyInFullGuild=(self:GetChecked() or false) end,{'fuckingOptions','auc_OnlyInFullGuild'},"OnlyInFullGuildRaid")
+	DA.FontCreater(nil,"BidTracker",{"LEFT",f,"TOPLEFT",5,-6},OnlyGuildChbx,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
 	DA.CreateFFGButton2(nil,f,{"center", f, "TOPLEFT", 80,-6},10,30,'open','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-		DA.AnimateText(DarkAngelopt.scrollchild.addbinds_ch)
+		DA.AnimateText(optScrollFrame.scrollchild.addbinds_ch)
 	end,'bt_open')
-end
+	
+	return f
+end)

@@ -5,6 +5,11 @@ local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 local Mod = DA:NewModule("Dispenser")
 
 
+DA_Flasker = DA.FrameCreater(nil,UIParent,100,180,{"TOPLEFT", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_trader]])
+local F = DA_Flasker
+F.cont={}
+DA.CloseButtonCreater(nil,F,{"CENTER",F,"TOPRIGHT",-5,-5},8,8,'x',F:GetFrameLevel()+3)
+DA.HelpCreater(F,{"CENTER",F,"TOPRIGHT",-15,-5},'dispenser_guide',8,8)
 
 function Mod:OnInitialize()
 
@@ -22,6 +27,40 @@ function Mod:OnInitialize()
 
 end
 
+local function IconGrabCreater(itemID,rel,point,heig,wid)
+	local f = CreateFrame("Button", nil, rel, "UIDarkAngelIconicButton")
+	local _, itemLink, _, _, _, _, _, _, _, itemTexture, _ = GetItemInfo(itemID)
+
+	f:SetPoint(unpack(point))
+	f:SetHeight(heig)
+	f:SetWidth(wid)
+	f:SetBackdropColor(1, 1, 1, 1)
+	f:RegisterForClicks("LeftButtonUp","RightButtonUp")
+	f:SetNormalTexture(itemTexture or GetItemIcon(itemID))
+	f:SetMovable(false)
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnClick", function() PickupItem(itemID) end)
+	f:SetScript("OnDragStart", function() PickupItem(itemID) end)
+
+	f:SetText('')
+
+	f:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self,'ANCHOR_CURSOR')
+		GameTooltip:SetHyperlink(itemLink or "\124cffffffff\124Hitem:"..itemID.."::::::::70:::::\124h[loading data]\124h\124r")
+		GameTooltip:Show()
+	end)
+
+	f:SetScript("OnLeave", function(self)
+		DA.myHideTooltip()
+	end)
+	return f
+end
+local function Flasker_Load()
+	for i,id in pairs({46377,46376,46379,40211,40212,40093,22828,9036,44939,44329,44328,40097,46378,40079,40076,42994,43523}) do
+		IconGrabCreater(id,  F.optionsFrame,  {"BOTTOMLEFT",F.optionsFrame,"BOTTOMLEFT", -17+i*20, 5},  20,  20)
+	end
+
+end
 function Mod:OnEnable()
 	DarkAngel_FlaskerDB = DarkAngel_FlaskerDB or {}
 
@@ -100,7 +139,7 @@ function Mod:OnEnable()
 		end
 		removeEmptySecondLevelTables(DarkAngel_FlaskerDB)
 	end
-    self.Flasker_Load()
+    Flasker_Load()
 	if UISpecialFrames then
 		tinsert(UISpecialFrames, "DA_Flasker")
 	end
@@ -115,13 +154,8 @@ function Mod:OnGuildLoad()
 	end
 end
 
-DA_Flasker = DA.FrameCreater(nil,UIParent,100,180,{"TOPLEFT", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_trader]],1)
-local F = DA_Flasker
-F.cont={}
-DA.CloseButtonCreater(nil,F,{"CENTER",F,"TOPRIGHT",-5,-5},8,8,'x',F:GetFrameLevel()+3)
-DA.HelpCreater(F,{"CENTER",F,"TOPRIGHT",-15,-5},'dispenser_guide',8,8)
 
-F.add:SetFrameLevel(0)
+-- F.add:SetFrameLevel(0)
 F:RegisterForDrag("LeftButton")
 F:SetScript("OnDragStart", function(self) self:StartMoving() end)
 F:SetScript("OnDragStop", function(self)
@@ -135,35 +169,7 @@ end)
 DA.CreateScaler('DA_Flasker',0.8,2,{'fuckingOptions','FFFLScale'})
 
 local TR_SelectedSet_UI=1
-local function IconGrabCreater(itemID,rel,point,heig,wid)
-local f = CreateFrame("Button", nil, rel, "UIDarkAngelIconicButton")
-local _, itemLink, _, _, _, _, _, _, _, itemTexture, _ = GetItemInfo(itemID)
 
-	f:SetPoint(unpack(point))
-	f:SetHeight(heig)
-	f:SetWidth(wid)
-	f:SetBackdropColor(1, 1, 1, 1)
-	f:RegisterForClicks("LeftButtonUp","RightButtonUp")
-	f:SetNormalTexture(itemTexture or GetItemIcon(itemID))
-	f:SetMovable(false)
-	f:RegisterForDrag("LeftButton")
-	f:SetScript("OnClick", function() PickupItem(itemID) end)
-	f:SetScript("OnDragStart", function() PickupItem(itemID) end)
-
-	f:SetText('')
-
-	f:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self,'ANCHOR_CURSOR')
-		GameTooltip:SetHyperlink(itemLink or "\124cffffffff\124Hitem:"..itemID.."::::::::70:::::\124h[loading data]\124h\124r")
-		GameTooltip:Show()
-	end)
-
-	f:SetScript("OnLeave", function(self)
-		DA.myHideTooltip()
-	end)
-	CXXVXSDFSBCXCB= f
-	return f
-end
 local function check_reRenderFlasker45()
 	local unlock4
 	local unlock5
@@ -368,12 +374,7 @@ local function Dispenser_ReRender()
 	end
 	F.Controls.naborFrame:SetSize(F.Controls.naborFrame.width, #DarkAngel_FlaskerDB*11 +17)
 end
-function Mod.Flasker_Load()
-	for i,id in pairs({46377,46376,46379,40211,40212,40093,22828,9036,44939,44329,44328,40097,46378,40079,40076,42994,43523}) do
-		IconGrabCreater(id,  F.optionsFrame,  {"BOTTOMLEFT",F.optionsFrame,"BOTTOMLEFT", -17+i*20, 5},  20,  20)
-	end
 
-end
 
 function Mod:Flasker_OptLoad()
 	local onstart=DA.CheckBtnCreater(nil,F.optionsFrame,{"CENTER",F.optionsFrame,"TOPLEFT", 10, -20},15,15,L['announce dispense'],function(self) fuckingOptions_g[DA_CurrentGuild].dispenser_announce=(self:GetChecked() or false) end,{'fuckingOptions_g','dispenser_announce','DA_CurrentGuild'},nil)
@@ -470,15 +471,15 @@ function Mod:Flasker_OptLoad()
 
 	Dispenser_ReRender()
 
-
+	
 end
 
-F.Controls=DA.FrameCreater(nil,F,70,90,{"TOPLEFT", F,"TOPRIGHT",2,0},nil,1)
-F.optionsFrame=DA.FrameCreater(nil,F,360,100,{'BOTTOMLEFT',F,'TOPLEFT',0,2},nil,1)
+F.Controls=DA.FrameCreater(nil,F,70,90,{"TOPLEFT", F,"TOPRIGHT",2,0})
+F.optionsFrame=DA.FrameCreater(nil,F,360,100,{'BOTTOMLEFT',F,'TOPLEFT',0,2})
 F.optionsFrame:RegisterForDrag("LeftButton")
 F.optionsFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 F.optionsFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end)
-F.optionsFrame.add:SetFrameLevel(0)
+-- F.optionsFrame.add:SetFrameLevel(0)
 	DA.CloseButtonCreater(nil,F.optionsFrame,{"TOPRIGHT", F.optionsFrame, "TOPRIGHT", -3,-3},10,10,'x')
 do --contents
 	F.Controls:EnableMouse(true)

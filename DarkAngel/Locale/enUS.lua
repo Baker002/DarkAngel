@@ -11,7 +11,7 @@ do
 L["Whisper"]=true
 L["Invite"]=true
 L["Details"]=true
-L["Twinks"]=true
+L["Twins"]=true
 L['award']=true
 L["add"]=true
 L["I am not a guild officer"]=true
@@ -28,6 +28,7 @@ end
 
 --Log
 do
+L["Logging Config"]=true
 L["No log is stored for this entry"]=true
 L["gm_changes_in"]="Detected changes in $1 guild ranks"
 L["gm_additions_in"]="Guild rank(s) added $1"
@@ -197,6 +198,15 @@ end
 --Gui2
 do
 L['guild raid']=true
+L['pure guild']="full guild"
+L["DESCr-dkpCommTT"]=[[Defines the conditions for accepting messages:
+
+|cffaaccffAlways|r — works even if you are not in a raid.
+|cffaaccffIn Raid|r — requires both you and the message sender to be in a raid.
+|cffaaccffGuild Raid|r — same as "|cffaaccffIn Raid|r", but the raid must consist of at least 70% guild members.
+|cffaaccffFull Guild|r — same as "|cffaaccffGuild Raid|r", but requires 100% guild members (current and locally linked).
+  -- With this option enabled, the linking command will only work for players who have already joined the guild but are not linked yet, 
+  -- since for security reasons the auto-link command cannot modify existing guild or local links.]]
 L["DESCr-OnlyInGuildRaid"]=[[Only in guild raid]]
 L["DESCr-OnlyInFullGuildRaid"]=[[Strictly 100% of raid members must be in a guild or locally bound
 Off: minimum 70%]]
@@ -216,11 +226,10 @@ L['DESCr-Inviter_AdditInvitHelp']=[[In this menu, you can add players to the "in
     |cff507375Well! Hello there! I don't believe we've been properly introduced.  I'm Bonzi!  What is your name?|r
 --The "all found online" option (Guild Tool) will add all players matching the specified search criteria to the queue, with an additional check to ensure they are actually online. Not offline.
     |cff507375Want to build a raid of 25 DK tanks by setting class = Death Knight and note "bis tank"? No? Alright then.]]
-L['DESCr-invAutostpdsc']=[[Enabled: auto-invite will stop after N minutes
-(the field on the right, yes, that one).
-
-Disabled: where are you even looking... not there. Wait—no. Ah, never mind.
-Anyway, it’ll keep going... for a while. Probably long enough.]]
+L['DESCr-invAutostpdsc']=[[|cffaaccffSchedule raid invite stop|r
+Supports 2 operating modes:
+   -- <number> - inviter will stop after the specified amount of minutes; the timer is set after changing the value/switching the option/starting the inviter
+   -- <time in 24:00 format> - uses local time instead of server time]]
 L['DESCr-invRepMsgdsc']=[[Enabled: the addon takes your message (from the box below) and calmly reminds the guild
 about the raid at the interval set by the slider on the right. Yes, repeatedly.
 
@@ -272,7 +281,7 @@ L['inv_RL']="RL: "
 
 L["joining raid..."]=true
 L["guild ping"]='ping'
-L['raidinv_stop_msg']='# raid inviter is disabled now, you may go fuck around (respectfully)'
+L['raidinv_stop_msg']='# raid inviter is disabled now'
 L['auto-stop']=true
 L['join raid']=true
 L['You are already in raid!']=true
@@ -289,7 +298,7 @@ L['dispenser']=true
 L['empty set']=true
 L['You are not in raid']=true
 L['minutes_short']='min'
-L['Invite auto-stopped']=true
+L['Invite auto-stopped']="Invite auto-stopped $1"
 L["Player not found"]=true
 end
 
@@ -300,7 +309,6 @@ L["Trusted players"]=true
 L["Texture Options"]=true
 L["Art texture alpha"]=true
 L["BG texture alpha"]=true
-L['+transp']=true
 L["texture presets"]=true
 L['guild window alias button']=true
 L['Additional binds']=true
@@ -318,7 +326,53 @@ L['epgp: custom tvins and loot']=true
 L['epgp: EP Auc']=true
 L['raidroll_epgp: DarkAngel tvins']=true
 L['commands on whisper']=true
-L['only in raid']=true
+L['in raid']=true
+L["always"]=true
+L["TXTArtOnFront"]="Front Art"
+L["DESCr-TXTArtOnFront"]=[[|cffff9999Art layering|r
+Controls which texture is rendered on top.
+
+|cff88ccffEnabled:|r
+The Art texture is displayed above the Background.
+Useful for semi-transparent artwork while keeping the menu visually solid and readable through the backing layer.
+
+|cff88ccffDisabled:|r
+The Background becomes the front layer and softens the Art beneath it.
+Perfect for dark UI styles with that "barely visible but definitely artistic" background everyone pretends was intentional.
+
+|cffa19375If you have cranked everything to 100%, may the Light have mercy upon you... for I shall not.|r]]
+L['share new locals']=true
+L["DESCr-dkpcomm_sendLocals"]=[[New auto bindings created by players will be sent to "subscribers" in the guild
+|cffa19375Screw security]]
+L["List Players"]=true
+L["Guild Rank"]=true
+L["Guild Any"]=true
+L["Raid Any"]=true
+L["Disabled"]=true
+L["DESCr-aw_trusted_players"]=[[|cffff9999Trusted Players|r
+-Can give/remove the assistant role to themselves if you are the raid leader.
+-Can share local character links with you:
+
+|cff88ccffPlayer List|r — specify trusted player names below, separated by commas.
+|cff88ccffGuild Rank|r — players with this rank or higher will be considered trusted.
+|cff88ccffGuild|r — every guild member is trusted.
+    |cff507375Are you absolutely sure this is what you want?..|r
+|cff88ccffRaid|r — same as |cff88ccffGuild|r, plus any raid member can give themselves assistant.
+    |cff507375What could possibly go wrong|r
+|cff88ccffDisabled|r — Disabled
+    |cff507375Allah once said: The safest system is the one nobody can use]]
+L['Old data notice']=true
+L["DESCr-OldDataDeletionPrint"]=[[When the retention period for a player who left the guild expires and their data is deleted, 
+it will also be printed in chat as a last chance to copy it]]
+L["Auto"]=true
+L["Instant"]=true
+L["By Timer"]=true
+L["Invitations speed"]=true
+L["Invite trigger"]=true
+L["Stop message"]=true
+L["Auto-stop message"]=true
+L["Loot Method"]=true
+L["more..."]=true
 end
 
 do -- Bid Tracker
@@ -470,15 +524,13 @@ L["DESCr-aw_sc_long"]=[[Show only long (>2min) fights
 |cffff9999This affects all scada logs processing, not only this list|r]]
 L["DESCr-aw_readycheck"]=[[Run a ready check]]
 L["DESCr-aw_auto_locals"]=[[|cffff9999Automatic Locals|r
-When one of the "Trusted Players" creates a local binding, you will automatically save it as well]]
+When one of the "Trusted Players" creates a local binding, you will automatically save it as well
+|cff507375Only a small percentage of viewers are actually subscribed]]
 L["DESCr-aw_auto_Ch_locals"]=[[If the received local binding modifies an existing one, it will be accepted automatically
 If disabled, such a binding is skipped]]
 L['subscribe to auto locals']=true
 L['apply changes']=true
 L['silent mode']=true
-L["DESCr-aw_trusted_players"]=[[|cffff9999Trusted Players|r
--can take/remove the assistant role in the raid if you are RL
--can share local twins with you ("Any" works same as "Any Guild")]]
 L["DESCr-dkpWhispers"]="Send whispers for DKP awards instead of guild chat messages"
 L["dkpWhispers"]="DKP: whispers"
 L["Promoted to Raid Assistant: "]=true
@@ -499,7 +551,8 @@ I recommend enabling the option "'commands on whisper'" in the addon options men
 L["Raid Role Summary"]=true
 L["roleshelp_details"]="Click to see $1 values"
 L["N/A spec"]=true
-L['DESCr-Raid difficulty']="Raid difficulty"
+L['Raid difficulty']=true
+L['DESCr-Raid difficulty']=true
 L["Lock raid"]="Lock"
 L["Unlock raid"]="Unlock"
 L['From EPGP settings']=true
@@ -734,7 +787,7 @@ L['gc_helper']=[[This menu provides a guild rank system visualization where you 
   —build a guild rank system from a template
 *there is a limit on the minimum/maximum number of ranks
 
-|cffff9999All changes are virtual. To save changes you must be |cff99ffffGuild Master|r]]
+|cffff9999All changes are virtual. To save changes you must be |cffaaccffGuild Master|r]]
 L["got it, close"]=true
 end
 
@@ -763,7 +816,6 @@ becomes
 
 The quoted joke at the end is randomly selected from the list on the right.]]
 L['DESCr-lootBtnSelect']=[==[Set looting method]==]
-L['DESCr-speedSelect']=[==[Interval between raid invites]==]
 L['DESCr-awgrpmover']=[==[|cffff9999   Drag|r
 Move group members to another group
 
@@ -795,9 +847,10 @@ Your anguished cries will be testament to my |cffbd0000unbridled |cff943838power
 L['DESCr-desc_evaluate']="Show alternative officer notes"
 L['DESCr-desc_onlinefirst']="sort online and offline players separately; put online players at the top of the list"
 L['DESCr-desc_reverse']="reverse sort"
-L['DESCr-onltvingrps']=[[|cffff9999Perfect sorting when kicking afk players|r
-Groups mains with alts and detects the last online via any character,
-then sorts such groups by online]]
+L['DESCr-onltvingrps']=[[|cffff9999Perfect sorting for kicking AFK players|r
+Groups mains with their alts and determines the most recent online activity across all characters,
+then sorts such groups by last online time.
+|cffa19375For this to work correctly, enable both online and offline player display and clear all search fields!]]
 L['DESCr-gc_run_notif']=[[The needed options are already enabled, depending on the changes you have made
 However, you can surely make adjustments]]
 L['DESCr-gc_createbackup']=[[|cffff9999Create a full guild backup before making changes.|r
@@ -831,10 +884,10 @@ Players can whisper "epgp standby" (by default) to you to join standby
 
 The list of players is saved even when you re-enter the game (saved within your account>guild)]==]
 L['DESCr-additionalbinds']=[==[|cffff9999Additional binds|r
-|cff99ffffCtrl-O|r — Open main addon window (Guild)
-|cff99ffffShift-O|r — Open Inviter/Flask Dispenser
-|cff99ffffAlt-O|r — Open Awarder window
-|cff99ffffCtrl-Alt-O|r — Open EP-Auc/DKP bid tool]==]
+|cffaaccffCtrl-O|r — Open main addon window (Guild)
+|cffaaccffShift-O|r — Open Inviter/Flask Dispenser
+|cffaaccffAlt-O|r — Open Awarder window
+|cffaaccffCtrl-Alt-O|r — Open EP-Auc/DKP bid tool]==]
 L['DESCr-GCmover']=[==[|cffff9999   Click|r
 Open the rank options menu
 
@@ -865,8 +918,8 @@ L['DESCr-darkenoffline']=[==[|cffff9999Darken offline players|r
 darkening may not work for all players
 in locked raids or loaded snapshots]==]
 L['DESCr-dkpcomm']=[==[|cffff9999On whisper commands|r
-|cff99ffff?dkp|r / |cff99ffff?epgp|r - Get player's DKP/EPGP values
-|cff99ffff?main|r <|cff99ffffnickname|r> - assign in-guild player to their main
+|cffaaccff?dkp|r / |cffaaccff?epgp|r - Get player's DKP/EPGP values
+|cffaaccff?main|r <|cffaaccffnickname|r> - assign in-guild player to their main
            (non-guild players will be assigned locally)]==]
 L['DESCr-warnsuspic']=[==[|cffff9999Chat transaction verification|r
 addon will try to verify each spotted transaction
@@ -943,24 +996,26 @@ Useful before awarding, if there are raid members prone to leaving
 or if you want to do award outside of raid.
 
 data is NOT stored on logout -use Snapshots]==]
-L["DESCr-precisematchsearch"]=[==[|cff00ff00enabled|cffffffff:|r Find players matching |cffaaccffALL|r of the entered |cffaaccffsearch|r fields.
-Example: By filling in "bis" in |cffaaccffnote|r, you will see all bis characters in guild. 
-         Adding "death" to |cffaaccffclass|r, will show only bis Death knights
-|cffff0000disabled|cffffffff:|r Display players with |cffaaccffANY|r match in |cffaaccffANY|r |cffaaccffsearch|r field.]==]
+L["DESCr-precisematchsearch"]=[==[|cff88ccffEnabled|cffffffff:|r Show only players matching |cffaaccffall|r entered search fields:
+Searching "bis" in |cffaaccffnote|r and "m" in |cffaaccffonline|r will show only bis players inactive for more than a month.
+
+|cff88ccffDisabled|cffffffff:|r Show players matching |cffaaccffany|r entered search field:
+Searching "bis" and "m" will show players matching at least one of the values.
+|cff507375The "twins" and "clear" buttons also toggle this function|r]==]
 L["DESCr-grefr"]=[==[Automatically refresh data.]==]
 L["DESCr-procepzamene"]=[==[Players on standby and 6-8 party (if the option above is enabled) will receive % of the raid award
 Raid award is the first award criteria (mark)
 
 Off: 100%]==]
-L["DESCr-showlocals"]=[==[|cff00ff00Enabled|cffffffff:|r Include non-guild characters locally bound with guild mains
-|cffff0000Disabled|cffffffff:|r (default) Show only guild members]==]
+L["DESCr-showlocals"]=[==[|cffaaccffEnabled|cffffffff:|r Include non-guild characters locally bound with guild mains
+|cffaaccffDisabled|cffffffff:|r (default) Show only guild members]==]
 L["DESCr-mmenuqcopy"]=[==[While typing in "note" or "officer note" fields, the sidebar copy menus will be shown automatically.]==]
 L["DESCr-mmenuleavefocus"]=[==[Leave the typing focus untouched in officer/note while selecting a player
 so you can select players one-by-one and fill in the needed officer/notes manually/via Ctrl+V
 If disabled, the typing focuses will be cleared.]==]
 L['DESCr-mmenucloserank']=[==[Close rank selection after change]==]
 L["DESCr-maxlog"]=[==[Max number of Log lines to store.
-Be careful, large log may cause lags when scrolling
+Be careful, large cock, i mean, log... crap, anyways it may cause lags when scrolling
 |cffffaeaeRecommended|r: no more than 200-300
 |cff99eeeeDefault|r: 150]==]
 L["DESCr-maxperplayer"]=[==[Max number of records 2b stored per guild's player.
@@ -974,27 +1029,23 @@ L["DESCr-addonscale"]=[==[Sets the Scale value of the addon.
 Not to be confused with |cffff00ffSize|r 
 (you may play with Alt-draging the addon window).
 |cff99eeeeDefault|r: 1.0]==]
-L["DESCr-epgpdecayprec"]=[==[Set the number of days that may pass between |cffffaaffaddon|r check and guild |cffaaccffEPGP|r:|cffaaccffDecay|r.
-If the guild was not checked at least once in this period, next time you see the EPGP changes, they will be shown as total difference.
-This function will try to re-calculate the |cffaaccffEPGP|r:|cffaaccffDecay|r and show the difference between the latest values and the actual ones.
-It means that if the guild was |cffaaccffDecay|red while you were online, you will be able to see any security violations :)
-If any suspicious changes were spotted, they might have happened due to the following reasons:
-1) Player obtained EP/GP before the |cffaaccffDecay|r and you were not online to spot it, or the |cffaaccffDecay|r was performed right away
-     (the difference in this case may be not precise due to math :) )
-2) Player obtained EP/GP after the |cffaaccffDecay|r and you were not online to spot it, or the EP/GP award was performed right away after the |cffaaccffDecay|r
-     (the difference in this case will be rather precise)
-3) Someone is cheating :) Depending on the types of differences you see and their amount, it is possible to guess when the violation of The Law happened.
-|cff9966a6Use your brains to figure out if this is valid or not; ffs, I made an addon for you, all the hard work. 
-You just fcking read and think, use your head. To listen, you need ears, you know? :)|cff2282aa (c) Roman B. , Senior Panasonic SSL Subject Matter Expert|r
-|cffffaeaeRecommended|r: no more than 3 days, depending on the guild activity and your online. 0-means only online changes (precise: 2.2*Auto-update_rate/60  )
+L['DESCr-epgpdecayprec']=[==[If the addon detects that an |cffaaccffEPGP|r:|cffaaccffDecay|r recently happened when you log in, this option determines whether expected values should be recalculated.
+If you were offline during |cffaaccffDecay|r and could not see EP/GP changes happening in the guild, the addon will try to approximately reconstruct them and show possible suspicious gains.
+
+When a decay is detected, players whose decayed values are as expected are marked as "cl" (clean) in Log, while players with discrepancies are marked with the difference amount and the letter "d" (diff).
+|cff88ccffTip|r: if you see a "clean" difference value, the EP/GP gain most likely happened |cff88ccffafter|r the decay. Messy-looking values usually mean there was an EP/GP gain before the decay (or possibly both before and after).
+Keep in mind that the more days passed since your last login, the less accurate this estimation becomes.
+
+|cffffaeaeRecommended|r: 1–3 days depending on guild activity.  
+0 = only track changes seen online.
 |cff99eeeeDefault|r: 2]==]
 L["DESCr-arttextalpha"]=[==[|cffff9999Art texture transparency|r
 |cff99eeeeDefault|r: |cff99ff990.2|r]==]
-L["DESCr-txt1extra"]=[==[|cffff9999Art texture extended transparency|r
+L["DESCr-TXTArtTransp"]=[==[|cffff9999Art texture extended transparency|r
 |cff99eeeeDefault|r: |cff99ff99Disabled|r]==]
 L["DESCr-bgtextalpha"]=[==[|cffff9999BG texture transparency|r
 |cff99eeeeDefault|r: |cff99ff990.5|r]==]
-L["DESCr-txt2extra"]=[==[|cffff9999BG texture extended transparency|r
+L["DESCr-TXTBgTransp"]=[==[|cffff9999BG texture extended transparency|r
 |cff99eeeeDefault|r: |cff99ff99Disabled|r]==]
 
 L['DESCr-epgpofficernote']=[==[Injection in |cffaaccffEPGP|r addon:

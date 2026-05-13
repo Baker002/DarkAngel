@@ -234,6 +234,18 @@ local function raidCompCleanup(t, rem)
 end
 
 
+DA_Awarder=DA.FrameCreater(nil,UIParent,350,495,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_awarder]])
+DA_Awarder:RegisterForDrag("LeftButton")
+DA_Awarder:SetScript("OnDragStart", DA_Awarder.StartMoving)
+DA_Awarder:SetScript("OnDragStop", function(self)
+
+	self:StopMovingOrSizing(self)
+
+	local point={DA_Awarder:GetPoint(1)}
+	fuckingOptions.saved_guiPositions.DA_Awarder={point[1] or "TOPLEFT",point[3] or "CENTER",point[4] or 0,point[5] or 0}
+
+end)
+
 function Mod:OnInitialize()
 
 	DA_Awarder:SetScale(fuckingOptions.Awarderscale)
@@ -469,7 +481,7 @@ function Mod:OnGuildLoad()
  
 end
 
-function Mod:PublishLocal(name)
+function DA.PublishLocal(name)
 	table.wipe(locals_Bulk)
 	localsToShare[name] = true
 	
@@ -491,17 +503,6 @@ function Mod:PublishLocal(name)
 end
 
 
-DA_Awarder=DA.FrameCreater(nil,UIParent,350,495,{"CENTER", UIParent, "CENTER", 0, 0},[[Interface\AddOns\DarkAngel\template\pict\art_awarder]],1)
-DA_Awarder:RegisterForDrag("LeftButton")
-DA_Awarder:SetScript("OnDragStart", DA_Awarder.StartMoving)
-DA_Awarder:SetScript("OnDragStop", function(self)
-
-	self:StopMovingOrSizing(self)
-
-	local point={DA_Awarder:GetPoint(1)}
-	fuckingOptions.saved_guiPositions.DA_Awarder={point[1] or "TOPLEFT",point[3] or "CENTER",point[4] or 0,point[5] or 0}
-
-end)
 
 DA_Awarder.locker=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER",DA_Awarder,"TOPLEFT",40,-10},10,74,L["Lock raid"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "outline"},function(self)
 	if self.fs:GetText()==L["Unlock raid"] then
@@ -4179,11 +4180,11 @@ function FEP_CreateGroups()
 								local ntt2=DA.DecodeNote(FEP_gMain[FEP_gMain[newmain]])
 								if ntt2=='m' then
 									FEP_L_gMain[DA_CurrentGuild][name]=FEP_gMain[newmain]
-									Mod:PublishLocal(name)
+									DA.PublishLocal(name)
 								elseif ntt2=='f' then
 									DA.Print(L['[OK] local created, however, main is frozen'])
 									FEP_L_gMain[DA_CurrentGuild][name]=FEP_gMain[newmain]
-									Mod:PublishLocal(name)
+									DA.PublishLocal(name)
 								elseif ntt2=='t' then
 									DA.Print(L['this is a dublicated tvin!'].." -"..newmain.."-"..FEP_gMain[newmain].."-"..FEP_gMain[FEP_gMain[newmain]])
 									if FEP_gMain[FEP_gMain[FEP_gMain[newmain]]] then
@@ -4198,11 +4199,11 @@ function FEP_CreateGroups()
 						elseif notetype=='f' then
 							DA.Print(L['[OK] local created, however, main is frozen'])
 							FEP_L_gMain[DA_CurrentGuild][name]=newmain
-							Mod:PublishLocal(name)
+							DA.PublishLocal(name)
 							
 						elseif notetype=='m' then
 							FEP_L_gMain[DA_CurrentGuild][name]=newmain
-							Mod:PublishLocal(name)
+							DA.PublishLocal(name)
 						end
 					else
 						DA.Print(L['no such player in guild'])
@@ -4224,7 +4225,7 @@ function FEP_CreateGroups()
 					if FEP_gMain[FEP_L_gMain[DA_CurrentGuild][name]] then
 						if FEP_gMain[newmain] then
 							FEP_L_gMain[DA_CurrentGuild][name]=newmain
-							Mod:PublishLocal(name)
+							DA.PublishLocal(name)
 						else
 							FEP_L_gMain[DA_CurrentGuild][name]=nil
 						end
@@ -6899,8 +6900,8 @@ local lastGuildGet = 0
 local AW_allowed_players={}
 local function gatherAllowedPlayers()
 	table.wipe(AW_allowed_players)
-	if fuckingOptions_g[DA_CurrentGuild].assistperm=="Manual" then
-		local allowedlist=fuckingOptions_g[DA_CurrentGuild].assistperm_manual:gsub("%s","")
+	if fuckingOptions_g[DA_CurrentGuild].trustedMode==1 then
+		local allowedlist=fuckingOptions_g[DA_CurrentGuild].trustedList:gsub("%s","")
 		if allowedlist~="" then
 			for allowed in string.gmatch(allowedlist,"([^%,]+)") do
 				if DA.IsInSameGuild(allowed) then
@@ -6911,8 +6912,8 @@ local function gatherAllowedPlayers()
 		else
 			return
 		end
-	elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Guild Rank" then
-		local permitted_rank=fuckingOptions_g[DA_CurrentGuild].assistperm_rank
+	elseif fuckingOptions_g[DA_CurrentGuild].trustedMode==2 then
+		local permitted_rank=fuckingOptions_g[DA_CurrentGuild].trustedRankID
 		for i=1, DA.GetNumGMembers() do
 			local nam, _, rankIndex, _, _, _, _, _, _, _, _, _, _, _, _, _ = GetGuildRosterInfo(i)
 			if nam and rankIndex and rankIndex+1<=permitted_rank then
@@ -6926,277 +6927,273 @@ local function IsAllowedPlayer(name,mode)
         lastGuildGet = time()
 		gatherAllowedPlayers()
     end
-	local perm_type = fuckingOptions_g[DA_CurrentGuild].assistperm
+	local perm_type = fuckingOptions_g[DA_CurrentGuild].trustedMode
 	
-	if perm_type == "None" then return end
+	if perm_type == 5 then return end
 	
-	if mode=="locals" and (perm_type == "Any" or perm_type == "Guild Any") and DA.IsInSameGuild(name) then return true end
+	if mode=="locals" and (perm_type == 4 or perm_type == 3) and DA.IsInSameGuild(name) then return true end
 	
-	if mode=="assist" and (perm_type == "Any" or (perm_type == "Guild Any" and DA.IsInSameGuild(name)))  then return true end
+	if mode=="assist" and (perm_type == 4 or (perm_type == 3 and DA.IsInSameGuild(name)))  then return true end
 	
 	if AW_allowed_players[name] then return true end
 end
 
-DA:RegisterComm("DA_ass", 
-	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() and dtype=='RAID' then
-			local name,class,raidID
-			for i=1,40 do
-				local na, _, _, _, _, cl, _, _, _, _, _ = GetRaidRosterInfo(i)
-				if na==sender then
-					name=na
-					class=cl
-					break
-				end
+DA:RegisterComm("DA_ass", function(message, dtype, sender)
+	if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() and dtype=='RAID' then
+		local name,class,raidID
+		for i=1,40 do
+			local na, _, _, _, _, cl, _, _, _, _, _ = GetRaidRosterInfo(i)
+			if na==sender then
+				name=na
+				class=cl
+				break
 			end
-			if not name or not class then return end
-			
-			if IsAllowedPlayer(sender,'assist') then
-				PromoteToAssistant(name)
-				DA.Print(L["Promoted to Raid Assistant: "]..DA.GetHexClassColorCode(class)..name)
-			end
-			
 		end
-	end
-)
-DA:RegisterComm("DA_assRm", 
-	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() then
-			DemoteAssistant(sender)
+		if not name or not class then return end
+		
+		if IsAllowedPlayer(sender,'assist') then
+			PromoteToAssistant(name)
+			DA.Print(L["Promoted to Raid Assistant: "]..DA.GetHexClassColorCode(class)..name)
 		end
+		
 	end
-)
-DA:RegisterComm("DA_fask", 
-	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and DA.IsInSameGuild(sender) then
+end)
+DA:RegisterComm("DA_assRm", function(message, dtype, sender)
+	if sender~=GetUnitName("player") and UnitInRaid(sender) and IsRaidLeader() then
+		DemoteAssistant(sender)
+	end
+end)
+DA:RegisterComm("DA_fask", function(message, dtype, sender)
+	if sender~=GetUnitName("player") and DA.IsInSameGuild(sender) then
 
-			DA.RegatherGuildNotes()
-			
-			local sendlist_low={}
-			for i,p in pairs(FEP_L_gMain[DA_CurrentGuild]) do
-				if FEP_gMain[p] and (DA.DecodeNote(FEP_gMain[p])=='m' or DA.DecodeNote(FEP_gMain[p])=='f') then
-					tinsert(sendlist_low,i.."@"..p)
-				end
-			end
-			for _,j in ipairs(DA.ConcatStr(sendlist_low,254,"_")) do
-				SendAddonMessage("DA_fans", j , "WHISPER", sender)
+		DA.RegatherGuildNotes()
+		
+		local sendlist_low={}
+		for i,p in pairs(FEP_L_gMain[DA_CurrentGuild]) do
+			if FEP_gMain[p] and (DA.DecodeNote(FEP_gMain[p])=='m' or DA.DecodeNote(FEP_gMain[p])=='f') then
+				tinsert(sendlist_low,i.."@"..p)
 			end
 		end
+		for _,j in ipairs(DA.ConcatStr(sendlist_low,254,"_")) do
+			SendAddonMessage("DA_fans", j , "WHISPER", sender)
+		end
 	end
-)
-DA:RegisterComm("DA_fans", 
-	function(message, dtype, sender)
-		if sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
-			for str in string.gmatch(message, "[^_]+") do 
-				local atIndex = str:find("@")
+end)
+DA:RegisterComm("DA_fans", function(message, dtype, sender)
+	if sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
+		for str in string.gmatch(message, "[^_]+") do 
+			local atIndex = str:find("@")
 
-				if atIndex then
-					local main = str:sub(1, atIndex - 1)
-					local assign = str:sub(atIndex + 1)
-					
-					if DA_locals_UpdList[main] then
-						local skip
-						for _,tbx in ipairs(DA_locals_UpdList[main]) do
-							if tbx[1]==assign then
-								skip=true
-								break
-							end
+			if atIndex then
+				local main = str:sub(1, atIndex - 1)
+				local assign = str:sub(atIndex + 1)
+				
+				if DA_locals_UpdList[main] then
+					local skip
+					for _,tbx in ipairs(DA_locals_UpdList[main]) do
+						if tbx[1]==assign then
+							skip=true
+							break
 						end
-						
-						if skip then
-						else
-							tinsert(DA_locals_UpdList[main],{assign,sender=sender})
-						end
-					else
-						DA_locals_UpdList[main]={{assign,sender=sender}}
 					end
+					
+					if skip then
+					else
+						tinsert(DA_locals_UpdList[main],{assign,sender=sender})
+					end
+				else
+					DA_locals_UpdList[main]={{assign,sender=sender}}
 				end
 			end
 		end
 	end
-)
-DA:RegisterComm("DA_flcans", 
-	function(message, dtype, sender)
-		if fuckingOptions_g[DA_CurrentGuild].aw_auto_locals and sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
-			local dochange = fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals
-			local quietmode = fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals
-			
-			local FL = FEP_L_gMain[DA_CurrentGuild]
-			
-			local received=0
-			local received_ignored=0
-			
-			for str in string.gmatch(message, "[^_]+") do 
-				local atIndex = str:find("@")
+end)
+DA:RegisterComm("DA_flcans", function(message, dtype, sender)
+	if fuckingOptions_g[DA_CurrentGuild].aw_auto_locals and sender~=GetUnitName("player") and IsAllowedPlayer(sender,'locals') then
+		local dochange = fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals
+		local quietmode = fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals
+		
+		local FL = FEP_L_gMain[DA_CurrentGuild]
+		
+		local received=0
+		local received_ignored=0
+		
+		for str in string.gmatch(message, "[^_]+") do 
+			local atIndex = str:find("@")
 
-				if atIndex then
-					local player = str:sub(1, atIndex - 1)
-					local main = str:sub(atIndex + 1)
-					
-					if FL[player] and FL[player]==main then
-						--do nothing
-					elseif FL[player] and FL[player]~=main then
-						if dochange then
-							FL[player]=main
-							received=received+1
-						else
-							received=received+1
-							received_ignored=received_ignored+1
-						end
-					elseif not FL[player] then
+			if atIndex then
+				local player = str:sub(1, atIndex - 1)
+				local main = str:sub(atIndex + 1)
+				
+				if FL[player] and FL[player]==main then
+					--do nothing
+				elseif FL[player] and FL[player]~=main then
+					if dochange then
 						FL[player]=main
 						received=received+1
+					else
+						received=received+1
+						received_ignored=received_ignored+1
 					end
-					
+				elseif not FL[player] then
+					FL[player]=main
+					received=received+1
 				end
+				
 			end
-			
-			if received>0 then 
-				if DA_Awarder:IsShown() then
-					FEP_GatherRaid()
-					tinsert(DA_Fep_bulk,function()  end)
-					tinsert(DA_Fep_bulk,function()  end)
-					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
-				end
-				if not quietmode then 
-					DA.Print(" [|cff00ffff"..sender.."|r]: +|cff00ffff"..received.."|r new locals "..(received_ignored>0 and "(|cfffff200"..received_ignored.."|r changing locals ignored)" or "") )
-				end
+		end
+		
+		if received>0 then 
+			if DA_Awarder:IsShown() then
+				FEP_GatherRaid()
+				tinsert(DA_Fep_bulk,function()  end)
+				tinsert(DA_Fep_bulk,function()  end)
+				tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 			end
-			
+			if not quietmode then 
+				DA.Print(" [|cff00ffff"..sender.."|r]: +|cff00ffff"..received.."|r new locals "..(received_ignored>0 and "(|cfffff200"..received_ignored.."|r changing locals ignored)" or "") )
+			end
+		end
+		
+	end
+end)
+
+
+DA.AddModOptions('Awarder', function(optFrame,optScrollFrame)
+	local f = DA.FrameCreater(nil,optScrollFrame.scrollchild,154,142)
+	f:Show()
+	
+	local commOnWh = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['commands on whisper'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm=(self:GetChecked() or false);DA.DKP_commUpdate() end,{'fuckingOptions_g','dkpcomm','DA_CurrentGuild'},'dkpcomm')
+
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-44},15,15,L['share new locals'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm_sendLocals=(self:GetChecked() or false) end,{'fuckingOptions_g','dkpcomm_sendLocals','DA_CurrentGuild'},'dkpcomm_sendLocals')
+	
+	
+	DA.FontCreater(nil,"Awarder",{"LEFT",f,"TOPLEFT",5,-6},commOnWh,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-105},15,15,L['subscribe to auto locals'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_locals','DA_CurrentGuild'},'aw_auto_locals')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-117},15,15,L['apply changes'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_Ch_locals','DA_CurrentGuild'},'aw_auto_Ch_locals')
+	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-129},15,15,L['silent mode'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_silent_locals','DA_CurrentGuild'})
+	
+	
+	if not fuckingOptions_g[DA_CurrentGuild].trustedRankID or GuildControlGetNumRanks()<=fuckingOptions_g[DA_CurrentGuild].trustedRankID then
+		for i=GuildControlGetNumRanks(),1,-1 do
+			GuildControlSetRank(i)
+			local _, _, _, _, _, _, _, _, _, _, view_officer_note, edit_officer_note, _, _, _, _, _ = GuildControlGetRankFlags()
+			if view_officer_note and edit_officer_note then
+				fuckingOptions_g[DA_CurrentGuild].trustedRankID=i
+				break
+			end
 		end
 	end
-)
+	local trustedModeSelectorFrame, trustedRankIDSelectorBtn, trustedRankIDSelectorFrame, trustedListEB
 
-function Mod:AddModOptions(modOptTable)
-	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,130)
-	f:Show()
-	tinsert(modOptTable, {'Awarder',f})	
-	
-	DA.FontCreater(nil,"Awarder",{"LEFT",f,"TOPLEFT",5,-6},f,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['commands on whisper'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm=(self:GetChecked() or false);DA.DKP_commUpdate() end,{'fuckingOptions_g','dkpcomm','DA_CurrentGuild'},'dkpcomm')
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-32},15,15,L['only in raid'],function(self) fuckingOptions_g[DA_CurrentGuild].dkpcomm_inraid=(self:GetChecked() or false) end,{'fuckingOptions_g','dkpcomm_inraid','DA_CurrentGuild'},nil)
-	
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-93},15,15,L['subscribe to auto locals'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_locals','DA_CurrentGuild'},'aw_auto_locals')
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-105},15,15,L['apply changes'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_Ch_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_Ch_locals','DA_CurrentGuild'},'aw_auto_Ch_locals')
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-117},15,15,L['silent mode'],function(self) fuckingOptions_g[DA_CurrentGuild].aw_auto_silent_locals=(self:GetChecked() or false) end,{'fuckingOptions_g','aw_auto_silent_locals','DA_CurrentGuild'})
-	
-	
-	do --assister ranks permit
-		if not fuckingOptions_g[DA_CurrentGuild].assistperm_rank or GuildControlGetNumRanks()<=fuckingOptions_g[DA_CurrentGuild].assistperm_rank then
-			for i=GuildControlGetNumRanks(),1,-1 do
-				GuildControlSetRank(i)
-				local _, _, _, _, _, _, _, _, _, _, view_officer_note, edit_officer_note, _, _, _, _, _ = GuildControlGetRankFlags()
-				if view_officer_note and edit_officer_note then
-					fuckingOptions_g[DA_CurrentGuild].assistperm_rank=i
-					break
-				end
-			end
+	-- Trusted Players Manual List
+	trustedListEB=DA.EditBoxCreater2(nil,f,{"TOPLEFT",f,"TOPLEFT",11,-80},{90,12},fuckingOptions_g[DA_CurrentGuild].trustedList,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","trustedList",'DA_CurrentGuild'},nil,nil,'text')
+	trustedListEB:SetScript("OnTextChanged",function(self)
+		if self:GetText():find("[0-9]") or self:GetText():find("%.") then
+			self.t:SetTexture(70/255, 12/255, 20/255, 1)
+		else
+			self.t:SetTexture(0.176, 0.286, 0.356, 1)
 		end
-		local re_render_byrankbtn_highlight 
-		local re_render_byrankbtn 
-		local additassist={
-			{"Manual"},
-			{"Guild Rank"},
-			{"Guild Any"},
-			{"Any"},
-			{"None"},
-		}
-		local re_highlight_assist 
-		
-		
-		DarkAngelGUI.opt.assistperm_byrankbtn,DarkAngelGUI.opt.assistperm_byrankFrame=DA.CreateFFGDropFrame(f,"",12,68,{"CENTER",f,"TOPLEFT",45,-75},70,GuildControlGetNumRanks()*11,"BOTTOM",'center', function() DarkAngelGUI.opt.assistpermFrame:Hide();re_render_byrankbtn();re_render_byrankbtn_highlight() end)
-		for i=1,10 do 
-			DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.opt.assistperm_byrankFrame,{"TOPLEFT", DarkAngelGUI.opt.assistperm_byrankFrame, "TOPLEFT", 1,10-11*i},10,68,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
-			end,nil,nil,'left')
-		end
-		
-		
-		
-		DarkAngelGUI.opt.assistpermbtn,DarkAngelGUI.opt.assistpermFrame=DA.CreateFFGDropFrame(f,"",12,68,{"CENTER",f,"TOPLEFT",45,-60},70,56,"BOTTOM",nil,function() DarkAngelGUI.opt.assistperm_byrankFrame:Hide() end,nil,'aw_trusted_players')
-		DA.FontCreater(nil,L["Trusted players"],{"LEFT",DarkAngelGUI.opt.assistpermbtn,"LEFT",-5,13},DarkAngelGUI.opt.assistpermbtn,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-		
-		DarkAngelGUI.opt.assistperm_manual=DA.EditBoxCreater2(nil,DarkAngelGUI.opt.assistpermbtn,{"TOPLEFT",DarkAngelGUI.opt.assistpermbtn,"BOTTOMLEFT",0,-4},{90,12},fuckingOptions_g[DA_CurrentGuild].assistperm_manual,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","assistperm_manual",'DA_CurrentGuild'},nil,nil,'text')
-		DarkAngelGUI.opt.assistperm_manual:SetScript("OnTextChanged",function(self)
-			if self:GetText():find("[0-9]") or self:GetText():find("%.") then
-				self.t:SetTexture(70/255, 12/255, 20/255, 1)
-			else
-				self.t:SetTexture(0.176, 0.286, 0.356, 1)
-			end
-		end)
-		DarkAngelGUI.opt.assistperm_manual:Hide()
-		
-		
-		for i,criteria in pairs(additassist) do
-			DarkAngelGUI.opt.assistpermFrame[i]=DA.CreateFFGButton2(nil,DarkAngelGUI.opt.assistpermFrame,{"TOPLEFT", DarkAngelGUI.opt.assistpermFrame, "TOPLEFT", 1,10-11*i},10,68,criteria[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), criteria[2] or 9, "OUTLINE"},function(self) 
-				fuckingOptions_g[DA_CurrentGuild].assistperm=self.fs:GetText()
-				re_highlight_assist()
-				DarkAngelGUI.opt.assistpermFrame:Hide()
-			end,criteria[3] or nil,nil,'center')
-		end
-		
-		
-		
-		
-		re_render_byrankbtn_highlight=function()
-			for i=1,10 do
-				if DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i].rankID==fuckingOptions_g[DA_CurrentGuild].assistperm_rank then
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i].fs:SetTextColor(0.2,1,1,1)
-					DarkAngelGUI.opt.assistperm_byrankbtn:SetText(GuildControlGetRankName(fuckingOptions_g[DA_CurrentGuild].assistperm_rank))
-				else
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i].fs:SetTextColor(0.85,1,1,1)
-				end
-			end
-		end
-		re_render_byrankbtn=function()
+	end)
+	trustedListEB:Hide()
+	
+	-- Trusted Players Rank selector
+	trustedRankIDSelectorBtn, trustedRankIDSelectorFrame=DA.CreateDropdownSelector({
+		rel = f,
+		point = {"CENTER",f,"TOPLEFT",50,-87},
+		width = 80,
+		height = 12,
+		frpoint = "BOTTOM",
+		valuesrosterDynamic = function()
 			local gcnr=GuildControlGetNumRanks()
+			local valuesroster = {}
 			for i=1,10 do
 				if i<=gcnr then
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i].fs:SetText(GuildControlGetRankName(i))
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i].rankID=i
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i]:SetScript("OnClick",function(self) 
-						DarkAngelGUI.opt.assistperm_byrankbtn.fs:SetText(self.fs:GetText())
-						fuckingOptions_g[DA_CurrentGuild].assistperm_rank=i
-						re_render_byrankbtn_highlight()
-						DarkAngelGUI.opt.assistperm_byrankFrame:Hide()
-					end)
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i]:SetPoint("TOPLEFT", DarkAngelGUI.opt.assistperm_byrankFrame, "TOPLEFT", 1,10-11*i)
+					table.insert(valuesroster, { text = "["..(i-1).."]"..GuildControlGetRankName(i), value = i})
 				else
-					DarkAngelGUI.opt.assistperm_byrankFrame['rankbtn'..i]:Hide()
+					table.insert(valuesroster, { text = "#"..i, value = i, isHidden = true})
 				end
 			end
-			DarkAngelGUI.opt.assistperm_byrankFrame:SetSize(70,gcnr*11)
-		end
-		re_highlight_assist=function()
-			for i=1,#additassist do
-				if DarkAngelGUI.opt.assistpermFrame[i].fs:GetText()==fuckingOptions_g[DA_CurrentGuild].assistperm then
-					DarkAngelGUI.opt.assistpermFrame[i].fs:SetTextColor(0.2,1,1,1)
-					if fuckingOptions_g[DA_CurrentGuild].assistperm=="Manual" then
-						DarkAngelGUI.opt.assistperm_manual:Show()
-						DarkAngelGUI.opt.assistperm_byrankbtn:Hide()
-					elseif fuckingOptions_g[DA_CurrentGuild].assistperm=="Guild Rank" then
-						DarkAngelGUI.opt.assistperm_manual:Hide()
-						DarkAngelGUI.opt.assistperm_byrankbtn:Show()
-					else
-						DarkAngelGUI.opt.assistperm_manual:Hide()
-						DarkAngelGUI.opt.assistperm_byrankbtn:Hide()
-					end
-					DarkAngelGUI.opt.assistpermbtn:SetText(fuckingOptions_g[DA_CurrentGuild].assistperm)
-				else
-					DarkAngelGUI.opt.assistpermFrame[i].fs:SetTextColor(0.85,1,1,1)
-				end
-			end
-		end
-		
-		re_render_byrankbtn()
-		re_render_byrankbtn_highlight()
-		DarkAngelGUI.opt.assistperm_byrankbtn:Hide()
-		re_highlight_assist()
-		table.insert(DA.RunOnGuildUpdate, re_render_byrankbtn)
-		table.insert(DA.RunOnGuildUpdate, re_render_byrankbtn_highlight)
-		table.insert(DA.RunOnGuildUpdate, re_highlight_assist)
-		
-	end
+			return valuesroster
+		end,
+		isGuildDynamicValue = true,
+		optjusth = 'left',
+		get = function()
+			return fuckingOptions_g[DA_CurrentGuild].trustedRankID
+		end,
+		set = function(value)
+			fuckingOptions_g[DA_CurrentGuild].trustedRankID = value
+		end,
+		funcOnShow = function(self) self:reRender(); trustedModeSelectorFrame:Hide(); end,
+	})
 
 	
-end
+	-- Trusted players
+	_, trustedModeSelectorFrame=DA.CreateDropdownSelector({
+		rel = f,
+		point = {"CENTER",f,"TOPLEFT",50,-72},
+		width = 80,
+		height = 12,
+		title = {
+			L["Trusted players"],
+			{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"}
+		},
+		frpoint = "BOTTOM",
+
+		valuesroster = {
+			{ text = L["List Players"], value = 1 , deskr = nil, funcOnSelection = function ()
+				trustedListEB:Show()
+				trustedRankIDSelectorBtn:Hide()
+			end},
+			{ text = L["Guild Rank"], value = 2 , deskr = nil, funcOnSelection = function ()
+				trustedListEB:Hide()
+				trustedRankIDSelectorBtn:Show()
+			end},
+			{ text = L["Guild Any"], value = 3 , deskr = nil, funcOnSelection = function ()
+				trustedListEB:Hide()
+				trustedRankIDSelectorBtn:Hide()
+			end},
+			{ text = L["Raid Any"], value = 4 , deskr = nil, funcOnSelection = function ()
+				trustedListEB:Hide()
+				trustedRankIDSelectorBtn:Hide()
+			end},
+			{ text = L["Disabled"], value = 5 , deskr = nil, funcOnSelection = function ()
+				trustedListEB:Hide()
+				trustedRankIDSelectorBtn:Hide()
+			end},
+		},
+		isGuildDynamicValue = true,
+		get = function()
+			return fuckingOptions_g[DA_CurrentGuild].trustedMode
+		end,
+		set = function(value)
+			fuckingOptions_g[DA_CurrentGuild].trustedMode = value
+		end,
+		funcOnShow = function() trustedRankIDSelectorFrame:Hide() end,
+		desrtag = "aw_trusted_players"
+	})
+
+	-- command whispers raid selector
+	DA.CreateDropdownSelector({
+		rel = f,
+		point = {"LEFT",f,"TOPLEFT",20,-32},
+		width = 70,
+		height = 12,
+		frpoint = "BOTTOM",
+		valuesroster = {
+			{ text = L["always"], value = 1},
+			{ text = L["in raid"], value = 2},
+			{ text = L["guild raid"], value = 3},
+			{ text = L["pure guild"], value = 4},
+		},
+		isGuildDynamicValue = true,
+		get = function()
+			return fuckingOptions_g[DA_CurrentGuild].commWhispersPerm
+		end,
+		set = function(value)
+			fuckingOptions_g[DA_CurrentGuild].commWhispersPerm = value
+		end,
+		desrtag = "dkpCommTT"
+	})
+	return f
+end)

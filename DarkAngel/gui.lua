@@ -36,13 +36,12 @@ DarkAngelGUI:SetScript("OnDragStop", 	function(self)
 	end
 end)
 
-
-function DA.FrameCreater(name,rel,width,heigh,point,textc,addtxtfr, moreframelvl)
+function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, moreframelvl, alwaysDarkFrame)
 	local f=CreateFrame("Frame", name, rel)
 	f.width  = width
 	f.height = heigh
 	f:SetBackdropColor(1, 1, 1, 1)
-	f:SetFrameStrata("MEDIUM")
+	-- f:SetFrameStrata("MEDIUM")
 	f:SetSize(f.width, f.height)
 	if point then f:SetPoint(unpack(point)) end
 
@@ -55,43 +54,53 @@ function DA.FrameCreater(name,rel,width,heigh,point,textc,addtxtfr, moreframelvl
 	f:SetMovable(true)
 	f:Hide()
 
-	f:SetFrameLevel(rel:GetFrameLevel() + 25 +(moreframelvl and 35 or 0) )
-
-	if textc then
-		if type(textc)=='string' and textc=='no' then
-		elseif type(textc)=='table' then
-			f.t = f:CreateTexture(nil, "BACKGROUND"); f.t:SetAllPoints(); f.t:SetTexture(unpack(textc));
+	f:SetFrameLevel(rel:GetFrameLevel() + 2 +(moreframelvl and 35 or 0) )
+	local fl = f:GetFrameLevel()
+	
+	f.tf=CreateFrame("Frame",nil,f)
+	f.tf:SetFrameLevel(fl-1)
+	-- f.tf:SetFrameLevel(math.max(fl-2, 0))
+	-- f.tf:SetFrameStrata("MEDIUM")
+	f.tf:SetSize(f.width, f.height)
+	f.tf:SetAllPoints(f)
+	f.tf:SetBackdropColor(1, 1, 1, 1)
+	f.t =f.tf:CreateTexture(nil, "BACKGROUND",nil,-2)
+		f.t:SetAllPoints(f.tf);
+		if customBGcolor then
+			f.t.myStoredTxt = {customBGcolor[1], customBGcolor[2], customBGcolor[3], customBGcolor[4]}
+			f.t:SetTexture(customBGcolor[1], customBGcolor[2], customBGcolor[3],  (fuckingOptions.TXTBgOpacity or customBGcolor[4] or 0.5));
 		else
-			local x = CreateFrame("Frame", nil, f)
-			x:SetAllPoints(f)
-			x:SetFrameLevel(f:GetFrameLevel()-2)
-			f.t = x:CreateTexture(nil, "BACKGROUND"); f.t:SetAllPoints(); f.t:SetTexture(textc);
-			f.t:SetBlendMode(fuckingOptions.txt1extra and "add" or "blend")
-			f.t:SetAlpha(fuckingOptions.txt1op or 0.8)
+			f.t:SetTexture(21/255, 18/255, 22/255, (alwaysDarkFrame and 0.8 or fuckingOptions.TXTBgOpacity or 0.5))
 		end
-	else
-		f.t = f:CreateTexture(nil, "BACKGROUND"); f.t:SetAllPoints(); f.t:SetTexture(0.03, 0.04, 0.07, 0.45); f.t:SetBlendMode("blend")
-	end
+		f.t:SetBlendMode(fuckingOptions.TXTBgTransp and "add" or "blend")
 
-	if addtxtfr then
-		f.add=CreateFrame("Frame",nil,f)
-		f.add.width  = f.width
-		f.add.height = f.height
-		f.add:SetFrameStrata("MEDIUM")
-		f.add:SetSize(f.add.width, f.add.height)
-		f.add:SetAllPoints(f)
-		f.add:SetBackdropColor(1, 1, 1, 1)
 
-		f.add.t=f.add:CreateTexture(nil, "BACKGROUND"); f.add.t:SetAllPoints(); f.add.t:SetTexture(21/255, 18/255, 22/255, (fuckingOptions.txt2op or 0.5));
-		f.add:SetFrameLevel(math.max(f:GetFrameLevel() - 1,0))
-		if fuckingOptions.txt2extra then
-			f.add.t:SetBlendMode("add")
+	if artTexture then
+		f.art=CreateFrame("Frame",nil,f)
+		f.art:SetFrameLevel(fl-1)
+		-- f.art:SetFrameStrata("MEDIUM")
+		f.art:SetSize(f.width, f.height)
+		f.art:SetAllPoints(f)
+		f.art:SetBackdropColor(1, 1, 1, 1)
+
+		f.art.t = f.art:CreateTexture(nil, "BACKGROUND")
+		f.art.t:SetAllPoints(f.art)
+		f.art.t:SetTexture(artTexture);
+		f.art.t:SetAlpha(fuckingOptions.TXTartOpacity or 0.8)
+		f.art.t:SetBlendMode(fuckingOptions.TXTArtTransp and "add" or "blend")
+		
+		if fuckingOptions.TXTArtOnFront then
+			f.art.t:SetDrawLayer('ARTWORK')
+			f.t:SetDrawLayer('BACKGROUND')
 		else
-			f.add.t:SetBlendMode("blend")
+			f.art.t:SetDrawLayer('BACKGROUND')
+			f.t:SetDrawLayer('ARTWORK')
 		end
-
 	end
 	
+	if not alwaysDarkFrame then
+		table.insert(DA.DrawnFrames, f)
+	end
 	return f
 end
 
@@ -168,13 +177,17 @@ local f
 	if not not_show then f:Show() end
 	return f
 end
-function DA.CreateFFGDropFrame(rel,text,width,heigh,point,frw,frh,frorient,justh,addfunctiononshow,addfunctiononhide,desrtag)
-local button=DA.CreateFFGButton2(nil,rel,point,width,heigh,text,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() end,nil,nil,justh)
-local frpoint
+function DA.CreateFFGDropFrame(rel,text,heigh,width,point,frw,frh,frorient,justh,addfunctiononshow,addfunctiononhide,desrtag,alwaysDarkFrame)
+	local button=DA.CreateFFGButton2(nil,rel,point,heigh,width,text,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() end,nil,nil,justh)
+	local frpoint
 	if not frorient then
 		frorient="BOTTOMLEFT"
 	end
-	if frorient=="TOPLEFT-right" then
+	
+	if type(frorient)=='table' then
+		local p1, p2, dX, dY = unpack(frorient)
+		frpoint = {p1, button, p2, dX, dY}
+	elseif frorient=="TOPLEFT-right" then
 		frpoint={'BOTTOMLEFT',button,'TOPLEFT'}
 	elseif frorient=="BOTTOMLEFT" then
 		frpoint={'TOPRIGHT',button,'BOTTOMLEFT'}
@@ -193,18 +206,18 @@ local frpoint
 	elseif frorient=="RIGHT" then
 		frpoint={'LEFT',button,'RIGHT'}
 	end
-local frame=DA.FrameCreater(nil,rel,frw,frh,frpoint,{0.03, 0.04, 0.07, 0.75})
+	local frame=DA.FrameCreater(nil,rel,frw,frh,frpoint,nil,{0.03, 0.04, 0.07, 0.75},nil,alwaysDarkFrame)
 	button:SetScript("OnClick",
 		function()
 			if frame:IsShown() then
 				frame:Hide()
 				if addfunctiononhide then
-					addfunctiononhide()
+					addfunctiononhide(frame)
 				end
 			else
 				frame:Show()
 				if addfunctiononshow then
-					addfunctiononshow()
+					addfunctiononshow(frame)
 				end
 			end
 		end
@@ -222,56 +235,142 @@ local frame=DA.FrameCreater(nil,rel,frw,frh,frpoint,{0.03, 0.04, 0.07, 0.75})
 		end)
 	end
 
-return button,frame
+	return button,frame
+end
+function DA.CreateDropdownSelector(d)
+	local 	rel, 	point, 		height, 	width, 		title, frpoint, valuesroster, valuesrosterDynamic, justh, optjusth, isGuildDynamicValue, getValue, setValue, funcOnShow, funcOnHide, desrtag =
+			d.rel, 	d.point, 	d.height,	d.width, 	d.title, d.frpoint, d.valuesroster, d.valuesrosterDynamic, d.justh, d.optjusth, d.isGuildDynamicValue, d.get, d.set, d.funcOnShow, d.funcOnHide, d.desrtag
+	
+	local function getRoster()
+		if valuesrosterDynamic then
+			return DA.Safecall(valuesrosterDynamic)
+		else
+			return valuesroster
+		end
+	end
+	local rosterCount = #getRoster()
+	local frheight = (rosterCount * (height+1)) + 1
+	local btnwidth = width-2
+
+	local button, frame = DA.CreateFFGDropFrame(rel,"",height,btnwidth,point,width,frheight,frpoint, justh, funcOnShow, funcOnHide, desrtag, true)
+		frame:SetFrameLevel(rel:GetFrameLevel() + 15)
+	local fontTitle
+
+	function frame:reRender()
+		local savedValue = getValue()
+		local newrosterCount = 0
+		for id,ss in ipairs(getRoster()) do
+			local data = ss
+			local text,value,isHidden,funcOnSelection = data.text, data.value, data.isHidden, data.funcOnSelection
+			if savedValue == value then
+				frame[id].fs:SetTextColor(0.2,1,1,1)
+				button:SetText(text)
+				if funcOnSelection then DA.Safecall(funcOnSelection) end
+			else
+				frame[id].fs:SetTextColor(0.85,1,1,1)
+			end
+			if isHidden then
+				frame[id]:Hide()
+			else
+				newrosterCount = newrosterCount + 1
+				frame[id]:Show()
+			end
+		end
+		if valuesrosterDynamic then
+			frame:SetSize(
+				width ,
+				(newrosterCount * (height+1)) + 1
+			)
+		end
+	end
+
+	if title then
+		local titleText, titleFontTable, titleRelPointTable = unpack(title)
+		local titlePoint = titleRelPointTable and {
+			titleRelPointTable[1],
+			button,
+			titleRelPointTable[2],
+			titleRelPointTable[3] or -5,
+			titleRelPointTable[4] or 13
+		} or {"LEFT", button, "LEFT", -5, 13}
+
+		fontTitle = DA.FontCreater(nil,titleText,titlePoint,button,15,180,titleFontTable,'left')
+	end
+
+	for id,ss in ipairs(getRoster()) do
+		local data = ss
+		local text,value,deskr = data.text, data.value, data.deskr
+		frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			setValue(value)
+			frame:reRender()
+			frame:Hide()
+		end,deskr,nil,optjusth or 'center')
+
+	end
+
+	frame:reRender()
+	if isGuildDynamicValue then
+		table.insert(DA.RunOnGuildUpdate, frame.reRender)
+	end
+
+	return button, frame, fontTitle
 end
 local function tabFrameCreater(rel,subname,ttt)
 	_G[rel][subname]=CreateFrame("Frame", nil, _G[rel])
-	_G[rel][subname].width  = _G[rel].width
-	_G[rel][subname].height = _G[rel].height
-	_G[rel][subname]:SetFrameStrata("MEDIUM")
-	_G[rel][subname]:SetSize(_G[rel][subname].width, _G[rel][subname].height)
-	_G[rel][subname]:SetAllPoints(_G[rel])
-	_G[rel][subname]:SetBackdropColor(1, 1, 1, 1)
+	local f = _G[rel][subname]
+	f.width  = _G[rel].width
+	f.height = _G[rel].height
+	f:SetFrameStrata("MEDIUM")
+	f:SetSize(f.width, f.height)
+	f:SetAllPoints(_G[rel])
+	f:SetBackdropColor(1, 1, 1, 1)
+	-- f:SetFrameLevel(_G[rel]:GetFrameLevel()+25)
+	local fl = f:GetFrameLevel()
 
-	_G[rel][subname].t = _G[rel][subname]:CreateTexture(nil, "BACKGROUND")
-		_G[rel][subname].t:SetAllPoints()
-		if ttt then
-			_G[rel][subname].t:SetTexture(ttt);
-			_G[rel][subname].t:SetAlpha(fuckingOptions.txt1op or 0.8)
-		else
-			_G[rel][subname].t:SetTexture(21/255, 18/255, 22/255, 0.45);
-		end
-		if fuckingOptions.txt1extra then
-			_G[rel][subname].t:SetBlendMode("add")
-		else
-			_G[rel][subname].t:SetBlendMode("blend")
-		end
+	f.art=CreateFrame("Frame",nil,f)
+	f.art:SetFrameStrata("MEDIUM")
+	f.art:SetSize(f.width, f.height)
+	f.art:SetAllPoints(f)
+	f.art:SetBackdropColor(1, 1, 1, 1)
+	f.art:SetFrameLevel(fl-1)
+	f.art.t = f.art:CreateTexture(nil, "BACKGROUND")
+		f.art.t:SetAllPoints(f.art)
+		f.art.t:SetTexture(ttt);
+		f.art.t:SetAlpha(fuckingOptions.TXTartOpacity or 0.8)
+		f.art.t:SetBlendMode(fuckingOptions.TXTArtTransp and "add" or "blend")
 
-	_G[rel][subname]:EnableMouse(true)
-	_G[rel][subname]:EnableMouseWheel(true)
-	_G[rel][subname]:SetMovable(true)
-	_G[rel][subname]:SetResizable(true)
-	-- _G[rel][subname]:SetMinResize(100, 100)
-	_G[rel][subname]:RegisterForDrag("LeftButton")
-	_G[rel][subname]:SetScript("OnDragStart", function(self) _G[rel]:GetScript("OnDragStart")(_G[rel]) end )
-	_G[rel][subname]:SetScript("OnDragStop",  function(self) _G[rel]:GetScript("OnDragStop")(_G[rel]) end )
+	f:EnableMouse(true)
+	f:EnableMouseWheel(true)
+	f:SetMovable(true)
+	f:SetResizable(true)
+	-- f:SetMinResize(100, 100)
+	f:RegisterForDrag("LeftButton")
+	f:SetScript("OnDragStart", function(self) _G[rel]:GetScript("OnDragStart")(_G[rel]) end )
+	f:SetScript("OnDragStop",  function(self) _G[rel]:GetScript("OnDragStop")(_G[rel]) end )
 
-	-- _G[rel][subname]:Hide()
-	_G[rel][subname].add=CreateFrame("Frame",nil,_G[rel][subname])
-	_G[rel][subname].add.width  = _G[rel].width
-	_G[rel][subname].add.height = _G[rel].height
-	_G[rel][subname].add:SetFrameStrata("MEDIUM")
-	_G[rel][subname].add:SetSize(_G[rel][subname].add.width, _G[rel][subname].add.height)
-	_G[rel][subname].add:SetAllPoints(_G[rel])
-	_G[rel][subname].add:SetBackdropColor(1, 1, 1, 1)
+	-- f:Hide()
+	f.bgtxt=CreateFrame("Frame",nil,f)
+	f.bgtxt:SetFrameStrata("MEDIUM")
+	f.bgtxt:SetSize(f.width, f.height)
+	f.bgtxt:SetAllPoints(f)
+	f.bgtxt:SetBackdropColor(1, 1, 1, 1)
+	f.bgtxt:SetFrameLevel(fl-1)
+		f.bgtxt.t =f.bgtxt:CreateTexture(nil, "BACKGROUND"); 
+		f.bgtxt.t:SetAllPoints(f.bgtxt); 
+		f.bgtxt.t:SetTexture(21/255, 18/255, 22/255, (fuckingOptions.TXTBgOpacity or 0.5));
+		f.bgtxt.t:SetBlendMode(fuckingOptions.TXTBgTransp and "add" or "blend")
 
-	_G[rel][subname].add.t =_G[rel][subname].add:CreateTexture(nil, "BACKGROUND"); _G[rel][subname].add.t:SetAllPoints(); _G[rel][subname].add.t:SetTexture(21/255, 18/255, 22/255, (fuckingOptions.txt2op or 0.5));
-	if fuckingOptions.txt2extra then
-		_G[rel][subname].add.t:SetBlendMode("add")
+	if fuckingOptions.TXTArtOnFront then
+		-- f.art:SetFrameLevel(math.max(fl-1, 0))
+		-- f.bgtxt:SetFrameLevel(math.max(fl-2, 0))
+		f.art.t:SetDrawLayer('ARTWORK')
+		f.bgtxt.t:SetDrawLayer('BACKGROUND')
 	else
-		_G[rel][subname].add.t:SetBlendMode("blend")
+		-- f.art:SetFrameLevel(math.max(fl-2, 0))
+		-- f.bgtxt:SetFrameLevel(math.max(fl-1, 0))
+		f.art.t:SetDrawLayer('BACKGROUND')
+		f.bgtxt.t:SetDrawLayer('ARTWORK')
 	end
-
 
 
 end
@@ -541,8 +640,8 @@ function DA.SliderCreater(name,rel,point,heig,wid,smin,smax,stepsize,setvalue,te
 	return f
 end
 function DA.SliderCreater2(name,rel,point,heig,wid,valuesRoster,valueFont,setvalue,textmin,textmax,title,desrtag,funconapply)
-	if not name then print('anonymous sliders are not allowed') return end
-	if #valuesRoster == 0 then print('slider sets == 0') return end
+	local valuesRosterCount = #valuesRoster
+	if valuesRosterCount == 0 then print('slider sets == 0') error() end
 	local function getInRosterPosByVal(val)
 		for i,entry in ipairs(valuesRoster) do
 			if entry[1] == val then
@@ -566,18 +665,45 @@ function DA.SliderCreater2(name,rel,point,heig,wid,valuesRoster,valueFont,setval
 		local val = getVal_FromSavedVar()
 		return valuesRoster[val][2]
 	end
+	local function getClosestNumber(target)
+		local closest = nil
+		local smallestDiff = math.huge
+
+		for i = 1, valuesRosterCount do
+			local num = valuesRoster[i][1]
+			local diff = math.abs(num - target)
+
+			if diff < smallestDiff then
+				smallestDiff = diff
+				closest = num
+			end
+		end
+
+		return closest
+	end
 	
 	local f = CreateFrame("Slider", name, rel, "OptionsSliderTemplate")
 	f:SetPoint(unpack(point))
 	f:SetHeight(heig)
 	f:SetWidth(wid)
+	f:SetHitRectInsets(-2, -2, -2, -2)
 	f:SetBackdropColor(1, 1, 1, 1)
 	f:SetOrientation('HORIZONTAL')
-	f:SetMinMaxValues(1,#valuesRoster)
+	f:SetMinMaxValues(1,valuesRosterCount)
 	f:SetValueStep(1)
 
 	if setvalue then
+		local function UpdateValue()
+			f:SetValue(getVal_FromSavedVar())
+			f.val:SetText(getText_FromSavedVar())
+		end
+		function f:selfUpdateValue()
+			UpdateValue()
+		end
 		if setvalue[3] then
+			if not getInRosterPosByVal(_G[setvalue[1]][_G[setvalue[3]]][setvalue[2]]) then
+				_G[setvalue[1]][_G[setvalue[3]]][setvalue[2]] = getClosestNumber(_G[setvalue[1]][_G[setvalue[3]]][setvalue[2]])
+			end
 			f.val=DA.FontCreater(nil,getText_FromSavedVar(),{'center',f,'center',0,-10},f,15,170,valueFont,'center',{0.5,0.9,1,1})
 			f:SetScript("OnMouseDown",function(self)
 				self:SetScript("OnUpdate",function(self)
@@ -593,18 +719,15 @@ function DA.SliderCreater2(name,rel,point,heig,wid,valuesRoster,valueFont,setval
 			f:SetScript("OnHide",function(self)
 				self:SetScript("OnUpdate",nil)
 			end)
-			
-			local function UpdateValue()
-				f:SetValue(getVal_FromSavedVar())
-				f.val:SetText(getText_FromSavedVar())
-			end
+
 			rel:HookScript('OnShow', UpdateValue)
 			UpdateValue()
-			function f:selfUpdateValue()
-				UpdateValue()
-			end
+			
 			table.insert(DA.RunOnGuildUpdate, UpdateValue)
 		else
+			if not getInRosterPosByVal(_G[setvalue[1]][setvalue[2]]) then
+				_G[setvalue[1]][setvalue[2]] = getClosestNumber(_G[setvalue[1]][setvalue[2]])
+			end
 			f:SetValue(getVal_FromSavedVar())
 			f.val=DA.FontCreater(nil,getText_FromSavedVar(),{'center',f,'center',0,10},f,15,170,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'center',{0.5,0.9,1,1})
 			f:SetScript("OnMouseDown",function(self)
@@ -682,7 +805,7 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelSecureButton")
 	return f
 end
 function DA.FontCreater(name,text,point,rel,heig,wid,fonttype,Hjust,txtcol,Vjust)
-local f = rel:CreateFontString(name, "ARTWORK", rel)
+local f = rel:CreateFontString(name, "ARTWORK")
 	f:SetFont(unpack(fonttype))
 	f:SetPoint(unpack(point))
 	f:SetHeight(heig)
@@ -758,6 +881,7 @@ local f = CreateFrame("CheckButton", name, rel, "UIDarkAngelCheckButton")
 end
 function DA.EditBoxCreater(name,rel,point,size,text,allowMultiLine,allowAutoFocus,fonttype,scOnEscapePressed,scOnEnterPressed,scOnEditFocusLost,scOnEditFocusGained,scOnTextChanged,isnumeric,desrtag,blend,customtxt)
 local txtcol={0.176, 0.286, 0.356, 1}
+local badcol={0.36, 0.20, 0.18, 1}
 
 local f = CreateFrame("EditBox", name, rel)
 	f:SetPoint(unpack(point))
@@ -808,6 +932,12 @@ local f = CreateFrame("EditBox", name, rel)
 	
 	f.t = f:CreateTexture(nil, "BACKGROUND")
 	f.t:SetAllPoints()
+	function f:SetGoodColor()
+		self.t:SetTexture(unpack(txtcol));
+	end
+	function f:SetBadColor()
+		self.t:SetTexture(unpack(badcol));
+	end
 	if customtxt then
 		f.t:SetTexture(unpack(customtxt));
 	else
@@ -843,6 +973,7 @@ local f = CreateFrame("EditBox", name, rel)
 end
 function DA.EditBoxCreater2(name,rel,point,size,text,allowMultiLine,allowAutoFocus,fonttype,checkingvalue,valuemin,valuemax,isnumeric,adfont,adcheckbox,desrtag,runonenter)
 local txtcol={0.176, 0.286, 0.356, 1}
+local badcol={0.36, 0.20, 0.18, 1}
 local f = CreateFrame("EditBox", name, rel)
 	f:SetPoint(unpack(point))
 	f:SetSize(unpack(size))
@@ -851,7 +982,9 @@ local f = CreateFrame("EditBox", name, rel)
 	f:SetMultiLine(allowMultiLine)
 	f:SetAutoFocus(allowAutoFocus)
 	f:SetFont(unpack(fonttype))
-	f:SetFrameLevel(rel:GetFrameLevel() + 2)
+	 DA.Safecall(function ()
+		f:SetFrameLevel(rel:GetFrameLevel() + 2)
+	 end)
 	f.stored=false
 
 --	28/255, 32/255, 50/255
@@ -1044,7 +1177,7 @@ local f = CreateFrame("EditBox", name, rel)
 			f:SetText(val)
 			f.stored=val
 		end
-		rel:HookScript('OnShow', UpdateValue)
+		-- rel:HookScript('OnShow', UpdateValue)
 		table.insert(DA.RunOnGuildUpdate, UpdateValue)
 	end
 f.t = f:CreateTexture(nil, "BACKGROUND")
@@ -1052,7 +1185,12 @@ f.t = f:CreateTexture(nil, "BACKGROUND")
 	f.t:SetTexture(unpack(txtcol));
 	f.t:SetBlendMode("add")
 	f.t:SetAlpha(0.7)
-
+	function f:SetGoodColor()
+		self.t:SetTexture(unpack(txtcol));
+	end
+	function f:SetBadColor()
+		self.t:SetTexture(unpack(badcol));
+	end
 	if desrtag and L['DESCr-'..desrtag] then
 		f:SetScript("OnEnter", function(self)
 			DA.myShowTooltip(self,L['DESCr-'..desrtag])
@@ -1086,7 +1224,6 @@ f.t = f:CreateTexture(nil, "BACKGROUND")
 	end
 return f
 end
-
 function DA.ScrollBarCreater(name, rel, size, point, exclude)
 
 	local f = CreateFrame("Frame", name, rel)
@@ -1148,8 +1285,6 @@ function DA.ScrollBarCreater(name, rel, size, point, exclude)
 
 	return f
 end
-
-
 function DA.HideBarCreater(name,rel,size,point)
 
 local f = CreateFrame("Frame", name, rel);
@@ -1290,7 +1425,6 @@ function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
 		self:SetScript("OnUpdate", OnUpdate)
 	end)
 end
-
 function DA.myShowTooltip(self, text, fontleft1, pointy)
     local tt = DA_Tooltip
 	tt:Hide()
@@ -1322,41 +1456,10 @@ function DA.myShowTooltip(self, text, fontleft1, pointy)
     tt:SetText(text, 0.75, 0.95, 0.95, 1)
     tt:Show()
 end
-
 function DA.myHideTooltip()
 	if getglobal("DA_TooltipTextLeft1") then getglobal("DA_TooltipTextLeft1"):SetFont("Fonts\\FRIZQT__.TTF", 14, "") end
     DA_Tooltip:Hide()
 	GameTooltip:Hide()
-end
-
-
-function DA.myShowTooltipMinimap(self)
-	local tt = DA_TooltipMM
-	tt:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile="true",tileSize="16",edgeSize="16",insets={bottom="5",left="5",right="5",top="5"}})
-	
-	
-	tt:SetBackdropColor(0.09, 0.09, 0.19, 0.9)
-	-- tt:SetBackdropBorderColor(0.2, 0.2, 0.2, 1.0)
-
-	DA_TooltipMMTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 15,'outline')
-	DA_TooltipMMTextRight1:SetFont(UIDarkAngelFontConsolas:GetFont(), 15,'outline') 
-	DA_TooltipMMTextLeft2:SetFont("Fonts\\FRIZQT__.TTF", 11,'outline') 
-	
-	tt:SetOwner(self,'ANCHOR_NONE')
-	tt:SetPoint('bottomright',self,'topleft',0,5)
-	for _,j in pairs({tt:GetRegions()}) do 
-		if j:GetObjectType()=='Texture' then
-			---@type Texture
-			j = j
-			j:SetBlendMode('add') 
-		end
-	end
-	tt:ClearLines()
-
-	tt:AddDoubleLine("|cff03fcf4DarkAngel|r","v"..GetAddOnMetadata("DarkAngel",'version'),0.25,0.85,0.85,0.35,0.85,0.45)
-	tt:AddLine(L["minimaptooltip"],0.45,0.65,0.65,1)
-	
-	tt:Show()
 end
 function DA.myHideMMTooltip()
 	if getglobal("DA_TooltipMMTextLeft1") then getglobal("DA_TooltipMMTextLeft1"):SetFont("Fonts\\FRIZQT__.TTF", 14, "") end
@@ -1401,7 +1504,6 @@ function DA.CreateTimer(runfromstart,short,startfrom,speed,runwhile,OnRun)
 	end
 
 end
-
 function DA.ResumeTimer(short)
 	if DA.XTimers[short] then
 		if DA.XTimers[short]:GetScript("OnUpdate") then
@@ -1941,6 +2043,371 @@ local function getColoredRecentAwardValue(epgp,value)
 
 end
 
+local function Run_ReTwink()
+
+
+
+	local assignedto,_=DarkAngelGUI.Guild.bulkmenu.assignedto:GetText():gsub("%s","")
+		if not assignedto then
+			DA.Print('[|cffffa0a0ERROR|r] please specify any name for \"assigned to\"')
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		elseif not FEP_gMain[assignedto] then
+			DA.Print('[|cffffa0a0ERROR|r] '..assignedto..' not found in guild')
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		end
+
+	local newmain,_=DarkAngelGUI.Guild.bulkmenu.newmain:GetText():gsub("%s","")
+		if not newmain then
+			DA.Print('[|cffffa0a0ERROR|r] please specify any name for \"new main\"')
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		elseif not FEP_gMain[newmain] then
+			DA.Print('[|cffffa0a0ERROR|r] '..newmain..' not found in guild')
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		elseif assignedto==newmain then
+			DA.Print('[|cffffa0a0ERROR|r] stupid :) ???? ')
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		end
+
+	local changingmain=DarkAngelGUI.Guild.bulkmenu.ismakingnewmain:GetChecked()
+	local assignedEP
+	if changingmain then
+
+		if not (DA.DecodeNote(FEP_gMain[assignedto])=="m" or DA.DecodeNote(FEP_gMain[assignedto])=="f") then
+			DA.Print('[|cffffa0a0ERROR|r] [Main change] '..assignedto.." "..L["is not main"])
+			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
+			return
+		elseif (DA.DecodeNote(FEP_gMain[newmain])=="m" or DA.DecodeNote(FEP_gMain[newmain])=="f") then
+			if FEP_gMain[newmain]=="" and FEP_gMain[assignedto]=="" then
+				assignedEP=""
+			elseif FEP_gMain[newmain]=="" then
+				assignedEP=FEP_gMain[assignedto]
+			elseif FEP_gMain[assignedto]=="" then
+				assignedEP=FEP_gMain[newmain]
+			else
+				DA.Print("[|cff0088ffINFO|r] "..assignedto..","..newmain.." -"..L["mains merged"])
+				local _,a,b,c=DA.DecodeNote(FEP_gMain[assignedto])
+				local _,na,nb,nc=DA.DecodeNote(FEP_gMain[newmain])
+				if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+					assignedEP=a+na..","..b+nb
+				elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+					assignedEP="Net:"..a+na.." Tot:"..b+nb..( ((c or nc) and " Hrs:"..c+nc) or "")
+				end
+			end
+		else
+			assignedEP=FEP_gMain[assignedto]
+		end
+	end
+
+	---local binds
+	for i,p in pairs(FEP_L_gMain[DA_CurrentGuild]) do
+		if p==assignedto then
+			FEP_L_gMain[DA_CurrentGuild][i]=newmain
+		end
+	end
+
+	---guild shit
+	for i=1,DA.GetNumGMembers() do
+		local name, _, _, _, _, _, _, officernote, _, _, _ = GetGuildRosterInfo(i);
+		if name then
+			if name==newmain and changingmain and assignedEP then
+				DA.SetOfficernote(name,tostring(assignedEP))
+				DA.Print('[|cff00ffa0SUCCESS|r] Mained '..name..' assigned '..assignedEP)
+
+			elseif name==assignedto and changingmain and assignedEP then
+				DA.SetOfficernote(name,tostring(newmain))
+				DA.Print('[|cff00ffa0SUCCESS|r] Old main '..name..' tvined')
+
+			elseif officernote==assignedto then
+				DA.SetOfficernote(name,tostring(newmain))
+				DA.Print('[|cff00ffa0SUCCESS|r] Retvined '..name)
+
+
+
+			end
+
+		end
+	end
+
+	DA.UpdateMicroMenu()
+
+
+	tinsert(DA_Fep_bulk,function() end)
+	tinsert(DA_Fep_bulk,function() DA.RegatherGuildNotes() end)
+	tinsert(DA_Fep_bulk,function() end)
+	tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu();DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable() end)
+	DA.ResumeTimer('fep')
+
+end
+
+local function Run_ProcessBulk()
+
+	local mode
+	if not DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() then
+		DA.Print(L['no action selected'])
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+		return
+	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['note'] then
+		mode='note'
+		if not CanEditPublicNote() then
+			DA.Print(L['I am not allowed to edit public notes'])
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['award'] then
+		mode='award'
+		if not CanEditOfficerNote() then
+			DA.Print(L['I am not allowed to edit officer notes'])
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['officer note'] then
+		mode='of.note'
+		if not CanEditOfficerNote() then
+			DA.Print(L['I am not allowed to edit officer notes'])
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['rank'] then
+		mode='rank'
+		if not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText() then
+			DA.Print(L['no rank selected'])
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+		if not CanGuildDemote() or not CanGuildPromote() then
+			DA.Print(L['I cant demote and/or promote'])
+			-- DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			-- return 
+		end
+		if not CanGuildDemote() and not CanGuildPromote() then
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['kick'] then
+		mode='kick'
+		if not CanGuildRemove() then
+			DA.Print(L['I am not allowed to kick guild members'])
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			return
+		end
+	end
+
+
+
+
+	if not mode then DA.Print(L['no action selected']);DarkAngelGUI.Guild.bulkmenu.startbulk:Enable() return end
+
+	local playersarray
+	if not DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() then
+		DA.Print(L["no apply to selected"])
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+		return
+	elseif DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['selected'] then
+		playersarray=DA.GetGfoundList('sel')
+	elseif DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['all found'] then
+		playersarray=DA.GetGfoundList('all')
+	end
+
+	if not playersarray or #playersarray==0 then DA.Print(L['no players found']);DarkAngelGUI.Guild.bulkmenu.startbulk:Enable() return end
+
+	if not DA_unlock200 and #playersarray>=200 then
+		DA.Print('|cffff0000####################################')
+		DA.Print('|cffff4444stupid protection triggered')
+		DA.Print('|cffff7744bulk was started for '..#playersarray..' players')
+		DA.Print('|cffff7744you can disable this protection using the following command:')
+		DA.Print('|cff44ffff/run DA_unlock200=1')
+		DA.Print('|cffff0000####################################')
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+
+
+
+		return
+	end
+	if not DA_unlockallguild and DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['all found'] and
+	(DarkAngelGUI.Guild.EB1:GetText() or '')=='' and
+	(DarkAngelGUI.Guild.EB2:GetText() or '')=='' and
+	(DarkAngelGUI.Guild.EB3:GetText() or '')=='' and
+	(DarkAngelGUI.Guild.EB4:GetText() or '')=='' and
+	(DarkAngelGUI.Guild.EB5:GetText() or '')=='' and
+	(DarkAngelGUI.Guild.EB6:GetText() or '')=='' then
+		DA.Print('|cffff0000####################################')
+		DA.Print('|cffff4444stupid protection triggered')
+		DA.Print('|cffff7744bulk was started for all guild members')
+		DA.Print('|cffff7744you can disable this protection using the following command:')
+		DA.Print('|cff44ffff/run DA_unlockallguild=1')
+		DA.Print('|cffff0000####################################')
+		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+		return
+	end
+	DarkAngelGUI.Guild.bulkmenu.stoper:Enable()
+
+
+	if mode=='note' then
+		local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
+
+		for _,pltbl in pairs(playersarray) do
+			if pltbl[1]=='local' then
+				DA.Print(pltbl[2]..' skipped (is not a guild member)')
+			elseif pltbl[1]=='normal' then
+				tinsert(DA_Bulk_list,function() DA.SetPublicnote(pltbl[2],new) end)
+			end
+		end
+	elseif mode=='of.note' then
+		local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
+
+		for _,pltbl in pairs(playersarray) do
+			if pltbl[1]=='local' then
+				if FEP_L_gMain[DA_CurrentGuild][pltbl[2]] then FEP_L_gMain[DA_CurrentGuild][pltbl[2]]=new end
+			elseif pltbl[1]=='normal' then
+				tinsert(DA_Bulk_list,function() DA.SetOfficernote(pltbl[2],new) end)
+			end
+		end
+	elseif mode=='award' then
+		DarkAngelGUI.Guild.bulkmenu.award123Frame.value.focusgained=nil
+		DarkAngelGUI.Guild.bulkmenu.award123Frame.value:ClearFocus()
+		DarkAngelGUI.Guild.bulkmenu.award123Frame.reason.focusgained=nil
+		DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:ClearFocus()
+
+
+		local reason=DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:GetText()
+		if reason=="" or reason:gsub("%s+","")=="" then reason='test' end
+
+		local value=DarkAngelGUI.Guild.bulkmenu.award123Frame.value:GetText()
+		if not value or value=="" or value:gsub("%s+","")=="" or (not value:match("^-?W%d+$") and not tonumber(value)) then
+			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
+			DarkAngelGUI.Guild.bulkmenu.stoper:Disable()
+			return	
+		end
+
+		local dkpinverted
+		local function awardfunc(name,epgp,value,reason,altTable)
+			if epgp=='ep' then
+				DA.EPawardfunc(name,value,reason,altTable)
+			elseif epgp=='gp' then
+				DA.GPawardfunc(name,value,reason,altTable)
+
+			elseif epgp=='+dkp' or epgp=='-dkp' then
+				if (epgp=='-dkp' and not tostring(value):find("-") ) then
+					DA.DKPawardfunc(name,"-"..value,reason,altTable)
+					dkpinverted = true
+				else
+					DA.DKPawardfunc(name,value,reason,altTable)
+				end
+			end
+		end
+		
+		local altTableByName={}
+			
+		DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide()
+		local award_roster={}
+		local is_alrdy_in_roster={}
+		for _,pltbl in pairs(playersarray) do
+			local pl_type = pltbl[1]
+			local name = pltbl[2]
+			if pl_type=='local' then
+				local main = FEP_L_gMain[DA_CurrentGuild][name]
+				local v_main = main and FEP_gMain[main] and (DA.DecodeNote(FEP_gMain[main])=='m' or DA.DecodeNote(FEP_gMain[main])=='f') and main
+				if v_main then
+					if not is_alrdy_in_roster[v_main] then
+						is_alrdy_in_roster[v_main]=true
+						altTableByName[v_main] = {name, true}
+						tinsert(award_roster,v_main)
+					else
+						DA.Print('skipped [duplicate]: '..name..' ('..v_main..')')
+					end
+				else
+					DA.Print('skipped [bad local]: '..name..' ('..main..')')
+				end
+			elseif pl_type=='normal' then
+				if FEP_gMain[name] then
+					local typ = DA.DecodeNote(FEP_gMain[name])
+					local main = ((typ=='m' or typ=='f') and name)
+						or (typ=='t' and FEP_gMain[FEP_gMain[name]] and (DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' or DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='f') and FEP_gMain[name])
+					if main then
+						if not is_alrdy_in_roster[main] then
+							if main~=name then
+								altTableByName[main] = {name, false}
+							end
+							is_alrdy_in_roster[main]=true
+							tinsert(award_roster,main)
+						else
+							if name==main then
+								DA.Print('skipped [duplicate]: '..name)
+							else
+								DA.Print('skipped [duplicate]: '..name..' ('..main..')')
+							end
+						end
+					else
+						DA.Print('skipped [bad note]: '..name..' ('..FEP_gMain[name]..')')
+					end
+				end
+			end
+		end
+
+		if next(award_roster) then
+			local epgp = string.lower(DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp:GetText())
+			
+			for _,name in ipairs(award_roster) do
+				tinsert(DA_Bulk_list,function() awardfunc(name,epgp,value,reason, altTableByName[name]) end)
+			end
+			tinsert(DA_Bulk_list,function()
+				if DA.loaded_Modules['Awarder'] then
+					FEP_GatherRaid()
+					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
+				end
+				DA.AddRecentAward('|cffce95fc/bulk/|r',epgp,dkpinverted and "-"..value or value,reason)
+			end)
+
+			tinsert(DA_Fep_bulk,function() if DarkAngelGuild:IsShown() then DA.GetGuildData();DA.GuildSetAllLines() end end)
+			DA.ResumeTimer('fep')
+
+		end
+	elseif mode=='rank' then
+		local new=DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.rankid
+		for _,pltbl in pairs(playersarray) do
+			if pltbl[1]=='local' then
+				DA.Print('skipped [not a guild member]: '..pltbl[2])
+			elseif pltbl[1]=='normal' then
+				if pltbl[3]=="0" then
+					DA.Print('skipped [Guild Leader]: '..pltbl[2])
+				elseif pltbl[2]==GetUnitName('player') then
+					DA.Print('skipped [self]: '.. pltbl[2])
+				else
+					tinsert(DA_Bulk_list,function() DA.DemotePromotePlayer(pltbl[2],pltbl[3],new,1) end)
+				end
+			end
+		end
+	elseif mode=='kick' then
+		for _,pltbl in pairs(playersarray) do
+			if pltbl[1]=='local' then
+				if FEP_L_gMain[DA_CurrentGuild][pltbl[2]] then FEP_L_gMain[DA_CurrentGuild][pltbl[2]]=nil end
+			elseif pltbl[1]=='normal' then
+				if pltbl[3]=="0" then
+					DA.Print('skipped [Guild Leader]: '..pltbl[2])
+				elseif pltbl[2]==GetUnitName('player') then
+					DA.Print('skipped [self]: '.. pltbl[2])
+				else
+					GuildUninvite(pltbl[2])
+				end
+			end
+		end
+	end
+
+	tinsert(DA_Bulk_list,function()  end)
+	tinsert(DA_Bulk_list,function()  DA.GetGuildData(); end)
+	tinsert(DA_Bulk_list,function()  DA.GuildSetAllLines();if DarkAngelGUI.Guild.bulkmenu.autodeselect:GetChecked() then DA.SelectGuildMember(nil,true) end end)
+	tinsert(DA_Bulk_list,function()  DA.UpdateMicroMenu() end)
+	tinsert(DA_Bulk_list,function()  DA.UpdateMicroMenu();DarkAngelGUI.Guild.bulkmenu.startbulk:Enable();DarkAngelGUI.Guild.bulkmenu.stoper:Disable() end)
+			DA.ResumeTimer('bulkprocessor')
+
+
+end
+
 local Guild_Create_ScrollBar
 
 local function IsInSameRaidWithMe(name)
@@ -2054,7 +2521,7 @@ do
 				DA.OpenLogSearch(DA_RightClickMenu.player)
 			end
 		end,nil,nil,'left')
-		DA.CreateFFGButton2(nil,DA_RightClickMenu,{"LEFT",DA_RightClickMenu,"TOPRIGHT",-75,-65},14,73,L['Twinks'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
+		DA.CreateFFGButton2(nil,DA_RightClickMenu,{"LEFT",DA_RightClickMenu,"TOPRIGHT",-75,-65},14,73,L['Twins'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
 			DA_RightClickMenu:Hide();
 			DarkAngelGUI:Show()
 			local ofnote=DA_RightClickMenu.ofnote or DA_RightClickMenu.altnote
@@ -2187,7 +2654,7 @@ do
 				end
 
 
-				DA_RightClickMenu.epgpawardFrame.Dropdown = DA.FrameCreater(nil,DA_RightClickMenu.epgpawardFrame,270,111,{"TOPLEFT",DA_RightClickMenu.epgpawardFrame,"BOTTOMLEFT",2,-2},{0.15, 0.17, 0.2, 0.65})
+				DA_RightClickMenu.epgpawardFrame.Dropdown = DA.FrameCreater(nil,DA_RightClickMenu.epgpawardFrame,270,111,{"TOPLEFT",DA_RightClickMenu.epgpawardFrame,"BOTTOMLEFT",2,-2},nil,{0.15, 0.17, 0.2, 0.65})
 					DA.CloseButtonCreater(nil,DA_RightClickMenu.epgpawardFrame.Dropdown,{"BOTTOMLEFT", DA_RightClickMenu.epgpawardFrame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
 				for i=1,20 do
 					DA_RightClickMenu.epgpawardFrame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame.Dropdown,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
@@ -2549,8 +3016,8 @@ do
 
 				re_highlight_gsort()
 			end
-			DarkAngelGUI.Guild.gsortbtn,DarkAngelGUI.Guild.gsortFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["sort"],12,32,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",215,-10},164,93,"TOP")
-
+			DarkAngelGUI.Guild.gsortbtn,DarkAngelGUI.Guild.gsortFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["sort"],12,32,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",215,-10},164,90,{"BOTTOMRIGHT", "TOPRIGHT", 65, 5})
+			DarkAngelGUI.Guild.gsortFrame:SetFrameLevel(DarkAngelGUI.Guild:GetFrameLevel()+15)
 			for i,criteria in pairs(additgsort) do
 				DarkAngelGUI.Guild.gsortFrame[i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.gsortFrame,{"TOPLEFT", DarkAngelGUI.Guild.gsortFrame, "TOPLEFT", (i>8 and 70.5 or 1),10-11*(i>8 and i-8 or i)},10,(i>8 and 92 or 68),criteria[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), criteria[2] or 9, "OUTLINE"},function(self)
 
@@ -2776,7 +3243,7 @@ do
 
 		-- guild control
 		do
-			DarkAngelGUI.Guild.GC=DA.FrameCreater(nil,UIParent,525,300,{"TOPRIGHT",DarkAngelGUI,"TOPLEFT",-2,0},{0.03, 0.04, 0.07, 0.65})
+			DarkAngelGUI.Guild.GC=DA.FrameCreater(nil,UIParent,525,300,{"TOPRIGHT",DarkAngelGUI,"TOPLEFT",-2,0},nil,{0.03, 0.04, 0.07, 0.65})
 			DA.CreateScaler(DarkAngelGUI.Guild.GC,0.6,2,{'fuckingOptions','GCScale'})
 			local gc=DarkAngelGUI.Guild.GC
 				gc:RegisterForDrag("LeftButton")
@@ -3349,8 +3816,7 @@ do
 							end
 						end)
 
-						gc['d'..i..'pos_frm']=DA.FrameCreater(nil,gc['d'..i..'name'],25,18,{"BOTTOMRIGHT",gc['d'..i..'mover'],"BOTTOMLEFT",-2,0})
-						gc['d'..i..'pos_frm'].t:SetTexture(0.7, 1, 1, 0.6)
+						gc['d'..i..'pos_frm']=DA.FrameCreater(nil,gc['d'..i..'name'],25,18,{"BOTTOMRIGHT",gc['d'..i..'mover'],"BOTTOMLEFT",-2,0},nil,{0.7, 1, 1, 0.6})
 						gc['d'..i..'pos_frm'].t:SetBlendMode('add')
 						DA.FontCreater(nil,">>>",{"RIGHT",gc['d'..i..'pos_frm'],"RIGHT",-2,0},gc['d'..i..'pos_frm'],15,50,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"right",{0.75,0.95,0.95,0.75})
 
@@ -3578,10 +4044,7 @@ do
 
 			-- help window
 			do
-				gc.helpwindow=DA.FrameCreater(nil,gc,350,150,{"TOPLEFT",gc,"TOPLEFT",30,-40})
-					-- gc.helpwindow:SetFrameLevel(22)
-					gc.helpwindow.t:SetTexture(0.05, 0.12, 0.18, 0.8)
-
+				gc.helpwindow=DA.FrameCreater(nil,gc,350,150,{"TOPLEFT",gc,"TOPLEFT",30,-40},nil,{0.05, 0.12, 0.18, 0.8},1)
 					DA.FontCreater(nil,L['gc_helper'],{"TOPLEFT",gc.helpwindow,"TOPLEFT",5,-12},gc.helpwindow,160,340,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.9,0.9,0.9}):SetJustifyV("top")
 
 					DA.CreateFFGButton2(nil,gc.helpwindow,{"CENTER",gc.helpwindow,"BOTTOM",0,10},12,80,L["got it, close"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9},function()
@@ -3966,8 +4429,8 @@ do
 
 		-- patterns
 		do
-			DarkAngelGUI.Guild.patternsbtn,DarkAngelGUI.Guild.patternsFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["patterns"],12,55,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",325,-10},147,82,"TOP")
-
+			DarkAngelGUI.Guild.patternsbtn,DarkAngelGUI.Guild.patternsFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["patterns"],12,55,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",325,-10},147,79,{"BOTTOMLEFT", "TOPLEFT", 0, 5})
+			DarkAngelGUI.Guild.patternsFrame:SetFrameLevel(DarkAngelGUI.Guild:GetFrameLevel()+15)
 			do --defaults
 				local function getMainPatternOffnote()
 					return (DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and "^(%d+),(%d+)" or "Ne?t?:(%-?%d+)")
@@ -4218,9 +4681,9 @@ do
 					end
 				end
 				if #fuckingOptions.storedpatterns==0 then
-					DarkAngelGUI.Guild.patternsFrame:SetSize(54,82)
+					DarkAngelGUI.Guild.patternsFrame:SetSize(54,79)
 				else
-					DarkAngelGUI.Guild.patternsFrame:SetSize(147,82)
+					DarkAngelGUI.Guild.patternsFrame:SetSize(147,79)
 				end
 
 			end
@@ -4319,7 +4782,7 @@ do
 		do
 			--main
 			do
-				DarkAngelGUI.Guild.micromenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,140,{"TOPLEFT",DarkAngelGUI.Guild,'TOPRIGHT',3,0},nil)
+				DarkAngelGUI.Guild.micromenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,140,{"TOPLEFT",DarkAngelGUI.Guild,'TOPRIGHT',3,0})
 
 				DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.micromenu,{"center", DarkAngelGUI.Guild.micromenu, "TOPRIGHT", -8.5,-8.5},12,12,'x')
 
@@ -4690,7 +5153,7 @@ do
 		do
 			--bulk
 			do
-				DarkAngelGUI.Guild.bulkmenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,157,{"BOTTOMLEFT",DarkAngelGUI.Guild,'BOTTOMRIGHT',3,0},nil)
+				DarkAngelGUI.Guild.bulkmenu=DA.FrameCreater(nil,DarkAngelGUI.Guild,188.25,157,{"BOTTOMLEFT",DarkAngelGUI.Guild,'BOTTOMRIGHT',3,0})
 
 				DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"center", DarkAngelGUI.Guild.bulkmenu, "TOPRIGHT", -8.5,-8.5},12,12,'x')
 
@@ -5008,7 +5471,7 @@ do
 						DarkAngelGUI.Guild.bulkmenu.adnotebox.focusgained=nil
 						if DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() and DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() and (not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() or (DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() and DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText())) then
 							self:Disable()
-							DA.ProcessBulk()
+							Run_ProcessBulk()
 						else
 							self:Disable()
 						end
@@ -5092,7 +5555,7 @@ do
 						return
 					else
 						self:Disable()
-						DA.Retwink()
+						Run_ReTwink()
 					end
 				end)
 
@@ -5283,36 +5746,75 @@ do
 	local options_scrolled=DarkAngelopt.scrollchild
 
 	do --texture options
-		local Textureopt=DA.EditBoxCreater2(nil,options_scrolled,{"CENTER",options_scrolled,"TOPLEFT",25,-30},{30,12},fuckingOptions.txt1op,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions","txt1op"},0,1,false,L["Art texture alpha"],nil,'arttextalpha',function() DA.RePaintFrames() end)
-			DA.FontCreater(nil,L["Texture Options"],{"LEFT",Textureopt,"CENTER",-10,13},Textureopt,15,190,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-		local txt2col=DA.EditBoxCreater2(nil,Textureopt,{"CENTER",Textureopt,"CENTER",0,-15},{30,12},fuckingOptions.txt2op,nil,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions","txt2op"},0,1,false,L["BG texture alpha"],nil,'bgtextalpha',function() DA.RePaintFrames() end)
-		local txt1cc=DA.CheckBtnCreater(nil,Textureopt,{"CENTER",Textureopt,"CENTER",95,0},15,15,L['+transp'],function(self) fuckingOptions.txt1extra=(self:GetChecked() or false) DA.RePaintFrames() end,{'fuckingOptions','txt1extra'},'txt1extra')
-		local txt2cc=DA.CheckBtnCreater(nil,Textureopt,{"CENTER",Textureopt,"CENTER",95,-15},15,15,L['+transp'],function(self) fuckingOptions.txt2extra=(self:GetChecked() or false) DA.RePaintFrames() end,{'fuckingOptions','txt2extra'},'txt2extra')
+		
+		local textureModes ={
+			{0, 	"---"},
+			{0.1, 	"10%"},
+			{0.2, 	"20%"},
+			{0.3, 	"30%"},
+			{0.4, 	"40%"},
+			{0.5, 	"50%"},
+			{0.6, 	"60%"},
+			{0.7, 	"70%"},
+			{0.8, 	"80%"},
+			{0.9, 	"90%"},
+			{1, 	"100%"}
+		}
+		local sl_art = DA.SliderCreater2('DA_OptTxtArt',options_scrolled,{"LEFT",options_scrolled,"TOPLEFT",10,-30},17,120, textureModes, {UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"}, {'fuckingOptions','TXTartOpacity'},'','',L["Art texture alpha"],'arttextalpha',function() DA.RePaintFrames() end)
+		sl_art.title:SetPoint('left',sl_art,'right',20,1)
+		local sl_bg = DA.SliderCreater2('DA_OptTxtBG',options_scrolled,{"LEFT",options_scrolled,"TOPLEFT",10,-56},17,120, textureModes, {UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"}, {'fuckingOptions','TXTBgOpacity'},'','',L["BG texture alpha"],'bgtextalpha',function() DA.RePaintFrames() end)
+		sl_bg.title:SetPoint('left',sl_bg,'right',20,1)
+		DA.FontCreater(nil,L["Texture Options"],{"LEFT",sl_art,"TOPLEFT",0,11},options_scrolled,15,190,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		
+		local txt1cc=DA.CheckBtnCreater(nil,options_scrolled,{"LEFT",sl_art,"RIGHT",1,0},15,15,nil,function(self) fuckingOptions.TXTArtTransp=(self:GetChecked() or false) DA.RePaintFrames() end,{'fuckingOptions','TXTArtTransp'},'TXTArtTransp')
+		local txt2cc=DA.CheckBtnCreater(nil,options_scrolled,{"LEFT",sl_bg,"RIGHT",1,0},15,15,nil,function(self) fuckingOptions.TXTBgTransp=(self:GetChecked() or false) DA.RePaintFrames() end,{'fuckingOptions','TXTBgTransp'},'TXTBgTransp')
+		
+		local txtPositionChan=DA.CheckBtnCreater(nil,options_scrolled,{"LEFT",sl_bg,"RIGHT",80,0},15,15,L["TXTArtOnFront"],function(self) fuckingOptions.TXTArtOnFront=(self:GetChecked() or false) DA.RePaintFrames(true) end,{'fuckingOptions','TXTArtOnFront'},'TXTArtOnFront')
+		
+		
 		--presets	
 		for i,j in ipairs({
-			{1,1,false,1},
-			{1,0,false,false},
-			{1,0.25,false,false},
-			{1,0.7,1,false},
-			{1,0,1,false},
-			{0.6,0.4,1,false},
-			{0,0.2,false,false},
-			{0,1,false,1},
-			{0.1,0.3,1,1}
+			{0.5, 0.2, 1, false, true},
+			{0.3, 0.1, false, false, true},
+			{0.3, 0.5, 1, false, true},
+			{0.5, 0.3, false, false, true},	-- defaults
+			{0.8, 0.4, false, false, true},
+			{1,   0.4, false, 1, false},
+			{1,   0.8, false, 1, true},
+			{0.3, 0.7, 1, false, false},
+			{0.5, 0.7, 1, false, false},
+			{0.2, 0.8, false, 1, false},
+			{0.1, 1,   false, 1, false},
+			{0.8, 0.6, 1, 1, true},
+
 		}) do
-			DA.CreateFFGButton2(nil,Textureopt,{"CENTER",Textureopt,"CENTER",130+15*i,-0},12,12,tostring(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-				fuckingOptions.txt1op=j[1]
-				fuckingOptions.txt2op=j[2]
-				fuckingOptions.txt1extra=j[3]
-				fuckingOptions.txt2extra=j[4]
-				Textureopt:SetText(fuckingOptions.txt1op)
-				txt2col:SetText(fuckingOptions.txt2op)
-				txt1cc:SetChecked(fuckingOptions.txt1extra)
-				txt2cc:SetChecked(fuckingOptions.txt2extra)
-				DA.RePaintFrames()
+			-- local col = (i - 1) % 10
+			-- local row = math.floor((i - 1) / 10)
+
+			local btn = DA.CreateFFGButton2(nil,options_scrolled,{"CENTER",sl_art,"CENTER",115 + (15 * i), 0},12,12,tostring(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+				fuckingOptions.TXTartOpacity=j[1]
+				fuckingOptions.TXTBgOpacity=j[2]
+				fuckingOptions.TXTArtTransp=j[3]
+				fuckingOptions.TXTBgTransp=j[4]
+				if fuckingOptions.TXTArtOnFront~=j[5] then
+					fuckingOptions.TXTArtOnFront=j[5]
+					DA.RePaintFrames(1)
+				end
+
+				DA.RePaintFrames(nil,1)
+				sl_art:selfUpdateValue()
+				sl_bg:selfUpdateValue()
+				txt1cc:SetChecked(fuckingOptions.TXTArtTransp)
+				txt2cc:SetChecked(fuckingOptions.TXTBgTransp)
+				txtPositionChan:SetChecked(fuckingOptions.TXTArtOnFront)
+				DA.RePaintFrames(nil,nil,1)
 			end)
+
+			if i == 1 then
+				DA.FontCreater(nil,L["texture presets"],{"LEFT",btn,"TOPLEFT",0,4},btn,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+			end
 		end
-			DA.FontCreater(nil,L["texture presets"],{"CENTER",Textureopt,"CENTER",227,10},Textureopt,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+			
 	end
 
 
@@ -5356,23 +5858,104 @@ do
 
 	DA.DKP_commUpdate()
 
+	local modOptTable = {}
+	for _,t in ipairs(DA.modOptCreate) do
+		local modName,modOptFunc = unpack(t)
+		local ok, result = pcall(modOptFunc, DarkAngelGUI.opt, DarkAngelopt)
+        if not ok then
+            DA.Print("|cffff0000["..modName.."]: Init Error:|r "..tostring(result))
+		else
+			table.insert(modOptTable, {modName, result})
+			DA.loaded_Modules[modName]=true
+        end
+	end
+
+	do --resort ModOpt order
+		local priority = {
+			["Logger"] = 1,
+			["BidTracker"] = 2,
+			["Awarder"] = 3,
+			["Tweaks"] = 4
+		}
+
+		table.sort(modOptTable, function(a, b)
+			local aVal = a and a[1] and priority[a[1]] or 99
+			local bVal = b and b[1] and priority[b[1]] or 99
+			return aVal < bVal
+		end)
+		
+		local xOffset = 0
+		local yOffset = -70
+		local spacing = 5
+		local anchors = {}
+		for i, tbl in ipairs(modOptTable) do
+			-- print('[|cffed94edDarkAngel|cffffffff]: Processing module index:', i)
+
+			local modName = tbl[1]
+			local modOptFrame = tbl[2]
+
+			-- print("[|cffed94edDarkAngel|cffffffff]: Module Name:", modName)
+			-- print("[|cffed94edDarkAngel|cffffffff]: Module Frame:", modOptFrame)
+
+			if DA.loaded_Modules[modName] then
+				-- print("[|cffed94edDarkAngel|cffffffff]:", modName, "is loaded")
+
+				if modName == "Tweaks" then
+					-- print("[|cffed94edDarkAngel|cffffffff]: Special positioning logic for Tweaks")
+
+					if anchors["BidTracker"] then
+						-- DA.Print("Anchoring Tweaks to BidTracker")
+						modOptFrame:SetPoint("TOPLEFT", anchors["BidTracker"], "BOTTOMLEFT", 0, -spacing)
+					elseif anchors["Awarder"] then
+						-- DA.Print("Anchoring Tweaks to Awarder")
+						modOptFrame:SetPoint("TOPLEFT", anchors["Awarder"], "BOTTOMLEFT", 0, -spacing)
+					elseif anchors["Logger"] then
+						-- DA.Print("Anchoring Tweaks to Logger")
+						modOptFrame:SetPoint("TOPLEFT", anchors["Logger"], "TOPRIGHT", spacing, 0)
+					else
+						-- DA.Print("Anchoring Tweaks to default position")
+						modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
+					end
+				else
+					-- print("[|cffed94edDarkAngel|cffffffff]: Standard positioning for", modName)
+					modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
+					
+					local width = modOptFrame:GetWidth()
+					-- print("[|cffed94edDarkAngel|cffffffff]: Width of", modName, "frame:", width)
+
+					xOffset = xOffset + width + spacing
+					-- print("[|cffed94edDarkAngel|cffffffff]: New xOffset:", xOffset)
+
+					anchors[modName] = modOptFrame
+					-- print("[|cffed94edDarkAngel|cffffffff]: Anchor updated for", modName)
+				end
+			else
+				-- print("[|cffed94edDarkAngel|cffffffff]: ",modName, "is not loaded. Skipping.")
+			end
+		end
+	end
+	
 end
 
 
 end
-function DA.CreateTweakGUIs(modOptTable,loaded_Modules)
-	local f = DA.FrameCreater(nil,DarkAngelopt.scrollchild,154,80)
+
+
+DA.AddModOptions('Tweaks', function(optFrame,optScrollFrame)
+	
+	local f = DA.FrameCreater(nil,optScrollFrame.scrollchild,154,80)
 	f:Show()
-	DA.FontCreater(nil,"Tweaks",{"LEFT",f,"TOPLEFT",5,-6},f,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-	tinsert(modOptTable, {'Tweaks',f})
 
-	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['epgp: officer note warning'],function(self) fuckingOptions.epgpofficer=(self:GetChecked() or false);DA.RunTweaks('epgpofficer') end,{'fuckingOptions','epgpofficer'},'epgpofficernote')
+	
+
+	local epgpOff = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['epgp: officer note warning'],function(self) fuckingOptions.epgpofficer=(self:GetChecked() or false);DA.RunTweaks('epgpofficer') end,{'fuckingOptions','epgpofficer'},'epgpofficernote')
+		DA.FontCreater(nil,"Tweaks",{"LEFT",f,"TOPLEFT",5,-6},epgpOff,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['epgp: multiple masters warning'],function(self) fuckingOptions.epgpmultiple=(self:GetChecked() or false);DA.RunTweaks('epgpmultiple') end,{'fuckingOptions','epgpmultiple'},'epgpmmasters')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-44},15,15,L['epgp: custom tvins and loot'],function(self) fuckingOptions.epgptwinksandloot=(self:GetChecked() or false);DA.RunTweaks('epgptwinksandloot') end,{'fuckingOptions','epgptwinksandloot'},'epgptwinsandloot')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-54},15,15,L['epgp: EP Auc'],function(self) fuckingOptions_g[DA_CurrentGuild].epgpepauc=(self:GetChecked() or false);DA.RunTweaks('epgptwinksandloot') end,{'fuckingOptions_g','epgpepauc','DA_CurrentGuild'},'epgpepauc')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-68},15,15,L['raidroll_epgp: DarkAngel tvins'],function(self) fuckingOptions.rrtwinks=(self:GetChecked() or false);DA.RunTweaks('rrtwinks') end,{'fuckingOptions','rrtwinks'},'rrtwins')
-	loaded_Modules['Tweaks']=true
-end
+	return f
+end)
 
 local function getNoteInfoWhisper_micro(ep,gp,frozen)
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
@@ -5555,6 +6138,24 @@ end
 	end
 
 end
+local function checkCommPerm(author)
+	local val = fuckingOptions_g[DA_CurrentGuild].commWhispersPerm
+
+	if val == 1 then
+		return true
+	end
+	
+	if (not UnitInRaid('player') or GetNumRaidMembers()==0) or not UnitInRaid(author) then return false end
+	
+
+	if val==2 then 
+		return true
+	else
+		local isFullGuildCheck = val==4 or false
+		return DA.IsFullGuildRaid(isFullGuildCheck)
+	end
+	
+end
 local DA_DKP_comm = CreateFrame("Frame")
 function DA.DKP_commUpdate()
 
@@ -5565,20 +6166,24 @@ function DA.DKP_commUpdate()
 	end
 
 	DA_DKP_comm:SetScript("OnEvent", function(_,_,message,author)
-		if not fuckingOptions_g[DA_CurrentGuild].dkpcomm_inraid or UnitInRaid('player') then
-			if (message:find("?dkp") or message:find("?epgp") or message:find("?main")) and not CanViewOfficerNote() then
-				DA.Print(L['error, i cant read officer notes'])
-				return
-			end
-		else
+		if not checkCommPerm(author) then return end
+
+		if (message:find("?dkp") or message:find("?epgp") or message:find("?main")) and not CanViewOfficerNote() then
+			DA.Print(L['error, i cant read officer notes'])
 			return
 		end
+			
+
+		
 
 		if message:find("?dkp") or message:find("?epgp") then
 			SendChatMessage(getNoteInfoWhisper(author), "whisper",nil,author)
 		elseif message:find("?main") then
 			local response=setTvinInfoWhisper(author,message)
 			if response=="[OK]" then
+				if fuckingOptions_g[DA_CurrentGuild].dkpcomm_sendLocals then
+					DA.PublishLocal(author)
+				end
 				if UnitInRaid('player') then
 					tinsert(DA_Fep_bulk,function()  end)
 					tinsert(DA_Fep_bulk,function() SendChatMessage(response, "whisper",nil,author) end)
@@ -5629,269 +6234,6 @@ function DA.GetGfoundList(mod)
 	end
 
 	return result
-
-end
-function DA.ProcessBulk()
-
-	local mode
-	if not DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() then
-		DA.Print(L['no action selected'])
-		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-		return
-	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['note'] then
-		mode='note'
-		if not CanEditPublicNote() then
-			DA.Print(L['I am not allowed to edit public notes'])
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['award'] then
-		mode='award'
-		if not CanEditOfficerNote() then
-			DA.Print(L['I am not allowed to edit officer notes'])
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['officer note'] then
-		mode='of.note'
-		if not CanEditOfficerNote() then
-			DA.Print(L['I am not allowed to edit officer notes'])
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['rank'] then
-		mode='rank'
-		if not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText() then
-			DA.Print(L['no rank selected'])
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-		if not CanGuildDemote() or not CanGuildPromote() then
-			DA.Print(L['I cant demote and/or promote'])
-			-- DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			-- return 
-		end
-		if not CanGuildDemote() and not CanGuildPromote() then
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-	elseif DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText()==L['kick'] then
-		mode='kick'
-		if not CanGuildRemove() then
-			DA.Print(L['I am not allowed to kick guild members'])
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			return
-		end
-	end
-
-
-
-
-	if not mode then DA.Print(L['no action selected']);DarkAngelGUI.Guild.bulkmenu.startbulk:Enable() return end
-
-	local playersarray
-	if not DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() then
-		DA.Print(L["no apply to selected"])
-		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-		return
-	elseif DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['selected'] then
-		playersarray=DA.GetGfoundList('sel')
-	elseif DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['all found'] then
-		playersarray=DA.GetGfoundList('all')
-	end
-
-	if not playersarray or #playersarray==0 then DA.Print(L['no players found']);DarkAngelGUI.Guild.bulkmenu.startbulk:Enable() return end
-
-	if not DA_unlock200 and #playersarray>=200 then
-		DA.Print('|cffff0000####################################')
-		DA.Print('|cffff4444stupid protection triggered')
-		DA.Print('|cffff7744bulk was started for '..#playersarray..' players')
-		DA.Print('|cffff7744you can disable this protection using the following command:')
-		DA.Print('|cff44ffff/run DA_unlock200=1')
-		DA.Print('|cffff0000####################################')
-		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-
-
-
-		return
-	end
-	if not DA_unlockallguild and DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText()==L['all found'] and
-	(DarkAngelGUI.Guild.EB1:GetText() or '')=='' and
-	(DarkAngelGUI.Guild.EB2:GetText() or '')=='' and
-	(DarkAngelGUI.Guild.EB3:GetText() or '')=='' and
-	(DarkAngelGUI.Guild.EB4:GetText() or '')=='' and
-	(DarkAngelGUI.Guild.EB5:GetText() or '')=='' and
-	(DarkAngelGUI.Guild.EB6:GetText() or '')=='' then
-		DA.Print('|cffff0000####################################')
-		DA.Print('|cffff4444stupid protection triggered')
-		DA.Print('|cffff7744bulk was started for all guild members')
-		DA.Print('|cffff7744you can disable this protection using the following command:')
-		DA.Print('|cff44ffff/run DA_unlockallguild=1')
-		DA.Print('|cffff0000####################################')
-		DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-		return
-	end
-	DarkAngelGUI.Guild.bulkmenu.stoper:Enable()
-
-
-	if mode=='note' then
-		local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
-
-		for _,pltbl in pairs(playersarray) do
-			if pltbl[1]=='local' then
-				DA.Print(pltbl[2]..' skipped (is not a guild member)')
-			elseif pltbl[1]=='normal' then
-				tinsert(DA_Bulk_list,function() DA.SetPublicnote(pltbl[2],new) end)
-			end
-		end
-	elseif mode=='of.note' then
-		local new=(DarkAngelGUI.Guild.bulkmenu.adnotebox:GetText() or "")
-
-		for _,pltbl in pairs(playersarray) do
-			if pltbl[1]=='local' then
-				if FEP_L_gMain[DA_CurrentGuild][pltbl[2]] then FEP_L_gMain[DA_CurrentGuild][pltbl[2]]=new end
-			elseif pltbl[1]=='normal' then
-				tinsert(DA_Bulk_list,function() DA.SetOfficernote(pltbl[2],new) end)
-			end
-		end
-	elseif mode=='award' then
-		DarkAngelGUI.Guild.bulkmenu.award123Frame.value.focusgained=nil
-		DarkAngelGUI.Guild.bulkmenu.award123Frame.value:ClearFocus()
-		DarkAngelGUI.Guild.bulkmenu.award123Frame.reason.focusgained=nil
-		DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:ClearFocus()
-
-
-		local reason=DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:GetText()
-		if reason=="" or reason:gsub("%s+","")=="" then reason='test' end
-
-		local value=DarkAngelGUI.Guild.bulkmenu.award123Frame.value:GetText()
-		if not value or value=="" or value:gsub("%s+","")=="" or (not value:match("^-?W%d+$") and not tonumber(value)) then
-			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
-			DarkAngelGUI.Guild.bulkmenu.stoper:Disable()
-			return	
-		end
-
-		local dkpinverted
-		local function awardfunc(name,epgp,value,reason,altTable)
-			if epgp=='ep' then
-				DA.EPawardfunc(name,value,reason,altTable)
-			elseif epgp=='gp' then
-				DA.GPawardfunc(name,value,reason,altTable)
-
-			elseif epgp=='+dkp' or epgp=='-dkp' then
-				if (epgp=='-dkp' and not tostring(value):find("-") ) then
-					DA.DKPawardfunc(name,"-"..value,reason,altTable)
-					dkpinverted = true
-				else
-					DA.DKPawardfunc(name,value,reason,altTable)
-				end
-			end
-		end
-		
-		local altTableByName={}
-			
-		DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide()
-		local award_roster={}
-		local is_alrdy_in_roster={}
-		for _,pltbl in pairs(playersarray) do
-			local pl_type = pltbl[1]
-			local name = pltbl[2]
-			if pl_type=='local' then
-				local main = FEP_L_gMain[DA_CurrentGuild][name]
-				local v_main = main and FEP_gMain[main] and (DA.DecodeNote(FEP_gMain[main])=='m' or DA.DecodeNote(FEP_gMain[main])=='f') and main
-				if v_main then
-					if not is_alrdy_in_roster[v_main] then
-						is_alrdy_in_roster[v_main]=true
-						altTableByName[v_main] = {name, true}
-						tinsert(award_roster,v_main)
-					else
-						DA.Print('skipped [duplicate]: '..name..' ('..v_main..')')
-					end
-				else
-					DA.Print('skipped [bad local]: '..name..' ('..main..')')
-				end
-			elseif pl_type=='normal' then
-				if FEP_gMain[name] then
-					local typ = DA.DecodeNote(FEP_gMain[name])
-					local main = ((typ=='m' or typ=='f') and name)
-						or (typ=='t' and FEP_gMain[FEP_gMain[name]] and (DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='m' or DA.DecodeNote(FEP_gMain[FEP_gMain[name]])=='f') and FEP_gMain[name])
-					if main then
-						if not is_alrdy_in_roster[main] then
-							if main~=name then
-								altTableByName[main] = {name, false}
-							end
-							is_alrdy_in_roster[main]=true
-							tinsert(award_roster,main)
-						else
-							if name==main then
-								DA.Print('skipped [duplicate]: '..name)
-							else
-								DA.Print('skipped [duplicate]: '..name..' ('..main..')')
-							end
-						end
-					else
-						DA.Print('skipped [bad note]: '..name..' ('..FEP_gMain[name]..')')
-					end
-				end
-			end
-		end
-
-		if next(award_roster) then
-			local epgp = string.lower(DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp:GetText())
-			
-			for _,name in ipairs(award_roster) do
-				tinsert(DA_Bulk_list,function() awardfunc(name,epgp,value,reason, altTableByName[name]) end)
-			end
-			tinsert(DA_Bulk_list,function()
-				if DA.loaded_Modules['Awarder'] then
-					FEP_GatherRaid()
-					tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
-				end
-				DA.AddRecentAward('|cffce95fc/bulk/|r',epgp,dkpinverted and "-"..value or value,reason)
-			end)
-
-			tinsert(DA_Fep_bulk,function() if DarkAngelGuild:IsShown() then DA.GetGuildData();DA.GuildSetAllLines() end end)
-			DA.ResumeTimer('fep')
-
-		end
-	elseif mode=='rank' then
-		local new=DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.rankid
-		for _,pltbl in pairs(playersarray) do
-			if pltbl[1]=='local' then
-				DA.Print('skipped [not a guild member]: '..pltbl[2])
-			elseif pltbl[1]=='normal' then
-				if pltbl[3]=="0" then
-					DA.Print('skipped [Guild Leader]: '..pltbl[2])
-				elseif pltbl[2]==GetUnitName('player') then
-					DA.Print('skipped [self]: '.. pltbl[2])
-				else
-					tinsert(DA_Bulk_list,function() DA.DemotePromotePlayer(pltbl[2],pltbl[3],new,1) end)
-				end
-			end
-		end
-	elseif mode=='kick' then
-		for _,pltbl in pairs(playersarray) do
-			if pltbl[1]=='local' then
-				if FEP_L_gMain[DA_CurrentGuild][pltbl[2]] then FEP_L_gMain[DA_CurrentGuild][pltbl[2]]=nil end
-			elseif pltbl[1]=='normal' then
-				if pltbl[3]=="0" then
-					DA.Print('skipped [Guild Leader]: '..pltbl[2])
-				elseif pltbl[2]==GetUnitName('player') then
-					DA.Print('skipped [self]: '.. pltbl[2])
-				else
-					GuildUninvite(pltbl[2])
-				end
-			end
-		end
-	end
-
-	tinsert(DA_Bulk_list,function()  end)
-	tinsert(DA_Bulk_list,function()  DA.GetGuildData(); end)
-	tinsert(DA_Bulk_list,function()  DA.GuildSetAllLines();if DarkAngelGUI.Guild.bulkmenu.autodeselect:GetChecked() then DA.SelectGuildMember(nil,true) end end)
-	tinsert(DA_Bulk_list,function()  DA.UpdateMicroMenu() end)
-	tinsert(DA_Bulk_list,function()  DA.UpdateMicroMenu();DarkAngelGUI.Guild.bulkmenu.startbulk:Enable();DarkAngelGUI.Guild.bulkmenu.stoper:Disable() end)
-			DA.ResumeTimer('bulkprocessor')
-
 
 end
 
@@ -6137,150 +6479,67 @@ function DA.SelectGMembersInRange(Name_1, Name_2)
 	end
 
 end
-
-function DA.RePaintFrames()
-	local alpha=fuckingOptions.txt1op
-	local beta=fuckingOptions.txt2op;
-	local blend1=fuckingOptions.txt1extra; if blend1 then blend1='add' else blend1='blend' end
-	local blend2=fuckingOptions.txt2extra; if blend2 then blend2='add' else blend2='blend' end
-
-	---@return table|nil frame
-	local function getNestedFrame(path)
-		local current = _G
-		for nested in path:gmatch("[^%.]+") do
-			current = current[nested]
-			if not current then
-				return nil
-			end
-		end
-		return current
+local RePaintFrameslocked
+function DA.RePaintFrames(onlyTxtPos,lock,unlock)
+	if unlock then
+		RePaintFrameslocked = nil
 	end
+	if lock then
+		RePaintFrameslocked = true
+	end
+	if RePaintFrameslocked then return end
+
+	local alpha=fuckingOptions.TXTartOpacity
+	local beta=fuckingOptions.TXTBgOpacity;
+	local blend1=fuckingOptions.TXTArtTransp; if blend1 then blend1='add' else blend1='blend' end
+	local blend2=fuckingOptions.TXTBgTransp; if blend2 then blend2='add' else blend2='blend' end
+
 
 	for n,_ in pairs(_G["DarkAngelGUI"]['tabsl']) do
-		_G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]].t:SetBlendMode(blend1)
-		_G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]].t:SetAlpha(alpha)
-		_G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]].add.t:SetBlendMode(blend2)
-		_G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]].add.t:SetTexture(21/255, 18/255, 22/255, beta)
+		local frame = _G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]]
+		if onlyTxtPos then
+			if fuckingOptions.TXTArtOnFront then
+				frame.art.t:SetDrawLayer('ARTWORK')
+				frame.bgtxt.t:SetDrawLayer('BACKGROUND')
+			else
+				frame.art.t:SetDrawLayer('BACKGROUND')
+				frame.bgtxt.t:SetDrawLayer('ARTWORK')
+			end
+		else
+			frame.art.t:SetBlendMode(blend1)
+			frame.art.t:SetAlpha(alpha)
+			frame.bgtxt.t:SetBlendMode(blend2)
+			frame.bgtxt.t:SetTexture(21/255, 18/255, 22/255, beta)
+		end
 
 	end
 
-	for _,data in ipairs({'DarkAngelGUI.Guild.micromenu','DarkAngelGUI.Guild.bulkmenu','DA_Inviter','DA_Flasker','DA_Flasker.Controls','DA_Flasker.optionsFrame','DA_Awarder','DA_BidTracker'}) do
-		local mainFrame = getNestedFrame(data)
-
-		if mainFrame then
-			if mainFrame.add and mainFrame.t then
-				mainFrame.add.t:SetBlendMode(blend2)
-				mainFrame.add.t:SetTexture(21/255, 18/255, 22/255, beta)
-			
-				mainFrame.t:SetBlendMode(blend1)
-				mainFrame.t:SetAlpha(alpha)
-
-			elseif mainFrame.t then
-				mainFrame.t:SetBlendMode(blend2)
-				mainFrame.t:SetTexture(21/255, 18/255, 22/255, beta)
+	for _,frame in ipairs(DA.DrawnFrames) do
+		if frame.art and onlyTxtPos then
+			if fuckingOptions.TXTArtOnFront then
+				frame.art.t:SetDrawLayer('ARTWORK')
+				frame.t:SetDrawLayer('BACKGROUND')
+			else
+				frame.art.t:SetDrawLayer('BACKGROUND')
+				frame.t:SetDrawLayer('ARTWORK')
+			end
+		elseif not onlyTxtPos then
+			if frame.art then
+				frame.art.t:SetBlendMode(blend1)
+				frame.art.t:SetAlpha(alpha)
+			end
+			if frame.tf then
+				frame.t:SetBlendMode(blend2)
+				if frame.t.myStoredTxt then
+					frame.t:SetTexture(frame.t.myStoredTxt[1], frame.t.myStoredTxt[2], frame.t.myStoredTxt[3],  (beta or frame.t.myStoredTxt[4] or 0.5));
+				else
+					frame.t:SetTexture(21/255, 18/255, 22/255, beta)
+				end
 				
 			end
 		end
+
 	end
-end
-function DA.Retwink()
-
-
-
-	local assignedto,_=DarkAngelGUI.Guild.bulkmenu.assignedto:GetText():gsub("%s","")
-		if not assignedto then
-			DA.Print('[|cffffa0a0ERROR|r] please specify any name for \"assigned to\"')
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		elseif not FEP_gMain[assignedto] then
-			DA.Print('[|cffffa0a0ERROR|r] '..assignedto..' not found in guild')
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		end
-
-	local newmain,_=DarkAngelGUI.Guild.bulkmenu.newmain:GetText():gsub("%s","")
-		if not newmain then
-			DA.Print('[|cffffa0a0ERROR|r] please specify any name for \"new main\"')
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		elseif not FEP_gMain[newmain] then
-			DA.Print('[|cffffa0a0ERROR|r] '..newmain..' not found in guild')
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		elseif assignedto==newmain then
-			DA.Print('[|cffffa0a0ERROR|r] stupid :) ???? ')
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		end
-
-	local changingmain=DarkAngelGUI.Guild.bulkmenu.ismakingnewmain:GetChecked()
-	local assignedEP
-	if changingmain then
-
-		if not (DA.DecodeNote(FEP_gMain[assignedto])=="m" or DA.DecodeNote(FEP_gMain[assignedto])=="f") then
-			DA.Print('[|cffffa0a0ERROR|r] [Main change] '..assignedto.." "..L["is not main"])
-			DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable()
-			return
-		elseif (DA.DecodeNote(FEP_gMain[newmain])=="m" or DA.DecodeNote(FEP_gMain[newmain])=="f") then
-			if FEP_gMain[newmain]=="" and FEP_gMain[assignedto]=="" then
-				assignedEP=""
-			elseif FEP_gMain[newmain]=="" then
-				assignedEP=FEP_gMain[assignedto]
-			elseif FEP_gMain[assignedto]=="" then
-				assignedEP=FEP_gMain[newmain]
-			else
-				DA.Print("[|cff0088ffINFO|r] "..assignedto..","..newmain.." -"..L["mains merged"])
-				local _,a,b,c=DA.DecodeNote(FEP_gMain[assignedto])
-				local _,na,nb,nc=DA.DecodeNote(FEP_gMain[newmain])
-				if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
-					assignedEP=a+na..","..b+nb
-				elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
-					assignedEP="Net:"..a+na.." Tot:"..b+nb..( ((c or nc) and " Hrs:"..c+nc) or "")
-				end
-			end
-		else
-			assignedEP=FEP_gMain[assignedto]
-		end
-	end
-
-	---local binds
-	for i,p in pairs(FEP_L_gMain[DA_CurrentGuild]) do
-		if p==assignedto then
-			FEP_L_gMain[DA_CurrentGuild][i]=newmain
-		end
-	end
-
-	---guild shit
-	for i=1,DA.GetNumGMembers() do
-		local name, _, _, _, _, _, _, officernote, _, _, _ = GetGuildRosterInfo(i);
-		if name then
-			if name==newmain and changingmain and assignedEP then
-				DA.SetOfficernote(name,tostring(assignedEP))
-				DA.Print('[|cff00ffa0SUCCESS|r] Mained '..name..' assigned '..assignedEP)
-
-			elseif name==assignedto and changingmain and assignedEP then
-				DA.SetOfficernote(name,tostring(newmain))
-				DA.Print('[|cff00ffa0SUCCESS|r] Old main '..name..' tvined')
-
-			elseif officernote==assignedto then
-				DA.SetOfficernote(name,tostring(newmain))
-				DA.Print('[|cff00ffa0SUCCESS|r] Retvined '..name)
-
-
-
-			end
-
-		end
-	end
-
-	DA.UpdateMicroMenu()
-
-
-	tinsert(DA_Fep_bulk,function() end)
-	tinsert(DA_Fep_bulk,function() DA.RegatherGuildNotes() end)
-	tinsert(DA_Fep_bulk,function() end)
-	tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu();DarkAngelGUI.Guild.bulkmenu.retvgobtn:Enable() end)
-	DA.ResumeTimer('fep')
 
 end
 function DA.SetPublicnote(player,note)
@@ -7585,7 +7844,7 @@ local function sanitizeInput(value)
 	end
 	return value
 end
-function DA.GuildSearchTec(eb_name, eb_lvl, eb_note, eb_offnote, eb_rank, eb_online)
+local function GetGuildDataFiltered(eb_name, eb_lvl, eb_note, eb_offnote, eb_rank, eb_online)
     local data = FFGGuildArray
     local result = {}
     local lightscan
@@ -7763,13 +8022,48 @@ local function checkIsNotMalformed(pat)
     return true
 end
 
+local function GuildSetLine(data1)
 
+   table.wipe(DA_GuildRoster)
+
+    for pos, data in ipairs(data1) do
+        local name, level, note, officerNote, rank, class, status = unpack(data)
+        local rankID, rankName, rankNA = unpack(rank)
+        local officerNoteText, officerNoteTextCol = unpack(officerNote)
+        local isLocal = rankID == 'local'
+        local color = DA.GetNumericClassColor(class)
+
+		DA_GuildRoster[pos]={}
+		local plDat = DA_GuildRoster[pos]
+
+
+		plDat.plname=name
+		plDat.officerNoteText=officerNoteText
+		plDat.colorname=isLocal and 'local' or color
+		plDat.isLocal=isLocal
+		plDat.lvl=level
+		plDat.note=note
+
+		plDat.officernote=DA.GetOfficerNoteColored(officerNoteTextCol)
+
+		plDat.rankNA=rankNA
+		plDat.rankTxt="[" .. rankID .. "]" .. (rankName or "")
+		plDat.rankID=rankID
+
+		plDat.class=class
+		plDat.isOnline = (status == "online")
+		plDat.onlineColor=plDat.isOnline and {0.1, 0.8, 0.3, 1} or {86/255, 18/255, 35/255, 1}
+		plDat.online=status
+
+    end
+
+	DarkAngelGuildCF:SetSize(5, #DA_GuildRoster * 15)
+
+	DarkAngelGUI.Guild.UpdRows(DarkAngelGuild.offset or 1)
+
+end
 function DA.GuildSetAllLines()
 	if DA_CurrentGuild=="n0-guild" and not DarkAngelGuild.custom_mode then return end
-
-	DarkAngelGuild.timerticked=0
-	DarkAngelGuild.scrolled=false
-	DarkAngelGuild.btnshidden=false
 
 	local eb={}
 	for r=1,6 do
@@ -7778,13 +8072,13 @@ function DA.GuildSetAllLines()
 			DarkAngelGUI.Guild["EB"..r].t:SetBlendMode("BLEND")
 			if checkIsNotMalformed(ebt) then
 				eb[r]=ebt
-				DarkAngelGUI.Guild["EB"..r].t:SetTexture(0.176, 0.286, 0.356, 1)
+				DarkAngelGUI.Guild["EB"..r]:SetGoodColor()
 			else
-				DarkAngelGUI.Guild["EB"..r].t:SetTexture(0.36, 0.20, 0.18, 1)
+				DarkAngelGUI.Guild["EB"..r]:SetBadColor()
 			end
 		else
 			DarkAngelGUI.Guild["EB"..r].t:SetBlendMode("ADD")
-			DarkAngelGUI.Guild["EB"..r].t:SetTexture(0.176, 0.286, 0.356, 1)
+			DarkAngelGUI.Guild["EB"..r]:SetGoodColor()
 		end
 	end
 
@@ -7797,7 +8091,7 @@ function DA.GuildSetAllLines()
 	end
 	DarkAngelGuild:Show()
 
-	local dump = DA.GuildSearchTec(eb[1],eb[2],eb[3],eb[4],eb[5],eb[6])
+	local dump = GetGuildDataFiltered(eb[1],eb[2],eb[3],eb[4],eb[5],eb[6])
 
 	if dump==0 then
 		DarkAngelGuild:Hide()
@@ -7822,7 +8116,7 @@ function DA.GuildSetAllLines()
 		end
 
 		DarkAngelGuild:Show()
-			DA.GuildSetLine(dump)
+			GuildSetLine(dump)
 	end
 end
 
@@ -8089,46 +8383,7 @@ Guild_Create_ScrollBar = function ()
 	end)
 
 end
-function DA.GuildSetLine(data1)
 
-   table.wipe(DA_GuildRoster)
-
-    for pos, data in ipairs(data1) do
-        local name, level, note, officerNote, rank, class, status = unpack(data)
-        local rankID, rankName, rankNA = unpack(rank)
-        local officerNoteText, officerNoteTextCol = unpack(officerNote)
-        local isLocal = rankID == 'local'
-        local color = DA.GetNumericClassColor(class)
-
-		DA_GuildRoster[pos]={}
-		local plDat = DA_GuildRoster[pos]
-
-
-		plDat.plname=name
-		plDat.officerNoteText=officerNoteText
-		plDat.colorname=isLocal and 'local' or color
-		plDat.isLocal=isLocal
-		plDat.lvl=level
-		plDat.note=note
-
-		plDat.officernote=DA.GetOfficerNoteColored(officerNoteTextCol)
-
-		plDat.rankNA=rankNA
-		plDat.rankTxt="[" .. rankID .. "]" .. (rankName or "")
-		plDat.rankID=rankID
-
-		plDat.class=class
-		plDat.isOnline = (status == "online")
-		plDat.onlineColor=plDat.isOnline and {0.1, 0.8, 0.3, 1} or {86/255, 18/255, 35/255, 1}
-		plDat.online=status
-
-    end
-
-	DarkAngelGuildCF:SetSize(5, #DA_GuildRoster * 15)
-
-	DarkAngelGUI.Guild.UpdRows(DarkAngelGuild.offset or 1)
-
-end
 
 -- Minimap button
 DarkAngel_minimapBtn = CreateFrame("Button", "DarkAngel_minimapBtn", Minimap)
@@ -8212,7 +8467,31 @@ minibtn:SetScript("OnDragStop", function()
 end)
 minibtn:SetScript("OnEnter",function(self)
 	DarkAngel_minimapBtn.menu.timerticked=0
-	DA.myShowTooltipMinimap(self)
+	local tt = DA_TooltipMM
+	tt:SetBackdrop({bgFile="Interface\\Tooltips\\UI-Tooltip-Background",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",tile="true",tileSize="16",edgeSize="16",insets={bottom="5",left="5",right="5",top="5"}})
+	
+	
+	tt:SetBackdropColor(0.09, 0.09, 0.19, 0.9)
+	-- tt:SetBackdropBorderColor(0.2, 0.2, 0.2, 1.0)
+
+	DA_TooltipMMTextLeft1:SetFont(UIDarkAngelFontConsolas:GetFont(), 15,'outline')
+	DA_TooltipMMTextRight1:SetFont(UIDarkAngelFontConsolas:GetFont(), 15,'outline') 
+	DA_TooltipMMTextLeft2:SetFont("Fonts\\FRIZQT__.TTF", 11,'outline') 
+	
+	tt:SetOwner(self,'ANCHOR_NONE')
+	tt:SetPoint('bottomright',self,'topleft',0,5)
+	for _,j in pairs({tt:GetRegions()}) do 
+		if j:GetObjectType()=='Texture' then
+			---@diagnostic disable-next-line: undefined-field
+			j:SetBlendMode('add')
+		end
+	end
+	tt:ClearLines()
+
+	tt:AddDoubleLine("|cff03fcf4DarkAngel|r","v"..GetAddOnMetadata("DarkAngel",'version'),0.25,0.85,0.85,0.35,0.85,0.45)
+	tt:AddLine(L["minimaptooltip"],0.45,0.65,0.65,1)
+	
+	tt:Show()
 end)
 minibtn:SetScript("OnLeave",function(self)
 	DA.myHideMMTooltip()

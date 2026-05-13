@@ -67,10 +67,11 @@ local fuckingOptions_local={
 	Decaydays=2,
 	decaygroup=1,
 	prntleav=1,
-	txt1op=0.2,
-	txt2op=0.5,
-	txt1extra=false,
-	txt2extra=false,
+	TXTartOpacity=0.5,
+	TXTBgOpacity=0.3,
+	TXTArtTransp=false,
+	TXTBgTransp=false,
+	TXTArtOnFront=true,
 	
 	auc_bidBtnsTutorial=true,
 	auc_OnlyInGuild=false,
@@ -78,7 +79,9 @@ local fuckingOptions_local={
 
 	Inviter_shareDiscordOnlyInGuild=true,
 	Inviter_shareDiscordOnlyInFullGuild=true,
-	
+	Inviter_manualTimerSpeed=4,
+	Inviter_TimerMode=1,
+
 	guildcopyauto=true,
 	logcopyauto=true,
 	
@@ -168,7 +171,7 @@ local fuckingOptions_g_local={
 	initRaidLootMethod='m',
 	inviter_stop_message=false,
 	inviter_repeat_message=false,
-	inviter_autostop_message=false,
+	inviter_autostop_msg=false,
 	inviter_inv_pattern=false,
 	Inviter_RepeatAnons=1,
 	Inviter_shareDiscord=false,
@@ -178,7 +181,7 @@ local fuckingOptions_g_local={
 	Inviter_AutoJoinRT=false,
 	Inviter_AutoAcceptOnJoinRT=1,
 	Inviter_AutoStop=false,
-	Inviter_TimeAutoStop=50,
+	Inviter_TimeAutoStop="5",
 	Inviter_RepeatMsgOnTime=60,
 	Inviter_RTMessage="Raid Time +++++++++++",
 	Inviter_RTDiscord="https://discord.gg/discord_link",
@@ -228,16 +231,15 @@ local fuckingOptions_g_local={
 	do_decay_checks=1,
 	
 	InvTimerSpeed='fast',
-	InvTimerSpeedTimer=4,
 	
 	standby_method='epgp',
 	procepzamene=false,
 	procepzam_usemanual=false,
 	manual_procent=100,
 	
-	assistperm="Guild Rank",
-	assistperm_rank=false,
-	assistperm_manual="",
+	trustedMode=2,
+	trustedRankID=false,
+	trustedList="",
 	
 	aucoptsets={
 		{100,5},
@@ -252,10 +254,13 @@ local fuckingOptions_g_local={
 	auc_allin=1,
 	auc_bidconfirmed=1,
 	
+	printOldDeleted=true,
 	warnsuspic=false,
 	warn_improv_suspic=true,
 	dkpcomm=false,
-	dkpcomm_inraid=true,
+	-- dkpcomm_inraid=true,
+	commWhispersPerm=3,
+	dkpcomm_sendLocals=true,
 	dispenser_announce=1,
 	dispenser_markself=1,
 	dispenser_markself_n=2,
@@ -299,7 +304,9 @@ do --variables
     DA.LinkIndex = 0
 	DA.RunOnGuildUpdate={}
 	DA.ResetValueOnGuildUpdate={}
-
+	DA.modOptCreate={}
+	DA.loaded_Modules={}
+	DA.DrawnFrames={}
 end
 local ModsAndGuildDataReady
 local IfModsAndGuildDataReady
@@ -625,12 +632,13 @@ local function SetAllFrameCoords()
 	end
 	
 end
+
+
+function DA.AddModOptions(modName, func)
+	table.insert(DA.modOptCreate, {modName, func})
+end
 ModsAndGuildDataReady = function(nomods)
 	DA.RegatherGuildNotes()
-	
-	
-	local modOptTable={}
-	DA.loaded_Modules={}
 	
 	if nomods then
 		-- DA.Print('mod opt: no mods')
@@ -641,10 +649,10 @@ ModsAndGuildDataReady = function(nomods)
 				-- print('[|cffed94edDarkAngel|cffffffff]: OnGuildLoad')
 				mod:OnGuildLoad()
 			end
-			if mod.AddModOptions then
-				-- print('[|cffed94edDarkAngel|cffffffff]: '.. modName,"options")
-				mod:AddModOptions(modOptTable)
-			end
+			-- if mod.AddModOptions then
+			-- 	-- print('[|cffed94edDarkAngel|cffffffff]: '.. modName,"options")
+			-- 	mod:AddModOptions(modOptTable)
+			-- end
 			DA.loaded_Modules[modName]=true
 		end
 		
@@ -652,78 +660,14 @@ ModsAndGuildDataReady = function(nomods)
 	if not DA.loaded_Modules['Logger'] then
 		DA_RightClickMenu.detailsbtn:Disable()
 	end
-	DA.CreateTweakGUIs(modOptTable,DA.loaded_Modules)
 	
 	SetAllFrameCoords()
 	DA:MimimapMenu_Create()
 	
-	local priority = {
-		["Logger"] = 1,
-		["BidTracker"] = 2,
-		["Awarder"] = 3,
-		["Tweaks"] = 4
-	}
+	-- DA.CreateTweakGUIs(modOptTable,DA.loaded_Modules)
 
-	table.sort(modOptTable, function(a, b)
-		local aVal = a and a[1] and priority[a[1]] or 99
-		local bVal = b and b[1] and priority[b[1]] or 99
-		return aVal < bVal
-	end)
 	
-	local xOffset = 0
-	local yOffset = -70
-	local spacing = 5
 
-	local anchors = {}
-	-- DA.Print("core settings mod options blocks")
-	-- DA.Print("====================")
-	for i, tbl in ipairs(modOptTable) do
-		-- print('[|cffed94edDarkAngel|cffffffff]: Processing module index:', i)
-
-		local modName = tbl[1]
-		local modOptFrame = tbl[2]
-
-		-- print("[|cffed94edDarkAngel|cffffffff]: Module Name:", modName)
-		-- print("[|cffed94edDarkAngel|cffffffff]: Module Frame:", modOptFrame)
-
-		if DA.loaded_Modules[modName] then
-			-- print("[|cffed94edDarkAngel|cffffffff]:", modName, "is loaded")
-
-			if modName == "Tweaks" then
-				-- print("[|cffed94edDarkAngel|cffffffff]: Special positioning logic for Tweaks")
-
-				if anchors["BidTracker"] then
-					-- DA.Print("Anchoring Tweaks to BidTracker")
-					modOptFrame:SetPoint("TOPLEFT", anchors["BidTracker"], "BOTTOMLEFT", 0, -spacing)
-				elseif anchors["Awarder"] then
-					-- DA.Print("Anchoring Tweaks to Awarder")
-					modOptFrame:SetPoint("TOPLEFT", anchors["Awarder"], "BOTTOMLEFT", 0, -spacing)
-				elseif anchors["Logger"] then
-					-- DA.Print("Anchoring Tweaks to Logger")
-					modOptFrame:SetPoint("TOPLEFT", anchors["Logger"], "TOPRIGHT", spacing, 0)
-				else
-					-- DA.Print("Anchoring Tweaks to default position")
-					modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
-				end
-			else
-				-- print("[|cffed94edDarkAngel|cffffffff]: Standard positioning for", modName)
-				modOptFrame:SetPoint("TOPLEFT", DarkAngelopt.scrollchild, "TOPLEFT", xOffset, yOffset)
-				
-				local width = modOptFrame:GetWidth()
-				-- print("[|cffed94edDarkAngel|cffffffff]: Width of", modName, "frame:", width)
-
-				xOffset = xOffset + width + spacing
-				-- print("[|cffed94edDarkAngel|cffffffff]: New xOffset:", xOffset)
-
-				anchors[modName] = modOptFrame
-				-- print("[|cffed94edDarkAngel|cffffffff]: Anchor updated for", modName)
-			end
-		else
-			-- print("[|cffed94edDarkAngel|cffffffff]: ",modName, "is not loaded. Skipping.")
-		end
-	end
-
-	-- DA.Print("====================")
 	
 	tinsert(DA_Fep_bulk,function()  end)
 	tinsert(DA_Fep_bulk,function()  end)

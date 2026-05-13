@@ -38,6 +38,28 @@ local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 
 
 -- Lua
+function DA.Safecall(func, ...)
+	if type(func) ~= "function" then
+		DA.Print("|cffff0000Safecall error:|r invalid function")
+		return
+	end
+
+	local ok,
+		result1, result2, result3,
+		result4, result5, result6,
+		result7, result8, result9 =
+			xpcall(func, debugstack, ...)
+
+	if not ok then
+		DA.Print("|cffff0000Error:|r "..tostring(result1))
+		return
+	end
+
+	return
+		result1, result2, result3,
+		result4, result5, result6,
+		result7, result8, result9
+end
 local da_simpleTimer = CreateFrame("Frame")
 da_simpleTimer.queue = {}
 da_simpleTimer.count = 0
@@ -98,16 +120,26 @@ da_simpleTimer:SetScript("OnUpdate", function(self,_)
         local cb = self.queue[1].func
         simpleTimer_Shift()
 
-        local ok, err = pcall(cb)
-        if not ok then
-            DA.Print("|cffff0000Timer Error:|r "..tostring(err))
-        end
+		DA.Safecall(cb)
+        -- local ok, err = pcall(cb)
+        -- if not ok then
+        --     DA.Print("|cffff0000Timer Error:|r "..tostring(err))
+        -- end
     end
 end)
 
 DA.TimerAfter = function(duration, callback)
     if type(callback) ~= "function" then return end
     if not duration or duration < 0 then duration = 0 end
+
+    simpleTimer_Insert(GetTime() + duration, callback)
+end
+DA.TimerAfterShort = function(duration, callback)
+    if type(callback) ~= "function" then return end
+    if not duration or duration < 0 then duration = 0 end
+
+    -- hard cap to avoid absurd spam
+    if duration < 0.01 then duration = 0.01 end
 
     simpleTimer_Insert(GetTime() + duration, callback)
 end
