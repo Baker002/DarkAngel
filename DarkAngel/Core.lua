@@ -49,6 +49,7 @@ function DA.Safecall(func, ...)
 		result4, result5, result6,
 		result7, result8, result9 =
 			xpcall(func, debugstack, ...)
+			-- pcall(func, ...)
 
 	if not ok then
 		DA.Print("|cffff0000Error:|r "..tostring(result1))

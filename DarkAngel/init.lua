@@ -194,7 +194,6 @@ local fuckingOptions_g_local={
 	aw_auto_locals=true,
 	aw_auto_Ch_locals=false,
 	aw_auto_silent_locals=false,
-	
 	aw_scada_bossfights=true,
 	aw_scada_long=true,
 	
@@ -230,9 +229,6 @@ local fuckingOptions_g_local={
 		
 	do_decay_checks=1,
 	
-	InvTimerSpeed='fast',
-	
-	standby_method='epgp',
 	procepzamene=false,
 	procepzam_usemanual=false,
 	manual_procent=100,
@@ -258,7 +254,6 @@ local fuckingOptions_g_local={
 	warnsuspic=false,
 	warn_improv_suspic=true,
 	dkpcomm=false,
-	-- dkpcomm_inraid=true,
 	commWhispersPerm=3,
 	dkpcomm_sendLocals=true,
 	dispenser_announce=1,
@@ -299,20 +294,19 @@ do --variables
     DA.IsModuleLoaded = {}
     DA.guild_info_found=false
     DA.GuildInfoFetched=false
-    DA.OnInit_completed = false
     DA.LinkStorage = {}
     DA.LinkIndex = 0
 	DA.RunOnGuildUpdate={}
-	DA.ResetValueOnGuildUpdate={}
+	DA.RunOnSettingsImport={}
 	DA.modOptCreate={}
 	DA.loaded_Modules={}
 	DA.DrawnFrames={}
 end
+local Init_completed = false
 local ModsAndGuildDataReady
 local IfModsAndGuildDataReady
 local OnGuildDataAvailable
 local TryInitGuildData
-local Run_OnGuildUpdate
 
 -- Initialization
 local gInfoFetcher=CreateFrame("Frame")
@@ -403,6 +397,17 @@ GuildSysTracker:SetScript("OnEvent", function (_,_,msg)
 	end
 end)
 
+function DA.Run_OnGuildUpdate()
+	for _,func in ipairs(DA.RunOnGuildUpdate) do
+		func()
+	end
+end
+function DA.Run_OnSettingsImport()
+	for _,func in ipairs(DA.RunOnSettingsImport) do
+		func()
+	end
+end
+
 function DA:OnInitialize()
 	-- DA.Print('core init')
 	DA.OptionsUpd()
@@ -492,7 +497,7 @@ function DA:OnInitialize()
 	DA.CreateTimer(nil,"greset",9,10,true,function(self)
 		-- print('greset run')
 		DA.Rewrite_Gopt()
-		Run_OnGuildUpdate()
+		DA.Run_OnGuildUpdate()
 		DarkAngel_minimapBtn:Enable()
 		DarkAngel_minimapBtn:Show()
 		self:SetScript("OnUpdate",nil)
@@ -573,7 +578,7 @@ OnGuildDataAvailable = function(guildName,delayednoguild)
 	end
 	
 	DA_CurrentGuild = guildName or 'n0-guild'
-	if DA.OnInit_completed then
+	if Init_completed then
 		-- DA.Print('core gdata greset')
 		DA.ResumeTimer("greset")
 		return
@@ -681,11 +686,6 @@ ModsAndGuildDataReady = function(nomods)
 	DA.ResumeTimer('fep')
 end
 
-Run_OnGuildUpdate = function()
-	for _,func in ipairs(DA.RunOnGuildUpdate) do
-		func()
-	end
-end
 
 
 -- Variables
@@ -1015,7 +1015,7 @@ local function Create_Slash_Functions()
 	SlashCmdList["FSRversionr"] = function() SendAddonMessage("DA_vrq",GetUnitName("player"), "raid") end
 end
 function Dark_Angel_OnInit(guildinit)
-	DA.OnInit_completed=true
+	Init_completed=true
 	if DA.modules.Logger then DA.Logger_rewrite_Gopt() end
 	
 	DA_Guild_Info[DA_CurrentGuild]=DA_Guild_Info[DA_CurrentGuild] or {}

@@ -86,6 +86,12 @@ end
 
 --Guild
 do
+L["DESCr-awardprocent_tt"]=[[|cffff9999Percentage-based award|r
+To apply a percentage-based award/deduction, enter W followed by the percentage value in the "value" field:
+   W100 - doubles the player's points (+100%)
+  -W5   - deducts 5%
+Deduction range: 0 < x <= 100
+Award range: 0 < x <= 500]]
 L["percentageAwardValueIsZero"] = "Player $1 has too few points — percentage-based award rounds to 0"
 L['roster from backup']=true
 L["hold_ctrl_for_more"]="|cff507375<Hold Ctrl to see more details>|r"
@@ -99,7 +105,7 @@ L["patterns"]=true
 L["sort"]=true
 L["clear"]=true
 L["refresh"]=true
-L["re-twink twins assigned to"]=true
+L["re-assign players assigned to"]=true
 L["to the new main"]=true
 L["Make it new Main"]='transfer\nmain'
 L["name"]=true
@@ -373,6 +379,29 @@ L["Stop message"]=true
 L["Auto-stop message"]=true
 L["Loot Method"]=true
 L["more..."]=true
+L["transfer_settings"]="transfer\nsettings"
+L["DESCr-transfer_settings_tt1"]=[[|cffff9999Addon Settings Transfer|r
+Most players will never need this feature, 
+but it can be useful if you play on multiple accounts or want to transfer settings from one guild to another.]]
+L["DESCr-transfer_settings_tt2"]=[[|cff88ccffThis menu allows you to|r
+ 1) transfer settings between different WoW accounts
+   |cff507375if you have characters on another account and want to use the same addon configuration there|r
+ 2) transfer settings from one guild to another within the same account
+
+Most settings are shared between all characters or stored separately per guild while still remaining account-wide, so a full profile system is unnecessary.
+
+For your convenience, the data type checkboxes affect both which data 
+will be exported and which of the provided data will be used.]]
+L["Manual settings transfer"]=true
+L["global setings"]=true
+L["guild setings"]=true
+L["import_settings_success"]="|cff00ffa0Settings imported successfully. |cffff8888To ensure proper functionality, it is highly recommended to reload the UI using /reload"
+L["Migrate guild settings"]=true
+L["DESCr-transfer_settings_tt3"]=[[|cff88ccffThis menu allows you to|r
+Easily transfer addon settings from one guild to another within the same account.
+|cffa19375Keep in mind that settings are copied with replacement|r
+
+If you are not sure what you are doing, it may be a good idea to export the settings in the menu above first, so they can later be restored via import if needed]]
 end
 
 do -- Bid Tracker
@@ -841,9 +870,58 @@ notes, officer notes, ranks, local twins, whichever is present in the backup]]
 L['DESCr-Backup_seeGMranks']=[[|cffff9999See stored guild ranks system|r]]
 L['DESCr-do_decay_checks']=[[|cffff9999Enable EPGP Decay checks|r
 Useful for EPGP guilds that do Decay]]
-L['DESCr-auto_cbs']=[[|cffff9999Automatic checkbox setup|r
-|cff943838You'll learn of that first hand. When my work is complete, you will beg for mercy -- and I will deny you.
-Your anguished cries will be testament to my |cffbd0000unbridled |cff943838power...|r]]
+L['DESCr-auto_cbs']=[[|cffff9999Automatic checkbox assignment|r
+Automatically assigns reward checkmarks to all raid members according to the automation settings (gear icon menu).
+|cff88ccff+Shift|r - also removes checkmarks that do not match the automation rules
+
+|cff943838If you truly want to experience the full joy of automation, it is highly recommended to explore these settings,
+as well as the explanatory tooltip in the settings menu next to the close button|r]]
+L['DESCr-autoopt_tt']=[[|cffff9999Automation settings|r |cff507375(please forgive me for this)|r
+Each bonus entry in the main window has condition icons displayed next to it.
+These conditions determine who will automatically receive the mark for that bonus.
+
+Multiple conditions can be assigned to the same bonus.
+For example, the |cff88ccfftank_heal|r bonus may include both |cff88ccffTank|r and |cff88ccffHealer|r conditions
+— in this case, both roles will receive the same bonus.
+
+|cffff9999Condition types:|r
+  - Raid participation reward — available only for Bonus #1
+  |cff88ccffGroup 1 — raid roles:|r
+    - Tank/Healer/Melee/Caster
+    - "Memory" mode — see the condition tooltip for details
+      |cff507375may be useful as bis character bonus|r
+
+  |cff88ccffGroup 2 — classes:|r
+    - Conditions based on player class
+    - Can be combined with raid roles
+    - Supports AND / OR modes
+
+  |cff88ccffGroup 3 — miscellaneous:|r
+    - Skada-based rewards (uses data from the latest kill of the selected boss)
+      Examples for "Deathbringer Saurfang"
+        mode:"damage done to enemy"="Blood Beast", condition:"top X"=3 |cff507375— top 3 damage dealers on adds|r
+        mode:"damage done (DPS)", condition:">= X"=20000 |cff507375— players with 20k+ DPS|r
+    - Raid Leader bonus
+    - Guild rank bonus
+
+|cffff9999Raid conditions:|r
+  Some conditions depend on the player's raid group number.
+  By default:
+  - raid participation bonuses apply to groups 1-8
+  - role, Skada, and "Memory" bonuses apply only to groups 1-5
+  This behavior can be changed.
+
+|cffff9999Additional options:|r
+  - change the number of bonuses (3-8)
+  - select the Skada data source
+  - create and switch bonus profiles
+
+|cff507375One day, in a dream, you had the idea to create two additional profiles besides the main one — each containing 8 bonuses,
+with every bonus having carefully designed "Skada"-based conditions.
+Then export the profiles and make all guild officers clear their Skada logs before raids,
+and distribute rewards strictly according to this new "standard"...
+
+Find someone reasonably sane and delegate this task to them :)|r]]
 L['DESCr-desc_evaluate']="Show alternative officer notes"
 L['DESCr-desc_onlinefirst']="sort online and offline players separately; put online players at the top of the list"
 L['DESCr-desc_reverse']="reverse sort"
@@ -885,7 +963,8 @@ Players can whisper "epgp standby" (by default) to you to join standby
 The list of players is saved even when you re-enter the game (saved within your account>guild)]==]
 L['DESCr-additionalbinds']=[==[|cffff9999Additional binds|r
 |cffaaccffCtrl-O|r — Open main addon window (Guild)
-|cffaaccffShift-O|r — Open Inviter/Flask Dispenser
+|cffaaccffShift-O|r — Open Inviter
+|cffaaccffCtrl-Shift-O|r — Open Flask Dispenser
 |cffaaccffAlt-O|r — Open Awarder window
 |cffaaccffCtrl-Alt-O|r — Open EP-Auc/DKP bid tool]==]
 L['DESCr-GCmover']=[==[|cffff9999   Click|r
@@ -977,15 +1056,15 @@ L["DESCr-bckpio"]=[==[When processing, skip actual guild members that are having
 any |cffaaffffofficer note|r filled]==]
 L["DESCr-pricolsedit"]=[==[Edit list of jokes]==]
 L["DESCr-BulkHelp"]=[==[|cffff9999Bulk actions menu|r
-|cffff9999Apply to|r - players the bulk will be applied to:
-   |cffff9999selected|r - select players in Guild list via 
+|cff88ccffApply to|r - players the bulk will be applied to:
+   |cff88ccffselected|r - |cff88eeffselect players in Guild list via|r
       --Ctrl+click (one player) 
       --Shift+click (many players) -same way as you do in Windows
-   |cffff9999all found|r - use all players found
+   |cff88ccffall found|r - use all players found
       (taking into account the current search criteria)
 
-|cffff9999Start|r - launch bulk
-|cffff9999Stop|r - try to stop the running bulk [ be careful, some operations are very fast ]]==]
+|cff88ccffStart|r - launch bulk
+|cff88ccffStop|r - try to stop the running bulk [ be careful, some operations are very fast ]]==]
 L['DESCr-BulkHelp2']=[==[If you are unsure of what you are doing,
 you can create a full guild backup in the 'Backup' tab :)
 With a backup, it will be possible to quickly roll back any changes, except, perhaps, a kick from the guild]==]

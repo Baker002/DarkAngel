@@ -401,14 +401,14 @@ function Mod:OnGuildLoad()
 			until ((not listinvite_bulk[1]) or (not UnitInRaid(listinvite_bulk[1])))
 		end
 		if listinvite_bulk[1] then
-			if fuckingOptions.Inviter_TimerMode=='timer' then
+			if fuckingOptions.Inviter_TimerMode==3 then
 				DA.ResumeTimer("proc_invite_timer")
-			elseif fuckingOptions.Inviter_TimerMode=='fast' then
+			elseif fuckingOptions.Inviter_TimerMode==1 then
 				Inviter_responseFrame:RegisterEvent("CHAT_MSG_SYSTEM")
 				Inviter_responseFrame:RegisterEvent("UI_ERROR_MESSAGE")
 
 				DA.ResumeTimer("proc_invite_fast")
-			elseif fuckingOptions.Inviter_TimerMode=='instant' then
+			elseif fuckingOptions.Inviter_TimerMode==2 then
 				for _,name in ipairs(listinvite_bulk) do
 					if name and not UnitInRaid(name) then
 						InviteUnit(name)

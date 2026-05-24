@@ -1059,7 +1059,6 @@ function Mod.Backup_Load()
 				DarkAngelGUI.Backup.guilds  = CreateFrame("Frame", nil, DarkAngelGUI.Backup)
 				DarkAngelGUI.Backup.guilds.width  = 160
 				DarkAngelGUI.Backup.guilds.height = 70
-				DarkAngelGUI.Backup.guilds:SetFrameStrata("MEDIUM")
 				DarkAngelGUI.Backup.guilds:SetSize(DarkAngelGUI.Backup.guilds.width, DarkAngelGUI.Backup.guilds.height)
 				DarkAngelGUI.Backup.guilds:SetPoint("TOPLEFT", DarkAngelGUI.Backup, "TOPLEFT", 10, -150)
 				DarkAngelGUI.Backup.guilds:SetBackdropColor(1, 1, 1, 1)
@@ -1103,7 +1102,6 @@ function Mod.Backup_Load()
 				DarkAngelGUI.Backup.backupo  = CreateFrame("Frame", nil, DarkAngelGUI.Backup)
 				DarkAngelGUI.Backup.backupo.width  = 226
 				DarkAngelGUI.Backup.backupo.height = 70
-				DarkAngelGUI.Backup.backupo:SetFrameStrata("MEDIUM")
 				DarkAngelGUI.Backup.backupo:SetSize(DarkAngelGUI.Backup.backupo.width, DarkAngelGUI.Backup.backupo.height)
 				DarkAngelGUI.Backup.backupo:SetPoint("TOPLEFT", DarkAngelGUI.Backup, "TOPLEFT", 180, -150)
 				DarkAngelGUI.Backup.backupo:SetBackdropColor(1, 1, 1, 1)

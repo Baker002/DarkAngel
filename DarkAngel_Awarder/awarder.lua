@@ -546,6 +546,7 @@ DA_Awarder.autoopt:RegisterForDrag("LeftButton")
 DA_Awarder.autoopt:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 DA_Awarder.autoopt:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
 
+DA_Awarder.autoopt.helper = DA.HelpCreater(DA_Awarder.autoopt,{"center", DA_Awarder.autoopt, "TOPRIGHT", -22,-8.5},'autoopt_tt',11,11)
 
 DA.CloseButtonCreater(nil,DA_Awarder.autoopt,{"center", DA_Awarder.autoopt, "TOPRIGHT", -8.5,-8.5},12,12,'x')
 
@@ -1347,349 +1348,345 @@ end
 local re_highlight_difficulty
 
 
-do
----MAIN
----MAIN
-	DA_Awarder.autoopt.skadaassign.main=CreateFrame('frame')
-	DA_Awarder.autoopt.skadaassign.main:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.main:SetFrameStrata('MEDIUM')
-	DA_Awarder.autoopt.skadaassign.main:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.main:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+do	-- Skada options
+	---MAIN
+	---MAIN
+	do
+		DA_Awarder.autoopt.skadaassign.main=CreateFrame('frame')
+		DA_Awarder.autoopt.skadaassign.main:SetParent(DA_Awarder.autoopt.skadaassign)
+		DA_Awarder.autoopt.skadaassign.main:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
+		DA_Awarder.autoopt.skadaassign.main:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
 
-	
-	DA_Awarder.autoopt.skadaassign.main.bossesbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-30},12,40,'boss','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
-	function(self)
-		DA_Awarder.autoopt.skadaassign.main:Hide()
-		skada_opt_refresh_bosses()
-		DA_Awarder.autoopt.skadaassign.bosses:Show()
-	end,'center')
-
-	DA_Awarder.autoopt.skadaassign.main.selectedboss=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.bossesbtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.bossesbtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-
-
-	DA_Awarder.autoopt.skadaassign.main.modebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-50},12,40,'mode','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
-	function(self)
-		DA_Awarder.autoopt.skadaassign.main:Hide()
-		skada_modes_preshow()
-		DA_Awarder.autoopt.skadaassign.modes:Show()
-	end,'center')
-
-	DA_Awarder.autoopt.skadaassign.main.selectedmode=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.modebtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.modebtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-
-	DA_Awarder.autoopt.skadaassign.main.additbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-70},12,40,'select','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
-	function(self)
-		skada_addit_render()
-	end,'center')
-
-	DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
-	
-	DA_Awarder.autoopt.skadaassign.main.addit_eb=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main.additbtn,{"LEFT",DA_Awarder.autoopt.skadaassign.main.additbtn,"RIGHT",2,0},{120,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
-		function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-		function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
-		function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-		function(self) 	
-			if self:GetParent():IsShown() then
-				self.t:SetBlendMode('blend');
-				self.focusgained=1
-			end
-		end
-	)
-
-	
-	-- SAVE
-	DA_Awarder.autoopt.skadaassign.main.savebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-180},12,45,'Save','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp',
-	function(self)
-		DA_Awarder.autoopt.skadaassign.main.addit_eb.focusgained=nil
-		DA_Awarder.autoopt.skadaassign.main.addit_eb:ClearFocus()
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1.focusgained=nil
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1:ClearFocus()
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2.focusgained=nil
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2:ClearFocus()
 		
-		if DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()=='' or DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()=='--' then
-			DA.Print('select boss first')
-			return
-		end
-		if DA_Awarder.autoopt.skadaassign.selmode then
-		else
-			DA.Print('select checking mode')
-			return
-		end
-		if not DA_Awarder.autoopt.skadaassign.main.additbtn:IsShown() or (DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText() and DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText()~="") then
-		else
-			DA.Print('select checking mode specifics')
-			return
-		end
-		if DA_Awarder.autoopt.skadaassign.main.operand then
-		else
-			DA.Print('select math checking type')
-			return
-		end
-		if DA_Awarder.autoopt.skadaassign.main.operand=='any' or DA_Awarder.autoopt.skadaassign.main.operand=='0_or_na' or DA_Awarder.autoopt.skadaassign.main.operand=='na' then
-		
-		elseif DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText() and DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()~='' then
-			if not tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()) then
-				DA.Print('checking value is not a number')
-				return
-			end
-		else
-			DA.Print('specify checking value')
-			return
-		end
-		if DA_Awarder.autoopt.skadaassign.main.operand~='between' or (DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText() and DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()~='') then
-			if DA_Awarder.autoopt.skadaassign.main.operand=='between' and not tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
-				DA.Print('checking value is not a number')
-				return
-			end
-			if DA_Awarder.autoopt.skadaassign.main.operand=='between' and tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())==tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
-				DA.Print('values #1 and #2 are equal')
-				return
-			end
-		else
-			DA.Print('specify checking value #2')
-			return
-		end
-		if DA_Awarder.autoopt.skadaassign.opened_criteriaID and DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID] then
-		else
-			print('error 710')
-		end
-		
-		local boss=DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()
-		local mode=DA_Awarder.autoopt.skadaassign.selmode
-		local addit
-			if mode=='dmg' or 
-			mode=='dmg_dps' or 
-			mode=='dmg_taken' or 
-			mode=='healing' or 
-			mode=='healing_hps' or 
-			mode=='death' or 
-			mode=='fails' or 
-			mode=='dispells' or 
-			mode=='cc_done' or 
-			mode=='sunders' then
-			else
-				addit=DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText()
-			end
-		local matem
-			if DA_Awarder.autoopt.skadaassign.main.operand=='between' then
-				if tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())>tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
-					matem={typ='between',tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()),tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())}
-				else
-					matem={typ='between',tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()),tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText())}
-				end
-			elseif DA_Awarder.autoopt.skadaassign.main.operand=='any' or
-			DA_Awarder.autoopt.skadaassign.main.operand=='0_or_na' or
-			DA_Awarder.autoopt.skadaassign.main.operand=='na' then
-				matem={typ=DA_Awarder.autoopt.skadaassign.main.operand}
-			else
-				matem={typ=DA_Awarder.autoopt.skadaassign.main.operand,tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())}
-			end
-			if not matem then
-				print('error 770')
-				return
-			end
-		
-		DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']=nil
-		DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']={boss=boss,mode=mode,addit=addit or nil,matem=matem}
-		DA_Awarder.autoopt.skadaassign.main.deletebtn:Enable()
-		DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(1)
-		DA.AWAutoOptions()
-		
-	end,'center')
+		DA_Awarder.autoopt.skadaassign.main.bossesbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-30},12,40,'boss','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		function(self)
+			DA_Awarder.autoopt.skadaassign.main:Hide()
+			skada_opt_refresh_bosses()
+			DA_Awarder.autoopt.skadaassign.bosses:Show()
+		end,'center')
 
-	
-	--DELETE
-	DA_Awarder.autoopt.skadaassign.main.deletebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",80,-180},12,45,'Delete','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',
-	function(self)
-		if DA_Awarder.autoopt.skadaassign.opened_criteriaID and DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID] then
-			DA_Awarder.autoopt.skadaassign:Hide()
-			DA_Awarder.autoopt.skadaassign.main.deletebtn:Disable()
-			DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
-			DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']=nil
-			DA_Awarder.autoopt.skadaassign.opened_criteriaID=nil
-			DA.AWAutoOptions()
-		end
-	end,'center')
+		DA_Awarder.autoopt.skadaassign.main.selectedboss=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.bossesbtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.bossesbtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
-	DA_Awarder.autoopt.skadaassign.main.deletebtn:Disable()
-	DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
-	
-	--RESET
-	DA_Awarder.autoopt.skadaassign.main.resetbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-160},12,45,'reset','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function(self)
-		DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText('--')
-		DA_Awarder.autoopt.skadaassign.selmode=nil
-		DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('--')
+
+		DA_Awarder.autoopt.skadaassign.main.modebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-50},12,40,'mode','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		function(self)
+			DA_Awarder.autoopt.skadaassign.main:Hide()
+			skada_modes_preshow()
+			DA_Awarder.autoopt.skadaassign.modes:Show()
+		end,'center')
+
+		DA_Awarder.autoopt.skadaassign.main.selectedmode=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.modebtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.modebtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+
+		DA_Awarder.autoopt.skadaassign.main.additbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-70},12,40,'select','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		function(self)
+			skada_addit_render()
+		end,'center')
+
 		DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
-		DA_Awarder.autoopt.skadaassign.main.addit_eb:SetText('')
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1:SetText('')
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2:SetText('')
-		DA_Awarder.autoopt.skadaassign.main.operand=nil
-		DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText('')
-		DA_Awarder.autoopt.skadaassign.SKDTBL=nil
-	end,'center')
-
-	
-	do -- operand
-		DA_Awarder.autoopt.skadaassign.main.operand_btn,DA_Awarder.autoopt.skadaassign.main.operand_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt.skadaassign.main,skada_list_matematics[1][2],12,45,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-95},120,#skada_list_matematics*11 +1,"BOTTOMRIGHT")
-		DA_Awarder.autoopt.skadaassign.main.operand=skada_list_matematics[1][2]
 		
-			for i,j in ipairs(skada_list_matematics) do
-				
-				DA_Awarder.autoopt.skadaassign.main.operand_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.main.operand_FRM,{"TOPLEFT", DA_Awarder.autoopt.skadaassign.main.operand_FRM, "TOPLEFT", 1,10-11*i},10,118,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
-					
-					DA_Awarder.autoopt.skadaassign.main.operand_FRM:Hide()
-					DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText(j[2])
-					if j[2]=='any' or j[2]=='0_or_na' or j[2]=='na' then
-						DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
-						DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
-					elseif j[2]=='between' then
-						DA_Awarder.autoopt.skadaassign.main.operand_eb1:Show()
-						DA_Awarder.autoopt.skadaassign.main.operand_eb2:Show()
-					else
-						DA_Awarder.autoopt.skadaassign.main.operand_eb1:Show()
-						DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
-					end
-					DA_Awarder.autoopt.skadaassign.main.operand=j[2]
-				end,nil,nil,'left')
-				
+		DA_Awarder.autoopt.skadaassign.main.addit_eb=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main.additbtn,{"LEFT",DA_Awarder.autoopt.skadaassign.main.additbtn,"RIGHT",2,0},{120,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
+			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+			function(self) 	
+				if self:GetParent():IsShown() then
+					self.t:SetBlendMode('blend');
+					self.focusgained=1
+				end
 			end
-		
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",60,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-			function(self) 	
-				if self:GetParent():IsShown() then
-					self.t:SetBlendMode('blend');
-					self.focusgained=1
-				end
-			end,
-			nil,true
 		)
-		DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
+
 		
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",105,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
-			function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
-			function(self) 	
-				if self:GetParent():IsShown() then
-					self.t:SetBlendMode('blend');
-					self.focusgained=1
+		-- SAVE
+		DA_Awarder.autoopt.skadaassign.main.savebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-180},12,45,'Save','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp',
+		function(self)
+			DA_Awarder.autoopt.skadaassign.main.addit_eb.focusgained=nil
+			DA_Awarder.autoopt.skadaassign.main.addit_eb:ClearFocus()
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1.focusgained=nil
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1:ClearFocus()
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2.focusgained=nil
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2:ClearFocus()
+			
+			if DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()=='' or DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()=='--' then
+				DA.Print('select boss first')
+				return
+			end
+			if DA_Awarder.autoopt.skadaassign.selmode then
+			else
+				DA.Print('select checking mode')
+				return
+			end
+			if not DA_Awarder.autoopt.skadaassign.main.additbtn:IsShown() or (DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText() and DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText()~="") then
+			else
+				DA.Print('select checking mode specifics')
+				return
+			end
+			if DA_Awarder.autoopt.skadaassign.main.operand then
+			else
+				DA.Print('select math checking type')
+				return
+			end
+			if DA_Awarder.autoopt.skadaassign.main.operand=='any' or DA_Awarder.autoopt.skadaassign.main.operand=='0_or_na' or DA_Awarder.autoopt.skadaassign.main.operand=='na' then
+			
+			elseif DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText() and DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()~='' then
+				if not tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()) then
+					DA.Print('checking value is not a number')
+					return
 				end
-			end,
-			nil,true
-		)
-		DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
-		
-		
-	end
-	
-	
+			else
+				DA.Print('specify checking value')
+				return
+			end
+			if DA_Awarder.autoopt.skadaassign.main.operand~='between' or (DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText() and DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()~='') then
+				if DA_Awarder.autoopt.skadaassign.main.operand=='between' and not tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
+					DA.Print('checking value is not a number')
+					return
+				end
+				if DA_Awarder.autoopt.skadaassign.main.operand=='between' and tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())==tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
+					DA.Print('values #1 and #2 are equal')
+					return
+				end
+			else
+				DA.Print('specify checking value #2')
+				return
+			end
+			if DA_Awarder.autoopt.skadaassign.opened_criteriaID and DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID] then
+			else
+				print('error 710')
+			end
+			
+			local boss=DA_Awarder.autoopt.skadaassign.main.selectedboss:GetText()
+			local mode=DA_Awarder.autoopt.skadaassign.selmode
+			local addit
+				if mode=='dmg' or 
+				mode=='dmg_dps' or 
+				mode=='dmg_taken' or 
+				mode=='healing' or 
+				mode=='healing_hps' or 
+				mode=='death' or 
+				mode=='fails' or 
+				mode=='dispells' or 
+				mode=='cc_done' or 
+				mode=='sunders' then
+				else
+					addit=DA_Awarder.autoopt.skadaassign.main.addit_eb:GetText()
+				end
+			local matem
+				if DA_Awarder.autoopt.skadaassign.main.operand=='between' then
+					if tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())>tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()) then
+						matem={typ='between',tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText()),tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())}
+					else
+						matem={typ='between',tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText()),tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb2:GetText())}
+					end
+				elseif DA_Awarder.autoopt.skadaassign.main.operand=='any' or
+				DA_Awarder.autoopt.skadaassign.main.operand=='0_or_na' or
+				DA_Awarder.autoopt.skadaassign.main.operand=='na' then
+					matem={typ=DA_Awarder.autoopt.skadaassign.main.operand}
+				else
+					matem={typ=DA_Awarder.autoopt.skadaassign.main.operand,tonumber(DA_Awarder.autoopt.skadaassign.main.operand_eb1:GetText())}
+				end
+				if not matem then
+					print('error 770')
+					return
+				end
+			
+			DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']=nil
+			DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']={boss=boss,mode=mode,addit=addit or nil,matem=matem}
+			DA_Awarder.autoopt.skadaassign.main.deletebtn:Enable()
+			DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(1)
+			DA.AWAutoOptions()
+			
+		end,'center')
 
----ADDIT
----ADDIT
-do
-	DA_Awarder.autoopt.skadaassign.addit=CreateFrame('frame')
-	DA_Awarder.autoopt.skadaassign.addit:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.addit:SetFrameStrata('MEDIUM')
-	DA_Awarder.autoopt.skadaassign.addit:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.addit:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+		
+		--DELETE
+		DA_Awarder.autoopt.skadaassign.main.deletebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",80,-180},12,45,'Delete','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',
+		function(self)
+			if DA_Awarder.autoopt.skadaassign.opened_criteriaID and DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID] then
+				DA_Awarder.autoopt.skadaassign:Hide()
+				DA_Awarder.autoopt.skadaassign.main.deletebtn:Disable()
+				DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
+				DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID].rl['skada']=nil
+				DA_Awarder.autoopt.skadaassign.opened_criteriaID=nil
+				DA.AWAutoOptions()
+			end
+		end,'center')
 
-	DA_Awarder.autoopt.skadaassign.addit:Hide()
-	
-	DA_Awarder.autoopt.skadaassign.addit.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.addit,{"CENTER",DA_Awarder.autoopt.skadaassign.addit,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function(self)
+		DA_Awarder.autoopt.skadaassign.main.deletebtn:Disable()
+		DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
+		
+		--RESET
+		DA_Awarder.autoopt.skadaassign.main.resetbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-160},12,45,'reset','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		function(self)
+			DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText('--')
+			DA_Awarder.autoopt.skadaassign.selmode=nil
+			DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText('--')
+			DA_Awarder.autoopt.skadaassign.main.additbtn:Hide()
+			DA_Awarder.autoopt.skadaassign.main.addit_eb:SetText('')
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1:SetText('')
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2:SetText('')
+			DA_Awarder.autoopt.skadaassign.main.operand=nil
+			DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText('')
+			DA_Awarder.autoopt.skadaassign.SKDTBL=nil
+		end,'center')
+
+		
+		do -- operand
+			DA_Awarder.autoopt.skadaassign.main.operand_btn,DA_Awarder.autoopt.skadaassign.main.operand_FRM=DA.CreateFFGDropFrame(DA_Awarder.autoopt.skadaassign.main,skada_list_matematics[1][2],12,45,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-95},120,#skada_list_matematics*11 +1,"BOTTOMRIGHT")
+			DA_Awarder.autoopt.skadaassign.main.operand=skada_list_matematics[1][2]
+			
+				for i,j in ipairs(skada_list_matematics) do
+					
+					DA_Awarder.autoopt.skadaassign.main.operand_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.main.operand_FRM,{"TOPLEFT", DA_Awarder.autoopt.skadaassign.main.operand_FRM, "TOPLEFT", 1,10-11*i},10,118,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+						
+						DA_Awarder.autoopt.skadaassign.main.operand_FRM:Hide()
+						DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText(j[2])
+						if j[2]=='any' or j[2]=='0_or_na' or j[2]=='na' then
+							DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
+							DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
+						elseif j[2]=='between' then
+							DA_Awarder.autoopt.skadaassign.main.operand_eb1:Show()
+							DA_Awarder.autoopt.skadaassign.main.operand_eb2:Show()
+						else
+							DA_Awarder.autoopt.skadaassign.main.operand_eb1:Show()
+							DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
+						end
+						DA_Awarder.autoopt.skadaassign.main.operand=j[2]
+					end,nil,nil,'left')
+					
+				end
+			
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",60,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+				function(self) 	
+					if self:GetParent():IsShown() then
+						self.t:SetBlendMode('blend');
+						self.focusgained=1
+					end
+				end,
+				nil,true
+			)
+			DA_Awarder.autoopt.skadaassign.main.operand_eb1:Hide()
+			
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2=DA.EditBoxCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"LEFT",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",105,-95},{40,15},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end, --enter here
+				function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); self.focusgained=nil end,
+				function(self) 	
+					if self:GetParent():IsShown() then
+						self.t:SetBlendMode('blend');
+						self.focusgained=1
+					end
+				end,
+				nil,true
+			)
+			DA_Awarder.autoopt.skadaassign.main.operand_eb2:Hide()
+			
+			
+		end
+
+	end	
+	---ADDIT
+	---ADDIT
+	do
+		DA_Awarder.autoopt.skadaassign.addit=CreateFrame('frame')
+		DA_Awarder.autoopt.skadaassign.addit:SetParent(DA_Awarder.autoopt.skadaassign)
+		DA_Awarder.autoopt.skadaassign.addit:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
+		DA_Awarder.autoopt.skadaassign.addit:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+
 		DA_Awarder.autoopt.skadaassign.addit:Hide()
-		DA_Awarder.autoopt.skadaassign.main:Show()
-	end,'center')
+		
+		DA_Awarder.autoopt.skadaassign.addit.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.addit,{"CENTER",DA_Awarder.autoopt.skadaassign.addit,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		function(self)
+			DA_Awarder.autoopt.skadaassign.addit:Hide()
+			DA_Awarder.autoopt.skadaassign.main:Show()
+		end,'center')
 
-	
-	DA_Skada_addit_scr = DA.ScrollBarCreater("DA_Skada_addit_scr",DA_Awarder.autoopt.skadaassign.addit,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+		
+		DA_Skada_addit_scr = DA.ScrollBarCreater("DA_Skada_addit_scr",DA_Awarder.autoopt.skadaassign.addit,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
 
-end
----BOSSES
----BOSSES
-do
-	DA_Awarder.autoopt.skadaassign.bosses=CreateFrame('frame')
-	DA_Awarder.autoopt.skadaassign.bosses:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.bosses:SetFrameStrata('MEDIUM')
-	DA_Awarder.autoopt.skadaassign.bosses:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.bosses:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+	end
+	---BOSSES
+	---BOSSES
+	do
+		DA_Awarder.autoopt.skadaassign.bosses=CreateFrame('frame')
+		DA_Awarder.autoopt.skadaassign.bosses:SetParent(DA_Awarder.autoopt.skadaassign)
+		DA_Awarder.autoopt.skadaassign.bosses:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
+		DA_Awarder.autoopt.skadaassign.bosses:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
 
-	DA_Awarder.autoopt.skadaassign.bosses:Hide()
-
-	DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function()
 		DA_Awarder.autoopt.skadaassign.bosses:Hide()
-		DA_Awarder.autoopt.skadaassign.main:Show()
-	end,'center')
 
-	
-	DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
-	function()
-		skada_opt_refresh_bosses()
-	end,'center')
+		DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		function()
+			DA_Awarder.autoopt.skadaassign.bosses:Hide()
+			DA_Awarder.autoopt.skadaassign.main:Show()
+		end,'center')
 
-	DA_Awarder.autoopt.skadaassign.bosses.nobosses=DA.FontCreater(nil,L['Skada logs not found'],{"LEFT",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",10,-30},DA_Awarder.autoopt.skadaassign.bosses.back,15,110,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
-	
-	DA_Skada_bosses_scr = DA.ScrollBarCreater("DA_Skada_bosses_scr",DA_Awarder.autoopt.skadaassign.bosses,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+		
+		DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		function()
+			skada_opt_refresh_bosses()
+		end,'center')
 
-end
----Modes
----Modes
-do
-	DA_Awarder.autoopt.skadaassign.modes=CreateFrame('frame')
-	DA_Awarder.autoopt.skadaassign.modes:SetParent(DA_Awarder.autoopt.skadaassign)
-	DA_Awarder.autoopt.skadaassign.modes:SetFrameStrata('MEDIUM')
-	DA_Awarder.autoopt.skadaassign.modes:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
-	DA_Awarder.autoopt.skadaassign.modes:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+		DA_Awarder.autoopt.skadaassign.bosses.nobosses=DA.FontCreater(nil,L['Skada logs not found'],{"LEFT",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",10,-30},DA_Awarder.autoopt.skadaassign.bosses.back,15,110,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
+		
+		DA_Skada_bosses_scr = DA.ScrollBarCreater("DA_Skada_bosses_scr",DA_Awarder.autoopt.skadaassign.bosses,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
 
-	DA_Awarder.autoopt.skadaassign.modes:Hide()
-	
-	DA_Awarder.autoopt.skadaassign.modes.back=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.modes,{"CENTER",DA_Awarder.autoopt.skadaassign.modes,"TOPLEFT",30,-8},15,40,'back',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+	end
+	---Modes
+	---Modes
+	do
+		DA_Awarder.autoopt.skadaassign.modes=CreateFrame('frame')
+		DA_Awarder.autoopt.skadaassign.modes:SetParent(DA_Awarder.autoopt.skadaassign)
+		DA_Awarder.autoopt.skadaassign.modes:SetSize(DA_Awarder.autoopt.skadaassign.width,DA_Awarder.autoopt.skadaassign.height)
+		DA_Awarder.autoopt.skadaassign.modes:SetPoint('TOPLEFT',DA_Awarder.autoopt.skadaassign,'TOPLEFT')
+
 		DA_Awarder.autoopt.skadaassign.modes:Hide()
-		DA_Awarder.autoopt.skadaassign.main:Show()
-	end,nil,nil,'center')
-	
-	DA_Skada_modes_scr = DA.ScrollBarCreater("DA_Skada_modes_scr",DA_Awarder.autoopt.skadaassign.modes,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
-	
-	local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
-	
-	for i,j in pairs(skada_list_modes) do
-		modesframe_Scrolled[i]=DA.CreateFFGButton2(nil,modesframe_Scrolled,{"TOPLEFT", modesframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
-			DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText(j[1])
-			DA_Awarder.autoopt.skadaassign.selmode=j[2]
+		
+		DA_Awarder.autoopt.skadaassign.modes.back=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.modes,{"CENTER",DA_Awarder.autoopt.skadaassign.modes,"TOPLEFT",30,-8},15,40,'back',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 			DA_Awarder.autoopt.skadaassign.modes:Hide()
 			DA_Awarder.autoopt.skadaassign.main:Show()
-			
-			skada_opt_reset_modes()
-		end,nil,nil,'left')
-		if modesframe_Scrolled[i].fs:GetStringWidth()>220 then
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
-		elseif modesframe_Scrolled[i].fs:GetStringWidth()>200 then
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
-		elseif modesframe_Scrolled[i].fs:GetStringWidth()>180 then
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
-		elseif modesframe_Scrolled[i].fs:GetStringWidth()>160 then
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
-		elseif modesframe_Scrolled[i].fs:GetStringWidth()>155 then
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
-		else
-			modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
-		end
+		end,nil,nil,'center')
 		
-		modesframe_Scrolled[i].fs:SetSize(230,15)
-	
-	end
+		DA_Skada_modes_scr = DA.ScrollBarCreater("DA_Skada_modes_scr",DA_Awarder.autoopt.skadaassign.modes,{DA_Awarder.autoopt.skadaassign.width-5, DA_Awarder.autoopt.skadaassign.height-30},{"TOPLEFT", 5, -20},1)
+		
+		local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
+		
+		for i,j in pairs(skada_list_modes) do
+			modesframe_Scrolled[i]=DA.CreateFFGButton2(nil,modesframe_Scrolled,{"TOPLEFT", modesframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+				DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText(j[1])
+				DA_Awarder.autoopt.skadaassign.selmode=j[2]
+				DA_Awarder.autoopt.skadaassign.modes:Hide()
+				DA_Awarder.autoopt.skadaassign.main:Show()
+				
+				skada_opt_reset_modes()
+			end,nil,nil,'left')
+			if modesframe_Scrolled[i].fs:GetStringWidth()>220 then
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5, "OUTLINE")
+			elseif modesframe_Scrolled[i].fs:GetStringWidth()>200 then
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE")
+			elseif modesframe_Scrolled[i].fs:GetStringWidth()>180 then
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 7.5, "OUTLINE")
+			elseif modesframe_Scrolled[i].fs:GetStringWidth()>160 then
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE")
+			elseif modesframe_Scrolled[i].fs:GetStringWidth()>155 then
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 9.5, "OUTLINE")
+			else
+				modesframe_Scrolled[i].fs:SetFont(UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE")
+			end
+			
+			modesframe_Scrolled[i].fs:SetSize(230,15)
+		
+		end
 
-	
-	
-end
+		
+		
+	end
 
 
 end
@@ -5003,35 +5000,34 @@ local function catch_decide_Move(source_gr)
 end
 
 function FEP_CreateGroup(number,posx,posy)
-local gr  = CreateFrame("Frame", "DA_AwarderGroup"..number, DA_Awarder)
-gr:SetFrameStrata("MEDIUM")
-gr:SetSize(156, 80)
-gr:SetPoint("TOPLEFT", DA_Awarder, "TOPLEFT", posx, posy)
-gr:SetBackdropColor(1, 1, 1, 1)
-local grtxt = gr:CreateTexture(nil, "BACKGROUND")
-grtxt:SetAllPoints()
-grtxt:SetTexture(21/255, 18/255, 22/255, 0.4);
-grtxt:SetBlendMode("blend")
-gr:EnableMouse(true)
-gr:EnableMouseWheel(true)
-gr:SetMovable(true)
-gr:RegisterForDrag("LeftButton")
-gr:SetScript("OnDragStart", function() DA_Awarder:StartMoving() end)
-gr:SetScript("OnDragStop", function() DA_Awarder:StopMovingOrSizing() end) 
+	local gr  = CreateFrame("Frame", "DA_AwarderGroup"..number, DA_Awarder)
+	gr:SetSize(156, 80)
+	gr:SetPoint("TOPLEFT", DA_Awarder, "TOPLEFT", posx, posy)
+	gr:SetBackdropColor(1, 1, 1, 1)
+	local grtxt = gr:CreateTexture(nil, "BACKGROUND")
+	grtxt:SetAllPoints()
+	grtxt:SetTexture(21/255, 18/255, 22/255, 0.4);
+	grtxt:SetBlendMode("blend")
+	gr:EnableMouse(true)
+	gr:EnableMouseWheel(true)
+	gr:SetMovable(true)
+	gr:RegisterForDrag("LeftButton")
+	gr:SetScript("OnDragStart", function() DA_Awarder:StartMoving() end)
+	gr:SetScript("OnDragStop", function() DA_Awarder:StopMovingOrSizing() end) 
 
-FEP_CreateGroupFrames(number)
+	FEP_CreateGroupFrames(number)
 
-DA_Awarder['moverFrame'..number] = DA.FrameCreater(nil,gr,156, 80,{"TOPLEFT", gr, "TOPLEFT", 0, 0})
-	DA_Awarder['moverFrame'..number].t:SetTexture(0.7, 1, 1, 0.6)
-	DA_Awarder['moverFrame'..number]:Hide()
+	DA_Awarder['moverFrame'..number] = DA.FrameCreater(nil,gr,156, 80,{"TOPLEFT", gr, "TOPLEFT", 0, 0})
+		DA_Awarder['moverFrame'..number].t:SetTexture(0.7, 1, 1, 0.6)
+		DA_Awarder['moverFrame'..number]:Hide()
 
-DA_Awarder['moverBtn'..number] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..number,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover')
-DA_Awarder['moverBtn'..number]:SetMovable(true)
-DA_Awarder['moverBtn'..number]:RegisterForDrag("LeftButton")
-DA_Awarder['moverBtn'..number]:SetScript("OnDragStart", function(self) catch_show_frames(number); self:StartMoving(); DA.myHideTooltip() end)
-DA_Awarder['moverBtn'..number]:SetScript("OnDragStop", function(self) catch_decide_Move(number);self:StopMovingOrSizing();self:ClearAllPoints();self:SetPoint("LEFT", gr, "TOPLEFT", 6, 7.5) end) 
-DA_Awarder['moverBtn'..number]:SetFrameLevel(DA_Awarder['moverFrame'..number]:GetFrameLevel() +1)
-DA_Awarder['moverBtn'..number]:EnableMouse(false)
+	DA_Awarder['moverBtn'..number] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..number,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover')
+	DA_Awarder['moverBtn'..number]:SetMovable(true)
+	DA_Awarder['moverBtn'..number]:RegisterForDrag("LeftButton")
+	DA_Awarder['moverBtn'..number]:SetScript("OnDragStart", function(self) catch_show_frames(number); self:StartMoving(); DA.myHideTooltip() end)
+	DA_Awarder['moverBtn'..number]:SetScript("OnDragStop", function(self) catch_decide_Move(number);self:StopMovingOrSizing();self:ClearAllPoints();self:SetPoint("LEFT", gr, "TOPLEFT", 6, 7.5) end) 
+	DA_Awarder['moverBtn'..number]:SetFrameLevel(DA_Awarder['moverFrame'..number]:GetFrameLevel() +1)
+	DA_Awarder['moverBtn'..number]:EnableMouse(false)
 end
 local function SwapPlayers(player1,player2)
 	local id1,id2
@@ -5570,43 +5566,43 @@ end
 
 function FEP_OpenSupportFrame()
 
-local assister=DA_Awarder.righside
---local assister_Scrolled=FEP_Assist.scrollchild
-local eb1=DA_Awarder.righside.EB1
+	local assister=DA_Awarder.righside
+	--local assister_Scrolled=FEP_Assist.scrollchild
+	local eb1=DA_Awarder.righside.EB1
 
-eb1:SetText('')
+	eb1:SetText('')
 
----6-8 party = zamena
-if fuckingOptions.sixeight then
-eb1:Insert('###### 6-8 '..L['group']..' ######\n')
-	for group=6,8 do
-		for i=1,5 do
-			local btn=_G["DA_AwarderGroup"..group.."frame"..i]
-			if btn.c and btn.c.name then
-				local state=btn.state
-				local name=btn.c.name
-				local main=btn.main
-				
-				if state=='tnormal' or state=='mnormal' or state=='pb' then
-					eb1:Insert(DA.GetTwinsInfo(name,main,1).."------------------------------------\n")
+	---6-8 party = zamena
+	if fuckingOptions.sixeight then
+	eb1:Insert('###### 6-8 '..L['group']..' ######\n')
+		for group=6,8 do
+			for i=1,5 do
+				local btn=_G["DA_AwarderGroup"..group.."frame"..i]
+				if btn.c and btn.c.name then
+					local state=btn.state
+					local name=btn.c.name
+					local main=btn.main
+					
+					if state=='tnormal' or state=='mnormal' or state=='pb' then
+						eb1:Insert(DA.GetTwinsInfo(name,main,1).."------------------------------------\n")
+					end
 				end
 			end
 		end
+		eb1:Insert('\n\n###### '..L['Standby']..' ######\n')
+	else 
+		eb1:Insert('###### '..L['Standby']..' ######\n')
 	end
-	eb1:Insert('\n\n###### '..L['Standby']..' ######\n')
-else 
-	eb1:Insert('###### '..L['Standby']..' ######\n')
-end
---ZAMENA
-for chelik in string.gmatch(DA_Standby[DA_CurrentGuild], '([^\n]+)') do
-	if FEP_gMain[chelik] then
-		eb1:Insert(DA.GetTwinsInfo(chelik,FEP_gMain[chelik],1).."------------------------------------\n")
+	--ZAMENA
+	for chelik in string.gmatch(DA_Standby[DA_CurrentGuild], '([^\n]+)') do
+		if FEP_gMain[chelik] then
+			eb1:Insert(DA.GetTwinsInfo(chelik,FEP_gMain[chelik],1).."------------------------------------\n")
+		end
 	end
-end
 
 
 
-assister:Show()
+	assister:Show()
 
 end
 function FEP_CreateCBs(button)

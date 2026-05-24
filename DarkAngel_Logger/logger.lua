@@ -3197,7 +3197,7 @@ DA.AddModOptions('Logger', function(_,optScrollFrame)
 	logmodoptReRender()
 	table.insert(DA.RunOnGuildUpdate, logmodoptReRender)
 	
-	--log clean
+	--log duration
 	DA.CreateDropdownSelector({
 		rel = f,
 		point = {"CENTER",f,"TOPLEFT",35,-67},

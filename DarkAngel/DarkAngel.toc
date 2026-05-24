@@ -1,5 +1,5 @@
 ## Title: DarkAngel
-## Version: 5.5
+## Version: 5.5.1
 ## Author: Baker
 ## Interface: 30300
 ## Notes: No one can hide from my sight...
@@ -16,6 +16,7 @@ Libs\AceAddon-3.0\AceAddon-3.0.xml
 Libs\AceLocale-3.0\AceLocale-3.0.xml
 Libs\LibTalentQuery-1.0\lib.xml
 Libs\LibGroupTalents-1.0\lib.xml
+## Libs\LibGuildStorage-1.0.lua
 #@end-no-lib-strip@
 
 Libs\LibCompress.lua

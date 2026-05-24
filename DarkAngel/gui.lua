@@ -8,7 +8,7 @@ DarkAngelGUI = CreateFrame("Frame", "DarkAngelGUI", UIParent)
 DarkAngelGUI.width  = 496
 DarkAngelGUI.height = 300
 DarkAngelGUI:SetBackdropColor(1, 1, 1, 1)
-DarkAngelGUI:SetFrameStrata("LOW")
+DarkAngelGUI:SetFrameStrata("HIGH")
 DarkAngelGUI:SetSize(DarkAngelGUI.width, DarkAngelGUI.height)
 DA.XTimers={}
 DA.Players_Selected={}
@@ -41,7 +41,7 @@ function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, mo
 	f.width  = width
 	f.height = heigh
 	f:SetBackdropColor(1, 1, 1, 1)
-	-- f:SetFrameStrata("MEDIUM")
+	f:SetFrameStrata("HIGH")
 	f:SetSize(f.width, f.height)
 	if point then f:SetPoint(unpack(point)) end
 
@@ -60,7 +60,6 @@ function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, mo
 	f.tf=CreateFrame("Frame",nil,f)
 	f.tf:SetFrameLevel(fl-1)
 	-- f.tf:SetFrameLevel(math.max(fl-2, 0))
-	-- f.tf:SetFrameStrata("MEDIUM")
 	f.tf:SetSize(f.width, f.height)
 	f.tf:SetAllPoints(f)
 	f.tf:SetBackdropColor(1, 1, 1, 1)
@@ -68,7 +67,7 @@ function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, mo
 		f.t:SetAllPoints(f.tf);
 		if customBGcolor then
 			f.t.myStoredTxt = {customBGcolor[1], customBGcolor[2], customBGcolor[3], customBGcolor[4]}
-			f.t:SetTexture(customBGcolor[1], customBGcolor[2], customBGcolor[3],  (fuckingOptions.TXTBgOpacity or customBGcolor[4] or 0.5));
+			f.t:SetTexture(customBGcolor[1], customBGcolor[2], customBGcolor[3],  (customBGcolor[4] or fuckingOptions.TXTBgOpacity or 0.5));
 		else
 			f.t:SetTexture(21/255, 18/255, 22/255, (alwaysDarkFrame and 0.8 or fuckingOptions.TXTBgOpacity or 0.5))
 		end
@@ -78,7 +77,6 @@ function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, mo
 	if artTexture then
 		f.art=CreateFrame("Frame",nil,f)
 		f.art:SetFrameLevel(fl-1)
-		-- f.art:SetFrameStrata("MEDIUM")
 		f.art:SetSize(f.width, f.height)
 		f.art:SetAllPoints(f)
 		f.art:SetBackdropColor(1, 1, 1, 1)
@@ -154,7 +152,7 @@ function DA.CreateFFGButton2(name,rel,point,heig,wid,settext,ntxt,fonttype,oncli
 	end
 	
 	f:Show()
-return f
+	return f
 end
 function DA.CreateFFGFont(name,rel,point,heig,wid,fonttype,text,textcol,Vjust,Hjust,not_show)
 local f
@@ -261,7 +259,14 @@ function DA.CreateDropdownSelector(d)
 		local newrosterCount = 0
 		for id,ss in ipairs(getRoster()) do
 			local data = ss
-			local text,value,isHidden,funcOnSelection = data.text, data.value, data.isHidden, data.funcOnSelection
+			local text,value,isHidden,funcOnSelection,deskr = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr
+			if not frame[id] then
+				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+					setValue(value)
+					frame:reRender()
+					frame:Hide()
+				end,deskr,nil,optjusth or 'center')
+			end
 			if savedValue == value then
 				frame[id].fs:SetTextColor(0.2,1,1,1)
 				button:SetText(text)
@@ -290,9 +295,9 @@ function DA.CreateDropdownSelector(d)
 			titleRelPointTable[1],
 			button,
 			titleRelPointTable[2],
-			titleRelPointTable[3] or -5,
-			titleRelPointTable[4] or 13
-		} or {"LEFT", button, "LEFT", -5, 13}
+			titleRelPointTable[3] or 0,
+			titleRelPointTable[4] or 10
+		} or {"LEFT", button, "LEFT", 0, 10}
 
 		fontTitle = DA.FontCreater(nil,titleText,titlePoint,button,15,180,titleFontTable,'left')
 	end
@@ -311,7 +316,95 @@ function DA.CreateDropdownSelector(d)
 	frame:reRender()
 	if isGuildDynamicValue then
 		table.insert(DA.RunOnGuildUpdate, frame.reRender)
+		table.insert(DA.RunOnSettingsImport, frame.reRender)
 	end
+
+	return button, frame, fontTitle
+end
+function DA.CreateDropdownNoValueSelector(d)
+	local 	rel, 	point, 		height, 	width, 		title, frpoint, valuesroster, valuesrosterDynamic, justh, optjusth, funcOnShow, funcOnHide, desrtag =
+			d.rel, 	d.point, 	d.height,	d.width, 	d.title, d.frpoint, d.valuesroster, d.valuesrosterDynamic, d.justh, d.optjusth, d.funcOnShow, d.funcOnHide, d.desrtag
+	local function getRoster()
+		if valuesrosterDynamic then
+			return DA.Safecall(valuesrosterDynamic)
+		else
+			return valuesroster
+		end
+	end
+	local rosterCount = #getRoster()
+	local frheight = (rosterCount * (height+1)) + 1
+	local btnwidth = width-2
+
+	
+	local button, frame = DA.CreateFFGDropFrame(rel,"",height,btnwidth,point,width,frheight,frpoint, justh, funcOnShow, funcOnHide, desrtag, true)
+		frame:SetFrameLevel(rel:GetFrameLevel() + 15)
+	local fontTitle
+
+	function frame:reRender()
+		local savedValue = frame.storedvalue
+		local newrosterCount = 0
+		for id,ss in ipairs(getRoster()) do
+			local data = ss
+			local text,value,isHidden,funcOnSelection,deskr = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr
+			if not frame[id] then
+				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+					frame.storedvalue = value
+					frame:reRender()
+					frame:Hide()
+				end,deskr,nil,optjusth or 'center')
+			end
+
+			if savedValue == value then
+				frame[id].fs:SetTextColor(0.2,1,1,1)
+				button:SetText(text)
+				if funcOnSelection then DA.Safecall(funcOnSelection) end
+			else
+				frame[id].fs:SetTextColor(0.85,1,1,1)
+			end
+			if isHidden then
+				frame[id]:Hide()
+			else
+				newrosterCount = newrosterCount + 1
+				frame[id]:Show()
+			end
+		end
+		if valuesrosterDynamic then
+			frame:SetSize(
+				width ,
+				(newrosterCount * (height+1)) + 1
+			)
+		end
+	end
+
+	if title then
+		local titleText, titleFontTable, titleRelPointTable = unpack(title)
+		local titlePoint = titleRelPointTable and {
+			titleRelPointTable[1],
+			button,
+			titleRelPointTable[2],
+			titleRelPointTable[3] or 0,
+			titleRelPointTable[4] or 10
+		} or {"LEFT", button, "LEFT", 0, 10}
+
+		fontTitle = DA.FontCreater(nil,titleText,titlePoint,button,15,180,titleFontTable,'left')
+	end
+
+	local defaultValue
+	for id,ss in ipairs(getRoster()) do
+		local data = ss
+		local text,value,deskr = data.text, data.value, data.deskr
+		frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			frame.storedvalue = value
+			frame:reRender()
+			frame:Hide()
+		end,deskr,nil,optjusth or 'center')
+		if id == 1 or data.isDefault then
+			defaultValue = value
+		end
+	end
+	frame.storedvalue = defaultValue
+
+	frame:reRender()
 
 	return button, frame, fontTitle
 end
@@ -320,7 +413,7 @@ local function tabFrameCreater(rel,subname,ttt)
 	local f = _G[rel][subname]
 	f.width  = _G[rel].width
 	f.height = _G[rel].height
-	f:SetFrameStrata("MEDIUM")
+	-- f:SetFrameStrata("HIGH")
 	f:SetSize(f.width, f.height)
 	f:SetAllPoints(_G[rel])
 	f:SetBackdropColor(1, 1, 1, 1)
@@ -328,7 +421,6 @@ local function tabFrameCreater(rel,subname,ttt)
 	local fl = f:GetFrameLevel()
 
 	f.art=CreateFrame("Frame",nil,f)
-	f.art:SetFrameStrata("MEDIUM")
 	f.art:SetSize(f.width, f.height)
 	f.art:SetAllPoints(f)
 	f.art:SetBackdropColor(1, 1, 1, 1)
@@ -350,7 +442,6 @@ local function tabFrameCreater(rel,subname,ttt)
 
 	-- f:Hide()
 	f.bgtxt=CreateFrame("Frame",nil,f)
-	f.bgtxt:SetFrameStrata("MEDIUM")
 	f.bgtxt:SetSize(f.width, f.height)
 	f.bgtxt:SetAllPoints(f)
 	f.bgtxt:SetBackdropColor(1, 1, 1, 1)
@@ -375,10 +466,10 @@ local function tabFrameCreater(rel,subname,ttt)
 
 end
 function DA.TabCreater(point,heig,wid,heigt,widt,settext,fonttype,onclickscr,onclickscr2,textur)
-	---Tab frame itself
-tabFrameCreater("DarkAngelGUI",settext,textur)
-	---Tab button
-local f = CreateFrame("Button", nil, _G["DarkAngelGUI"],"UIDarkAngelButtonTabs")
+
+	tabFrameCreater("DarkAngelGUI",settext,textur)
+
+	local f = CreateFrame("Button", nil, _G["DarkAngelGUI"],"UIDarkAngelButtonTabs")
 	f:SetNormalTexture(nil)
 	f:SetPoint(unpack(point))
 	f:SetHeight(heig)
@@ -427,7 +518,6 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelCloseButton")
 	f:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp')
 	-- f:SetScript("OnClick", HideParentPanel)
 	f:SetText(settext)
-	f:SetFrameStrata("MEDIUM");
 	if framelevel then
 		f:SetFrameLevel(framelevel or 104)
 	else
@@ -575,7 +665,6 @@ function DA.SliderCreater(name,rel,point,heig,wid,smin,smax,stepsize,setvalue,te
 				local val = _G[setvalue[1]][_G[setvalue[3]]][setvalue[2]]
 				f:SetValue(val)
 			end
-			rel:HookScript('OnShow', UpdateValue)
 			UpdateValue()
 			table.insert(DA.RunOnGuildUpdate, UpdateValue)
 
@@ -595,7 +684,12 @@ function DA.SliderCreater(name,rel,point,heig,wid,smin,smax,stepsize,setvalue,te
 				self:SetScript("OnUpdate",nil)
 			end)
 		else
-			f:SetValue(_G[setvalue[1]][setvalue[2]])
+			local function UpdateValue()
+				local val = _G[setvalue[1]][setvalue[2]]
+				f:SetValue(val)
+			end
+			UpdateValue()
+			table.insert(DA.RunOnSettingsImport, UpdateValue)
 			f.val=DA.FontCreater(nil,_G[setvalue[1]][setvalue[2]],{'center',f,'center',0,10},f,15,170,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'center',{0.5,0.9,1,1})
 			f:SetScript("OnMouseDown",function(self)
 				self:SetScript("OnUpdate",function(self)
@@ -720,7 +814,6 @@ function DA.SliderCreater2(name,rel,point,heig,wid,valuesRoster,valueFont,setval
 				self:SetScript("OnUpdate",nil)
 			end)
 
-			rel:HookScript('OnShow', UpdateValue)
 			UpdateValue()
 			
 			table.insert(DA.RunOnGuildUpdate, UpdateValue)
@@ -744,6 +837,7 @@ function DA.SliderCreater2(name,rel,point,heig,wid,valuesRoster,valueFont,setval
 			f:SetScript("OnHide",function(self)
 				self:SetScript("OnUpdate",nil)
 			end)
+			table.insert(DA.RunOnSettingsImport, UpdateValue)
 		end
 
 	elseif funconapply then
@@ -805,7 +899,7 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelSecureButton")
 	return f
 end
 function DA.FontCreater(name,text,point,rel,heig,wid,fonttype,Hjust,txtcol,Vjust)
-local f = rel:CreateFontString(name, "ARTWORK")
+	local f = rel:CreateFontString(name, "ARTWORK")
 	f:SetFont(unpack(fonttype))
 	f:SetPoint(unpack(point))
 	f:SetHeight(heig)
@@ -858,7 +952,12 @@ local f = CreateFrame("CheckButton", name, rel, "UIDarkAngelCheckButton")
 			UpdateValue()
 			table.insert(DA.RunOnGuildUpdate, UpdateValue)
 		else
-			f:SetChecked(_G[setvalue[1]][setvalue[2]])
+			local function UpdateValue()
+				local val = _G[setvalue[1]][setvalue[2]]
+				f:SetChecked(val)
+			end
+			UpdateValue()
+			table.insert(DA.RunOnSettingsImport, UpdateValue)
 		end
 	end
 	if settext and name then
@@ -1171,14 +1270,23 @@ local f = CreateFrame("EditBox", name, rel)
 		end)
 
 	end
-	if checkingvalue and checkingvalue[3] then
-		local function UpdateValue()
-			local val = _G[checkingvalue[1]][_G[checkingvalue[3]]][checkingvalue[2]]
-			f:SetText(val)
-			f.stored=val
+	if checkingvalue then
+		local UpdateValue
+		if checkingvalue[3] then
+			UpdateValue = function()
+				local val = _G[checkingvalue[1]][_G[checkingvalue[3]]][checkingvalue[2]]
+				f:SetText(val)
+				f.stored=val
+			end
+			table.insert(DA.RunOnGuildUpdate, UpdateValue)
+		else
+			UpdateValue = function()
+				local val = _G[checkingvalue[1]][checkingvalue[2]]
+				f:SetText(val)
+				f.stored=val
+			end
+			table.insert(DA.RunOnSettingsImport, UpdateValue)
 		end
-		-- rel:HookScript('OnShow', UpdateValue)
-		table.insert(DA.RunOnGuildUpdate, UpdateValue)
 	end
 f.t = f:CreateTexture(nil, "BACKGROUND")
 	f.t:SetAllPoints()
@@ -1379,12 +1487,18 @@ function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
 		end
 		UpdateValue()
 		table.insert(DA.RunOnGuildUpdate, UpdateValue)
+	elseif setvalue[2] then
+		local function UpdateValue()
+			local val = _G[setvalue[1]][setvalue[2]]
+			Frametoscale:SetScale(val)
+		end
+		UpdateValue()
+		table.insert(DA.RunOnSettingsImport, UpdateValue)
 	end
 
 	
 
 	local mousetracker = CreateFrame("Frame", nil, Frametoscale)
-	mousetracker:SetFrameStrata("MEDIUM")
 	mousetracker:SetFrameLevel(Frametoscale:GetFrameLevel()+10)
 	mousetracker:SetWidth(12)
 	mousetracker:SetHeight(12)
@@ -1756,14 +1870,14 @@ end
 function DA.DKPawardfunc(name,value,reason,alt)
 	if name and value and reason then else return end
 	local IsPercentAward
-	if tostring(value):match("^-?W%d+$") then
+	if tostring(value):match("^-?[w,W]%d+$") then
 		IsPercentAward = true 
 		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
 		if value==0 or
-			(value<0 and value<-100) or
-			(value>0 and value>100)
+			(value<-100) or
+			(value>500)
 		then
-			DA.Print("Percentage might not exceed -100 <> 0 <> 100 intervals")
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
 			return
 		end
 	else
@@ -1777,6 +1891,8 @@ function DA.DKPawardfunc(name,value,reason,alt)
 	local altName = alt and not localName and alt[1] or nil
 	local anyAltName = localName or altName or nil
 	local processedName = anyAltName and anyAltName.." ("..name..")" or name
+
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
 
 	local typ,ep,gp,hrs=DA.DecodeNote(FEP_gMain[name])
 
@@ -1794,18 +1910,18 @@ function DA.DKPawardfunc(name,value,reason,alt)
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 		if tonumber(value)>0 then
 			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), "Net:"..tostring(tonumber(ep)+tonumber(value)).." Tot:"..tostring(tonumber(gp)+tonumber(value))..((hrs and " Hrs:"..hrs) or "") )
-			SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..reason..")",'guild')
+			SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..processedReason..")",'guild')
 		else
 			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), "Net:"..tostring(tonumber(ep)+tonumber(value)).." Tot:"..tostring(tonumber(gp))..((hrs and " Hrs:"..hrs) or "") )
-			SendChatMessage("QDKP2> "..processedName.." Spends "..math.abs(value).." DKP ("..reason..")",'guild')
+			SendChatMessage("QDKP2> "..processedName.." Spends "..math.abs(value).." DKP ("..processedReason..")",'guild')
 		end
-		SendAddonMessage("DA_log",name.."\031"..value.."\031"..reason, "guild")
+		SendAddonMessage("DA_log",name.."\031"..value.."\031"..processedReason, "guild")
 
 		if localName and UnitInRaid(localName) then
 			if value>0 then
-				SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..reason..")",'raid')
+				SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..processedReason..")",'raid')
 			else
-				SendChatMessage("QDKP2> "..processedName.." Spends "..-value.." DKP ("..reason..")",'raid')
+				SendChatMessage("QDKP2> "..processedName.." Spends "..-value.." DKP ("..processedReason..")",'raid')
 			end
 		end
 	end
@@ -1815,14 +1931,14 @@ end
 function DA.EPawardfunc(name,value,reason,alt)
 	if name and value and reason then else return end
 	local IsPercentAward
-	if tostring(value):match("^-?W%d+$") then
+	if tostring(value):match("^-?[w,W]%d+$") then
 		IsPercentAward = true 
 		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
 		if value==0 or
-			(value<0 and value<-100) or
-			(value>0 and value>100)
+			(value<-100) or
+			(value>500)
 		then
-			DA.Print("Percentage might not exceed -100 <> 0 <> 100 intervals")
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
 			return
 		end
 	else
@@ -1836,6 +1952,8 @@ function DA.EPawardfunc(name,value,reason,alt)
 	local altName = alt and not localName and alt[1] or nil
 	local anyAltName = localName or altName or nil
 	local processedName = anyAltName and anyAltName.." ("..name..")" or name
+
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
 
 	local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[name])
 
@@ -1854,7 +1972,7 @@ function DA.EPawardfunc(name,value,reason,alt)
 
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 		if EPGP then --insert log in original EPGP addon
-			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'EP',name,reason,tonumber(value)})
+			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'EP',name,processedReason,tonumber(value)})
 		end
 
 		if tonumber(ep)+tonumber(value)>=0 then
@@ -1865,11 +1983,11 @@ function DA.EPawardfunc(name,value,reason,alt)
 		end
 		
 		local valueText = value > 0 and tostring("+" .. value) or tostring(value)
-		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031EP\031" .. name .. "\031" .. reason .. "\031" .. value,"guild")
-		SendChatMessage("EPGP: " .. valueText .. " EP (" .. reason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
+		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031EP\031" .. name .. "\031" .. processedReason .. "\031" .. value,"guild")
+		SendChatMessage("EPGP: " .. valueText .. " EP (" .. processedReason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
 		
 		if localName and UnitInRaid(localName) then
-			SendChatMessage("EPGP: "..valueText.." EP ("..reason..") "..processedName,'raid')
+			SendChatMessage("EPGP: "..valueText.." EP ("..processedReason..") "..processedName,'raid')
 		end
 	end
 
@@ -1877,14 +1995,14 @@ end
 function DA.GPawardfunc(name,value,reason,alt)
 	if name and value and reason then else return end
 	local IsPercentAward
-	if tostring(value):match("^-?W%d+$") then
+	if tostring(value):match("^-?[w,W]%d+$") then
 		IsPercentAward = true 
 		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
 		if value==0 or
-			(value<0 and value<-100) or
-			(value>0 and value>100)
+			(value<-100) or
+			(value>500)
 		then
-			DA.Print("Percentage might not exceed -100 <> 0 <> 100 intervals")
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
 			return
 		end
 	else
@@ -1899,6 +2017,8 @@ function DA.GPawardfunc(name,value,reason,alt)
 	local anyAltName = localName or altName or nil
 	local processedName = anyAltName and anyAltName.." ("..name..")" or name
 
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
+	
 	local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[name])
 
 	if typ=='f' then
@@ -1916,7 +2036,7 @@ function DA.GPawardfunc(name,value,reason,alt)
 
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 		if EPGP then --insert log in original EPGP addon
-			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'GP',name,reason,tonumber(value)})
+			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'GP',name,processedReason,tonumber(value)})
 		end
 
 		if tonumber(gp)+tonumber(value)>=0 then
@@ -1927,11 +2047,11 @@ function DA.GPawardfunc(name,value,reason,alt)
 		end
 
 		local valueText = value > 0 and tostring("+" .. value) or tostring(value)
-		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031GP\031" .. name .. "\031" .. reason .. "\031" .. value,"guild")
-		SendChatMessage("EPGP: " .. valueText .. " GP (" .. reason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
+		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031GP\031" .. name .. "\031" .. processedReason .. "\031" .. value,"guild")
+		SendChatMessage("EPGP: " .. valueText .. " GP (" .. processedReason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
 
 		if localName and UnitInRaid(localName) then
-			SendChatMessage("EPGP: "..valueText.." GP ("..reason..") "..processedName,'raid')
+			SendChatMessage("EPGP: "..valueText.." GP ("..processedReason..") "..processedName,'raid')
 		end
 	end
 end
@@ -2003,8 +2123,24 @@ local function getRecentAwardsFiltered(reason, value)
 
 	return result
 end
-local function SetRecentAwardBtnTxt(epgp,value, btn)
-	if epgp=='ep' then
+local function SetRecentAwardBtnTxt(epgp, btn)
+
+	-- handling saves after guild type change
+	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and (epgp=='ep' or epgp=='gp') then
+		if epgp=='ep' then
+			btn:SetText("+DKP")
+			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+		elseif epgp=='gp' then
+			btn:SetText("-DKP")
+			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+		end
+	elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and (epgp=='+dkp' or epgp=='-dkp') then
+		btn:SetText("EP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+
+
+	-- regular cases
+	elseif epgp=='ep' then
 		btn:SetText("EP")
 		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
 	elseif epgp=='gp' then
@@ -2278,7 +2414,7 @@ local function Run_ProcessBulk()
 		if reason=="" or reason:gsub("%s+","")=="" then reason='test' end
 
 		local value=DarkAngelGUI.Guild.bulkmenu.award123Frame.value:GetText()
-		if not value or value=="" or value:gsub("%s+","")=="" or (not value:match("^-?W%d+$") and not tonumber(value)) then
+		if not value or value=="" or value:gsub("%s+","")=="" or (not value:match("^-?[w,W]%d+$") and not tonumber(value)) then
 			DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
 			DarkAngelGUI.Guild.bulkmenu.stoper:Disable()
 			return	
@@ -2442,7 +2578,6 @@ function DA.CreateGUIs()
 do
 	do --frame
 		DA_RightClickMenu = DA.FrameCreater("DA_RightClickMenu",UIParent,62,105,{"TOPLEFT",UIParent,"TOPLEFT"})
-		DA_RightClickMenu:SetFrameStrata("MEDIUM")
 		DA_RightClickMenu:SetFrameLevel(107)
 		DA_RightClickMenu.timerticked=0
 		DA_RightClickMenu.t:SetTexture(0.03, 0.04, 0.07, 0.8)
@@ -2663,6 +2798,7 @@ do
 				end
 				local Dropdown_rerender
 
+				DA.HelpCreater(DA_RightClickMenu.epgpawardFrame,{"CENTER",DA_RightClickMenu.epgpawardFrame,"TOPLEFT",52.5,-8},'awardprocent_tt',10,10)
 
 				DA_RightClickMenu.epgpawardFrame.start=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 60, -2},13,50,L['add'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 					self:Disable()
@@ -2682,7 +2818,7 @@ do
 					if reason=="" or reason:gsub("%s+","")=="" then reason='test' end
 
 					local value=DA_RightClickMenu.epgpawardFrame.value:GetText()
-					if value=="" or value:gsub("%s+","")=="" or (not value:match("^-?W%d+$") and not tonumber(value)) then
+					if value=="" or value:gsub("%s+","")=="" or (not value:match("^-?[w,W]%d+$") and not tonumber(value)) then
 						self:Enable()
 						return
 					end
@@ -2797,7 +2933,7 @@ do
 								DA_RightClickMenu.epgpawardFrame.value:ClearFocus()
 								DA_RightClickMenu.epgpawardFrame.reason:SetText(reason)
 								DA_RightClickMenu.epgpawardFrame.value:SetText(value)
-								SetRecentAwardBtnTxt(epgp,value, DA_RightClickMenu.epgpawardFrame.epgp)
+								SetRecentAwardBtnTxt(epgp, DA_RightClickMenu.epgpawardFrame.epgp)
 							end)
 							DA_RightClickMenu.epgpawardFrame.Dropdown['btn'..i]:Show()
 							counted = counted + 1
@@ -2919,7 +3055,7 @@ end
 ---- 1 TAB ------
 ---- 1 TAB ------
 ---- 1 TAB ------
-DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",55,0},15,40,10,50,"Guild",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) DA.SetTimerTime('grefresher',5)  DA.GetGuildData();DA.GuildSetAllLines();DA.ResetScrollBoxes() end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_guild]])
+DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",55,0},15,40,10,50,"Guild",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) DA.SetTimerTime('grefresher',5)  DA.GetGuildData();DA.TimerAfter(0, function() DA.GuildSetAllLines();DA.ResetScrollBoxes() end) end,function() DA.ResetScrollBoxes() end,[[Interface\AddOns\DarkAngel\template\pict\art_guild]])
 local copyFrame_Update
 local update_class_srch
 do
@@ -2933,7 +3069,8 @@ do
 
 		-- refresh
 		DarkAngelGUI.Guild.refreshbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",163,-8},8,52,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-			DA.GetGuildData();DA.GuildSetAllLines()
+			DA.GetGuildData()
+			DA.GuildSetAllLines()
 		end)
 		DarkAngelGUI.Guild.activescan=DA.CheckBtnCreater(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",148,-16},14,14,'auto',function(self)
 			fuckingOptions.grefr=(self:GetChecked() or false)
@@ -5344,6 +5481,7 @@ do
 							end
 						end
 						table.insert(DA.RunOnGuildUpdate, epgpdkpfunc)
+						DA.HelpCreater(DarkAngelGUI.Guild.bulkmenu.award123Frame,{"CENTER",DarkAngelGUI.Guild.bulkmenu.award123Frame,"TOPLEFT",15,-36},'awardprocent_tt',20,20)
 						DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 1, -9},15,30,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
 
 						DarkAngelGUI.Guild.bulkmenu.award123Frame.reason=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 35, -10},{90,11},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
@@ -5425,7 +5563,7 @@ do
 										DarkAngelGUI.Guild.bulkmenu.award123Frame.value:ClearFocus()
 										DarkAngelGUI.Guild.bulkmenu.award123Frame.reason:SetText(reason)
 										DarkAngelGUI.Guild.bulkmenu.award123Frame.value:SetText(value)
-										SetRecentAwardBtnTxt(epgp,value, DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp)
+										SetRecentAwardBtnTxt(epgp, DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp)
 									end)
 									DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]:Show()
 									counted = counted + 1
@@ -5521,7 +5659,7 @@ do
 						end
 					end
 				)
-				DA.FontCreater(nil,L['re-twink twins assigned to'],{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.assignedto,"TOPLEFT",5,12},DarkAngelGUI.Guild.bulkmenu.assignedto,15,170,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'left',{0.85,1,1,0.8})
+				DA.FontCreater(nil,L['re-assign players assigned to'],{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu.assignedto,"TOPLEFT",5,12},DarkAngelGUI.Guild.bulkmenu.assignedto,15,170,{UIDarkAngelFontConsolas:GetFont(), 8,'outline'},'left',{0.85,1,1,0.8})
 				DarkAngelGUI.Guild.bulkmenu.astdropfr=DA.FrameCreater(nil,DarkAngelGUI.Guild.bulkmenu.assignedto,160,20,{"BOTTOMLEFT",DarkAngelGUI.Guild.bulkmenu.assignedto,"TOPLEFT"})
 
 				DarkAngelGUI.Guild.bulkmenu.newmain=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",10,-137},{100,12},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
@@ -5817,6 +5955,182 @@ do
 			
 	end
 
+	do	--import/export settings
+		_,DarkAngelGUI.opt.importOptFrame=DA.CreateFFGDropFrame(DarkAngelopt.scrollchild,L["transfer_settings"],22,55,{"CENTER",DarkAngelopt.scrollchild,"TOPLEFT",415,-26},331,220,{"BOTTOMRIGHT","TOPRIGHT"},nil,nil,nil,'transfer_settings_tt1')
+		DarkAngelGUI.opt.importOptFrame:SetParent(DarkAngelGUI.opt)
+		DarkAngelGUI.opt.importOptFrame:SetPoint("BOTTOMRIGHT",DarkAngelGUI.opt,"TOPRIGHT",0,2)
+		do --content
+			local frame = DarkAngelGUI.opt.importOptFrame
+			
+			do -- manual
+				DarkAngelImportOpt = DA.ScrollBarCreater("DarkAngelImportOpt",frame,{200, 218},{"TOPLEFT", 1, -1},1)
+				local import_scrolled=DarkAngelImportOpt.scrollchild
+
+				frame.EB=DA.EditBoxCreater(nil,import_scrolled,{"TOPLEFT", import_scrolled, "TOPLEFT", 0, 0},{1,1},nil,true,false,{UIDarkAngelFontConsolas:GetFont(), 8},
+					function(self) 		 self:ClearFocus(); self.focusgained=nil;self:HighlightText(0,0)  end,
+					function(self) 		 self:Insert("\n")  end, --enter here
+					function(self) 		 self:ClearFocus(); self.focusgained=nil;self:HighlightText(0,0)  end,
+					function(self) 	     self.t:SetBlendMode("BLEND") self.focusgained=1 self:HighlightText() end,
+					nil,nil,nil,1
+				)
+				frame.EB:SetPoint("BOTTOMRIGHT", DarkAngelImportOpt, "BOTTOMRIGHT", -18, 1)
+
+				DA.HelpCreater(frame,{"CENTER",frame,"TOPRIGHT",-125,-16},'transfer_settings_tt2',10,10)
+
+				DA.FontCreater(nil,L["Manual settings transfer"],{"LEFT",frame,"TOPRIGHT",-118,-16},frame,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+				
+				local import_global=DA.CheckBtnCreater(nil,frame,{"CENTER",frame,"TOPRIGHT",-125,-30},15,15,L["global setings"]) ; import_global:SetChecked(true)
+				local import_guild=DA.CheckBtnCreater(nil,frame,{"CENTER",frame,"TOPRIGHT",-125,-45},15,15,L["guild setings"]) ; import_guild:SetChecked(true)
+				
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-105,-60},12,45,L['export'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self)
+					local exportLine = {}
+					if import_global:GetChecked() then exportLine.DA_GLOBAL_SETTINGS = fuckingOptions end
+					if import_guild:GetChecked() then exportLine.DA_GUILD_SPECIFIC_SETTINGS = fuckingOptions_g end
+					if next(exportLine) then
+						frame.EB:SetText('')
+						frame.EB:SetText(DA.tableToString(exportLine))
+						frame.EB:SetCursorPosition(0)
+					else
+						frame.EB:SetText('')
+					end
+				end)
+
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-60},12,45,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
+					if not(btnType=="RightButton" and frame.EB:GetText() and frame.EB:GetText():gsub("%s+","")~="") then return end
+
+					self:Disable()
+
+					local ok, result = pcall(DA.stringToTable, frame.EB:GetText())
+					if not ok or not result or not(result.DA_GLOBAL_SETTINGS or result.DA_GUILD_SPECIFIC_SETTINGS) then
+						DA.Print("|cffff7777Wrong settings format. Correctly copied the settings, have you? Along with the { } braces, hmm?")
+						self:Enable()
+						return
+					end
+					if import_global:GetChecked() and result.DA_GLOBAL_SETTINGS then 
+						fuckingOptions = DA.DeepCopy(result.DA_GLOBAL_SETTINGS)
+						DA.TimerAfter(0, function() DA.Run_OnSettingsImport();DA.RePaintFrames(true);DA.RePaintFrames() end)
+					end
+					if import_guild:GetChecked() and result.DA_GUILD_SPECIFIC_SETTINGS then 
+						fuckingOptions_g = DA.DeepCopy(result.DA_GUILD_SPECIFIC_SETTINGS)
+						DA.TimerAfter(0, function() DA.Run_OnGuildUpdate() end)
+					end
+					DA.TimerAfter(0, function() 
+						DA.Print(L["import_settings_success"])
+						self:Enable()
+					end)
+				end,'confirm_rightclick')
+
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-121,5},6,20,'<<<','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
+					if not s.state then
+						s.state = true
+						frame:SetSize(DarkAngelGUI.width,220)
+						DarkAngelImportOpt:SetSize(365, 218)
+						s:SetText(">>>")
+					else
+						s.state = false
+						frame:SetSize(331,220)
+						DarkAngelImportOpt:SetSize(200, 218)
+						s:SetText("<<<")
+
+					end
+				end)
+				local cat = 
+[==[
+
+   
+                                           oOOOOOOOOOOOOOOoo.. 
+                                            """""""""""OOOOOOOOo. 
+                                          ..oooooooo..    `""OOOOO. 
+                                      .oOOOOOOOOOOOOOOOOo     OOOOO 
+                    ..ooOOOOOOo..oooOOOOOOOOOOOOOOOOOOOOOOoooOOOOO' 
+           .Oo...ooOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO"' 
+       .oooOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO""'
+         \oOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO' 
+          OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOoOOOOOOOOOOOOOOO' 
+         __\OO/"    "OOOOOOOOOOOOOOOOOOOO`OOOOOOOOOOOOO" 
+           /|\   .oOOooo- `OOOOOOOO""   .O`OOOOOOOOOO' 
+ oO--.        .oOOOO"~    .OOOOO'      QQOOO`OOOOOOOOOo 
+ +o--o`----QQOOO"~       .OOOOO'                 `OOOOO 
+                        .OOOO'                  QQQQO" 
+                      QQQQO" 
+      
+
+]==]			
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-100,5},6,18,':3','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function()
+					frame.EB:SetText(cat)
+				end)
+			end
+			
+			do	-- guild migration
+
+				DA.FontCreater(nil,L["Migrate guild settings"],{"LEFT",frame,"TOPRIGHT",-118,-103},frame,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+				
+				DA.HelpCreater(frame,{"CENTER",frame,"TOPRIGHT",-125,-103},'transfer_settings_tt3',10,10)
+
+				DA.CreateDropdownNoValueSelector({
+					rel = frame,
+					point = {"LEFT",frame,"TOPRIGHT",-130,-127},
+					width = 125,
+					height = 12,
+					title = {
+						"from",
+						{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}
+					},
+					frpoint = "TOP",
+					valuesrosterDynamic = function()
+						local result = {}
+						for guildName,_ in pairs(fuckingOptions_g) do
+							if guildName ~= "n0-guild" then
+								table.insert(result, {text = guildName, value = guildName})
+							end
+						end
+						return result
+					end,
+					justh = 'left',
+					optjusth = 'left',
+					funcOnShow = function(s) s:reRender() end,
+				})
+
+				DA.CreateDropdownNoValueSelector({
+					rel = frame,
+					point = {"LEFT",frame,"TOPRIGHT",-130,-150},
+					width = 125,
+					height = 12,
+					title = {
+						"to",
+						{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}
+					},
+					frpoint = "BOTTOM",
+					valuesrosterDynamic = function()
+						local result = {}
+						for guildName,_ in pairs(fuckingOptions_g) do
+							if guildName ~= "n0-guild" then
+								table.insert(result, {text = guildName, value = guildName, isDefault = DA_CurrentGuild==guildName or false})
+							end
+						end
+						return result
+					end,
+					justh = 'left',
+					optjusth = 'left',
+					funcOnShow = function(s) s:reRender() end,
+				})
+
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-170},12,45,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
+					if not(btnType=="RightButton" and frame.fromFrame.storedvalue and frame.toFrame.storedvalue and frame.fromFrame.storedvalue~=frame.toFrame.storedvalue) then return end
+
+					
+					fuckingOptions_g[frame.toFrame.storedvalue] = DA.DeepCopy(fuckingOptions_g[frame.fromFrame.storedvalue])
+					if frame.toFrame.storedvalue == DA_CurrentGuild then
+						DA.TimerAfter(0, function() DA.Run_OnGuildUpdate() end)
+						DA.TimerAfter(0, function() DA.Print(L["import_settings_success"]) end)
+					else
+						DA.Print(L["import_settings_success"])
+					end
+				end,'confirm_rightclick')
+			end
+			
+		end
+	end
 
 	do	--alias and binds
 		local aliasbtn = DA.ButtonCreater(nil,GuildFrame,{"CENTER",GuildFrame,"TOPRIGHT",-27,-330},22,22,">",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',function() DarkAngel_minimapBtn:Click() end)
@@ -5937,6 +6251,72 @@ do
 	
 end
 
+-----  About ---------
+-----  About ---------
+-----  About ---------
+do
+	DA.TabCreater({"TOP",_G["DarkAngelGUI"],"BOTTOMLEFT",299,0},15,40,10,50,"About",{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},function(self) end,function(self) end,[[Interface\AddOns\DarkAngel\template\pict\art_about]])
+	local frame = DarkAngelGUI.About
+	local function do_frame(rel, width, heigh, point)
+		local f = DA.FrameCreater(nil, rel, width, heigh, point, nil, {0.03, 0.04, 0.05, 0.6}, nil, true)
+		f:Show()
+		f.t:SetBlendMode('add')
+		return f
+	end
+	local function font_do(text, point, rel, fontSize, hjust, textColor)
+		local f = DA.FontCreater(nil, text, point, rel, 18, 150, {UIDarkAngelFontConsolas:GetFont(), fontSize, "OUTLINE"}, hjust, textColor)
+		return f
+	end
+	local function do_eb_with_title(rel, point,ebText,labelText)
+		local eb = DA.EditBoxCreater2(nil, rel, point, {180, 10}, ebText, false, false, {UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"})
+		local label = DA.FontCreater(nil, labelText, {"BOTTOMLEFT", eb, "TOPLEFT", 1, -1}, eb, 15, 180, {UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"}, "left", {0.80, 0.88, 1, 1})
+		return eb,label
+	end
+	do
+		frame.aboutPanel = do_frame(frame, 220, 280, {"TOPLEFT", frame, "TOPLEFT", 10, -10})
+		
+		frame.addonName = DA.FontCreater(nil, "DarkAngel", {"CENTER", frame.aboutPanel, "TOPLEFT", 100, -18}, frame.aboutPanel, 200, 220, {UIDarkAngelFontConsolas:GetFont(), 15, "OUTLINE"}, "CENTER", {0.50, 0.88, 1, 1},'MIDDLE')
+
+		frame.authorBtn = DA.CreateFFGButton2(nil, frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 20, -35}, 18, 64, "Author", [[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"}, function(self)
+			self.clicks = (self.clicks or 0) + 1
+			-- future easter egg hook
+		end)
+			frame.authorFont = font_do("Baker", {"LEFT", frame.authorBtn, "RIGHT", 10, 0}, frame.authorBtn, 11, "left", {0.93, 0.90, 0.75, 1})
+
+		frame.versionBtn = DA.CreateFFGButton2(nil, frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 20, -60}, 18, 64, "Version", [[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"}, function(self)
+			self.clicks = (self.clicks or 0) + 1
+			-- future easter egg hook
+		end)
+			frame.versionFont = DA.FontCreater(nil, "5.4", {"LEFT", frame.versionBtn, "RIGHT", 10, 0}, frame.versionBtn, 18, 68, {UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"}, "left", {0.93, 0.90, 0.75, 1})
+
+		
+		frame.youtubeEb,frame.youtubeFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -105},"https://youtube.com/add_guide_link","Video tutorial")
+		
+		frame.dsEb,frame.dsFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -130},"https://discord.gg/rrQXzCD4MY","Discord")
+		
+		frame.kofiEb,frame.kofiFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -155},"https://ko-fi.com/darkangeladdon","Support author <3")
+		
+		frame.gitEb,frame.gitFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -180},"https://github.com/Baker002/DarkAngel","GitHub")
+		
+		local welcomeText=
+[[Thank you for installing my addon <3
+It truly means a lot to me that my work may have become part of your guild and raid management.
+
+If you enjoy using it and would like to support further development, please consider making a small donation.
+Your support genuinely helps keep the project alive and motivates future updates.
+
+Either way — thank you for giving it a try, and have a great time!]]
+
+		
+		frame.infos = DA.FontCreater(nil, welcomeText, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 8, -200}, frame.aboutPanel, 200, 220, {UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"}, "left", {0.80, 0.88, 1, 1},'TOP')
+
+
+	end
+
+	
+	
+end
+
 
 end
 
@@ -5945,7 +6325,6 @@ DA.AddModOptions('Tweaks', function(optFrame,optScrollFrame)
 	
 	local f = DA.FrameCreater(nil,optScrollFrame.scrollchild,154,80)
 	f:Show()
-
 	
 
 	local epgpOff = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['epgp: officer note warning'],function(self) fuckingOptions.epgpofficer=(self:GetChecked() or false);DA.RunTweaks('epgpofficer') end,{'fuckingOptions','epgpofficer'},'epgpofficernote')
@@ -5954,6 +6333,15 @@ DA.AddModOptions('Tweaks', function(optFrame,optScrollFrame)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-44},15,15,L['epgp: custom tvins and loot'],function(self) fuckingOptions.epgptwinksandloot=(self:GetChecked() or false);DA.RunTweaks('epgptwinksandloot') end,{'fuckingOptions','epgptwinksandloot'},'epgptwinsandloot')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",25,-54},15,15,L['epgp: EP Auc'],function(self) fuckingOptions_g[DA_CurrentGuild].epgpepauc=(self:GetChecked() or false);DA.RunTweaks('epgptwinksandloot') end,{'fuckingOptions_g','epgpepauc','DA_CurrentGuild'},'epgpepauc')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-68},15,15,L['raidroll_epgp: DarkAngel tvins'],function(self) fuckingOptions.rrtwinks=(self:GetChecked() or false);DA.RunTweaks('rrtwinks') end,{'fuckingOptions','rrtwinks'},'rrtwins')
+	local function updTweaks()
+		if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+			f:SetAlpha(1)
+		else
+			f:SetAlpha(0.5)
+		end
+	end
+	table.insert(DA.RunOnGuildUpdate, updTweaks)
+	updTweaks()
 	return f
 end)
 
@@ -8391,7 +8779,6 @@ local minibtn = DarkAngel_minimapBtn
 minibtn:SetFrameLevel(99)
 minibtn:SetSize(28,28)
 minibtn:SetMovable(true)
-minibtn:SetFrameStrata("MEDIUM")
 minibtn:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon.blp")
 minibtn:SetPushedTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon2.blp")
 minibtn:SetHighlightTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon.blp")
@@ -8503,7 +8890,6 @@ DarkAngel_minimapBtn.menu.timerticked=0
 DarkAngel_minimapBtn.menu.width  = 87
 DarkAngel_minimapBtn.menu.height = 80
 DarkAngel_minimapBtn.menu:SetBackdropColor(1, 1, 1, 1)
-DarkAngel_minimapBtn.menu:SetFrameStrata("MEDIUM")
 DarkAngel_minimapBtn.menu:SetSize(DarkAngel_minimapBtn.menu.width, DarkAngel_minimapBtn.menu.height)
 DarkAngel_minimapBtn.menu:SetPoint("TOPRIGHT", DarkAngel_minimapBtn, "CENTER",-15,-15)
 DarkAngel_minimapBtn.menu:EnableMouse(true)
