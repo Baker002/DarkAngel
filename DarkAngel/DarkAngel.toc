@@ -1,5 +1,5 @@
 ## Title: DarkAngel
-## Version: 5.5.1
+## Version: 5.5.2
 ## Author: Baker
 ## Interface: 30300
 ## Notes: No one can hide from my sight...
@@ -16,14 +16,22 @@ Libs\AceAddon-3.0\AceAddon-3.0.xml
 Libs\AceLocale-3.0\AceLocale-3.0.xml
 Libs\LibTalentQuery-1.0\lib.xml
 Libs\LibGroupTalents-1.0\lib.xml
-## Libs\LibGuildStorage-1.0.lua
 #@end-no-lib-strip@
 
 Libs\LibCompress.lua
 template\frozentemplate.xml
 
-init.lua
+Code\init.lua
 Locale\locale.xml
 Locale\defaultTables.lua
-Core.lua
-gui.lua
+Code\Core.lua
+Code\UI_helpers.lua
+
+Code\main.lua
+Code\RightClickMenu.lua
+Code\Guild.lua
+Code\Guild_micromenu.lua
+Code\Guild_GuildControl.lua
+Code\About.lua 
+Code\Console.lua
+Code\Options.lua

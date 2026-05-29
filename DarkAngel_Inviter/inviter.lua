@@ -1,7 +1,7 @@
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 local Mod = DA:NewModule("Inviter")
 
 local Inviter_response_idle={}
@@ -834,64 +834,6 @@ function Mod:Inviter_Load()
 		
 	end
 
-	do -- pre raid settings
-		local function re_render_difficultyBtns_Diff()
-			for i,j in ipairs({"10","25","10H","25H"}) do
-				if DA_Inviter.initRaidDifficulty==i then
-					DA_Inviter.difficultyBtns[i].fs:SetTextColor(0.2,1,1,1)
-				else
-					DA_Inviter.difficultyBtns[i].fs:SetTextColor(0.85,1,1,1)
-				end
-			end
-		end
-		DA_Inviter.difficultyBtns={}
-		for i,j in ipairs({"10","25","10H","25H"}) do
-			DA_Inviter.difficultyBtns[i]=DA.CreateFFGButton2(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 0+26*i,-125},12,25,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-				DA_Inviter.initRaidDifficulty=i
-				re_render_difficultyBtns_Diff()
-			end,nil,nil,'center')
-		end
-		DA_Inviter.initRaidDifficulty=4
-		re_render_difficultyBtns_Diff()
-		DA.FontCreater(nil,L["Raid difficulty"],{"LEFT",DA_Inviter.difficultyBtns[1],"TOPLEFT",0,4},DA_Inviter.difficultyBtns[1],15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-
-
-		local lootSelectTbl={
-			{"Master",'m'},
-			{"Group",'g'},
-			{"Free",'f'},
-		}
-		local rerender_lootSelectFrame
-		DA_Inviter.lootBtn,DA_Inviter.lootFrame=DA.CreateFFGDropFrame(DA_Inviter,"",12,45,{"TOPLEFT",DA_Inviter,"TOPLEFT",135,-125},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect')
-		-- DA_Inviter.lootFrame:SetFrameLevel(200)
-		for id,ss in ipairs(lootSelectTbl) do
-			DA_Inviter.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.lootFrame,{"TOPLEFT",DA_Inviter.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-				fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=ss[2]
-				rerender_lootSelectFrame()
-				DA_Inviter.lootFrame:Hide()
-			end,nil,nil,'center')
-			-- DA_Inviter.lootFrame[id]:SetFrameLevel(201)
-
-		end
-		DA.FontCreater(nil,L["Loot Method"],{"LEFT",DA_Inviter.lootBtn,"TOPLEFT",0,4},DA_Inviter,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
-		rerender_lootSelectFrame=function()
-			for i,j in ipairs(lootSelectTbl) do
-				if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod==j[2] then
-					DA_Inviter.lootFrame[i].fs:SetTextColor(0.2,1,1,1)
-					DA_Inviter.lootBtn:SetText(j[1])
-				else
-					DA_Inviter.lootFrame[i].fs:SetTextColor(0.85,1,1,1)
-				end
-			end
-		end
-		rerender_lootSelectFrame()
-		table.insert(DA.RunOnGuildUpdate, rerender_lootSelectFrame)
-
-
-
-
-	end
-
 	do -- additional invites
 		DA.HelpCreater(DA_Inviter.addInvFr,{"TOPLEFT", DA_Inviter.addInvFr, "TOPLEFT", 2, -2},'Inviter_AdditInvitHelp',10,10)
 		DA_Inviter.addInvFr.lvl80=DA.CheckBtnCreater(nil,DA_Inviter.addInvFr,{"TOPLEFT", DA_Inviter.addInvFr, "TOPLEFT", 10, -12},20,20,L['guild: all 80 lvl online'])
@@ -963,15 +905,15 @@ function Mod:Inviter_Load()
 				for group=1,8 do
 					for i=1,5 do
 
-						local frame=_G["DA_AwarderGroup"..group.."frame"..i]
+						local frame=DA_Awarder.group[group].player[i]
 
-						if _G["DA_AwarderGroup"..group.."frame"..i]:IsShown()
-						and _G["DA_AwarderGroup"..group.."frame"..i].c
-						and _G["DA_AwarderGroup"..group.."frame"..i].c.name
-						and _G["DA_AwarderGroup"..group.."frame"..i].c.name~=myname
-						and not UnitInRaid(_G["DA_AwarderGroup"..group.."frame"..i].c.name)
-						and not index[_G["DA_AwarderGroup"..group.."frame"..i].c.name] then
-							table.insert(listinvite_bulk,_G["DA_AwarderGroup"..group.."frame"..i].c.name)
+						if frame:IsShown()
+						and frame.c
+						and frame.c.name
+						and frame.c.name~=myname
+						and not UnitInRaid(frame.c.name)
+						and not index[frame.c.name] then
+							table.insert(listinvite_bulk,frame.c.name)
 						end
 					end
 				end
@@ -1092,6 +1034,64 @@ function Mod:Inviter_Load()
 		end)
 	end
 
+	do -- pre raid settings
+		local function re_render_difficultyBtns_Diff()
+			for i,j in ipairs({"10","25","10H","25H"}) do
+				if DA_Inviter.initRaidDifficulty==i then
+					DA_Inviter.difficultyBtns[i].fs:SetTextColor(0.2,1,1,1)
+				else
+					DA_Inviter.difficultyBtns[i].fs:SetTextColor(0.85,1,1,1)
+				end
+			end
+		end
+		DA_Inviter.difficultyBtns={}
+		for i,j in ipairs({"10","25","10H","25H"}) do
+			DA_Inviter.difficultyBtns[i]=DA.CreateFFGButton2(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 0+26*i,-125},12,25,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+				DA_Inviter.initRaidDifficulty=i
+				re_render_difficultyBtns_Diff()
+			end,nil,nil,'center')
+		end
+		DA_Inviter.initRaidDifficulty=4
+		re_render_difficultyBtns_Diff()
+		DA.FontCreater(nil,L["Raid difficulty"],{"LEFT",DA_Inviter.difficultyBtns[1],"TOPLEFT",0,4},DA_Inviter.difficultyBtns[1],15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+
+
+		local lootSelectTbl={
+			{"Master",'m'},
+			{"Group",'g'},
+			{"Free",'f'},
+		}
+		local rerender_lootSelectFrame
+		DA_Inviter.lootBtn,DA_Inviter.lootFrame=DA.CreateFFGDropFrame(DA_Inviter,"",12,45,{"TOPLEFT",DA_Inviter,"TOPLEFT",135,-125},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect',true)
+		-- DA_Inviter.lootFrame:SetFrameLevel(200)
+		for id,ss in ipairs(lootSelectTbl) do
+			DA_Inviter.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.lootFrame,{"TOPLEFT",DA_Inviter.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+				fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=ss[2]
+				rerender_lootSelectFrame()
+				DA_Inviter.lootFrame:Hide()
+			end,nil,nil,'center')
+			-- DA_Inviter.lootFrame[id]:SetFrameLevel(201)
+
+		end
+		DA.FontCreater(nil,L["Loot Method"],{"LEFT",DA_Inviter.lootBtn,"TOPLEFT",0,4},DA_Inviter,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
+		rerender_lootSelectFrame=function()
+			for i,j in ipairs(lootSelectTbl) do
+				if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod==j[2] then
+					DA_Inviter.lootFrame[i].fs:SetTextColor(0.2,1,1,1)
+					DA_Inviter.lootBtn:SetText(j[1])
+				else
+					DA_Inviter.lootFrame[i].fs:SetTextColor(0.85,1,1,1)
+				end
+			end
+		end
+		rerender_lootSelectFrame()
+		table.insert(DA.RunOnGuildUpdate, rerender_lootSelectFrame)
+
+
+
+
+	end
+
 	DA.CreateScaler('DA_Inviter',0.6,2,{'fuckingOptions','SRScale'})
 
 end
@@ -1207,8 +1207,8 @@ Raids_Create_ScrollBar = function ()
         -- row:SetNormalTexture('')
 
 		row.buttons = {}
-		row.buttons[1]=DA.CreateFFGFont(nil, row, {"TOPLEFT", row, "TOPLEFT", 1, 2}, 20, 200, {font, 9, "OUTLINE"}, "", {0.2, 0.8, 0.8, 1}, nil, "LEFT")
-		row.buttons[2]=DA.CreateFFGFont(nil, row, {"TOPLEFT", row, "TOPLEFT", 1, -12}, 20, 200, {font, 9, "OUTLINE"}, "", {0.7, 0.8, 0.8, 1}, nil, "LEFT")
+		row.buttons[1]=DA.FontCreater(nil,"",{"TOPLEFT", row, "TOPLEFT", 1, 2},row,20, 200,{font, 9, "OUTLINE"},"LEFT", {0.2, 0.8, 0.8, 1})
+		row.buttons[2]=DA.FontCreater(nil,"",{"TOPLEFT", row, "TOPLEFT", 1, -12},row,20, 200,{font, 9, "OUTLINE"},"LEFT", {0.7, 0.8, 0.8, 1})
 
 		RowButtons[i] = row
 	end
@@ -1312,3 +1312,4 @@ DA:RegisterComm("DA_RTbeacon", function(message, dtype, sender)
 		Inviter_UpdateRaidBrowser()
 	end
 end)
+

@@ -545,6 +545,13 @@ end
 
 --EP Awarder
 do
+L['empty groups']=true
+L['hide more']=true
+L["DESCr-hideemptygrps"]=[[|cffff9999Hide groups with no players|r
+If the option below is disabled, the addon will check groups starting from group 8
+and stop once it finds a group that contains players.
+
+With the "hide more" option enabled, all empty groups will be hidden.]]
 L["DESCr-aw_sc_bossfights"]=[[Show only boss fights
 
 |cffff9999This affects all scada logs processing, not only this list|r]]
@@ -602,7 +609,7 @@ L['setname']='name'
 L['show locals']=true
 L['fepfor']='to'
 L['auto']=true
-L['darken\noffline']="offline"
+L['darken_offline']="offline"
 L['apply']=true
 L['getlocals']='locals'
 L['ask guild']=true

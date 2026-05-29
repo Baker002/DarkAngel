@@ -1,7 +1,7 @@
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 local Mod = DA:NewModule("Logger")
 
 
@@ -2277,7 +2277,7 @@ function Mod.Logger_Load()
 			)
 			DarkAngelGUI.Details.SearchEB.t:SetBlendMode("blend")
 			
-			DarkAngelGUI.Details.notific=DA.CreateFFGFont(nil,DarkAngelGUI.Details.SearchEB,{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"",{0.65,0.55,0.55,1},nil,"LEFT")
+			DarkAngelGUI.Details.notific=DA.FontCreater(nil,"",{"TOPLEFT", DarkAngelGUI.Details, "TOPLEFT", 55, -70},DarkAngelGUI.Details.SearchEB,15,150,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},"LEFT",{0.65,0.55,0.55,1})
 			DarkAngelGUI.Details.notific:Hide()
 			
 		DarkAngelGUI.Details.SearchTooltip = DA.FrameCreater(nil,DarkAngelGUI.Details.SearchEB,160,20,{"TOPLEFT",DarkAngelGUI.Details.SearchEB,"BOTTOMLEFT",-220,58})
@@ -2461,16 +2461,14 @@ Log_Create_ScrollBar = function()
 			DA.myHideTooltip()
 		end)
 		
-		
-		
 		row.buttons = {}
-		row.buttons[1]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 1, 0}, 20, 110, {font, 9, "OUTLINE"}, "", {0.17,0.6,0.6,0.85}, nil, "LEFT")		--time
-		row.buttons[2]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 100, 0}, 20, 130, {font, 8, "OUTLINE"}, "", {0.6, 0.6, 0.6, 1}, nil, "LEFT")		--type
-		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 140, 0}, 20, 130, {font, 9, "OUTLINE"}, "", nil, nil, "LEFT")					--name
-		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 212, 0}, 20, 180, {font, 8, "OUTLINE"}, "", {0.75,0.85,0.85,1}, nil, "LEFT")	--note
-		row.buttons[5]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 232, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change ep
-		row.buttons[6]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 317, 0}, 20, 100, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--change gp
-		row.buttons[7]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 382, 0}, 20, 100, {font, 8, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--total
+		row.buttons[1] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 1, 0}, row, 20, 110, {font, 9, "OUTLINE"}, "LEFT", {0.17, 0.6, 0.6, 0.85}) 		-- time
+		row.buttons[2] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 100, 0}, row, 20, 130, {font, 8, "OUTLINE"}, "LEFT", {0.6, 0.6, 0.6, 1}) 		-- type
+		row.buttons[3] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 140, 0}, row, 20, 130, {font, 9, "OUTLINE"}, "LEFT") 							-- name
+		row.buttons[4] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 212, 0}, row, 20, 180, {font, 8, "OUTLINE"}, "LEFT", {0.75, 0.85, 0.85, 1}) 		-- note
+		row.buttons[5] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 232, 0}, row, 20, 100, {font, 10, "OUTLINE"}, "LEFT", {0.45, 0.65, 0.65, 1}) 	-- change ep
+		row.buttons[6] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 317, 0}, row, 20, 100, {font, 10, "OUTLINE"}, "LEFT", {0.45, 0.65, 0.65, 1}) 	-- change gp
+		row.buttons[7] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 382, 0}, row, 20, 100, {font, 8, "OUTLINE"}, "LEFT", {0.45, 0.65, 0.65, 1}) 		-- total
 		
 		RowButtons[i] = row
 		
@@ -2674,13 +2672,12 @@ Details_Create_ScrollBar = function()
 		
 		
 		row.buttons = {}
-		row.buttons[1]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 1, 0}, 20, 110, {font, 9, "OUTLINE"}, "", {0.17,0.6,0.6,0.85}, nil, "LEFT")		--time
-		row.buttons[2]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 100, 0}, 20, 130, {font, 8, "OUTLINE"}, "", {0.6, 0.6, 0.6, 1}, nil, "LEFT")		--type
-		row.buttons[3]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 137, 0}, 20, 153, {font, 9, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "LEFT")					--total
-		row.buttons[4]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 130, 0}, 20, 180, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "RIGHT")					--EP
-		row.buttons[5]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 180, 0}, 20, 180, {font, 10, "OUTLINE"}, "", {0.45,0.65,0.65,1}, nil, "RIGHT")					--GP
-		row.buttons[6]=DA.CreateFFGFont(nil, row, {"LEFT", row, "LEFT", 365, 0}, 20, 125, {font, 8, "OUTLINE"}, "", nil, nil, "LEFT")					--reason
-		
+		row.buttons[1] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 1, 0}, row, 20, 110, {font, 9, "OUTLINE"}, "LEFT", {0.17, 0.6, 0.6, 0.85}) 		-- time
+		row.buttons[2] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 100, 0}, row, 20, 130, {font, 8, "OUTLINE"}, "LEFT", {0.6, 0.6, 0.6, 1}) 		-- type
+		row.buttons[3] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 137, 0}, row, 20, 153, {font, 9, "OUTLINE"}, "LEFT", {0.45, 0.65, 0.65, 1}) 		-- total
+		row.buttons[4] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 130, 0}, row, 20, 180, {font, 10, "OUTLINE"}, "RIGHT", {0.45, 0.65, 0.65, 1}) 	-- EP
+		row.buttons[5] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 180, 0}, row, 20, 180, {font, 10, "OUTLINE"}, "RIGHT", {0.45, 0.65, 0.65, 1}) 	-- GP
+		row.buttons[6] = DA.FontCreater(nil, "", {"LEFT", row, "LEFT", 365, 0}, row, 20, 125, {font, 8, "OUTLINE"}, "LEFT") -- reason
 		RowButtons[i] = row
 		
 	end
@@ -2986,9 +2983,17 @@ local function IsLoggingRequired()
 	end
 	return false
 end
+local function GetTimerTime(short)
+	if DA.XTimers[short] then
+		return DA.XTimers[short]['time']
+	else
+		print('no such timer-'..short)
+		return
+	end
+end
 function Mod:UpdateLogging()
 	if IsLoggingRequired() then
-		if DA.GetTimerTime("scan_schedule")<4 then
+		if GetTimerTime("scan_schedule")<4 then
 			DA.SetTimerTime("scan_schedule",4)
 		end
 		DA.ResumeTimer("scan_schedule")

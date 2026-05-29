@@ -1,7 +1,7 @@
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 local Mod = DA:NewModule("Backup")
 
 

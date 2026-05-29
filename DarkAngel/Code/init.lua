@@ -54,7 +54,6 @@ local _, DA = ...
 ---@class DarkAngelAddon
 DA = LibStub("AceAddon-3.0"):NewAddon('DarkAngel')
 DarkAngel = DA
--- local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
 
 
 local fuckingOptions_local={
@@ -113,6 +112,8 @@ local fuckingOptions_local={
 	localized_items_data={},
 
 	darkenoffline=1,
+	hideemptygrps=false,
+	hidemore=1,
 
 	precisematchsearch=1,
 	showlocals=false,
@@ -163,7 +164,7 @@ local fuckingOptions_g_local={
 	epgpepauc=false,
 	bidtracker=false,
 	bidtracker_onlymine=true,
-	evaluateoffnote=false,
+	evaluateoffnote=1,
 	aw_send_whispers=1,
 
 	
@@ -301,12 +302,14 @@ do --variables
 	DA.modOptCreate={}
 	DA.loaded_Modules={}
 	DA.DrawnFrames={}
+	DA.DA_GuildRoster={}
 end
 local Init_completed = false
 local ModsAndGuildDataReady
 local IfModsAndGuildDataReady
 local OnGuildDataAvailable
 local TryInitGuildData
+local Dark_Angel_OnInit
 
 -- Initialization
 local gInfoFetcher=CreateFrame("Frame")
@@ -1014,7 +1017,21 @@ local function Create_Slash_Functions()
 	SLASH_FSRversionr1 = "/daversionr"
 	SlashCmdList["FSRversionr"] = function() SendAddonMessage("DA_vrq",GetUnitName("player"), "raid") end
 end
-function Dark_Angel_OnInit(guildinit)
+
+local BuildGUITask={}
+function DA.AddToBuildQueue(moduleName, buildFunc)
+	table.insert(BuildGUITask, {moduleName, buildFunc})
+end
+function DA.RunBuildQueue()
+    for _, builder in ipairs(BuildGUITask) do
+		local moduleName, buildFunc = unpack(builder)
+        local ok, err = pcall(buildFunc)
+        if not ok then
+            DA.Print("|cffff0000INIT error in " .. moduleName .. ":|r " .. err)
+        end
+    end
+end
+Dark_Angel_OnInit = function(guildinit)
 	Init_completed=true
 	if DA.modules.Logger then DA.Logger_rewrite_Gopt() end
 	
@@ -1030,7 +1047,8 @@ function Dark_Angel_OnInit(guildinit)
 	local guildType=DA.DetermineDKPorEPGPguild()
 		DA_Guild_Info[DA_CurrentGuild].GuildType=guildType
 	
-	DA.CreateGUIs()
+	-- DA.CreateGUIs()
+	DA.RunBuildQueue()
 	
 	
 	DarkAngelGUI:SetScale(fuckingOptions.FFGScale)
@@ -1469,3 +1487,5 @@ DA:RegisterComm("DA_vans", function(message, dtype, sender)
 			DA.Print("   v|cff00ffff"..message:gsub("_Sp"," "):gsub("_Rr","|r"):gsub("_c7f","|cff77aaff").." |cffffffff"..sender)
 		end 
 end)
+
+

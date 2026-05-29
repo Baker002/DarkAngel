@@ -1,7 +1,7 @@
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 local Mod = DA:NewModule("BidTracker")
 
@@ -369,10 +369,6 @@ local function BidderTimerAddTimeIfNeeded()
 	local remaining = tonumber(DA_BidTracker.timerfont:GetText()) or 10
 	BidderTimerSetCountdown(remaining <= 10 and 10 or remaining)
 end
--- local function ResumeBidderTimer()
--- 	local remaining = tonumber(DA_BidTracker.timerfont:GetText()) or 5
--- 	BidderTimerSetCountdown(remaining)
--- end
 
 DA_BidTracker.itemicon:GetNormalTexture():SetBlendMode('blend')
 DA_BidTracker.itemicon:GetNormalTexture():SetTexture("Interface\\PaperDoll\\UI-Backpack-EmptySlot")
@@ -1058,11 +1054,16 @@ local function Add_Check_Bid(value, name, isAllIn)
 				DA_BidTracker['loot'..i]:SetText("|cff888888"..addspacestovalue(DA_BidTracker.bidsession_roster[i][1]).."  "..addspacestobank(DA_BidTracker.bidsession_roster[i][3]).."   "..DA_BidTracker.bidsession_roster[i].classCC..DA_BidTracker.bidsession_roster[i][2])
 			end
 			DA_BidTracker['loot'..i]:Show()
-			DA_BidTracker['loot'..i]:SetScript("OnClick",function() 
-				DA_BidTracker.winnerfont:SetText(DA_BidTracker.bidsession_roster[i][2])
-				DA_BidTracker.pricebox:SetText(DA_BidTracker.bidsession_roster[i][1])
-				DA_BidTracker.winnermain=DA_BidTracker.bidsession_roster[i][4] or nil
-				DA_BidTracker.winneralt=DA_BidTracker.bidsession_roster[i][5] or nil
+			DA_BidTracker['loot'..i]:SetScript("OnClick",function(self, btntype) 
+				if btntype == 'LeftButton' then
+					DA_BidTracker.winnerfont:SetText(DA_BidTracker.bidsession_roster[i][2])
+					DA_BidTracker.pricebox:SetText(DA_BidTracker.bidsession_roster[i][1])
+					DA_BidTracker.winnermain=DA_BidTracker.bidsession_roster[i][4] or nil
+					DA_BidTracker.winneralt=DA_BidTracker.bidsession_roster[i][5] or nil
+				elseif btntype=='RightButton' then
+					DA_RightClickMenu.calledfrom="DA_BidTracker"
+					DA.OpenOptMenu(self,DA_BidTracker.bidsession_roster[i][2])
+				end
 			end)
 			DA_BidTracker['loot'..i].myID=i
 			DA_BidTracker['loot'..i]:SetScript("OnEnter", function(self)

@@ -1,7 +1,7 @@
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 local Mod = DA:NewModule("Awarder")
 
@@ -245,7 +245,7 @@ DA_Awarder:SetScript("OnDragStop", function(self)
 	fuckingOptions.saved_guiPositions.DA_Awarder={point[1] or "TOPLEFT",point[3] or "CENTER",point[4] or 0,point[5] or 0}
 
 end)
-
+DA_Awarder.group={}
 function Mod:OnInitialize()
 
 	DA_Awarder:SetScale(fuckingOptions.Awarderscale)
@@ -615,7 +615,6 @@ DA_Awarder.autoopt.skadaassign:SetScript("OnHide",function() DA.AWAutoOptions() 
 
 
 
-
 local function getSkadadatabasenames()
 
 	if SkadaCharDB and SkadaCharDB.sets and SkadaStorageDB and SkadaStorageDB.sets then
@@ -832,9 +831,9 @@ end
 local function alpha_on_CBs(hig)
 	for group=1,8 do
 		for player=1,5 do
-			local frame=_G["DA_AwarderGroup"..group.."frame"..player]
+			local frame=DA_Awarder.group[group].player[player]
 			for r=1,8 do
-				local cb=_G["DA_AwarderGroup"..group.."frame"..player.."CB"..r]
+				local cb=frame.cb[r]
 			
 				if frame and frame.c and cb and cb:IsShown() then
 					if hig and hig==r then
@@ -1274,6 +1273,13 @@ local function skada_check_if_player_passed(input_tbl,input_tbl_sorted,name,boss
 	end
 end
 
+
+local function GetChatCopyLink(longString)
+	DA.LinkIndex = DA.LinkIndex + 1
+	local id = tostring(DA.LinkIndex)
+	DA.LinkStorage[id] = longString
+	return "|cffffff00|Hdalink:" .. id .. "|h<click to copy>|h|r"
+end
 local function re_render_saves()
 
 local saves_Frame=DA_Awarder.getsavesFrame
@@ -1299,7 +1305,7 @@ for i=100,1,-1 do
 						DA.Print("Raid composition is not stored for this old snapshot. Try to load and re-save it")
 						return
 					end
-					DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(saves_sorted[i].compLink))
+					DA.Print("Raid Comp Link: "..GetChatCopyLink(saves_sorted[i].compLink))
 					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, saves_sorted[i].compLink)
 				end
 			end,
@@ -2211,129 +2217,130 @@ end
 function DA.CreateSnapshot(isauto)
 
 
-local stamp
+	local stamp
 	local datX,timX=string.match(date(), "(.+)%s(.+)")
 	stamp=datX..' |cff85aaaa'..timX
 
-if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate() then
-	local raidCompSpec={}
-	local raidCompNames={}
-	local specFailed=0
-	local counterplayers=0
-	
-	for grp=1,8 do
-		for id=1,5 do
-			local frame = _G["DA_AwarderGroup"..grp.."frame"..id]
+	if (GetNumRaidMembers() and GetNumRaidMembers()>0) or DA_Awarder.locker.getstate() then
+		local raidCompSpec={}
+		local raidCompNames={}
+		local specFailed=0
+		local counterplayers=0
+		
+		for grp=1,8 do
+			for id=1,5 do
+				local frame = DA_Awarder.group[grp].player[id]
 
-			if frame then
+				if frame then
 
-				if frame:IsShown() and frame.c then
-					counterplayers = counterplayers + 1
+					if frame:IsShown() and frame.c then
+						counterplayers = counterplayers + 1
 
-					local name = frame.c.name
-					local class = frame.c.clas
-					local storedRole = frame.c.checkedSpec
-					local role = LGT:GetUnitRole(name)
+						local name = frame.c.name
+						local class = frame.c.clas
+						local storedRole = frame.c.checkedSpec
+						local role = LGT:GetUnitRole(name)
 
-					local spec_a, spec_b, spec_c = LGT:GetTreeNames(class)
-					local specname = select(1, LGT:GetUnitTalentSpec(name), 1)
+						local spec_a, spec_b, spec_c = LGT:GetTreeNames(class)
+						local specname = select(1, LGT:GetUnitTalentSpec(name), 1)
 
-					local spec_ID = specname and (
-						(spec_a == specname and 1) or
-						(spec_b == specname and 2) or
-						(spec_c == specname and 3)
-					) or nil
+						local spec_ID = specname and (
+							(spec_a == specname and 1) or
+							(spec_b == specname and 2) or
+							(spec_c == specname and 3)
+						) or nil
 
-					local specShort, specCorrect = raidCompGetClassShort(class, spec_ID, storedRole or role)
+						local specShort, specCorrect = raidCompGetClassShort(class, spec_ID, storedRole or role)
 
-					if specCorrect or (spec_ID and specShort) then
-						tinsert(raidCompSpec, specShort)
-						tinsert(raidCompNames, name..";")
+						if specCorrect or (spec_ID and specShort) then
+							tinsert(raidCompSpec, specShort)
+							tinsert(raidCompNames, name..";")
 
-					elseif specShort then	
-						specFailed = specFailed + 1
-						tinsert(raidCompSpec, specShort)
-						tinsert(raidCompNames, "@@+"..name..";")
+						elseif specShort then	
+							specFailed = specFailed + 1
+							tinsert(raidCompSpec, specShort)
+							tinsert(raidCompNames, "@@+"..name..";")
+								
+						else
+							tinsert(raidCompSpec, "0")
+							tinsert(raidCompNames, ";")
+							specFailed = specFailed + 1
+						end
 							
 					else
 						tinsert(raidCompSpec, "0")
 						tinsert(raidCompNames, ";")
-						specFailed = specFailed + 1
 					end
 						
-				else
-					tinsert(raidCompSpec, "0")
-					tinsert(raidCompNames, ";")
 				end
-					
 			end
 		end
-	end
-	
-	if counterplayers==0 then
+		
+		if counterplayers==0 then
+			DA.Print(L["raid is empty"])
+			return
+		end
+		
+		raidCompCleanup(raidCompSpec, "0")
+		raidCompCleanup(raidCompNames, ";")
+		
+		if specFailed ~= 0 then
+			DA.Print(L["failed to detect specialization"]..": "..specFailed.." players")
+		end
+		
+		local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames)
+		DA.Print("Raid Comp Link: "..GetChatCopyLink(RaidCompLink))
+		
+		tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks) , compLink = RaidCompLink})
+		
+	else
 		DA.Print(L["raid is empty"])
 		return
 	end
-	
-	raidCompCleanup(raidCompSpec, "0")
-	raidCompCleanup(raidCompNames, ";")
-	
-	if specFailed ~= 0 then
-		DA.Print(L["failed to detect specialization"]..": "..specFailed.." players")
+
+	if #DA_Snapshots>30 then
+		table.remove(DA_Snapshots,1)
 	end
-	
-	local RaidCompLink = "https://www.wowhead.com/wotlk/raid-composition#0"..table.concat(raidCompSpec)..";"..table.concat(raidCompNames)
-	DA.Print("Raid Comp Link: "..DA.GetChatCopyLink(RaidCompLink))
-	
-	tinsert(DA_Snapshots,{isauto=isauto,members=counterplayers,stamp=stamp,raid=DA.DeepCopy(DA_Awarder.raidtable),currentset=DA_SelSet,marks=DA.DeepCopy(DA_raid_marks) , compLink = RaidCompLink})
-	
-else
-	DA.Print(L["raid is empty"])
-	return
-end
 
-if #DA_Snapshots>30 then
-	table.remove(DA_Snapshots,1)
-end
-
-if DA_Awarder.getsavesFrame:IsShown() then
-	re_render_saves()
-	re_render_saves()
-end
+	if DA_Awarder.getsavesFrame:IsShown() then
+		re_render_saves()
+		re_render_saves()
+	end
 
 
 end
 function DA.LoadSnapshot(id,whatload)
-DA_Awarder.locker.setstate(true)
-for grp=1,8 do
-	for player=1,5 do
-		if _G["DA_AwarderGroup"..grp.."frame"..player] then
-			_G["DA_AwarderGroup"..grp.."frame"..player]:Hide()
-			_G["DA_AwarderGroup"..grp.."frame"..player].c=nil
+	DA_Awarder.locker.setstate(true)
+	for grp=1,8 do
+		for player=1,5 do
+			local playerFrame = DA_Awarder.group[grp].player[player]
+			if playerFrame then
+				playerFrame:Hide()
+				playerFrame.c=nil
+			end
 		end
 	end
-end
-if whatload=="all" then
-	DA_Awarder.raidtable=DA.DeepCopy(DA_Snapshots[id].raid)
-	DA_raid_marks=nil
-	DA_raid_marks=DA.DeepCopy(DA_Snapshots[id].marks)
-	DA_Awarder.isinraidfont:SetText("S N A P S H O T")
-elseif whatload=="raid" then
-	DA_Awarder.raidtable=DA.DeepCopy(DA_Snapshots[id].raid)
-	DA_Awarder.isinraidfont:SetText("S N A P S H O T")
-elseif whatload=="marks" then
-	DA_raid_marks=nil
-	DA_raid_marks=DA.DeepCopy(DA_Snapshots[id].marks)
-end
+	if whatload=="all" then
+		DA_Awarder.raidtable=DA.DeepCopy(DA_Snapshots[id].raid)
+		DA_raid_marks=nil
+		DA_raid_marks=DA.DeepCopy(DA_Snapshots[id].marks)
+		DA_Awarder.isinraidfont:SetText("S N A P S H O T")
+	elseif whatload=="raid" then
+		DA_Awarder.raidtable=DA.DeepCopy(DA_Snapshots[id].raid)
+		DA_Awarder.isinraidfont:SetText("S N A P S H O T")
+	elseif whatload=="marks" then
+		DA_raid_marks=nil
+		DA_raid_marks=DA.DeepCopy(DA_Snapshots[id].marks)
+	end
 
-if (whatload=="all" or whatload=="marks") and (not DA_SelSet or DA_SelSet~=DA_Snapshots[id].currentset) then
-	DA_SelSet=DA_Snapshots[id].currentset
-	ReRenderNaborsList();FEP_RecalculateAllBtnEP();FEP_ResetAllChecks();resetAddboxes();readdRemCh();FEP_ReNameRePushThings();FEP_GatherRaid()
-	ReRenderNaborsList();FEP_RecalculateAllBtnEP();FEP_ResetAllChecks();resetAddboxes();readdRemCh();FEP_ReNameRePushThings();FEP_GatherRaid()
-else
-	FEP_GatherRaid()
-	FEP_GatherRaid()
-end
+	if (whatload=="all" or whatload=="marks") and (not DA_SelSet or DA_SelSet~=DA_Snapshots[id].currentset) then
+		DA_SelSet=DA_Snapshots[id].currentset
+		ReRenderNaborsList();FEP_RecalculateAllBtnEP();FEP_ResetAllChecks();resetAddboxes();readdRemCh();FEP_ReNameRePushThings();FEP_GatherRaid()
+		ReRenderNaborsList();FEP_RecalculateAllBtnEP();FEP_ResetAllChecks();resetAddboxes();readdRemCh();FEP_ReNameRePushThings();FEP_GatherRaid()
+	else
+		FEP_GatherRaid()
+		FEP_GatherRaid()
+	end
 
 end
 
@@ -2380,32 +2387,31 @@ local function FEP_CheckNoteType(note)
 end 
 
 local function OptMenuUpdate()
-if DA_RightClickMenu and DA_RightClickMenu:IsShown() then else return end
+	if DA_RightClickMenu and DA_RightClickMenu:IsShown() then else return end
 
--- not InCombatLockdown()
 
 
 	if UnitInRaid(DA_RightClickMenu.player) then else DA_RightClickMenu:Hide() return end
 	
 	if DA_RightClickMenu.player and GetPartyAssignment('MAINTANK',DA_RightClickMenu.player, 1) then
-		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
-		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+		DA_RightClickMenu.MT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
+		DA_RightClickMenu.OT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 		
 		local ottxt="/run ClearPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1);DA_RightClickMenu.ismt=false \n"
 		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
 		local ottxt2="/run if GetPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) then ClearPartyAssignment('MAINTANK','"..DA_RightClickMenu.player.."', 1) end;DA_RightClickMenu.ismt=false \n"; ottxt2=ottxt2.."/mainassist "..DA_RightClickMenu.player
 		DA_RightClickMenu.OT:SetAttribute("macrotext", ottxt2)
 	elseif DA_RightClickMenu.player and GetPartyAssignment('MAINASSIST',DA_RightClickMenu.player, 1) then
-		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
-		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+		DA_RightClickMenu.MT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
+		DA_RightClickMenu.OT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 		
 		local ottxt="/run DA_RightClickMenu.ismt=true \n"; ottxt=ottxt.."/maintank "..DA_RightClickMenu.player
 		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
 		local ottxt2="/run ClearPartyAssignment('MAINASSIST','"..DA_RightClickMenu.player.."', 1) ;DA_RightClickMenu.ismt=false \n"
 		DA_RightClickMenu.OT:SetAttribute("macrotext", ottxt2)
 	elseif DA_RightClickMenu.player then
-		DA_RightClickMenu.MT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
-		DA_RightClickMenu.OT:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+		DA_RightClickMenu.MT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
+		DA_RightClickMenu.OT:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 		
 		local ottxt="/run DA_RightClickMenu.ismt=true \n"; ottxt=ottxt.."/maintank "..DA_RightClickMenu.player
 		DA_RightClickMenu.MT:SetAttribute("macrotext", ottxt)
@@ -2434,21 +2440,21 @@ if DA_RightClickMenu and DA_RightClickMenu:IsShown() then else return end
 		DA_RightClickMenu.looter:SetAlpha(1)
 		DA_RightClickMenu.looter:Enable()
 		if UnitIsPartyLeader(DA_RightClickMenu.player) then
-			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
+			DA_RightClickMenu.assist:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 		elseif UnitIsRaidOfficer(DA_RightClickMenu.player) then
-			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+			DA_RightClickMenu.assist:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 		else
-			DA_RightClickMenu.assist:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight")
+			DA_RightClickMenu.assist:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 		end
 		
 		if GetLootMethod()=='master' and DA_RightClickMenu.lootername==DA_RightClickMenu.player then
 			if UnitIsPartyLeader(DA_RightClickMenu.player) then
-				DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Red.blp")
+				DA_RightClickMenu.looter:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 			else
-				DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp")
+				DA_RightClickMenu.looter:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 			end
 		else
-			DA_RightClickMenu.looter:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp")
+			DA_RightClickMenu.looter:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 		end
 	else
 		DA_RightClickMenu.assist:SetAlpha(0.5)
@@ -2461,16 +2467,17 @@ if DA_RightClickMenu and DA_RightClickMenu:IsShown() then else return end
 	
 end
 function DA_Awarder.FEP_UpdateFrames()
-DA_standby_mainslist="@"
-local flag=0
-local flag2=0
-local main=0
+	DA_standby_mainslist="@"
+	local flag=0
+	local flag2=0
+	local main=0
 
-DA.RegatherGuildNotes()
+	DA.RegatherGuildNotes()
 
 	for i=1,8 do
+		local grp = DA_Awarder.group[i]
 		for p=1,5 do
-			local frame=_G['DA_AwarderGroup'..i..'frame'..p] or nil
+			local frame=grp.player[p]
 			if frame then 
 			
 			
@@ -2649,10 +2656,43 @@ DA.RegatherGuildNotes()
 					end
 				end
 			end
-			
 		end
 	end
-	
+
+	if fuckingOptions.hideemptygrps then
+
+		if fuckingOptions.hidemore then
+			
+			for i=8,1,-1 do
+				local grp = DA_Awarder.group[i]
+				if DA_Awarder.array["g"..i] >0 then
+					grp:Show()
+				else
+					grp:Hide()
+				end
+			end
+		else
+			local stophide 
+			for i=8,1,-1 do
+				local grp = DA_Awarder.group[i]
+				if DA_Awarder.array["g"..i] >0 then
+					grp:Show()
+					stophide = true
+				elseif not stophide then
+					grp:Hide()
+				else
+					grp:Show()
+				end
+				
+			end
+		end
+	else
+		for i=1,8 do
+			local grp = DA_Awarder.group[i]
+			grp:Show()
+		end
+	end
+
 	if not FEP_ZamField.focusgained then FEP_ZamField:SetText(DA_Standby[DA_CurrentGuild]) end
 	if DA_Awarder.AssignFrame:IsShown() and (not DA_Awarder.AssignFrame.EB.focusgained) then _G[DA_Awarder.AssignFrame.GetCalledby]:Click() end
 	FEP_ResetAllChecks()
@@ -2691,85 +2731,85 @@ local function FEP_Fill()
 		
 		
 		
-		
-		if _G['DA_AwarderGroup'.. group .. 'frame' .. player] then 
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player]:SetText(name)
+		local playerFrame = DA_Awarder.group[group].player[player]
+		if playerFrame then 
+			playerFrame:SetText(name)
 			
 			color=DA.GetNumericClassColor(clas)
 			
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetJustifyH('LEFT')
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player].fs:SetTextColor(unpack(color))
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].c=a[i]
+			playerFrame.fs:SetJustifyH('LEFT')
+			playerFrame.fs:SetTextColor(unpack(color))
+			playerFrame.c=a[i]
 			DA_Awarder.array["g"..group]=DA_Awarder.array["g"..group]+1
 			for cbox=1,#DA_StoredCheckboxes[DA_SelSet] do
-				_G["DA_AwarderGroup"..group.."frame"..player.."CB"..cbox]:Show()
+				playerFrame.cb[cbox]:Show()
 			end
 			  
 			--is leader or assist
 			if isLA==2 then
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:SetTexture("Interface\\GroupFrame\\UI-Group-LeaderIcon")
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:Show()
+				playerFrame.rlassist.txt:SetTexture("Interface\\GroupFrame\\UI-Group-LeaderIcon")
+				playerFrame.rlassist.txt:Show()
+				playerFrame.rlassist:SetNormalTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:SetPushedTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:Show()
 			elseif isLA==1 then
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:SetTexture("Interface\\GroupFrame\\UI-Group-AssistantIcon")
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:Show()
+				playerFrame.rlassist.txt:SetTexture("Interface\\GroupFrame\\UI-Group-AssistantIcon")
+				playerFrame.rlassist.txt:Show()
+				playerFrame.rlassist:SetNormalTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:SetPushedTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:Show()
 			else
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:SetTexture("")
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].rlassist.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].rlassist:Hide()
+				playerFrame.rlassist.txt:SetTexture("")
+				playerFrame.rlassist.txt:Hide()
+				playerFrame.rlassist:SetNormalTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:SetPushedTexture(playerFrame.rlassist.txt)
+				playerFrame.rlassist:Hide()
 			end
 				
 			--is tank or offtank
 			if tankrole=="MAINTANK" then
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MainTankIcon")
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..player].ismtot=2
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:Show()
+				playerFrame.MTot.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MainTankIcon")
+				playerFrame.MTot.txt:Show()
+				playerFrame.ismtot=2
+				playerFrame.MTot:SetNormalTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:SetPushedTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:Show()
 			elseif tankrole=="MAINASSIST" then
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MainAssistIcon")
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..player].ismtot=1
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:Show()
+				playerFrame.MTot.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MainAssistIcon")
+				playerFrame.MTot.txt:Show()
+				playerFrame.ismtot=1
+				playerFrame.MTot:SetNormalTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:SetPushedTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:Show()
 			else
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:SetTexture("")
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..player].ismtot=0
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].MTot.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].MTot:Hide()
+				playerFrame.MTot.txt:SetTexture("")
+				playerFrame.MTot.txt:Hide()
+				playerFrame.ismtot=0
+				playerFrame.MTot:SetNormalTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:SetPushedTexture(playerFrame.MTot.txt)
+				playerFrame.MTot:Hide()
 			end
 			
 			--is master looter
 			if masterl==1 then
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MasterLooter")
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:Show()
+				playerFrame.masterlooter.txt:SetTexture("Interface\\GroupFrame\\UI-Group-MasterLooter")
+				playerFrame.masterlooter.txt:Show()
+				playerFrame.masterlooter:SetNormalTexture(playerFrame.masterlooter.txt)
+				playerFrame.masterlooter:SetPushedTexture(playerFrame.masterlooter.txt)
+				playerFrame.masterlooter:Show()
 			else
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt:SetTexture("")
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:SetNormalTexture(_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:SetPushedTexture(_G["DA_AwarderGroup"..group.."frame"..player].masterlooter.txt)
-				_G["DA_AwarderGroup"..group.."frame"..player].masterlooter:Hide()
+				playerFrame.masterlooter.txt:SetTexture("")
+				playerFrame.masterlooter.txt:Hide()
+				playerFrame.masterlooter:SetNormalTexture(playerFrame.masterlooter.txt)
+				playerFrame.masterlooter:SetPushedTexture(playerFrame.masterlooter.txt)
+				playerFrame.masterlooter:Hide()
 			end
 			
 			-- is online
 			if not fuckingOptions.darkenoffline or isonline then
-				_G['DA_AwarderGroup'.. group .. 'frame' .. player ]:SetAlpha(1)
+				playerFrame:SetAlpha(1)
 			else
-				_G['DA_AwarderGroup'.. group .. 'frame' .. player ]:SetAlpha(0.45)
+				playerFrame:SetAlpha(0.45)
 			end
 		end
 	end
@@ -2793,7 +2833,7 @@ local function enableMovingGrps()
 end
 function FEP_GatherRaid()
 	if not DA_SelSet then DA_SelSet='default' end
-	if not DA_AwarderGroup1 then FEP_CreateGroups() end
+	if not DA_Awarder.group[1] then FEP_CreateGroups() end
 	re_highlight_difficulty()
 	if GetNumRaidMembers()==0 then 
 		DA_Awarder.DisbandBtn:Hide()
@@ -2839,21 +2879,23 @@ function FEP_GatherRaid()
 
 
 	for group=1,8 do
+		
 		for player=1,5 do
-		if _G['DA_AwarderGroup'.. group .. 'frame' .. player ] then
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].c=nil
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].state=nil
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].main=nil
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].epvalue=nil
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ].mainmain=nil
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ]:SetText('')
-			_G['DA_AwarderGroup'.. group .. 'frame' .. player ]:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
-			
-			for cbox=1,#DA_StoredCheckboxes[DA_SelSet] do
-				_G["DA_AwarderGroup"..group.."frame"..player.."CB"..cbox]:Hide()
-			end
+			local playerFrame=DA_Awarder.group[group].player[player]
+			if playerFrame then
+				playerFrame.c=nil
+				playerFrame.state=nil
+				playerFrame.main=nil
+				playerFrame.epvalue=nil
+				playerFrame.mainmain=nil
+				playerFrame:SetText('')
+				playerFrame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
+				
+				for cbox=1,#DA_StoredCheckboxes[DA_SelSet] do
+					playerFrame.cb[cbox]:Hide()
+				end
 
-		end
+			end
 		end
 	end
 	
@@ -2918,7 +2960,7 @@ function FEP_CreateGroups()
 			if msg:find(ERR_RAID_DIFFICULTY_CHANGED_S:gsub("%:%s%%s%.","")) then
 				re_highlight_difficulty()
 			end
-		end)
+		end)     
 	end
 
 	do --ready check
@@ -3090,10 +3132,8 @@ function FEP_CreateGroups()
 
 	do --main frame buttons
 		
-		
-		
 		do --Award Frame
-			DA_Awarder.Awardbn,DA_Awarder.AwardFrame=DA.CreateFFGDropFrame(DA_Awarder,L['award'],15,50,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -134.5,12},100,112,"BOTTOM",nil,function() DA_Awarder.getlocalsFrame:Hide() end)
+			DA_Awarder.Awardbn,DA_Awarder.AwardFrame=DA.CreateFFGDropFrame(DA_Awarder,L['award'],15,50,{"CENTER", DA_Awarder, "BOTTOMRIGHT", -134.5,12},100,112,{"TOPRIGHT", "BOTTOMRIGHT",109.5,-6})
 			
 			DA.FontCreater(nil,L['awarder_warn'],{"LEFT",DA_Awarder.AwardFrame,"TOPLEFT",5,-12},DA_Awarder.AwardFrame,50,250,{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},"left",{1,0.4,0.4,0.9})
 			
@@ -3222,7 +3262,6 @@ function FEP_CreateGroups()
 			end
 		end)
 		
-		DA.CheckBtnCreater(nil,DA_Awarder,{"CENTER",DA_Awarder,"BOTTOMLEFT",17,75},15,15,L['darken\noffline'],function(self) fuckingOptions.darkenoffline=(self:GetChecked() or false);FEP_GatherRaid() end,{'fuckingOptions','darkenoffline'},'darkenoffline').font:SetSize(190,32)
 		
 		DA_Awarder.standby_inMain=DA.CheckBtnCreater(nil,DA_Awarder,{"CENTER",DA_Awarder,"BOTTOMLEFT",17,60},15,15,L['6-8 standby'],function(self) fuckingOptions.sixeight=(self:GetChecked() or false) ;DA_Awarder.standby_inAssister:SetChecked(self:GetChecked());GuildRoster();FEP_GatherRaid()	end,{'fuckingOptions','sixeight'},'sixeightdet')
 		
@@ -3243,8 +3282,14 @@ function FEP_CreateGroups()
 		re_highlight_manualEB()
 		table.insert(DA.RunOnGuildUpdate, re_highlight_manualEB)
 		
+
+		local asdasd = DA.CheckBtnCreater(nil,DA_Awarder,{"CENTER",DA_Awarder,"BOTTOMLEFT",115,60},15,15,L['darken_offline'],function(self) fuckingOptions.darkenoffline=(self:GetChecked() or false);FEP_GatherRaid() end,{'fuckingOptions','darkenoffline'},'darkenoffline')
+		-- asdasd.font:SetSize(190,32)
+		DA.CheckBtnCreater(nil,DA_Awarder,{"CENTER",DA_Awarder,"BOTTOMLEFT",115,45},15,15,L['empty groups'],function(self) fuckingOptions.hideemptygrps=(self:GetChecked() or false);FEP_GatherRaid() end,{'fuckingOptions','hideemptygrps'},'hideemptygrps')
+		DA.CheckBtnCreater(nil,DA_Awarder,{"CENTER",DA_Awarder,"BOTTOMLEFT",115,30},15,15,L['hide more'],function(self) fuckingOptions.hidemore=(self:GetChecked() or false);FEP_GatherRaid() end,{'fuckingOptions','hidemore'})
+		
 		do --locals
-			_,DA_Awarder.getlocalsFrame=DA.CreateFFGDropFrame(DA_Awarder,L['getlocals'],15,45,{"CENTER", DA_Awarder, "BOTTOMLEFT", 87,12},285,160,"BOTTOM",nil,function() DA_Awarder.AwardFrame:Hide() end)
+			_,DA_Awarder.getlocalsFrame=DA.CreateFFGDropFrame(DA_Awarder,L['getlocals'],15,45,{"CENTER", DA_Awarder, "BOTTOMLEFT", 87,12},285,160,{"TOPRIGHT", "BOTTOMRIGHT",138.5,-6})
 			
 			DA_Awarder.askupdbutton=DA.CreateFFGButton2(nil,DA_Awarder.getlocalsFrame,{"CENTER",DA_Awarder.getlocalsFrame,"TOPLEFT",40,-13},12,60,L['ask guild'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 			function(self)
@@ -3502,7 +3547,7 @@ function FEP_CreateGroups()
 			for group=1,8 do
 				for i=1,5 do
 				
-					local frame=_G["DA_AwarderGroup"..group.."frame"..i]
+					local frame=DA_Awarder.group[group].player[i]
 					
 					if frame:IsShown() 
 					and frame.c 
@@ -4094,7 +4139,7 @@ function FEP_CreateGroups()
 		end)
 		
 		do --saved raid
-			DA_Awarder.saveraidbtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMLEFT", 119,75},13,35,L['save'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+			DA_Awarder.saveraidbtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "BOTTOMLEFT", 35,77},13,35,L['save'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 				FEP_GatherRaid()
 				DA.CreateSnapshot()
 			end,'saveraid',nil,'center')
@@ -4278,8 +4323,8 @@ function FEP_CreateGroups()
 				if not IsShiftKeyDown() and not IsControlKeyDown() then
 					for group=1,8 do
 						for player=1,5 do
-							local frame=_G["DA_AwarderGroup"..group.."frame"..player]
-							local cb=_G["DA_AwarderGroup"..group.."frame"..player.."CB"..z]
+							local frame=DA_Awarder.group[group].player[player]
+							local cb=frame.cb[z]
 							
 							if frame and frame.c then
 								if cb then
@@ -4319,8 +4364,8 @@ function FEP_CreateGroups()
 			elseif clicktype=='RightButton' then
 				for group=1,8 do
 					for player=1,5 do
-						local frame=_G["DA_AwarderGroup"..group.."frame"..player]
-						local cb=_G["DA_AwarderGroup"..group.."frame"..player.."CB"..z]
+						local frame=DA_Awarder.group[group].player[player]
+						local cb=frame.cb[z]
 						
 						if frame and frame.c then
 							if cb then
@@ -4681,7 +4726,7 @@ end
 local function FindMemberFrame(memberID)
 	for group = 1, 8 do
 		for i = 1, 5 do
-			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			local frame=DA_Awarder.group[group].player[i]
 			if frame and frame:IsShown() and frame.c and frame.c.name then
 				local nameMatch = false
 				if type(memberID) == "number" then
@@ -4699,7 +4744,7 @@ end
 local function ShowAllWaitingIcons()
 	for group = 1, 8 do
 		for i = 1, 5 do
-			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			local frame=DA_Awarder.group[group].player[i]
 			if frame and frame:IsShown() then
 				frame.rcicon:Show()
 				frame.rcicon.txt:Show()
@@ -4712,7 +4757,7 @@ end
 local function HideAllReadyIcons()
 	for group = 1, 8 do
 		for i = 1, 5 do
-			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			local frame=DA_Awarder.group[group].player[i]
 			if frame then
 				if frame:IsShown() then
 					frame.rcicon:Hide()
@@ -4742,7 +4787,7 @@ end
 local function ShowAllFlaskIcons()
 	for group = 1, 8 do
 		for i = 1, 5 do
-			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			local frame=DA_Awarder.group[group].player[i]
 			if frame then
 				if frame:IsShown() and frame.c and frame.c.name then
 					local name = frame.c.name
@@ -4758,7 +4803,7 @@ end
 local function HideAllFlaskIcons()
 	for group = 1, 8 do
 		for i = 1, 5 do
-			local frame = _G["DA_AwarderGroup" .. group .. "frame" .. i]
+			local frame=DA_Awarder.group[group].player[i]
 			if frame then
 				if frame:IsShown() then
 					frame.flaskicon:Hide()
@@ -4783,37 +4828,18 @@ function FEP_ReNameRePushThings()
 --reset CBs positions
 	for group=1,8 do
 		for i=1,5 do
+			local frame=DA_Awarder.group[group].player[i]
 			for z=1,8 do
+				local cb=frame.cb[z]
 				if DA_StoredCheckboxes[DA_SelSet][z] and DA_StoredCheckboxes[DA_SelSet][z][1] then
-					if _G["DA_AwarderGroup"..group.."frame"..i..'CB'..z] then
-						if _G["DA_AwarderGroup"..group.."frame"..i].c and _G["DA_AwarderGroup"..group.."frame"..i].c.name then 
-							_G["DA_AwarderGroup"..group.."frame"..i..'CB'..z]:Show()
-						else 
-							_G["DA_AwarderGroup"..group.."frame"..i..'CB'..z]:Hide() 
-						end
-						_G["DA_AwarderGroup"..group.."frame"..i..'CB'..z]:SetPoint("CENTER", _G["DA_AwarderGroup"..group.."frame"..i], "CENTER", -16+(8-#DA_StoredCheckboxes[DA_SelSet])*11+z*11, 0)
-					else
-						local chbtn=DA.CheckBtnCreater("DA_AwarderGroup"..group.."frame"..i..'CB'..z,_G["DA_AwarderGroup"..group.."frame"..i],{"CENTER", _G["DA_AwarderGroup"..group.."frame"..i], "CENTER", -16+(8-#DA_StoredCheckboxes[DA_SelSet])*11+z*11, 0},15,15,nil,function(self)
-								if DA_StoredCheckboxes[DA_SelSet][z].rl.saved then
-									DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][z][1]][_G["DA_AwarderGroup"..group.."frame"..i].c.name]=self:GetChecked()
-								end
-								FEP_mark_PL(_G["DA_AwarderGroup"..group.."frame"..i].c.name,DA_StoredCheckboxes[DA_SelSet][z][1],self:GetChecked())
-						end)
-						chbtn:SetScript("OnEnter", function(self)
-							if not _G["DA_AwarderGroup"..group.."frame"..i].ismoving then
-								DA.myShowTooltip(self,DA_StoredCheckboxes[DA_SelSet][z][1])
-							end
-						end)
-						chbtn:SetScript("OnLeave", function()
-							DA.myHideTooltip()
-						end)
-						if _G["DA_AwarderGroup"..group.."frame"..i..'CB'..z].c and _G["DA_AwarderGroup"..group.."frame"..i..'CB'..z].c.name then else _G["DA_AwarderGroup"..group.."frame"..i..'CB'..z]:Hide() end
-						
+					if frame.c and frame.c.name then 
+						cb:Show()
+					else 
+						cb:Hide() 
 					end
+					cb:SetPoint("CENTER", frame, "CENTER", -16+(8-#DA_StoredCheckboxes[DA_SelSet])*11+z*11, 0)
 				else
-					if _G["DA_AwarderGroup"..group.."frame"..i..'CB'..z] then
-						_G["DA_AwarderGroup"..group.."frame"..i..'CB'..z]:Hide()
-					end
+					cb:Hide()
 				end
 			end
 		end
@@ -4999,35 +5025,26 @@ local function catch_decide_Move(source_gr)
 	end
 end
 
-function FEP_CreateGroup(number,posx,posy)
-	local gr  = CreateFrame("Frame", "DA_AwarderGroup"..number, DA_Awarder)
-	gr:SetSize(156, 80)
-	gr:SetPoint("TOPLEFT", DA_Awarder, "TOPLEFT", posx, posy)
-	gr:SetBackdropColor(1, 1, 1, 1)
-	local grtxt = gr:CreateTexture(nil, "BACKGROUND")
-	grtxt:SetAllPoints()
-	grtxt:SetTexture(21/255, 18/255, 22/255, 0.4);
-	grtxt:SetBlendMode("blend")
-	gr:EnableMouse(true)
-	gr:EnableMouseWheel(true)
-	gr:SetMovable(true)
-	gr:RegisterForDrag("LeftButton")
-	gr:SetScript("OnDragStart", function() DA_Awarder:StartMoving() end)
-	gr:SetScript("OnDragStop", function() DA_Awarder:StopMovingOrSizing() end) 
 
-	FEP_CreateGroupFrames(number)
-
-	DA_Awarder['moverFrame'..number] = DA.FrameCreater(nil,gr,156, 80,{"TOPLEFT", gr, "TOPLEFT", 0, 0})
-		DA_Awarder['moverFrame'..number].t:SetTexture(0.7, 1, 1, 0.6)
-		DA_Awarder['moverFrame'..number]:Hide()
-
-	DA_Awarder['moverBtn'..number] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..number,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover')
-	DA_Awarder['moverBtn'..number]:SetMovable(true)
-	DA_Awarder['moverBtn'..number]:RegisterForDrag("LeftButton")
-	DA_Awarder['moverBtn'..number]:SetScript("OnDragStart", function(self) catch_show_frames(number); self:StartMoving(); DA.myHideTooltip() end)
-	DA_Awarder['moverBtn'..number]:SetScript("OnDragStop", function(self) catch_decide_Move(number);self:StopMovingOrSizing();self:ClearAllPoints();self:SetPoint("LEFT", gr, "TOPLEFT", 6, 7.5) end) 
-	DA_Awarder['moverBtn'..number]:SetFrameLevel(DA_Awarder['moverFrame'..number]:GetFrameLevel() +1)
-	DA_Awarder['moverBtn'..number]:EnableMouse(false)
+local function createCBs(button)
+	button.cb = {}
+	for g=1,8 do
+		button.cb[g] = DA.CheckBtnCreater(nil,button,{"CENTER", button, "CENTER", -16+g*11, 0},15,15,nil,function(self)
+			if DA_StoredCheckboxes[DA_SelSet][g].rl['saved'] then
+				DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][g][1]][button.c.name]=self:GetChecked()
+			end
+			FEP_mark_PL(button.c.name,DA_StoredCheckboxes[DA_SelSet][g][1],self:GetChecked())
+		end)
+		local chbtn = button.cb[g]
+		chbtn:SetScript("OnEnter", function(self)
+			if not button.ismoving then
+				DA.myShowTooltip(self,DA_StoredCheckboxes[DA_SelSet][g][1])
+			end
+		end)
+		chbtn:SetScript("OnLeave", function()
+			DA.myHideTooltip()
+		end)
+	end
 end
 local function SwapPlayers(player1,player2)
 	local id1,id2
@@ -5043,16 +5060,11 @@ local function SwapPlayers(player1,player2)
 
 	SwapRaidSubgroup(id1,id2)
 end
-function FEP_CreateGroupFrames(number)
+local function createGroupFrames(number)
 
-for i=1,5 do
-local group=_G["DA_AwarderGroup"..number]
-local groupname="DA_AwarderGroup"..number
-local frame=_G["DA_AwarderGroup"..number.."frame"..i]
-local framename="DA_AwarderGroup"..number.."frame"..i
-
-	DA.CreateFFGButton2((framename),group,{"TOPLEFT", group, "TOPLEFT", 1, 15-i*16},14,153,'',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 11, 'outline'},
-	function(self,btntype)
+	local group=DA_Awarder.group[number]
+	for i=1,5 do
+		DA_Awarder.group[number].player[i] = DA.CreateFFGButton2(nil,group,{"TOPLEFT", group, "TOPLEFT", 1, 15-i*16},14,153,'',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 11, 'outline'},function(self,btntype)
 			if self.c then
 				if btntype=='LeftButton' then
 					FEP_OpenAssignment(self.c, self.state, self.main, self.mainmain,self:GetName())
@@ -5094,263 +5106,289 @@ local framename="DA_AwarderGroup"..number.."frame"..i
 					DA.ResumeTimer('fep')
 						
 				elseif btntype=='RightButton' then
-					local ofnot=self.main
-					if ofnot=='not in guild' then ofnot=nil end
+					-- local ofnot=self.main
+					-- if ofnot=='not in guild' then ofnot=nil end
 					DA_RightClickMenu.calledfrom="DA_Awarder"
 					DA.OpenOptMenu(self,self.c.name)
 					
 				end
-				   
+				
 			end
-		end
-	,nil,nil,'left')
-	_G[framename].storedpoint={"TOPLEFT", group, "TOPLEFT", 1, 15-i*16}
-	_G[framename].storedgrp=number
-	_G[framename]:EnableMouse(true)
-	_G[framename]:EnableMouseWheel(true)
-	_G[framename]:SetMovable(true)
-	_G[framename]:SetResizable(false)
-	_G[framename]:SetMinResize(100, 100)
-	_G[framename]:RegisterForDrag("LeftButton")
-	_G[framename]:RegisterForClicks("AnyUp")
-	_G[framename]:SetScript("OnDragStart", function(...) if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then _G[framename].StartMoving(...);_G[framename].ismoving=true;DA_Tooltip:Hide() end end)
-	_G[framename]:SetScript("OnDragStop", function(self) 
-			self:StopMovingOrSizing(); 
-			self.ismoving=false;
-		if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then 
-			if self:IsShown() and self.c and self.c.name then 
-				for grp=1,8 do
-					if _G["DA_AwarderGroup"..grp]:IsMouseOver() and grp~=self.storedgrp then
-						if IsShiftKeyDown() then
-							for pl=1,5 do
-								local targetframe = _G["DA_AwarderGroup"..grp..'frame'..pl]
-								if targetframe.c and targetframe.c.name and targetframe:IsMouseOver() then
-									SwapPlayers(self.c.name,targetframe.c.name)
-									break
+		end,nil,nil,'left')
+		local playerFrame = DA_Awarder.group[number].player[i]
+		playerFrame.storedpoint={"TOPLEFT", group, "TOPLEFT", 1, 15-i*16}
+		playerFrame.storedgrp=number
+		playerFrame:EnableMouse(true)
+		playerFrame:EnableMouseWheel(true)
+		playerFrame:SetMovable(true)
+		playerFrame:SetResizable(false)
+		playerFrame:SetMinResize(100, 100)
+		playerFrame:RegisterForDrag("LeftButton")
+		playerFrame:RegisterForClicks("AnyUp")
+		playerFrame:SetScript("OnDragStart", function(...) if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then playerFrame.StartMoving(...);playerFrame.ismoving=true;DA_Tooltip:Hide() end end)
+		playerFrame:SetScript("OnDragStop", function(self) 
+				self:StopMovingOrSizing(); 
+				self.ismoving=false;
+			if UnitIsRaidOfficer('player') and not DA_Awarder.locker.getstate() then 
+				if self:IsShown() and self.c and self.c.name then 
+					for grp=1,8 do
+						local group = DA_Awarder.group[grp]
+						if group:IsMouseOver() and grp~=self.storedgrp then
+							if IsShiftKeyDown() then
+								for pl=1,5 do
+									local targetframe = group.player[pl]
+									if targetframe.c and targetframe.c.name and targetframe:IsMouseOver() then
+										SwapPlayers(self.c.name,targetframe.c.name)
+										break
+									end
 								end
-							end
-						else
-							FEP_QeuePlayerGroupTransfer(self.c.name,grp) 
-						end
-						break
-					end
-				end
-			end 
-		end
-			self:ClearAllPoints()
-			self:SetPoint(unpack(self.storedpoint)) 
-	end) 
-	_G[framename]:SetScript("OnEnter", function(self)
-		self:RegisterEvent('MODIFIER_STATE_CHANGED')
-			if IsShiftKeyDown() and self.main and self.state and self.c and self.c.name then
-				local tooltipText=""
-				if self.state=='mnormal' or self.state=='pum' or self.state=='tnormal' or self.state=='put' then
-					tooltipText = DA.GetTwinsInfo(self.c.name,self.main)
-				elseif self.state=='f' then
-					tooltipText = L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main)
-					
-				elseif self.state=='tf' then
-					tooltipText = L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main)
-					
-				elseif self.state=='pb' then
-					if CanEditOfficerNote() then
-						tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1']
-					else
-						tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2']
-					end
-					
-				elseif self.state=='n' then
-					local adtxt=""
-					if CanGuildInvite() then
-						adtxt=L['AW_not_in_guild1']
-					else
-						adtxt=L['AW_not_in_guild2']
-					end
-					
-					local origmessg="something went wrong..."
-					
-					if self.main and FEP_L_gMain[DA_CurrentGuild][self.c.name] then
-						if not FEP_gMain[self.main] then
-							origmessg=L['AW_local_ex1']..adtxt
-						elseif DA.DecodeNote(FEP_gMain[self.main])=='t' then
-							--is tvink
-							local ep, gp = string.match(FEP_gMain[self.main], "^(%d+).(%d+)$")
-							if tonumber(ep) and tonumber(gp) then
-								---tvink+ tochka v epgp
-								origmessg=L['AW_local_ex2']..adtxt
 							else
-								local ep, gp = string.match(FEP_gMain[self.main], "^[.](%d+).(%d+)$")
+								FEP_QeuePlayerGroupTransfer(self.c.name,grp) 
+							end
+							break
+						end
+					end
+				end 
+			end
+				self:ClearAllPoints()
+				self:SetPoint(unpack(self.storedpoint)) 
+		end) 
+		playerFrame:SetScript("OnEnter", function(self)
+			self:RegisterEvent('MODIFIER_STATE_CHANGED')
+				if IsShiftKeyDown() and self.main and self.state and self.c and self.c.name then
+					local tooltipText=""
+					if self.state=='mnormal' or self.state=='pum' or self.state=='tnormal' or self.state=='put' then
+						tooltipText = DA.GetTwinsInfo(self.c.name,self.main)
+					elseif self.state=='f' then
+						tooltipText = L['AW_frozen']..DA.GetTwinsInfo(self.c.name,self.main)
+						
+					elseif self.state=='tf' then
+						tooltipText = L['AW_frozen_main']..DA.GetTwinsInfo(self.c.name,self.main)
+						
+					elseif self.state=='pb' then
+						if CanEditOfficerNote() then
+							tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_1']
+						else
+							tooltipText = L['AW_empty_note']..FFG_gMain[self.c.name]..L['AW_empty_note_2']
+						end
+						
+					elseif self.state=='n' then
+						local adtxt=""
+						if CanGuildInvite() then
+							adtxt=L['AW_not_in_guild1']
+						else
+							adtxt=L['AW_not_in_guild2']
+						end
+						
+						local origmessg="something went wrong..."
+						
+						if self.main and FEP_L_gMain[DA_CurrentGuild][self.c.name] then
+							if not FEP_gMain[self.main] then
+								origmessg=L['AW_local_ex1']..adtxt
+							elseif DA.DecodeNote(FEP_gMain[self.main])=='t' then
+								--is tvink
+								local ep, gp = string.match(FEP_gMain[self.main], "^(%d+).(%d+)$")
 								if tonumber(ep) and tonumber(gp) then
-									---tvink+ tochka v epgp +main is frozen
-									origmessg=L['AW_local_ex3']..adtxt
+									---tvink+ tochka v epgp
+									origmessg=L['AW_local_ex2']..adtxt
 								else
-									origmessg=L['AW_local_ex4']..adtxt
+									local ep, gp = string.match(FEP_gMain[self.main], "^[.](%d+).(%d+)$")
+									if tonumber(ep) and tonumber(gp) then
+										---tvink+ tochka v epgp +main is frozen
+										origmessg=L['AW_local_ex3']..adtxt
+									else
+										origmessg=L['AW_local_ex4']..adtxt
+									end
 								end
-							end
-						else
-							origmessg=L['AW_local_ex5']..adtxt
-						end
-					elseif self.main and FEP_gMain[self.c.name] then
-						if DA.DecodeNote(self.main)=='t' then
-							local ep, gp = string.match(self.main, "^(%d+).(%d+)$")
-							if tonumber(ep) and tonumber(gp) then
-								---tochka v epgp
-								origmessg=L['AW_local_ex6']
 							else
-								local ep, gp = string.match(self.main, "^[.](%d+).(%d+)$")
+								origmessg=L['AW_local_ex5']..adtxt
+							end
+						elseif self.main and FEP_gMain[self.c.name] then
+							if DA.DecodeNote(self.main)=='t' then
+								local ep, gp = string.match(self.main, "^(%d+).(%d+)$")
 								if tonumber(ep) and tonumber(gp) then
-									---tochka v epgp +frozen
-									origmessg=L['AW_local_ex7']
+									---tochka v epgp
+									origmessg=L['AW_local_ex6']
 								else
-									if not FEP_gMain[self.main] then
-										--priv9zka k player not in guild
-										origmessg=L['AW_local_ex8']
-									else --is tvink
-										local ep, gp = string.match(FEP_gMain[self.main], "^(%d+).(%d+)$")
-										if tonumber(ep) and tonumber(gp) then
-											---tvink+ tochka v epgp
-											origmessg=L['AW_local_ex9']
-										else
-											local ep, gp = string.match(FEP_gMain[self.main], "^[.](%d+).(%d+)$")
+									local ep, gp = string.match(self.main, "^[.](%d+).(%d+)$")
+									if tonumber(ep) and tonumber(gp) then
+										---tochka v epgp +frozen
+										origmessg=L['AW_local_ex7']
+									else
+										if not FEP_gMain[self.main] then
+											--priv9zka k player not in guild
+											origmessg=L['AW_local_ex8']
+										else --is tvink
+											local ep, gp = string.match(FEP_gMain[self.main], "^(%d+).(%d+)$")
 											if tonumber(ep) and tonumber(gp) then
-												---tvink+ tochka v epgp +main is frozen
-												origmessg=L['AW_local_ex10']
+												---tvink+ tochka v epgp
+												origmessg=L['AW_local_ex9']
 											else
-												origmessg=L['AW_local_ex11']
+												local ep, gp = string.match(FEP_gMain[self.main], "^[.](%d+).(%d+)$")
+												if tonumber(ep) and tonumber(gp) then
+													---tvink+ tochka v epgp +main is frozen
+													origmessg=L['AW_local_ex10']
+												else
+													origmessg=L['AW_local_ex11']
+												end
 											end
 										end
 									end
 								end
+							else
+								origmessg=L['AW_local_ex12']
 							end
-						else
-							origmessg=L['AW_local_ex12']
+						
+						elseif self.main and (self.main=='not in guild' or not FEP_gMain[self.main]) then
+							origmessg=adtxt
 						end
-					
-					elseif self.main and (self.main=='not in guild' or not FEP_gMain[self.main]) then
-						origmessg=adtxt
+						tooltipText = origmessg
 					end
-					tooltipText = origmessg
-				end
-				
-				DA.myShowTooltip(self, tooltipText, {UIDarkAngelFontConsolas:GetFont(), 10})
+					
+					DA.myShowTooltip(self, tooltipText, {UIDarkAngelFontConsolas:GetFont(), 10})
 
-			elseif not IsShiftKeyDown() and DA_Tooltip:IsShown() then
-				DA.myHideTooltip()
+				elseif not IsShiftKeyDown() and DA_Tooltip:IsShown() then
+					DA.myHideTooltip()
+				end
+			end)
+		playerFrame:SetScript("OnLeave", function(self)
+			self:UnregisterEvent('MODIFIER_STATE_CHANGED')
+			DA.myHideTooltip()
+		end)
+		playerFrame:SetScript("OnEvent", function(self)
+			if self:IsVisible() and self:IsMouseOver() and GetMouseFocus():GetName()==self:GetName() then
+				self:GetScript('OnEnter')(GetMouseFocus())
 			end
 		end)
-	_G[framename]:SetScript("OnLeave", function(self)
-		self:UnregisterEvent('MODIFIER_STATE_CHANGED')
-		DA.myHideTooltip()
-	end)
-	_G[framename]:SetScript("OnEvent", function(self)
-		if self:IsVisible() and self:IsMouseOver() and GetMouseFocus():GetName()==self:GetName() then
-			self:GetScript('OnEnter')(GetMouseFocus())
+		
+		
+		--rcicon 
+		do
+			playerFrame.rcicon=DA.CreateFFGButton2(nil,playerFrame,  {"RIGHT", playerFrame, "LEFT", 4, 0},  15,  15,  "",'')
+			playerFrame.rcicon.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+			playerFrame.rcicon.txt:SetAllPoints(playerFrame.rcicon)
+			playerFrame.rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
+			playerFrame.rcicon:SetNormalTexture(playerFrame.rcicon.txt)
+			playerFrame.rcicon:SetPushedTexture(playerFrame.rcicon.txt)
+			playerFrame.rcicon:SetHighlightTexture('')
+			playerFrame.rcicon:Hide()
+			playerFrame.rcicon.txt:Show()
 		end
-	end)
-	
-	
-	--rcicon 
-	do
-		_G[framename].rcicon=DA.CreateFFGButton2(nil,_G[framename],  {"RIGHT", _G[framename], "LEFT", 4, 0},  15,  15,  "",'')
-		_G[framename].rcicon.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
-		_G[framename].rcicon.txt:SetAllPoints(_G[framename].rcicon)
-		_G[framename].rcicon.txt:SetTexture("Interface\\RaidFrame\\ReadyCheck-Waiting")
-		_G[framename].rcicon:SetNormalTexture(_G[framename].rcicon.txt)
-		_G[framename].rcicon:SetPushedTexture(_G[framename].rcicon.txt)
-		_G[framename].rcicon:SetHighlightTexture('')
-		_G[framename].rcicon:Hide()
-		_G[framename].rcicon.txt:Show()
+		
+		--RLassist 
+		do
+			playerFrame.rlassist=DA.CreateFFGButton2(nil,playerFrame,  {"RIGHT", playerFrame, "LEFT", 4, 3},  10,  10,  "",'')
+			playerFrame.rlassist.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+			playerFrame.rlassist.txt:SetAllPoints(playerFrame.rlassist)
+			playerFrame.rlassist.txt:SetTexture("")
+			playerFrame.rlassist:SetNormalTexture(playerFrame.rlassist.txt)
+			playerFrame.rlassist:SetPushedTexture(playerFrame.rlassist.txt)
+			playerFrame.rlassist:SetHighlightTexture('')
+			playerFrame.rlassist:Hide()
+			playerFrame.rlassist.txt:Show()
+		end
+		
+		--MTot
+		do
+			playerFrame.MTot=DA.CreateFFGButton2(nil,playerFrame,  {"RIGHT", playerFrame, "LEFT", 4, -3},  10,  10,  "",'')
+			playerFrame.MTot.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+			playerFrame.MTot.txt:SetAllPoints(playerFrame.MTot)
+			playerFrame.MTot.txt:SetTexture("")
+			playerFrame.ismtot=0
+			playerFrame.MTot:SetNormalTexture(playerFrame.MTot.txt)
+			playerFrame.MTot:SetPushedTexture(playerFrame.MTot.txt)
+			playerFrame.MTot:SetHighlightTexture('')
+			playerFrame.MTot:Hide()
+			playerFrame.MTot.txt:Show()
+		end
+		
+		--masterlooter
+		do
+			playerFrame.masterlooter=DA.CreateFFGButton2(nil,playerFrame,  {"RIGHT", playerFrame, "LEFT", -4, 0},  7,  7,  "",'')
+			playerFrame.masterlooter.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+			playerFrame.masterlooter.txt:SetAllPoints(playerFrame.masterlooter)
+			playerFrame.masterlooter.txt:SetTexture("")
+			playerFrame.masterlooter:SetNormalTexture(playerFrame.masterlooter.txt)
+			playerFrame.masterlooter:SetPushedTexture(playerFrame.masterlooter.txt)
+			playerFrame.masterlooter:SetHighlightTexture('')
+			playerFrame.masterlooter:Hide()
+			playerFrame.masterlooter.txt:Show()
+		end
+		
+		
+		createCBs(playerFrame)
+		
+		--flaskicon 
+		do
+			playerFrame.flaskicon=DA.CreateFFGButton2(nil,playerFrame,  {"CENTER", playerFrame, "CENTER", 35, 0},  15,  15,  "",'')
+			playerFrame.flaskicon:SetFrameLevel(playerFrame:GetFrameLevel() +5)
+			playerFrame.flaskicon.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
+			playerFrame.flaskicon.txt:SetAllPoints(playerFrame.flaskicon)
+			playerFrame.flaskicon.txt:SetTexture("")
+			playerFrame.flaskicon:SetNormalTexture(playerFrame.flaskicon.txt)
+			playerFrame.flaskicon:SetPushedTexture(playerFrame.flaskicon.txt)
+			playerFrame.flaskicon:SetHighlightTexture('')
+			playerFrame.flaskicon:Hide()
+			playerFrame.flaskicon.txt:Show()
+		end
 	end
-	
-	--RLassist 
-	do
-		_G[framename].rlassist=DA.CreateFFGButton2(nil,_G[framename],  {"RIGHT", _G[framename], "LEFT", 4, 3},  10,  10,  "",'')
-		_G[framename].rlassist.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
-		_G[framename].rlassist.txt:SetAllPoints(_G[framename].rlassist)
-		_G[framename].rlassist.txt:SetTexture("")
-		_G[framename].rlassist:SetNormalTexture(_G[framename].rlassist.txt)
-		_G[framename].rlassist:SetPushedTexture(_G[framename].rlassist.txt)
-		_G[framename].rlassist:SetHighlightTexture('')
-		_G[framename].rlassist:Hide()
-		_G[framename].rlassist.txt:Show()
-	end
-	
-	--MTot
-	do
-		_G[framename].MTot=DA.CreateFFGButton2(nil,_G[framename],  {"RIGHT", _G[framename], "LEFT", 4, -3},  10,  10,  "",'')
-		_G[framename].MTot.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
-		_G[framename].MTot.txt:SetAllPoints(_G[framename].MTot)
-		_G[framename].MTot.txt:SetTexture("")
-		_G[framename].ismtot=0
-		_G[framename].MTot:SetNormalTexture(_G[framename].MTot.txt)
-		_G[framename].MTot:SetPushedTexture(_G[framename].MTot.txt)
-		_G[framename].MTot:SetHighlightTexture('')
-		_G[framename].MTot:Hide()
-		_G[framename].MTot.txt:Show()
-	end
-	
-	--masterlooter
-	do
-		_G[framename].masterlooter=DA.CreateFFGButton2(nil,_G[framename],  {"RIGHT", _G[framename], "LEFT", -4, 0},  7,  7,  "",'')
-		_G[framename].masterlooter.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
-		_G[framename].masterlooter.txt:SetAllPoints(_G[framename].masterlooter)
-		_G[framename].masterlooter.txt:SetTexture("")
-		_G[framename].masterlooter:SetNormalTexture(_G[framename].masterlooter.txt)
-		_G[framename].masterlooter:SetPushedTexture(_G[framename].masterlooter.txt)
-		_G[framename].masterlooter:SetHighlightTexture('')
-		_G[framename].masterlooter:Hide()
-		_G[framename].masterlooter.txt:Show()
-	end
-	
-	
-	FEP_CreateCBs(framename)
-	
-	--flaskicon 
-	do
-		_G[framename].flaskicon=DA.CreateFFGButton2(nil,_G[framename],  {"CENTER", _G[framename], "CENTER", 35, 0},  15,  15,  "",'')
-		_G[framename].flaskicon:SetFrameLevel(_G[framename]:GetFrameLevel() +5)
-		_G[framename].flaskicon.txt=DA_Awarder:CreateTexture(nil, "BACKGROUND")
-		_G[framename].flaskicon.txt:SetAllPoints(_G[framename].flaskicon)
-		_G[framename].flaskicon.txt:SetTexture("")
-		_G[framename].flaskicon:SetNormalTexture(_G[framename].flaskicon.txt)
-		_G[framename].flaskicon:SetPushedTexture(_G[framename].flaskicon.txt)
-		_G[framename].flaskicon:SetHighlightTexture('')
-		_G[framename].flaskicon:Hide()
-		_G[framename].flaskicon.txt:Show()
-	end
-end
 
+end
+function FEP_CreateGroup(id,posx,posy)
+	DA_Awarder.group[id] = DA.FrameCreater(nil,DA_Awarder,156, 80,{"TOPLEFT", DA_Awarder, "TOPLEFT", posx, posy})
+	local gr = DA_Awarder.group[id]
+	gr:Show()
+	gr.player={}
+	gr:EnableMouse(true)
+	gr:EnableMouseWheel(true)
+	gr:SetMovable(true)
+	gr:RegisterForDrag("LeftButton")
+	gr:SetScript("OnDragStart", function() DA_Awarder:StartMoving() end)
+	gr:SetScript("OnDragStop", function() DA_Awarder:StopMovingOrSizing() end) 
+
+	createGroupFrames(id)
+
+	DA_Awarder['moverFrame'..id] = DA.FrameCreater(nil,gr,156, 80,{"TOPLEFT", gr, "TOPLEFT", 0, 0})
+	local moverFr = DA_Awarder['moverFrame'..id]
+		moverFr.t:SetTexture(0.7, 1, 1, 0.6)
+		moverFr:Hide()
+
+	DA_Awarder['moverBtn'..id] = DA.CreateFFGButton2(nil,gr,{"LEFT", gr, "TOPLEFT", 6, 5},8,50,L['party']..' '..id,'',{"Fonts\\FRIZQT__.TTF", 9, "OUTLINE"},nil,'awgrpmover')
+	local moverBtn = DA_Awarder['moverBtn'..id]
+		moverBtn:SetMovable(true)
+		moverBtn:RegisterForDrag("LeftButton")
+		moverBtn:SetScript("OnDragStart", function(self) catch_show_frames(id); self:StartMoving(); DA.myHideTooltip() end)
+		moverBtn:SetScript("OnDragStop", function(self) catch_decide_Move(id);self:StopMovingOrSizing();self:ClearAllPoints();self:SetPoint("LEFT", gr, "TOPLEFT", 6, 7.5) end) 
+		moverBtn:SetFrameLevel(moverFr:GetFrameLevel() +1)
+		moverBtn:EnableMouse(false)
 end
 
 function FFG_ShowHideLittleBttns(show)
 
-if show then
+
 	for group=1,8 do
-		for i=1,5 do
-			if _G["DA_AwarderGroup"..group.."frame"..i] and _G["DA_AwarderGroup"..group.."frame"..i]:IsShown() then
-				_G["DA_AwarderGroup"..group.."frame"..i].rlassist:Show()
-				_G["DA_AwarderGroup"..group.."frame"..i].rlassist.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..i].MTot:Show()
-				_G["DA_AwarderGroup"..group.."frame"..i].MTot.txt:Show()
-				_G["DA_AwarderGroup"..group.."frame"..i].masterlooter:Show()
-				_G["DA_AwarderGroup"..group.."frame"..i].masterlooter.txt:Show()
+		for player=1,5 do
+			local playerFrame = DA_Awarder.group[group].player[player]
+			if playerFrame and playerFrame:IsShown() then
+				if show then
+					playerFrame.rlassist:Show()
+					playerFrame.rlassist.txt:Show()
+					playerFrame.MTot:Show()
+					playerFrame.MTot.txt:Show()
+					playerFrame.masterlooter:Show()
+					playerFrame.masterlooter.txt:Show()
+				else
+					playerFrame.rlassist:Hide()
+					playerFrame.rlassist.txt:Hide()
+					playerFrame.MTot:Hide()
+					playerFrame.MTot.txt:Hide()
+					playerFrame.masterlooter:Hide()
+					playerFrame.masterlooter.txt:Hide()
+				end
 			end
 		end
 	end
-else
-	for group=1,8 do
-		for i=1,5 do
-			if _G["DA_AwarderGroup"..group.."frame"..i] and _G["DA_AwarderGroup"..group.."frame"..i]:IsShown() then
-				_G["DA_AwarderGroup"..group.."frame"..i].rlassist:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..i].rlassist.txt:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..i].MTot:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..i].MTot.txt:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..i].masterlooter:Hide()
-				_G["DA_AwarderGroup"..group.."frame"..i].masterlooter.txt:Hide()
-			end
-		end
-	end
-end
+
 
 end
 
@@ -5577,7 +5615,7 @@ function FEP_OpenSupportFrame()
 	eb1:Insert('###### 6-8 '..L['group']..' ######\n')
 		for group=6,8 do
 			for i=1,5 do
-				local btn=_G["DA_AwarderGroup"..group.."frame"..i]
+				local btn=DA_Awarder.group[group].player[i]
 				if btn.c and btn.c.name then
 					local state=btn.state
 					local name=btn.c.name
@@ -5605,55 +5643,36 @@ function FEP_OpenSupportFrame()
 	assister:Show()
 
 end
-function FEP_CreateCBs(button)
-	for g=1,#DA_StoredCheckboxes[DA_SelSet] do
-		local chbtn=DA.CheckBtnCreater(button.."CB"..g,_G[button],{"CENTER", _G[button], "CENTER", -16+(8-#DA_StoredCheckboxes[DA_SelSet])*11+g*11, 0},15,15,nil,function(self)
-			if DA_StoredCheckboxes[DA_SelSet][g].rl['saved'] then
-				DA_StoredCheckboxes_remembered[DA_SelSet][DA_StoredCheckboxes[DA_SelSet][g][1]][_G[button].c.name]=self:GetChecked()
-			end
-			FEP_mark_PL(_G[button].c.name,DA_StoredCheckboxes[DA_SelSet][g][1],self:GetChecked())
-		end)
-		chbtn:SetScript("OnEnter", function(self)
-			if not _G[button].ismoving then
-				DA.myShowTooltip(self,DA_StoredCheckboxes[DA_SelSet][g][1])
-			end
-		end)
-		chbtn:SetScript("OnLeave", function()
-			DA.myHideTooltip()
-		end)
-	end
-end
-function FEP_RecalculateBtnEP(rbutton,grzxcp)
-if rbutton then else print("error 690");return end
-local sixeight=fuckingOptions.sixeight
-_G[rbutton:GetName()]['epvalue']=0
-for i=1,#DA_StoredCheckboxes[DA_SelSet] do 
-	if not DA_StoredCheckboxes[DA_SelSet][i][2] then
-		DA_StoredCheckboxes[DA_SelSet][i][2]=0
-	end
-end
-
-
-for i=1,#DA_StoredCheckboxes[DA_SelSet] do
-	local cb=_G[rbutton:GetName().."CB"..i]
-	if cb then
-		if i==1 and grzxcp>5 and sixeight and fuckingOptions_g[DA_CurrentGuild].procepzamene then
-			_G[rbutton:GetName()]['epvalue']=(cb:GetChecked() or 0)* math.ceil(DA_StoredCheckboxes[DA_SelSet][i][2]*(DA.GetProcAwardStandby()))
-		elseif i==1 and grzxcp>5 and sixeight then
-			_G[rbutton:GetName()]['epvalue']=(cb:GetChecked() or 0)* math.ceil(DA_StoredCheckboxes[DA_SelSet][i][2])
-		else
-			_G[rbutton:GetName()]['epvalue']=(_G[rbutton:GetName()]['epvalue'] + (cb:GetChecked() or 0)* DA_StoredCheckboxes[DA_SelSet][i][2])
+function FEP_RecalculateBtnEP(button,grp)
+	local sixeight=fuckingOptions.sixeight
+	button['epvalue']=0
+	for i=1,#DA_StoredCheckboxes[DA_SelSet] do 
+		if not DA_StoredCheckboxes[DA_SelSet][i][2] then
+			DA_StoredCheckboxes[DA_SelSet][i][2]=0
 		end
 	end
 
 
+	for i=1,#DA_StoredCheckboxes[DA_SelSet] do
+		local cb=button.cb[i]
+		if cb then
+			if i==1 and grp>5 and sixeight and fuckingOptions_g[DA_CurrentGuild].procepzamene then
+				button['epvalue']=(cb:GetChecked() or 0)* math.ceil(DA_StoredCheckboxes[DA_SelSet][i][2]*(DA.GetProcAwardStandby()))
+			elseif i==1 and grp>5 and sixeight then
+				button['epvalue']=(cb:GetChecked() or 0)* math.ceil(DA_StoredCheckboxes[DA_SelSet][i][2])
+			else
+				button['epvalue']=(button['epvalue'] + (cb:GetChecked() or 0)* DA_StoredCheckboxes[DA_SelSet][i][2])
+			end
+		end
 
-end
+
+
+	end
 end
 function FEP_RecalculateAllBtnEP()
 	for group=1,8 do
 		for i=1,5 do
-			FEP_RecalculateBtnEP(_G["DA_AwarderGroup"..group.."frame"..i],group)
+			FEP_RecalculateBtnEP(DA_Awarder.group[group].player[i],group)
 		end
 	end
 
@@ -5719,8 +5738,7 @@ DA.RegatherGuildNotes()
 for group=1,8 do
 	for i=1,5 do
 		
-		local frame=_G["DA_AwarderGroup"..group.."frame"..i]
-		local framen=frame:GetName()
+		local frame=DA_Awarder.group[group].player[i]
 		
 		if frame:IsShown() and frame.epvalue and frame.c and frame.epvalue>0 then
 			if frame.state=="tnormal" or frame.state=="mnormal" or frame.state=="pb" then
@@ -5728,7 +5746,8 @@ for group=1,8 do
 				local reason=""
 				
 				for cb=1,#DA_StoredCheckboxes[DA_SelSet] do
-					if _G[framen.."CB"..cb]:GetChecked() then
+					local chekbox = frame.cb[cb]
+					if chekbox:GetChecked() then
 						if cb==1 and group>5 and sixeight then
 							reason=L['standby']
 						elseif cb==1 then
@@ -6727,16 +6746,14 @@ FEP_ZamWHframe = CreateFrame("Frame","FEP_ZamWHframe")
 FEP_ZamWHframe:SetScript("OnEvent", FEP_Standby)
 function FEP_ResetAllChecks()
 for group=1,8 do
-	for b=1,5 do
-		local frame=_G["DA_AwarderGroup"..group.."frame"..b]
+	for player=1,5 do
+		local frame = DA_Awarder.group[group].player[player]
 		if frame and frame.c and frame.c.name then 
-		local name=frame.c.name
+			local name=frame.c.name
 			for cb,r in pairs(DA_StoredCheckboxes[DA_SelSet]) do
-				local checkbox=_G["DA_AwarderGroup"..group.."frame"..b.."CB"..cb]
+				local checkbox=frame.cb[cb]
 				if checkbox then
 					checkbox:SetChecked(FEP_mark_State(name,r[1]))
-					
-					
 				end		
 			end
 		end

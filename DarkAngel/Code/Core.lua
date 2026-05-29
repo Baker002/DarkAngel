@@ -34,10 +34,12 @@ Bismillah — we press Run.
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-local L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+	DA.L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+local L = DA.L
 
 
--- Lua
+
+--- Lua helpers
 function DA.Safecall(func, ...)
 	if type(func) ~= "function" then
 		DA.Print("|cffff0000Safecall error:|r invalid function")
@@ -48,8 +50,8 @@ function DA.Safecall(func, ...)
 		result1, result2, result3,
 		result4, result5, result6,
 		result7, result8, result9 =
-			xpcall(func, debugstack, ...)
-			-- pcall(func, ...)
+			pcall(func, ...)
+			-- xpcall(func, debugstack, ...)
 
 	if not ok then
 		DA.Print("|cffff0000Error:|r "..tostring(result1))
@@ -61,6 +63,147 @@ function DA.Safecall(func, ...)
 		result4, result5, result6,
 		result7, result8, result9
 end
+function DA.Print(...)
+	print("[|cffed94edDarkAngel|cffffffff]:", ...)
+end
+function DA.ConcatStr(inputTable,maxl,separator)
+	local outputTable = {}
+	local currentString = ""
+
+	for _, str in ipairs(inputTable) do
+		if #currentString + #str + 1 <= maxl then
+			if currentString ~= "" then
+				currentString = currentString .. separator
+			end
+			currentString = currentString .. str
+		else
+			table.insert(outputTable, currentString)
+			currentString = str
+		end
+	end
+
+	if currentString ~= "" then
+		table.insert(outputTable, currentString)
+	end
+
+	return outputTable
+end
+local garbage_collector=CreateFrame("Frame")
+function DA.Garbage_Collect()
+	--- I DECLARE A WAR :)
+	local isGarbageProtectorAddonInstalled = GarbageProtectorDB or false
+	local gpNeedsToggle = isGarbageProtectorAddonInstalled and (GarbageProtectorDB.Handlecollectgarbage and GarbageProtectorDB.Enabled)
+	
+	if not garbage_collector.r then
+		garbage_collector.r=true
+		if gpNeedsToggle then GarbageProtectorDB.Handlecollectgarbage = false end
+		garbage_collector:SetScript("OnUpdate", function(self,_)
+			if collectgarbage("step",128) then 
+				self:SetScript("OnUpdate", nil)
+				self.r=nil
+				if gpNeedsToggle then GarbageProtectorDB.Handlecollectgarbage = true end
+				return
+			end
+		end)
+	end
+end
+function DA.DeepCopy(source)
+    local copy = {}
+    for key, value in pairs(source) do
+        if type(value) == "table" then
+            copy[key] = DA.DeepCopy(value)
+        else
+            copy[key] = value
+        end
+    end
+    return copy
+end
+function DA.stringToTable(str)
+	return loadstring("return " .. str)()
+end
+function DA.serialize(tbl, indent)
+	local str = ""
+	local t = type(tbl)
+	if t == "table" then
+		str = str .. "{\n"
+		for k, v in pairs(tbl) do
+			str = str .. string.rep(" ", indent + 4) .. "[" .. DA.serialize(k, 0) .. "] = " .. DA.serialize(v, indent + 4) .. ",\n"
+		end
+		str = str .. string.rep(" ", indent) .. "}"
+	elseif t == "number" or t == "boolean" then
+		str = str .. tostring(tbl)
+	elseif t == "string" then
+		-- str = str .. string.format("%q", tbl)
+		str = str .. '"' .. tbl .. '"'
+	end
+	return str
+end
+function DA.tableToString(tbl)
+	return DA.serialize(tbl, 0)
+end
+function DA.capitalizeFirstCharacter(inputString)
+    if inputString and inputString ~= "" then
+        local firstChar, restOfString = inputString:match("([%z\1-\127\194-\244][\128-\191]*)(.*)")
+        if firstChar then
+            if string.byte(firstChar) == 207 or string.byte(firstChar) == 208 then
+                -- Cyrillic character range
+                firstChar = firstChar:gsub("^%l", string.upper)
+            else
+                firstChar = firstChar:upper()
+            end
+            return firstChar .. restOfString
+        else
+            return ""
+        end
+    else
+        return ""
+    end
+end
+function DA.CheckAndRestoreLocalizedTable(tablename, keepLocal)
+	local lang = L.lang
+	local default = DarklangelDefaultTables[tablename] and (DarklangelDefaultTables[tablename][lang] or DarklangelDefaultTables[tablename].enUS)
+	local localExport
+	if default then
+		if not keepLocal and not _G[tablename] then
+			_G[tablename] = DA.DeepCopy(default)
+		elseif keepLocal then
+			localExport = DA.DeepCopy(default)
+		end
+		DarklangelDefaultTables[tablename] = nil
+		if not next(DarklangelDefaultTables) then --if there are no unused keys left, emptying the global so it would be eaten by gc
+			DarklangelDefaultTables=nil
+		end
+
+		if localExport then
+			return localExport
+		end
+	elseif not _G[tablename] then
+		DA.Print(tablename, 'not exist, creating new global')
+		_G[tablename] = {}
+	end
+end
+function DA.PackTableForEditBox(tabl)
+	local str=''
+	for i=1,#tabl do
+		if str=="" then 
+			str=tabl[i]
+		else
+			str=str..'\n'..tabl[i]
+		end
+	end
+	return str
+end
+function DA.PackEditBoxTextInTable(text)
+	local rows = {}
+	for row in text:gmatch("[^\r\n]+") do
+		table.insert(rows, row)
+	end
+	return rows
+end
+
+
+
+--- Timers
 local da_simpleTimer = CreateFrame("Frame")
 da_simpleTimer.queue = {}
 da_simpleTimer.count = 0
@@ -128,7 +271,6 @@ da_simpleTimer:SetScript("OnUpdate", function(self,_)
         -- end
     end
 end)
-
 DA.TimerAfter = function(duration, callback)
     if type(callback) ~= "function" then return end
     if not duration or duration < 0 then duration = 0 end
@@ -144,128 +286,82 @@ DA.TimerAfterShort = function(duration, callback)
 
     simpleTimer_Insert(GetTime() + duration, callback)
 end
+DA.XTimers={}
+function DA.CreateTimer(runfromstart,short,startfrom,speed,runwhile,OnRun)
+	DA.XTimers[short]=CreateFrame('frame')
+	local f=DA.XTimers[short]
+	f.speed=speed
+	f.time=startfrom
 
-function DA.Print(...)
-	print("[|cffed94edDarkAngel|cffffffff]:", ...)
-end
-function DA.ConcatStr(inputTable,maxl,separator)
-	local outputTable = {}
-	local currentString = ""
-
-	for _, str in ipairs(inputTable) do
-		if #currentString + #str + 1 <= maxl then
-			if currentString ~= "" then
-				currentString = currentString .. separator
+	if type(runwhile)=='boolean' then
+		f.myscript=function(self,elapsed)
+			self.time = self.time - elapsed
+			if self.time <= 0 then
+				self.time=f.speed
+				self.code(self)
 			end
-			currentString = currentString .. str
-		else
-			table.insert(outputTable, currentString)
-			currentString = str
 		end
-	end
-
-	if currentString ~= "" then
-		table.insert(outputTable, currentString)
-	end
-
-	return outputTable
-end
-local garbage_collector=CreateFrame("Frame")
-function DA.Garbage_Collect()
-	
-	if not garbage_collector.r then
-		garbage_collector.r=true
-		garbage_collector:SetScript("OnUpdate", function(self,_)
-			if collectgarbage("step",128) then 
-				self:SetScript("OnUpdate", nil)
-				self.r=nil
+	else
+		f.myscript=function(self,elapsed)
+			if runwhile() then
+			else
+				self:SetScript("OnUpdate",nil)
 				return
 			end
-		end)
-	end
-end
-function DA.DeepCopy(source)
-    local copy = {}
-    for key, value in pairs(source) do
-        if type(value) == "table" then
-            copy[key] = DA.DeepCopy(value)
-        else
-            copy[key] = value
-        end
-    end
-    return copy
-end
-function DA.stringToTable(str)
-	return loadstring("return " .. str)()
-end
-function DA.serialize(tbl, indent)
-	local str = ""
-	local t = type(tbl)
-	if t == "table" then
-		str = str .. "{\n"
-		for k, v in pairs(tbl) do
-			str = str .. string.rep(" ", indent + 4) .. "[" .. DA.serialize(k, 0) .. "] = " .. DA.serialize(v, indent + 4) .. ",\n"
-		end
-		str = str .. string.rep(" ", indent) .. "}"
-	elseif t == "number" or t == "boolean" then
-		str = str .. tostring(tbl)
-	elseif t == "string" then
-		-- str = str .. string.format("%q", tbl)
-		str = str .. '"' .. tbl .. '"'
-	end
-	return str
-end
-function DA.tableToString(tbl)
-	return DA.serialize(tbl, 0)
-end
-function DA.GetChatCopyLink(longString)
-	DA.LinkIndex = DA.LinkIndex + 1
-	local id = tostring(DA.LinkIndex)
-	DA.LinkStorage[id] = longString
-	return "|cffffff00|Hdalink:" .. id .. "|h<click to copy>|h|r"
-end
-function DA.capitalizeFirstCharacter(inputString)
-    if inputString and inputString ~= "" then
-        local firstChar, restOfString = inputString:match("([%z\1-\127\194-\244][\128-\191]*)(.*)")
-        if firstChar then
-            if string.byte(firstChar) == 207 or string.byte(firstChar) == 208 then
-                -- Cyrillic character range
-                firstChar = firstChar:gsub("^%l", string.upper)
-            else
-                firstChar = firstChar:upper()
-            end
-            return firstChar .. restOfString
-        else
-            return ""
-        end
-    else
-        return ""
-    end
-end
-function DA.CheckAndRestoreLocalizedTable(tablename, keepLocal)
-	local lang = L.lang
-	local default = DarklangelDefaultTables[tablename] and (DarklangelDefaultTables[tablename][lang] or DarklangelDefaultTables[tablename].enUS)
-	local localExport
-	if default then
-		if not keepLocal and not _G[tablename] then
-			_G[tablename] = DA.DeepCopy(default)
-		elseif keepLocal then
-			localExport = DA.DeepCopy(default)
-		end
-		DarklangelDefaultTables[tablename] = nil
-		if not next(DarklangelDefaultTables) then --if there are no unused keys left, emptying the global so it would be eaten by gc
-			DarklangelDefaultTables=nil
-		end
 
-		if localExport then
-			return localExport
+			self.time = self.time - elapsed
+			if self.time <= 0 then
+				self.time=f.speed
+				self.code(self)
+			end
 		end
-	elseif not _G[tablename] then
-		DA.Print(tablename, 'not exist, creating new global')
-		_G[tablename] = {}
+	end
+
+
+	f.code=OnRun
+
+	if runfromstart then
+		f:SetScript("OnUpdate", f.myscript)
+	end
+
+end
+function DA.ResumeTimer(short)
+	if DA.XTimers[short] then
+		if DA.XTimers[short]:GetScript("OnUpdate") then
+			-- print(short..' already runnin')
+		else
+			DA.XTimers[short]:SetScript("OnUpdate", DA.XTimers[short].myscript)
+		end
+	else
+		print('no such timer-'..short)
+		return
 	end
 end
-
+function DA.StopTimer(short)
+	if DA.XTimers[short] then
+		-- print('stopped',short)
+		DA.XTimers[short]:SetScript("OnUpdate", nil)
+	else
+		-- print('no such timer-'..short)
+		return
+	end
+end
+function DA.SetTimerTime(short,times)
+	if DA.XTimers[short] then
+		DA.XTimers[short]['time']=times
+	else
+		print('no such timer-'..short)
+		return
+	end
+end
+function DA.SetTimerSpeed(short,speed)
+	if DA.XTimers[short] then
+		DA.XTimers[short]['speed']=speed
+	else
+		print('no such timer-'..short)
+		return
+	end
+end
 
 
 -- Widget helpers
@@ -298,6 +394,8 @@ function DA.AnimateText(obj)
 	DA.ResumeTimer('fep')
 end
 function DA.ResetScrollBoxes()
+	if true then return end
+
 	for _,j in pairs(DarkAngelGUI.scrollbexes) do
 		_G[j]:ClearAllPoints()
 		-- _G[j]:SetPoint("TOPLEFT", _G[j]:GetParent(),"TOPLEFT",5, -62)
@@ -328,10 +426,73 @@ function DA.ResetScrollBoxes()
 	-- DarkAngelGUI:GetScript("OnDragStop")(DarkAngelGUI)
 	-- DarkAngelGUI:StopMovingOrSizing()
 end
+local RePaintFrameslocked
+function DA.RePaintFrames(onlyTxtPos,lock,unlock)
+	if unlock then
+		RePaintFrameslocked = nil
+	end
+	if lock then
+		RePaintFrameslocked = true
+	end
+	if RePaintFrameslocked then return end
+
+	local alpha=fuckingOptions.TXTartOpacity
+	local beta=fuckingOptions.TXTBgOpacity;
+	local blend1=fuckingOptions.TXTArtTransp; if blend1 then blend1='add' else blend1='blend' end
+	local blend2=fuckingOptions.TXTBgTransp; if blend2 then blend2='add' else blend2='blend' end
+
+
+	for n,_ in pairs(_G["DarkAngelGUI"]['tabsl']) do
+		local frame = _G['DarkAngelGUI'][_G["DarkAngelGUI"]['tabsl'][n]]
+		if onlyTxtPos then
+			if fuckingOptions.TXTArtOnFront then
+				frame.art.t:SetDrawLayer('ARTWORK')
+				frame.bgtxt.t:SetDrawLayer('BACKGROUND')
+			else
+				frame.art.t:SetDrawLayer('BACKGROUND')
+				frame.bgtxt.t:SetDrawLayer('ARTWORK')
+			end
+		else
+			frame.art.t:SetBlendMode(blend1)
+			frame.art.t:SetAlpha(alpha)
+			frame.bgtxt.t:SetBlendMode(blend2)
+			frame.bgtxt.t:SetTexture(21/255, 18/255, 22/255, beta)
+		end
+
+	end
+
+	for _,frame in ipairs(DA.DrawnFrames) do
+		if frame.art and onlyTxtPos then
+			if fuckingOptions.TXTArtOnFront then
+				frame.art.t:SetDrawLayer('ARTWORK')
+				frame.t:SetDrawLayer('BACKGROUND')
+			else
+				frame.art.t:SetDrawLayer('BACKGROUND')
+				frame.t:SetDrawLayer('ARTWORK')
+			end
+		elseif not onlyTxtPos then
+			if frame.art then
+				frame.art.t:SetBlendMode(blend1)
+				frame.art.t:SetAlpha(alpha)
+			end
+			if frame.tf then
+				frame.t:SetBlendMode(blend2)
+				if frame.t.myStoredTxt then
+					frame.t:SetTexture(frame.t.myStoredTxt[1], frame.t.myStoredTxt[2], frame.t.myStoredTxt[3],  (beta or frame.t.myStoredTxt[4] or 0.5));
+				else
+					frame.t:SetTexture(21/255, 18/255, 22/255, beta)
+				end
+				
+			end
+		end
+
+	end
+
+end
 
 
 
--- Guild helpers
+-- Guild API helpers
 local guildInfoCache = ""
 local guildInfoEmptyHits = 0
 local guildMOTDCache = ""
@@ -447,6 +608,19 @@ end
 function DA.IsInSameGuild(character)
 	if FEP_gMain[character] then return true else return false end
 end
+function DA.IsInSameRaid(name) -- not sure if this is useful, but it should include cross-realm players
+	if not IsInRaid() then return end
+	if GetNumRaidMembers()==0 then return end
+
+	if UnitInRaid(name) then return true end
+
+	for i=1,GetNumRaidMembers() do
+		local nam, _, _, _, _, _, _, _, _, _, _ = GetRaidRosterInfo(i)
+		if nam==name then return true end
+
+	end
+	return
+end
 function DA.GetPlayerGuildIndex(name)
 	for k=1,DA.GetNumGMembers() do
 		local m={GetGuildRosterInfo(k)}
@@ -465,7 +639,7 @@ function DA.GetNumGMembers()
 
 	return GetNumGuildMembers(true)
 end
-local GC_flag_IDs={
+local guildControl_PermissionListByID={
 	guildchat_listen=1,
 	guildchat_speak=2,
 	officerchat_listen=3,
@@ -484,7 +658,7 @@ local GC_flag_IDs={
 	withdraw_gold=16,
 	create_guild_event=17,
 }
-local GC_bank_flag_IDs={
+local guildControl_BankPermissionIDs={
 	canView=1,
 	canDeposit=2,
 	canEditInfo=3,
@@ -498,7 +672,7 @@ function DA.Process_GMranking(db,selectedrank,bankslots,lock,anons)
 	if selectedrank>1 then
 		for rank,val in pairs(db[selectedrank]) do
 			if rank~='name' and rank~='bankpermissions' and rank~='gwithraw' then
-				GuildControlSetRankFlag(GC_flag_IDs[tostring(rank)],(not lock and val) or false)
+				GuildControlSetRankFlag(guildControl_PermissionListByID[tostring(rank)],(not lock and val) or false)
 			elseif rank=='gwithraw' then
 				SetGuildBankWithdrawLimit((not lock and tonumber(db[selectedrank].gwithraw)) or 0)
 			end
@@ -510,7 +684,7 @@ function DA.Process_GMranking(db,selectedrank,bankslots,lock,anons)
 					if rank=='stacksPerDay'then
 						SetGuildBankTabWithdraw(banktab,((not lock and tonumber(val)) or 0))
 					else
-						SetGuildBankTabPermissions(banktab,GC_bank_flag_IDs[tostring(rank)],(not lock and val) or false)
+						SetGuildBankTabPermissions(banktab,guildControl_BankPermissionIDs[tostring(rank)],(not lock and val) or false)
 					end
 				end
 			end
@@ -669,7 +843,7 @@ function DA.GetTwinsInfo(name,ofnote,iszamena)
 
 	local result=""
 	if found.main then 
-		local epgpdkpvalues=DA.GetOfficerNoteColored(found.main.ofn)
+		local epgpdkpvalues=DA.GetOfficerNotePretty(found.main.ofn)
 		
 		if IsControlKeyDown() and not iszamena then
 			result=(spacesraidID(string.sub(found.main[1],11,-3),found.main[3])..found.main[1].. string.rep(" ",16-#(string.sub(found.main[1],11,-3)):gsub('[\128-\191]', ''))..found.main[2]..
@@ -723,6 +897,79 @@ function DA.IsFullGuildRaid(fullGuildSetting)
 	local raidMembers = members + non_members
 	if members/raidMembers >= 0.7 then
 		return true
+	end
+
+end
+function DA.SetPublicnote(player,note)
+	GuildRosterSetPublicNote(DA.GetPlayerGuildIndex(player), tostring(note) )
+end
+function DA.SetOfficernote(player,note)
+	GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(player), tostring(note) )
+end
+function DA.DemotePromotePlayer(name,curentrank,i,isbulk)
+	if isbulk then
+	else
+		i=i-1
+	end
+
+	local myrank=tonumber(({GetGuildInfo('player')})[3])
+	if myrank==curentrank then
+		if isbulk then
+			DA.Print(name.." "..L['same rank as me'])
+			return
+		else
+			DA.Print(L['target on the same rank as me'])
+			return
+		end
+
+	elseif i<=myrank then
+		DA.Print(L['requested rank is too high'])
+		return
+
+	elseif myrank<curentrank then
+		if i<curentrank then
+			if CanGuildPromote() then else DA.Print(L['I cannot promote players']) return end
+			--promoting
+			for r=1,curentrank-i do
+				GuildPromote(name)
+			end
+			if not isbulk then
+				tinsert(DA_Fep_bulk,function() end)
+				tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu() end)
+				tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu() end)
+				DA.ResumeTimer('fep')
+			end
+			return
+		elseif i==curentrank then
+			if not isbulk then
+				DA.Print(L['already this rank'])
+			end
+			return
+		elseif i>curentrank then
+			if CanGuildDemote() then else DA.Print(L['I cannot demote players']) return end
+			--demoting
+			for r=1,i-curentrank do
+				GuildDemote(name)
+			end
+			if not isbulk then
+				tinsert(DA_Fep_bulk,function() end)
+				tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu() end)
+				tinsert(DA_Fep_bulk,function() DA.UpdateMicroMenu() end)
+				DA.ResumeTimer('fep')
+			end
+			return
+		else
+			print('error 900')
+			return
+		end
+
+	elseif myrank>curentrank then
+		DA.Print(L['target is having a higher rank than me'])
+		return
+
+	else
+		print('error 908')
+		return
 	end
 
 end
@@ -911,6 +1158,352 @@ StaticPopupDialogs["EPGP_CONFIRM_MINUS_EP_CREDIT"] = {
                              self:GetParent():Hide()
                            end
 }
+function DA.GetOfficerNotePretty(note)
+	if not note or note:gsub("%s","")=="" then
+		return note
+	end
+
+	if fuckingOptions_g[DA_CurrentGuild].evaluateoffnote then
+		local tz,net,tot,hrs=DA.DecodeNote(note)
+
+		if (tz=='m' or tz=='f') and (net~=0 or tot~=0 or hrs~=0) then
+			if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+				local base = (DA_Guild_Info[DA_CurrentGuild].base1 or 1) or (DA_Guild_Info[DA_CurrentGuild].base1==0 and 1)
+
+				if base==1 and tot==0 then
+					return "|cff00ffffPR|r:"..net
+				elseif tot==0 then
+					return "|cff00ffffPR|r:"..(ceil((net/base)*10) / 10)
+				else
+					return note.." |cff00ffffPR|r:"..(ceil((net/(tot+(base or 1)))*10) / 10)
+				end
+
+			elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+				return "|cffa964ccDKP|r:"..net..","..tot..((hrs and (","..hrs)) or "")
+			end
+		else
+			return note
+		end
+	else
+		return note
+	end
+
+
+
+end
+
+
+-- Award functions
+function DA.DKPawardfunc(name,value,reason,alt)
+	if name and value and reason then else return end
+	local IsPercentAward
+	if tostring(value):match("^-?[w,W]%d+$") then
+		IsPercentAward = true 
+		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
+		if value==0 or
+			(value<-100) or
+			(value>500)
+		then
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
+			return
+		end
+	else
+		value = tonumber(value)
+	end
+
+	if type(value)=='number' then else print('error 1324') return end
+	if FEP_gMain[name] then else DA.Print(DA.GetStoredColorName(name or 'no_name')..' -not found') return end
+
+	local localName = alt and alt[2] and alt[1] or nil
+	local altName = alt and not localName and alt[1] or nil
+	local anyAltName = localName or altName or nil
+	local processedName = anyAltName and anyAltName.." ("..name..")" or name
+
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
+
+	local typ,ep,gp,hrs=DA.DecodeNote(FEP_gMain[name])
+
+	if typ=='f' then
+		DA.Print(processedName.. ' has frozen DKP')
+		return
+	end
+	if IsPercentAward then
+		value = math.floor((tonumber(ep)*(value/100))+0.5)
+		if value == 0 then
+			DA.Print((L["percentageAwardValueIsZero"]:gsub("$1", processedName)))
+			return
+		end
+	end
+	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
+		if tonumber(value)>0 then
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), "Net:"..tostring(tonumber(ep)+tonumber(value)).." Tot:"..tostring(tonumber(gp)+tonumber(value))..((hrs and " Hrs:"..hrs) or "") )
+			SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..processedReason..")",'guild')
+		else
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), "Net:"..tostring(tonumber(ep)+tonumber(value)).." Tot:"..tostring(tonumber(gp))..((hrs and " Hrs:"..hrs) or "") )
+			SendChatMessage("QDKP2> "..processedName.." Spends "..math.abs(value).." DKP ("..processedReason..")",'guild')
+		end
+		SendAddonMessage("DA_log",name.."\031"..value.."\031"..processedReason, "guild")
+
+		if localName and UnitInRaid(localName) then
+			if value>0 then
+				SendChatMessage("QDKP2> "..processedName.." Gains "..value.." DKP ("..processedReason..")",'raid')
+			else
+				SendChatMessage("QDKP2> "..processedName.." Spends "..-value.." DKP ("..processedReason..")",'raid')
+			end
+		end
+	end
+
+
+end
+function DA.EPawardfunc(name,value,reason,alt)
+	if name and value and reason then else return end
+	local IsPercentAward
+	if tostring(value):match("^-?[w,W]%d+$") then
+		IsPercentAward = true 
+		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
+		if value==0 or
+			(value<-100) or
+			(value>500)
+		then
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
+			return
+		end
+	else
+		value = tonumber(value)
+	end
+
+	if type(value)=='number' then else print('error 1733') return end
+	if FEP_gMain[name] then else DA.Print(DA.GetStoredColorName(name or 'no_name')..' -not found') return end
+
+	local localName = alt and alt[2] and alt[1] or nil
+	local altName = alt and not localName and alt[1] or nil
+	local anyAltName = localName or altName or nil
+	local processedName = anyAltName and anyAltName.." ("..name..")" or name
+
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
+
+	local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[name])
+
+	if typ=='f' then
+		DA.Print(processedName.. ' has frozen EPGP')
+		return
+	end
+	
+	if IsPercentAward then
+		value = math.floor((tonumber(ep)*(value/100))+0.5)
+		if value == 0 then
+			DA.Print((L["percentageAwardValueIsZero"]:gsub("$1", processedName)))
+			return
+		end
+	end
+
+	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+		if EPGP then --insert log in original EPGP addon
+			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'EP',name,processedReason,tonumber(value)})
+		end
+
+		if tonumber(ep)+tonumber(value)>=0 then
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), tostring(tonumber(ep)+tonumber(value))..","..tostring(gp) )
+		else
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), "0,"..tostring(gp) )
+			DA.Print((L["settingep0"]:gsub("$1",name)):gsub("$2",tonumber(ep).."/"..tonumber(value)))
+		end
+		
+		local valueText = value > 0 and tostring("+" .. value) or tostring(value)
+		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031EP\031" .. name .. "\031" .. processedReason .. "\031" .. value,"guild")
+		SendChatMessage("EPGP: " .. valueText .. " EP (" .. processedReason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
+		
+		if localName and UnitInRaid(localName) then
+			SendChatMessage("EPGP: "..valueText.." EP ("..processedReason..") "..processedName,'raid')
+		end
+	end
+
+end
+function DA.GPawardfunc(name,value,reason,alt)
+	if name and value and reason then else return end
+	local IsPercentAward
+	if tostring(value):match("^-?[w,W]%d+$") then
+		IsPercentAward = true 
+		value = tonumber((tostring(value):match("^-") or "") .. tostring(value):match("%d+$"))
+		if value==0 or
+			(value<-100) or
+			(value>500)
+		then
+			DA.Print("Percentage might not exceed -100 <> 0 <> 500 intervals")
+			return
+		end
+	else
+		value = tonumber(value)
+	end
+
+	if type(value)=='number' then else print('error 1733') return end
+	if FEP_gMain[name] then else DA.Print(DA.GetStoredColorName(name or 'no_name')..' -not found') return end
+
+	local localName = alt and alt[2] and alt[1] or nil
+	local altName = alt and not localName and alt[1] or nil
+	local anyAltName = localName or altName or nil
+	local processedName = anyAltName and anyAltName.." ("..name..")" or name
+
+	local processedReason = IsPercentAward and ("["..value.."%]"..reason) or (reason)
+	
+	local typ,ep,gp,_=DA.DecodeNote(FEP_gMain[name])
+
+	if typ=='f' then
+		DA.Print(processedName.. ' has frozen EPGP')
+		return
+	end
+
+	if IsPercentAward then
+		value = math.floor((tonumber(gp)*(value/100))+0.5)
+		if value == 0 then
+			DA.Print((L["percentageAwardValueIsZero"]:gsub("$1", processedName)))
+			return
+		end
+	end
+
+	if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
+		if EPGP then --insert log in original EPGP addon
+			tinsert(EPGP_DB.namespaces.log.profiles[DA_CurrentGuild].log , {DA.GetEPGPTimestamp(),'GP',name,processedReason,tonumber(value)})
+		end
+
+		if tonumber(gp)+tonumber(value)>=0 then
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), (tostring(ep)..","..tostring(tonumber(gp)+tonumber(value))) )
+		else
+			GuildRosterSetOfficerNote(DA.GetPlayerGuildIndex(name), (tostring(ep)..",0") )
+			DA.Print((L["settinggp0"]:gsub("$1",name)):gsub("$2",tonumber(gp).."/"..tonumber(value)))
+		end
+
+		local valueText = value > 0 and tostring("+" .. value) or tostring(value)
+		SendAddonMessage("EPGP","LOG:" .. DA.GetEPGPTimestamp() .. "\031GP\031" .. name .. "\031" .. processedReason .. "\031" .. value,"guild")
+		SendChatMessage("EPGP: " .. valueText .. " GP (" .. processedReason .. ") " .. L['fepfor'] .. " " .. processedName, "guild")
+
+		if localName and UnitInRaid(localName) then
+			SendChatMessage("EPGP: "..valueText.." GP ("..processedReason..") "..processedName,'raid')
+		end
+	end
+end
+function DA.AddRecentAward(name,epgp,value,reason)
+	local t = DA_Guild_Info[DA_CurrentGuild].RecentAwards
+	local dat,tim=string.match(date(), "(.+)%s(.+)")
+	local p = 1
+	local count = #t
+
+	if count==100 then
+		table.remove(t,1)
+	elseif count~=0 then
+		while true do
+
+			local e = t[p]
+			if e then
+				if e[1]==name and e[2]==epgp and e[3]==value and e[4]==reason then
+					table.remove(t,p)
+				else
+					p = p + 1
+				end
+			else
+				break
+			end
+		end
+	end
+
+	tinsert(DA_Guild_Info[DA_CurrentGuild].RecentAwards, {name,epgp,value,reason,{dat,tim}})
+
+end
+function DA.getRecentAwardsFiltered(reason, value)
+	local result={}
+	local t = DA_Guild_Info[DA_CurrentGuild].RecentAwards
+	local count = #t
+	if count== 0 then return result end
+
+	if reason=="" or reason:gsub("%s+","")=="" then
+		reason=nil
+	end
+
+	if value=="0" or value=="" or value:gsub("%s+","")=="" then
+		value=nil
+	end
+	local perfectmatch={}
+	local anymatch={}
+
+	for i=count,1,-1 do
+		local e = t[i]
+		if (not value or e[3] and tostring(e[3]):find(value,nil,true) )
+		and (not reason or e[4] and tostring(e[4]):lower():find(reason:lower(),nil,true) )
+		then
+			tinsert(perfectmatch, e)
+
+		elseif (not value or e[3] and tostring(e[3]):find(value,nil,true) )
+		or (not reason or e[4] and tostring(e[4]):lower():find(reason:lower(),nil,true) )
+		then
+			tinsert(anymatch, e)
+		end
+	end
+
+	for _,j in ipairs(perfectmatch) do
+		tinsert(result,j)
+	end
+
+	for _,j in ipairs(anymatch) do
+		tinsert(result,j)
+	end
+
+	return result
+end
+function DA.SetRecentAwardBtnTxt(epgp, btn)
+
+	-- handling saves after guild type change
+	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and (epgp=='ep' or epgp=='gp') then
+		if epgp=='ep' then
+			btn:SetText("+DKP")
+			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+		elseif epgp=='gp' then
+			btn:SetText("-DKP")
+			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+		end
+	elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and (epgp=='+dkp' or epgp=='-dkp') then
+		btn:SetText("EP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+
+
+	-- regular cases
+	elseif epgp=='ep' then
+		btn:SetText("EP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+	elseif epgp=='gp' then
+		btn:SetText("GP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+	elseif epgp=='+dkp' then
+		btn:SetText("+DKP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+	elseif epgp=='-dkp' then
+		btn:SetText("-DKP")
+		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+	end
+
+end
+function DA.getColoredRecentAwardValue(epgp,value)
+	local isPositive = not tostring(value):find("-")
+	if epgp=='ep' then
+		if isPositive then
+			return "|cffaaffff+"..value.." EP|r"
+		else
+			return "|cffff00ff"..value.." EP|r"
+		end
+	elseif epgp=='gp' then
+		if isPositive then
+			return "|cffedf500+"..value.." GP|r"
+		else
+			return "|cffff0000"..value.." GP|r"
+		end
+	elseif epgp=='+dkp' or epgp=='-dkp' then
+		if isPositive then
+			return "|cffaaffff+"..value.." DKP|r"
+		else
+			return "|cffff00ff"..value.." DKP|r"
+		end
+	end
+
+end
 
 
 
@@ -1023,159 +1616,5 @@ if select(1,DA.DecodeNote(name, gtype))=='t' or numeric then else return name en
 		end
 	end
 
-end
-
-
-
----- Fun functions ----
-
---- Fake loot drop in RaidRoll:Loot module ----
---- 49623 -- Shadowmourne
---- 50182 -- blood pendant of Lana'Tel
---- 19019 -- Thunderfury, Blessed Blade of the Windseeker
---- 
---- Usage:
---- /run DA_fakeloot(49623,'LichKing','RLname')
-function DA_fakeloot(ItemId,boss,looter)
-
-	local playername = UnitName("player")
-	local target = UnitName("target")
-
-	if not boss then boss="Unknown" end
-	if not looter then looter=playername end
-
-
-	if not ItemId or type(boss)~='string' or type(looter)~='string' then
-		DA.Print("Usage:")
-		DA.Print("DA_fakeloot(ItemId,'boss','looter')") 
-		DA.Print("'boss' and 'looter' are optional. If skipped, boss is assigned 'Unknown' and 'looter' is assigned your name") 
-		DA.Print("using 't' in 'boss' or 'looter' will grab your /target. You may also skip it as well, so mob name will be printed as \"Unknown\"")
-		return
-	end
-
-	if boss:lower() == 't' then boss=target or "Unknown" end
-	if looter:lower() == 't' then looter=target or "Unknown" end
-
-	local lootName, _, rarity, ItemLvl = GetItemInfo(ItemId)
-	if not ( (rarity and tonumber(rarity) > 3) or 
-		ItemId == 	46110 	or		-- Alchemist's Cache
-		ItemId == 	47556	or		-- Crusader Orb
-		ItemId == 	45087	or		-- Runed Orb
-		ItemId == 	49908 )	-- Primordial Saronite
-	then
-		DA.Print("Item's rarity should be at least Epic")
-		return
-	end
-
-	local a = "\a"
-	local payload = {
-		"Beta_2",
-		looter,
-		boss,
-		tostring(ItemId),
-		lootName,
-		tostring(ItemLvl)
-	}
-
-	SendAddonMessage("RRL",table.concat(payload,a),"RAID")
-end
-
---- Checks Quests whether they are completed or not
---- You can pass multiple quest IDs, separated by comma
---- 
---- Usage:
---- /run DA_CheckQuestsCompleted(12915,12956) --Sons of Hodir quest chain
-function DA_CheckQuestsCompleted(...)
-	local a={...}
-	local b={} 
-	local x=CreateFrame("FRAME") 
-	x:RegisterEvent("QUEST_QUERY_COMPLETE") 
-	x:SetScript("OnEvent",function() 
-		GetQuestsCompleted(b)
-		for k=1,#a do if not b[a[k]] then DA.Print(a[k]..' - not completed') else DA.Print(a[k]..' - completed') end end
-		x:UnregisterEvent("QUEST_QUERY_COMPLETE") 
-	end)
-	QueryQuestsCompleted()
-end
-
---- Checks all action bars for outdated spell levels
---- 
---- Usage:
---- /run DA_CheckActionBars()
-local function GetHighestRankSpellID(spellName)
-    local i = 1
-    local spellID = nil
-    while true do
-        local name, _ = GetSpellName(i, BOOKTYPE_SPELL)
-        if not name then break end
-        if name == spellName then
-            spellID = i
-        end
-        i = i + 1
-    end
-    return spellID
-end
-function DA_CheckActionBars()
-    for bar = 1, 6 do
-        for slot = 1, 12 do
-            local actionType, id, _ = GetActionInfo((bar - 1) * 12 + slot)
-            if actionType == "spell" and id then
-                local spellName = GetSpellName(id, BOOKTYPE_SPELL)
-                local highestRankSpellID = GetHighestRankSpellID(spellName)
-                if id ~= highestRankSpellID then
-                    DA.Print((GetSpellLink(spellName) or spellName).. " in slot " .. slot .. " on bar " .. bar .. " is not the highest rank.")
-                end
-            end
-        end
-    end
-end
-
---- Checks guild roster for members who has more than X tvins in guild
---- if second argument is specified, results are simply printed in chat
---- if omitted, writes output to 
---- ./WTF/Account/XXXXX/SavedVariables/DarkAngel.lua as FFTestFF table 
---- 
---- Usage:
---- /run DA_GetTvins_N(3)
-function DA_GetTvins_N(morethan,onlyprint)
-local mains={}
-	for i=1,DA.GetNumGMembers() do
-		local name, _, _, _, _, _, _, officernote, _ = GetGuildRosterInfo(i);
-		local typ=DA.DecodeNote(officernote)
-		if typ=="m" or typ=="f" then
-			if mains[name] then
-				mains[name]=mains[name]+1
-			else
-				mains[name]=1
-			end
-		elseif typ=="t" then
-			if mains[officernote] then
-				mains[officernote]=mains[officernote]+1
-			else
-				mains[officernote]=1
-			end
-		end
-	end
-local sorted={}
-for pl,numtvins in pairs(mains) do
-	if morethan and numtvins>=morethan then
-		if onlyprint then
-			print(pl,numtvins)
-		else
-			sorted[pl]=numtvins
-		end
-	elseif not morethan and numtvins>=3 then
-		if onlyprint then
-			print(pl,numtvins)
-		else
-			sorted[pl]=numtvins
-		end
-	end
-end
-	if onlyprint then
-	else
-		FFTestFF=nil
-		FFTestFF=sorted
-	end
 end
 
