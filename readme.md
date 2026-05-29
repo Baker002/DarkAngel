@@ -2,13 +2,13 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/Baker002/DarkAngel)
 
 ![DarkAngel Preview](doc_images/preview_main.webp)
-DarkAngel добавляет инструменты для управления гильдией, рейдами, лутом, EPGP/DKP начислениями, логирования и автоматизации административных процессов.
+DarkAngel добавляет инструменты для управления гильдией, рейдами, лутом, EPGP/DKP начислений, логирования и некоторых автоматизаций.
 
 Система построена из независимых модулей, которые могут использоваться как совместно, так и частично.
 
 ---
 
-# 📦 Modules Overview
+# Modules Overview
 - Core / Guild tools: `DarkAngel`
 - Raid Time Inviter: `DarkAngel_Inviter`
 - Flask Dispenser: `DarkAngel_Dispenser`
@@ -79,7 +79,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# 📩 DarkAngel_Inviter
+# DarkAngel_Inviter
 Автоматизация гильдейских сборов на Raid Time.
 
 ### Возможности:
@@ -107,7 +107,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# 🧪 DarkAngel_Dispenser
+# DarkAngel_Dispenser
 Автоматическая раздача consumables в рейде.
 
 ### Возможности:
@@ -125,7 +125,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# 🎁 DarkAngel_Awarder
+# DarkAngel_Awarder
 Рейд-менеджер и система начислений EPGP/DKP.
 
 ### Возможности:
@@ -177,7 +177,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# ⚔️ DarkAngel_BidTracker
+# DarkAngel_BidTracker
 Аукционная система для EP-Auc / DKP.
 
 ### Возможности:
@@ -193,7 +193,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# 📜 DarkAngel_Logger
+# DarkAngel_Logger
 Модуль логирования всех изменений в гильдии.
 
 ### Логирует:
@@ -216,7 +216,7 @@ Core-модуль предоставляет базовую инфраструк
 
 ---
 
-# 💾 DarkAngel_Backup
+# DarkAngel_Backup
 Система резервного копирования гильдии.
 
 ### Возможности:

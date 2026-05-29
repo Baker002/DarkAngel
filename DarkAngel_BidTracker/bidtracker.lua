@@ -347,6 +347,13 @@ DA_BidTracker.itemicon=DA.ButtonCreater(nil,DA_BidTracker,{"TOPLEFT",DA_BidTrack
 		end
 	end
 end)
+DA_BidTracker.itemicon:RegisterForDrag("LeftButton")
+DA_BidTracker.itemicon:SetScript("OnDragStart", function() 
+	local item = DA_BidTracker.itemlink
+	if item then
+		PickupItem(item)
+	end
+end)
 local infinitePause = false
 local function BidderTimerStartNew()
 	if type(fuckingOptions_g[DA_CurrentGuild].auc_bidTime)=='number' then

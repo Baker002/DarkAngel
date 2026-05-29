@@ -4,7 +4,7 @@ local DA = DarkAngel
 local L = DA.L
 local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
 
-local working=false
+DA.TR_working=false
 local targetn=nil
 local countererrors=0
 DA.TR_Names={}
@@ -278,7 +278,7 @@ end
 function DA.TR_routine(_,event,ac1,ac2,...)
 	TradePlayerItem6:Show()
 	
-	if not working then
+	if not DA.TR_working then
 		return
 	end
 
@@ -399,12 +399,12 @@ function DA.TR_start(set)
 	if DarkAngel_FlaskerDB[set] then else DA.Print("error 364") end
 
 
-	if working and DA.TR_SelSet==set then 
+	if DA.TR_working and DA.TR_SelSet==set then 
 		DA.Print(L["already working"])
 		return
-	elseif not working or (working and DA.TR_SelSet~=set) then 
+	elseif not DA.TR_working or (DA.TR_working and DA.TR_SelSet~=set) then 
 
-		if working and DA.TR_SelSet~=set then
+		if DA.TR_working and DA.TR_SelSet~=set then
 			table.wipe(DA.TR_Names)
 			DA.Print(L["starting distribution from another set..."])
 		end
@@ -418,7 +418,7 @@ function DA.TR_start(set)
 			gt:RegisterEvent("TRADE_REQUEST_CANCEL")
 			table.wipe(DA.TR_Names)
 			if quickgive=='set' then
-				working=true
+				DA.TR_working=true
 				if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'raid') else DA.Print("|cff00ffff    Ready.")  end
 				if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
 					if UnitIsRaidOfficer('player') then
@@ -439,7 +439,7 @@ function DA.TR_start(set)
 					tinsert(DA.flasker_bulk,function()  end)
 					tinsert(DA.flasker_bulk,function()  end)
 					tinsert(DA.flasker_bulk,function() 
-						working=true
+						DA.TR_working=true
 
 						if fuckingOptions_g[DA_CurrentGuild].dispenser_announce then SendChatMessage(L['You can trade me for flasks!'],'RAID') else DA.Print("|cff00ffff    Ready.") end
 						if fuckingOptions_g[DA_CurrentGuild].dispenser_markself then 
@@ -458,13 +458,15 @@ function DA.TR_start(set)
 			DA.ResumeTimer('flask_disp')
 
 		end
+
+		return true
 	end
 end
 
 function DA.TR_stop()
-	if working==true then
+	if DA.TR_working==true then
 
-		working=false
+		DA.TR_working=false
 		countererrors=0
 		gt:UnregisterEvent("TRADE_ACCEPT_UPDATE")
 		gt:UnregisterEvent("TRADE_SHOW")

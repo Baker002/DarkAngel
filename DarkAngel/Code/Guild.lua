@@ -3118,7 +3118,7 @@ DA.AddToBuildQueue("Guild", function()
 
         DarkAngelGUI.Guild.classTbl={}
         DarkAngelGUI.Guild.classbtn,DarkAngelGUI.Guild.classFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["class"],7,35,{"CENTER", DarkAngelGUI.Guild, "TOPLEFT", 65, -24},70,120.5,"BOTTOM",nil,function() end,nil,nil,true)
-        DarkAngelGUI.Guild.classbtn:SetFrameLevel(DarkAngelGUI.Guild:GetFrameLevel()+2)
+        DarkAngelGUI.Guild.classFrame:SetFrameLevel(DarkAngelGUI.Guild:GetFrameLevel()+10)
         local classes={
             "DEATHKNIGHT",
             "PALADIN",

@@ -412,7 +412,9 @@ function Mod:Flasker_OptLoad()
 					TR_SelectedSet_UI = i
 					Dispenser_ReRender()
 					if DA.TR_SelSet == TR_SelectedSet_UI then
-						F.Controls.startflBtn:Disable()
+						if DA.TR_working then
+							F.Controls.startflBtn:Disable()
+						end
 					else
 						F.Controls.startflBtn:Enable()
 					end
@@ -505,7 +507,7 @@ do --contents
 
 
 	F.Controls.startflBtn = DA.CreateFFGButton2(nil,F.Controls,{"CENTER", F.Controls, "TOP", -(F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,L['start'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-		if not IsInRaid() then
+		if not UnitInRaid('player') then
 			DA.Print(L['You are not in raid'])
 			return
 		end
@@ -525,10 +527,11 @@ do --contents
 			return
 		end
 
-		F.Controls.stopflBtn:Enable()
-		self:Disable()
-		DA.TR_start(TR_SelectedSet_UI)
-
+		local successfully_started = DA.TR_start(TR_SelectedSet_UI)
+		if successfully_started then
+			F.Controls.stopflBtn:Enable()
+			self:Disable()
+		end
 	end)
 
 	F.Controls.stopflBtn=DA.CreateFFGButton2(nil,  F.Controls,  {"CENTER", F.Controls, "TOP", (F.Controls.width/4), -50}, 12, (F.Controls.width/2)-6,  L["stop"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]], {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)

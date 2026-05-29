@@ -206,12 +206,7 @@ function DA.CreateDropdownSelector(d)
 			local text,value,isHidden,funcOnSelection,deskr,frameHideOnSelection,DrawLocked = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr, data.funcframeHideOnSelection, data.funcDrawLocked
 			if not frame[id] then
 				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-					setValue(value)
-					if frameHideOnSelection and frameHideOnSelection() then
-						frame:Hide()
-					end
-					if funcOnSelection then DA.Safecall(funcOnSelection) end
-					frame:reRender()
+					--func is set later anyways
 				end,deskr,nil,optjusth or 'center')
 			end
 			if DrawLocked then
@@ -232,17 +227,15 @@ function DA.CreateDropdownSelector(d)
 			if isHidden then
 				frame[id]:Hide()
 			else
-				if valuesrosterDynamic then
-					frame[id]:SetText(text)
-					frame[id]:SetScript("OnClick", function()
-						setValue(value)
-						if frameHideOnSelection and frameHideOnSelection() then
-							frame:Hide()
-						end
-						if funcOnSelection then DA.Safecall(funcOnSelection) end
-						frame:reRender()
-					end)
-				end
+				frame[id]:SetText(text)
+				frame[id]:SetScript("OnClick", function()
+					setValue(value)
+					if not frameHideOnSelection or frameHideOnSelection() then
+						frame:Hide()
+					end
+					if funcOnSelection then DA.Safecall(funcOnSelection) end
+					frame:reRender()
+				end)
 				newrosterCount = newrosterCount + 1
 				frame[id]:Show()
 			end
@@ -309,12 +302,7 @@ function DA.CreateDropdownNoValueSelector(d)
 			local text,value,isHidden,funcOnSelection,deskr,frameHideOnSelection,DrawLocked = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr, data.funcframeHideOnSelection, data.funcDrawLocked
 			if not frame[id] then
 				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
-					frame.storedvalue = value
-					if frameHideOnSelection and frameHideOnSelection() then
-						frame:Hide()
-					end
-					if funcOnSelection then DA.Safecall(funcOnSelection) end
-					frame:reRender()
+					-- func is set later anyways
 				end,deskr,nil,optjusth or 'center')
 			end
 			if DrawLocked then
@@ -335,17 +323,15 @@ function DA.CreateDropdownNoValueSelector(d)
 			if isHidden then
 				frame[id]:Hide()
 			else
-				if valuesrosterDynamic then
-					frame[id]:SetText(text)
-					frame[id]:SetScript("OnClick", function()
-						frame.storedvalue = value
-						if frameHideOnSelection and frameHideOnSelection() then
-							frame:Hide()
-						end
-						if funcOnSelection then DA.Safecall(funcOnSelection) end
-						frame:reRender()
-					end)
-				end
+				frame[id]:SetText(text)
+				frame[id]:SetScript("OnClick", function()
+					frame.storedvalue = value
+					if not frameHideOnSelection or frameHideOnSelection() then
+						frame:Hide()
+					end
+					if funcOnSelection then DA.Safecall(funcOnSelection) end
+					frame:reRender()
+				end)
 				newrosterCount = newrosterCount + 1
 				frame[id]:Show()
 			end

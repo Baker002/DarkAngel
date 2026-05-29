@@ -609,7 +609,6 @@ function DA.IsInSameGuild(character)
 	if FEP_gMain[character] then return true else return false end
 end
 function DA.IsInSameRaid(name) -- not sure if this is useful, but it should include cross-realm players
-	if not IsInRaid() then return end
 	if GetNumRaidMembers()==0 then return end
 
 	if UnitInRaid(name) then return true end

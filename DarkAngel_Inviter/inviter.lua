@@ -830,6 +830,12 @@ function Mod:Inviter_Load()
 					fuckingOptions.Inviter_TimerMode = value
 				end
 			})
+			
+			if fuckingOptions.Inviter_TimerMode == 3 then
+				DA_Inviter.OptionsFr.speedSelectTimerEB:Show()
+			else
+				DA_Inviter.OptionsFr.speedSelectTimerEB:Hide()
+			end
 		end
 		
 	end
