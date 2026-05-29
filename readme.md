@@ -1,5 +1,11 @@
 # DarkAngel - WoW 3.3.5 addon
-![.github/images/preview_main.webp]
+![GitHub last commit](https://img.shields.io/github/last-commit/Baker002/DarkAngel)
+
+![DarkAngel Preview](doc_images/preview_main.webp)
+
+Skada is a modular damage meter with various viewing modes, segmented fights and customizable windows. It aims to be highly efficient with memory and CPU.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/4732702/170839578-72a9a952-c999-457a-8f57-7d151e3b76a8.png" alt="Skada WotLK"></p>
 DarkAngel добавляет инструменты для для управления гильдией, рейдами, лутом, EPGP/DKP начислениями, логирования и автоматизации административных процессов.
 
 Система построена из независимых модулей, которые могут использоваться как совместно, так и частично.
