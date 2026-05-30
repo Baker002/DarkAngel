@@ -71,7 +71,7 @@ Core-модуль предоставляет базовую инфраструк
 ### GM View
 <p align="left">
     <a href="doc_images/preview_guildControl.webp">
-        <img src="doc_images/preview_guildControl.webp" width="650">
+        <img src="doc_images/preview_guildControl.webp" width="550">
     </a>
 </p>
 Админ-панель управления структурой гильдии:
@@ -92,7 +92,7 @@ Core-модуль предоставляет базовую инфраструк
 # DarkAngel_Inviter
 <p align="left">
     <a href="doc_images/preview_inviter.webp">
-        <img src="doc_images/preview_inviter.webp" width="450">
+        <img src="doc_images/preview_inviter.webp" width="550">
     </a>
 </p>
 Автоматизация гильдейских сборов на Raid Time.
