@@ -29,7 +29,11 @@ Core-модуль предоставляет базовую инфраструк
 - Общие утилиты для работы с гильдией, точечно и массовые
 
 ### Guild Browser (Guild Viewer)
-![DarkAngel Guild](doc_images/preview_guild.webp)
+<p align="left">
+    <a href="doc_images/preview_guild.webp">
+        <img src="doc_images/preview_guild.webp" width="350">
+    </a>
+</p>
 Полноценный браузер гильдии со следующими возможностями:
 - Поиск по:
     - нику
@@ -65,7 +69,11 @@ Core-модуль предоставляет базовую инфраструк
     - подсветка похожих значений
 
 ### GM View
-![DarkAngel GM](doc_images/preview_guildControl.webp)
+<p align="left">
+    <a href="doc_images/preview_guildControl.webp">
+        <img src="doc_images/preview_guildControl.webp" width="250">
+    </a>
+</p>
 Админ-панель управления структурой гильдии:
 (доступно любому игроку гильдии, но вносить изменения может только ГМ)
 
@@ -82,7 +90,11 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Inviter
-![DarkAngel GM](doc_images/preview_inviter.webp)
+<p align="left">
+    <a href="doc_images/preview_inviter.webp">
+        <img src="doc_images/preview_inviter.webp" width="250">
+    </a>
+</p>
 Автоматизация гильдейских сборов на Raid Time.
 
 ### Возможности:
@@ -111,23 +123,11 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Dispenser
-<p align="center">
-    <a href="doc_images/preview_dispenser.webp">
-        <img src="doc_images/preview_dispenser.webp" width="700">
-    </a>
-</p>
-<p align="center">
+<p align="left">
     <a href="doc_images/preview_dispenser.webp">
         <img src="doc_images/preview_dispenser.webp" width="250">
     </a>
-    <a href="doc_images/preview_inviter.webp">
-        <img src="doc_images/preview_inviter.webp" width="250">
-    </a>
 </p>
-[![DarkAngel GM](doc_images/preview_dispenser.webp)](doc_images/preview_dispenser.webp)
-<a href="doc_images/preview_dispenser.webp">
-    <img src="doc_images/preview_dispenser.webp" alt="DarkAngel GM" width="300">
-</a>
 Автоматическая раздача consumables в рейде.
 
 ### Возможности:
