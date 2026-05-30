@@ -111,7 +111,11 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Dispenser
-![DarkAngel GM](doc_images/preview_dispenser.webp)
+<p align="center">
+    <a href="doc_images/preview_dispenser.webp">
+        <img src="doc_images/preview_dispenser.webp" width="700">
+    </a>
+</p>
 Автоматическая раздача consumables в рейде.
 
 ### Возможности:
