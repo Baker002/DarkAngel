@@ -2,9 +2,10 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/Baker002/DarkAngel)
 
 ![DarkAngel Preview](doc_images/preview_main.webp)
-DarkAngel добавляет инструменты для управления гильдией, рейдами, лутом, EPGP/DKP начислений, логирования и некоторых автоматизаций.
 
-Система построена из независимых модулей, которые могут использоваться как совместно, так и частично.
+DarkAngel provides tools for guild management, raids, loot distribution, EPGP/DKP tracking, logging, and various automations.
+
+The system is built from independent modules that can be used either together or partially.
 
 ---
 
@@ -20,13 +21,13 @@ DarkAngel добавляет инструменты для управления 
 ---
 
 # Core — DarkAngel
-Core-модуль предоставляет базовую инфраструктуру, shared API и общие UI-компоненты для всех модулей аддона.
+The core module provides the base infrastructure, shared API, and common UI components for all addon modules.
 
-### Функционально, модуль добавляет:
-- Браузер гильдии (поиск, сортировка, шаблоны)
-- Система локальных привязок - возможность привязать игрока без приглашения в гильдию (основной функционал завязан на модуле Awarder)
-- Поддержка EPGP/DKP систем
-- Общие утилиты для работы с гильдией, точечно и массовые
+### Functionally, the module adds:
+- Guild browser (search, sorting, templates)
+- Local linking system — ability to link a player without inviting them to the guild (main functionality is tied to the Awarder module)
+- EPGP/DKP system support
+- General guild utilities for both targeted and mass operations
 
 ### Guild Browser (Guild Viewer)
 <p align="left">
@@ -35,39 +36,39 @@ Core-модуль предоставляет базовую инфраструк
     </a>
 </p>
 
-Полноценный браузер гильдии со следующими возможностями:
-- Поиск по:
-    - нику
-    - уровню (`>15`, `<80`, `>70<79`)
-    - рангу (работает математика поиска по айди ранга как в "уровень", так и поиск по названию ранга)
-    - заметкам / оф. заметкам
+A full-featured guild browser with the following capabilities:
+- Search by:
+    - character name
+    - level (`>15`, `<80`, `>70<79`)
+    - rank (supports mathematical rank ID search as in “level”, and rank name search)
+    - notes / officer notes
     - last online
-    - класс (реализовано через выпадающее меню возле колонки "ник")
+    - class (via dropdown next to the “name” column)
 
-- Сортировка:
-    - по любым колонкам
-    - кастомные сортировки (EPGP, DKP, PR, Total/Net/Hrs)
-    - группировка main + alts с сортировкой по наименьшему online
-    - реверс сортировки
-    - раздельная группировка онлайн/оффлайн
+- Sorting:
+    - by any column
+    - custom sorting (EPGP, DKP, PR, Total/Net/Hrs)
+    - main + alt grouping sorted by lowest online time
+    - reverse sorting
+    - separate online/offline grouping
 
-- Фильтры:
-    - только мейны / твинки
-    - (EPGP) "замороженные"
-    - игроки без привязки
-    - ошибки привязки / "двойные твины"
-    - привязка к ливнувшим игрокам
+- Filters:
+    - mains / alts only
+    - (EPGP) “frozen” players
+    - unlinked players
+    - link errors / “duplicate alts”
+    - links to players who have left the guild
 
-- Bulk операции:
-    - массовая смена заметок / оф. заметок
-    - смена рангов
-    - начисление/снятие EP/GP/DKP
-    - массовый кик
-    - перепривязка твинов между мейнами
+- Bulk operations:
+    - mass note / officer note changes
+    - rank changes
+    - EP/GP/DKP adjustments
+    - mass kick
+    - relinking alts between mains
 
-- Inline редактирование:
-    - редактирование ранга / заметок
-    - подсветка похожих значений
+- Inline editing:
+    - rank / note editing
+    - highlighting similar values
 
 ### GM View
 <p align="left">
@@ -76,18 +77,18 @@ Core-модуль предоставляет базовую инфраструк
     </a>
 </p>
 
-Админ-панель управления структурой гильдии:
-(доступно любому игроку гильдии, но вносить изменения может только ГМ)
+Guild structure management admin panel:
+(available to any guild member, but only the GM can apply changes)
 
-- визуальная схема рангов:
-    - права для каждого ранга
-    - создание / копирование и перемещение рангов в любую позицию (планирование)
-    - перемещение игроков между рангами (планирование)
-    - Все ранги и все права на одной странице
-- экспорт / импорт конфигураций
-- интеграция с Log модулем
-- применение изменений одним действием
-- автоматический backup перед применением
+- visual rank schema:
+    - permissions per rank
+    - create / copy / move ranks anywhere (planning mode)
+    - move players between ranks (planning mode)
+    - all ranks and permissions on a single page
+- export / import configurations
+- integration with the Log module
+- apply changes in a single action
+- automatic backup before applying changes
 
 ---
 
@@ -98,28 +99,28 @@ Core-модуль предоставляет базовую инфраструк
     </a>
 </p>
 
-Автоматизация гильдейских сборов на Raid Time.
+Automation for guild raid time gatherings.
 
-### Возможности:
-- авто-инвайт по ключевым словам (по дефолту, "+")
-- авто-анонс рейда в гильд. чат
-- работа через:
+### Features:
+- auto-invite via keyword (default: "+")
+- auto raid announcements in guild chat
+- works via:
     - guild chat
     - whisper
     - LFG / global channels
-        - работает через "секретную фразу"
-- автоостановка по таймеру
-    - таймер в минутах
-    - конкретное время остановки
-- Discord link auto-send при запросах
+        - uses a “secret phrase”
+- auto-stop via timer
+    - timer in minutes
+    - specific stop time
+- Discord link auto-send on request
 - bulk invite:
-  - онлайн 80lvl гильдии
-  - snapshot рейда из Awarder
-  - игроки из Guild Browser
-    - все соответствующие поиску
-    - выделенные через Ctrl/Shift
+  - online level 80 guild members
+  - raid snapshot from Awarder
+  - players from Guild Browser
+    - all matching search results
+    - selected via Ctrl/Shift
 
-- настройки рейда:
+- raid settings:
   - loot method
   - difficulty
 
@@ -132,136 +133,135 @@ Core-модуль предоставляет базовую инфраструк
     </a>
 </p>
 
-Автоматическая раздача consumables в рейде.
+Automatic consumables distribution in raids.
 
-### Возможности:
-- определение роли игрока:
+### Features:
+- player role detection:
   - tank / healer / melee / ranged
-- автоматическая выдача предметов:
-  - еда
-  - фласки
-  - зелья
-- до 5 предметов на роль
-- системы наборов (preset packs)
-- проверка гильдейской принадлежности
-- отслеживание получения предметов
-- кто уже получил: интеграция с Awarder модулем
+- automatic item distribution:
+  - food
+  - flasks
+  - potions
+- up to 5 items per role
+- preset pack system
+- guild membership verification
+- item pickup tracking
+- tracking who already received items: integrated with Awarder module
 
 ---
 
 # DarkAngel_Awarder
-Рейд-браузер и система начислений EPGP/DKP.
+Raid browser and EPGP/DKP award system.
 
-### Возможности:
+### Features:
 
 #### Raid UI
-- отображение рейда (1–8 группы)
-- цвет классов
-- статусы (ready check, RL / assist, Master Looter, Main Tank / Off Tank)
-- drag & drop управление игроками/группами
-- условно-цветовое отображение игроков:
+- raid display (groups 1–8)
+- class colors
+- status indicators (ready check, RL / assist, Master Looter, Main Tank / Off Tank)
+- drag & drop player/group management
+- conditional color coding of players:
     - ⬜ Normal — everything is OK (no issues detected)
     - 🟩 External link — not in guild, but locally linked to a guild main
-        - такой игрок может получать награду за рейд или учавствовать в разроле лута в BidTracker
+        - such players can receive raid rewards or participate in loot rolls in BidTracker
     - 🟥 Bad — player is not in guild OR incorrectly linked OR linked to a leaver
     - 🟨 New player — joined guild, but has 0 EPGP/DKP
-    - 🟦 Frozen (EPGP/DKP only) — character or its main is frozen
-    - 🟪 Raid duplicate — player is already present in raid on another character
+    - 🟦 Frozen (EPGP/DKP only) — character or main is frozen
+    - 🟪 Raid duplicate — player already present in raid on another character
 
 #### Player info (Shift hover)
 - EP/GP/PR/DKP
-- заметки
-- альты / мейны
-- локальные привязки
-- присутствие в рейде
+- notes
+- alts / mains
+- local links
+- raid presence
 
 #### Raid snapshots
-- сохранение состава рейда
-- оффлайн репрезентация рейда
-- экспорт в Wowhead raid preview
+- raid composition saving
+- offline raid representation
+- export to Wowhead raid preview
 
 #### EPGP/DKP system
-- гибкие критерии начислений:
-    - участие в рейде
-    - роль (tank/heal/dps)
-    - класс / билд
-    - рейд лидер
-    - кастом награда по логам Scada (например, топ DPS за рейд)
-- автоматическое и ручное выставление чекбоксов
-- batch начисления
-- сообщения в чат с breakdown наград
+- flexible award criteria:
+    - raid participation
+    - role (tank/heal/dps)
+    - class / build
+    - raid leader
+    - custom log-based rewards (e.g. top DPS of the raid via Scada logs)
+- automatic and manual checkbox assignment
+- batch awards
+- chat messages with reward breakdown
 
 #### Raid operations on RightClick
 - assign MT/OT / ML / Assist
 - kick players
-- whisper commands (secure actions) - should be enabled in settings
-    - узнать свои очки EPGP/DKP
-    - привязаться к мейну
-    - привязаться к мейну без вступления в гильдию (локальная привязка)
+- whisper commands (secure actions) — must be enabled in settings
+    - check your EPGP/DKP points
+    - link to a main character
+    - link to a main without joining the guild (local link)
 
 ---
 
 # DarkAngel_BidTracker
-Аукционная система для EP-Auc / DKP.
+Auction system for EP-Auction / DKP.
 
-### Возможности:
-- объявление лота
-- отслеживание ставок в рейд чате
-- проверка доступных EP/DKP у участников
-- предупреждения о неподходящем классе/спеке
-- возможность задать систему роста ставок
-- завершение аукциона:
-  - авто-трейд победителю
-  - выдача предмета из лута
-- автоматическое списание EP/DKP
+### Features:
+- item auction announcement
+- bid tracking in raid chat
+- validation of EP/DKP availability
+- warnings for incorrect class/spec
+- configurable bid progression system
+- auction conclusion:
+  - automatic trade to winner
+  - item distribution from loot
+- automatic EP/DKP deduction
 
 ---
 
 # DarkAngel_Logger
-Модуль логирования всех изменений в гильдии.
+Guild-wide change logging module.
 
-### Логирует:
-- изменения заметок
-- изменения офицерских заметок
-  - транзакции EPGP/DKP
-  - привязки/перепривязки твинов
-  - decay и аномалии значений
-  - распознавание причин изменений (loot, slack, decay, raid award, manual)
-- изменения рангов
-- вступления, выход и возвраты игроков в гильдию
-- изменения MOTD / Guild Info / GM Ranks
+### Logs:
+- note changes
+- officer note changes
+  - EPGP/DKP transactions
+  - alt linking / relinking
+  - decay and value anomalies
+  - change reason detection (loot, slack, decay, raid award, manual)
+- rank changes
+- guild joins, leaves, and returns
+- MOTD / Guild Info / GM rank changes
 
-### Особенности:
-- цветовой diff (positional + semantic)
-- распознавание EPGP/DKP логики
-- детект нечестных начислений, как простых (без обьявления), так и скрытых под EPGP:Decay
-- история игроков даже после выхода из гильдии
-- переход в Details view по игроку
+### Features:
+- color diff (positional + semantic)
+- EPGP/DKP logic recognition
+- cheating detection (both explicit and hidden under EPGP decay systems)
+- full player history even after leaving guild
+- per-player detailed view
 
 ---
 
 # DarkAngel_Backup
-Система резервного копирования гильдии.
+Guild backup system.
 
-### Возможности:
-- ручные и автоматические бэкапы
-- настройка частоты авто-бэкапов
-- хранение N последних бэкапов
-- выбор данных для сохранения:
-  - заметки
-  - оф. заметки
-  - ранги
-  - MOTD / Guild Info / GM System
-  - локальные привязки
-- выбор хранилища:
+### Features:
+- manual and automatic backups
+- configurable backup frequency
+- retention of last N backups
+- selectable data:
+  - notes
+  - officer notes
+  - ranks
+  - MOTD / Guild Info / GM system
+  - local links
+- storage options:
   - SavedVariables
   - per-character storage
 
-### Восстановление:
-- выборочные restore (по типу данных)
-- правила пропуска (если данные уже существуют)
-- полный restore (для GM)
-- восстановление системы рангов
-- режим пассивного восстановления, для игроков присоединяющихся к гильдии
-    - отличный вариант для случаев когда нужно сделать "перенос" игроков между гильдиями
-
+### Restore:
+- selective restore (by data type)
+- skip rules (if data already exists)
+- full restore (GM only)
+- rank system restoration
+- passive restore mode for players joining the guild
+    - useful for transferring players between guilds
