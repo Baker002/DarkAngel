@@ -1,7 +1,7 @@
 # DarkAngel for Wrath of the Lich King `3.3.5`
 ![GitHub last commit](https://img.shields.io/github/last-commit/Baker002/DarkAngel)
 
-![DarkAngel Preview](doc_images/preview_main.webp)
+![DarkAngel Preview](https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_main.webp)
 
 DarkAngel provides tools for guild management, raids, loot distribution, EPGP/DKP tracking, logging, and various automations.
 
@@ -31,8 +31,8 @@ The core module provides the base infrastructure, shared API, and common UI comp
 
 ### Guild Browser (Guild Viewer)
 <p align="left">
-    <a href="doc_images/preview_guild.webp">
-        <img src="doc_images/preview_guild.webp" width="650">
+    <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_guild.webp">
+        <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_guild.webp" width="650">
     </a>
 </p>
 
@@ -72,8 +72,8 @@ A full-featured guild browser with the following capabilities:
 
 ### GM View
 <p align="left">
-    <a href="doc_images/preview_guildControl.webp">
-        <img src="doc_images/preview_guildControl.webp" width="550">
+    <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_guildControl.webp">
+        <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_guildControl.webp" width="550">
     </a>
 </p>
 
@@ -94,8 +94,8 @@ Guild structure management admin panel:
 
 # DarkAngel_Inviter
 <p align="left">
-    <a href="doc_images/preview_inviter.webp">
-        <img src="doc_images/preview_inviter.webp" width="550">
+    <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_inviter.webp">
+        <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_inviter.webp" width="550">
     </a>
 </p>
 
@@ -128,8 +128,8 @@ Automation for guild raid time gatherings.
 
 # DarkAngel_Dispenser
 <p align="left">
-    <a href="doc_images/preview_dispenser.webp">
-        <img src="doc_images/preview_dispenser.webp" width="300">
+    <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_dispenser.webp">
+        <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_dispenser.webp" width="300">
     </a>
 </p>
 
