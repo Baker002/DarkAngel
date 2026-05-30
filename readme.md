@@ -28,6 +28,7 @@ The core module provides the base infrastructure, shared API, and common UI comp
 - Local linking system — ability to link a player without inviting them to the guild (main functionality is tied to the Awarder module)
 - EPGP/DKP system support
 - General guild utilities for both targeted and mass operations
+- Guild GM View
 
 ### Guild Browser (Guild Viewer)
 <p align="left">
