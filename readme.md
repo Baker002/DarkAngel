@@ -146,7 +146,7 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Awarder
-Рейд-менеджер и система начислений EPGP/DKP.
+Рейд-браузер и система начислений EPGP/DKP.
 
 ### Возможности:
 
@@ -161,7 +161,7 @@ Core-модуль предоставляет базовую инфраструк
         - такой игрок может получать награду за рейд или учавствовать в разроле лута в BidTracker
     - 🟥 Bad — player is not in guild OR incorrectly linked OR linked to a leaver
     - 🟨 New player — joined guild, but has 0 EPGP/DKP
-    - 🟦 Frozen (EPGP/DKP only) — this/main character is frozen
+    - 🟦 Frozen (EPGP/DKP only) — character or its main is frozen
     - 🟪 Raid duplicate — player is already present in raid on another character
 
 #### Player info (Shift hover)
