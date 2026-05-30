@@ -29,6 +29,7 @@ Core-модуль предоставляет базовую инфраструк
 - Общие утилиты для работы с гильдией, точечно и массовые
 
 ### Guild Browser (Guild Viewer)
+![DarkAngel Guild](doc_images/preview_guild.webp)
 Полноценный браузер гильдии со следующими возможностями:
 - Поиск по:
     - нику
@@ -64,6 +65,7 @@ Core-модуль предоставляет базовую инфраструк
     - подсветка похожих значений
 
 ### GM View
+![DarkAngel GM](doc_images/preview_guildControl.webp)
 Админ-панель управления структурой гильдии:
 (доступно любому игроку гильдии, но вносить изменения может только ГМ)
 
@@ -80,6 +82,7 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Inviter
+![DarkAngel GM](doc_images/preview_inviter.webp)
 Автоматизация гильдейских сборов на Raid Time.
 
 ### Возможности:
@@ -108,6 +111,7 @@ Core-модуль предоставляет базовую инфраструк
 ---
 
 # DarkAngel_Dispenser
+![DarkAngel GM](doc_images/preview_dispenser.webp)
 Автоматическая раздача consumables в рейде.
 
 ### Возможности:
@@ -136,13 +140,13 @@ Core-модуль предоставляет базовую инфраструк
 - статусы (ready check, RL / assist, Master Looter, Main Tank / Off Tank)
 - drag & drop управление игроками/группами
 - условно-цветовое отображение игроков:
-    - <span>■</span> Normal — everything is OK (no issues detected)
-    - <span style="color:#3ddc84;">■</span> External link — not in guild, but locally linked to a guild main
+    - ⬜ Normal — everything is OK (no issues detected)
+    - 🟩 External link — not in guild, but locally linked to a guild main
         - такой игрок может получать награду за рейд или учавствовать в разроле лута в BidTracker
-    - <span style="color:#ff4d4d;">■</span> Bad — player is not in guild OR incorrectly linked OR linked to a leaver
-    - <span style="color:#ffd24d;">■</span> New player — joined guild, but has 0 EPGP/DKP
-    - <span style="color:#4da3ff;">■</span> Frozen (EPGP/DKP only) — this/main character is frozen
-    - <span style="color:#ff66cc;">■</span> Raid duplicate — player is already present in raid on another character
+    - 🟥 Bad — player is not in guild OR incorrectly linked OR linked to a leaver
+    - 🟨 New player — joined guild, but has 0 EPGP/DKP
+    - 🟦 Frozen (EPGP/DKP only) — this/main character is frozen
+    - 🟪 Raid duplicate — player is already present in raid on another character
 
 #### Player info (Shift hover)
 - EP/GP/PR/DKP
