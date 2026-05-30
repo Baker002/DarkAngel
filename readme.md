@@ -31,7 +31,7 @@ Core-модуль предоставляет базовую инфраструк
 ### Guild Browser (Guild Viewer)
 <p align="left">
     <a href="doc_images/preview_guild.webp">
-        <img src="doc_images/preview_guild.webp" width="350">
+        <img src="doc_images/preview_guild.webp" width="650">
     </a>
 </p>
 Полноценный браузер гильдии со следующими возможностями:
@@ -71,7 +71,7 @@ Core-модуль предоставляет базовую инфраструк
 ### GM View
 <p align="left">
     <a href="doc_images/preview_guildControl.webp">
-        <img src="doc_images/preview_guildControl.webp" width="250">
+        <img src="doc_images/preview_guildControl.webp" width="650">
     </a>
 </p>
 Админ-панель управления структурой гильдии:
@@ -92,7 +92,7 @@ Core-модуль предоставляет базовую инфраструк
 # DarkAngel_Inviter
 <p align="left">
     <a href="doc_images/preview_inviter.webp">
-        <img src="doc_images/preview_inviter.webp" width="250">
+        <img src="doc_images/preview_inviter.webp" width="450">
     </a>
 </p>
 Автоматизация гильдейских сборов на Raid Time.
@@ -125,7 +125,7 @@ Core-модуль предоставляет базовую инфраструк
 # DarkAngel_Dispenser
 <p align="left">
     <a href="doc_images/preview_dispenser.webp">
-        <img src="doc_images/preview_dispenser.webp" width="250">
+        <img src="doc_images/preview_dispenser.webp" width="300">
     </a>
 </p>
 Автоматическая раздача consumables в рейде.
