@@ -217,7 +217,12 @@ DarkAngel_minimapBtn.menu:SetSize(DarkAngel_minimapBtn.menu.width, DarkAngel_min
 DarkAngel_minimapBtn.menu:SetPoint("TOPRIGHT", DarkAngel_minimapBtn, "CENTER",-15,-15)
 DarkAngel_minimapBtn.menu:EnableMouse(true)
 DarkAngel_minimapBtn.menu:EnableMouseWheel(true)
-DarkAngel_minimapBtn.menu.t=DarkAngel_minimapBtn.menu:CreateTexture(nil, "BACKGROUND"); DarkAngel_minimapBtn.menu.t:SetAllPoints(); DarkAngel_minimapBtn.menu.t:SetTexture(0.4,0.9,0.9, 0.6); DarkAngel_minimapBtn.menu.t:SetBlendMode('blend')
+DarkAngel_minimapBtn.menu.border = DarkAngel_minimapBtn.menu:CreateTexture(nil, "BORDER")
+DarkAngel_minimapBtn.menu.border:SetPoint("TOPLEFT", -1, 1)
+DarkAngel_minimapBtn.menu.border:SetPoint("BOTTOMRIGHT", 1, -1)
+DarkAngel_minimapBtn.menu.border:SetTexture(0.7,0.99,0.99, 0.9)
+DarkAngel_minimapBtn.menu.t=DarkAngel_minimapBtn.menu:CreateTexture(nil, "ARTWORK"); DarkAngel_minimapBtn.menu.t:SetAllPoints(); DarkAngel_minimapBtn.menu.t:SetTexture(0.08, 0.05, 0.08, 1); DarkAngel_minimapBtn.menu.t:SetBlendMode('blend')
+
 DarkAngel_minimapBtn.menu:SetMovable(true)
 DarkAngel_minimapBtn.menu:SetResizable(true)
 DarkAngel_minimapBtn.menu:Hide()
@@ -273,26 +278,26 @@ function DA:MimimapMenu_Create()
 		)
 	end
 
-if IsGuildLeader() then
-	tinsert(listbtns,
-		{'Guild control',10,
-		function()
-			DarkAngel_minimapBtn.menu:Hide();
+	if IsGuildLeader() then
+		tinsert(listbtns,
+			{'Guild control',10,
+			function()
+				DarkAngel_minimapBtn.menu:Hide();
 
-			DarkAngelGUI:Show()
-			_G['DarkAngelGUI']['Guildbtn']:Click('LeftButton',true)
-			_G['DarkAngelGUI']['Guildbtn']:Click('LeftButton',false)
+				DarkAngelGUI:Show()
+				_G['DarkAngelGUI']['Guildbtn']:Click('LeftButton',true)
+				_G['DarkAngelGUI']['Guildbtn']:Click('LeftButton',false)
 
-			DarkAngelGUI.Guild.OpenGC_Btn:Click()
-			DarkAngelGUI.Guild.GC:Show()
-		end}
-	)
-end
+				DarkAngelGUI.Guild.OpenGC_Btn:Click()
+				DarkAngelGUI.Guild.GC:Show()
+			end}
+		)
+	end
 
 
 	for i,j in pairs(listbtns) do
 		DA.CreateFFGButton2(nil,DarkAngel_minimapBtn.menu,{"LEFT",DarkAngel_minimapBtn.menu,"TOPLEFT",2,5-15*i},14,83,j[1],
-		'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), j[2]},j[3],nil,'middle','left').fs:SetTextColor(0.1,0.1,0.1,0.8)
+		[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), j[2]},j[3],nil,'middle','left').fs:SetTextColor(0.69,0.85,0.99,0.89)
 	end
 
 	DarkAngel_minimapBtn.menu:SetSize(87,#listbtns*15+3)

@@ -3,7 +3,7 @@
 
 ![DarkAngel Preview](https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_main.webp)
 
-DarkAngel provides tools for guild management, raids, loot distribution, EPGP/DKP tracking, logging, and various automations.
+DarkAngel provides tools for guild and raidmanagement, loot distribution, EPGP/DKP awarding, logging, bulk operations and other stuff.
 
 The system is built from independent modules that can be used either together or partially.
 
@@ -24,10 +24,10 @@ The system is built from independent modules that can be used either together or
 The core module provides the base infrastructure, shared API, and common UI components for all addon modules.
 
 ### Functionally, the module adds:
-- Guild browser (search, sorting, templates)
+- Guild browser (search, sorting, flter, templates)
+  - General guild utilities for both targeted and mass operations
+  - EPGP/DKP system support
 - Local linking system — ability to link a player without inviting them to the guild (main functionality is tied to the Awarder module)
-- EPGP/DKP system support
-- General guild utilities for both targeted and mass operations
 - Guild GM View
 
 ### Guild Browser (Guild Viewer)
@@ -37,39 +37,44 @@ The core module provides the base infrastructure, shared API, and common UI comp
   </a>
 </p>
 
-A full-featured guild browser with the following capabilities:
-- Search by:
-  - character name
-  - level (`>15`, `<80`, `>70<79`)
-  - rank (supports mathematical rank ID search as in “level”, and rank name search)
-  - notes / officer notes
-  - last online
-  - class (via dropdown next to the “name” column)
+An admin panel-style guild browser with the following capabilities:
+#### Search by:
+- character name
+- level
+- rank
+- notes / officer notes
+- last online
+- class (via dropdown next to the “name” column)
 
-- Sorting:
-  - by any column
-  - custom sorting (EPGP, DKP, PR, Total/Net/Hrs)
-  - main + alt grouping sorted by lowest online time
-  - reverse sorting
-  - separate online/offline grouping
+#### Sorting:
+- by any column
+- custom sorting (EPGP, DKP, PR, Total/Net/Hrs)
+- main + alt grouping sorted by lowest online time
+- reverse sorting
+- separate online/offline grouping
 
-- Filters:
-  - mains / alts only
-  - (EPGP) “frozen” players
-  - unlinked players
-  - link errors / “duplicate alts”
-  - links to players who have left the guild
+#### Filters:
+- mains / alts only
+- (EPGP) “frozen” players
+- unlinked players
+- link errors / “duplicate alts”
+- links to players who have left the guild
 
-- Bulk operations:
-  - mass note / officer note changes
-  - rank changes
-  - EP/GP/DKP adjustments
-  - mass kick
-  - relinking alts between mains
+#### Bulk operations:
+- mass note / officer note changes
+- rank changes
+- EP/GP/DKP adjustments
+- mass kick
+- relinking alts between mains
 
-- Inline editing:
-  - rank / note editing
-  - highlighting similar values
+#### Inline editing:
+- rank / note editing
+- highlighting similar values
+
+
+All Search fields support Lua Reg Exp. Additionally, "level" and "rank" fields support "math" operands `>15`, `<80`, `>70<79`
+Reg Exp by default should be the same as normal search since you dont often need to search something with extra symbols, but if you need it, such symbol should be escaped with "%":
+fmage 5.6 -> fmage 5%.6
 
 ### GM View
 <p align="left">
@@ -160,14 +165,21 @@ Raid browser and EPGP/DKP award system.
 - class colors
 - status indicators (ready check, RL / assist, Master Looter, Main Tank / Off Tank)
 - drag & drop player/group management
-- conditional color coding of players:
-  - ⬜ Normal — everything is OK (no issues detected)
-  - 🟩 External link — not in guild, but locally linked to a guild main
-    - such players can receive raid rewards or participate in loot rolls in BidTracker
-  - 🟥 Bad — player is not in guild OR incorrectly linked OR linked to a leaver
-  - 🟨 New player — joined guild, but has 0 EPGP/DKP
-  - 🟦 Frozen (EPGP/DKP only) — character or main is frozen
-  - 🟪 Raid duplicate — player already present in raid on another character
+
+#### Conditional color coding of players:
+- ⬜ Normal — everything is OK (no issues detected)
+- 🟩 External link — not in guild, but locally linked to a guild main
+  - such players can receive raid rewards or participate in loot rolls in BidTracker
+- 🟥 Bad — player is not in guild OR incorrectly linked OR linked to a leaver
+- 🟨 New player — joined guild, but has 0 EPGP/DKP
+- 🟦 Frozen (EPGP/DKP only) — character or main is frozen
+- 🟪 Raid duplicate — player already present in raid on another character
+
+
+#### Whisper commands — must be enabled in addon settings
+- check your EPGP/DKP points
+- link to a main character
+- link to a main without joining the guild (local link)
 
 #### Player info (Shift hover)
 - EP/GP/PR/DKP
@@ -193,27 +205,28 @@ Raid browser and EPGP/DKP award system.
 - chat messages with reward breakdown
 
 #### Raid operations on RightClick
-- assign MT/OT / ML / Assist
+- MT/OT / ML / Assist
 - kick players
-- whisper commands (secure actions) — must be enabled in settings
-  - check your EPGP/DKP points
-  - link to a main character
-  - link to a main without joining the guild (local link)
+- MS Change — Loot priority change (main functionality is tied to the BidTracker module)
 
 ---
 
 # DarkAngel_BidTracker
-Auction system for EP-Auction / DKP.
+Auction system for EP-Auc / DKP -based guilds.
 
 ### Features:
 - item auction announcement
 - bid tracking in raid chat
 - validation of EP/DKP availability
-- warnings for incorrect class/spec
+- indication for incorrect class/spec
 - configurable bid progression system
-- auction conclusion:
-  - automatic trade to winner
-  - item distribution from loot
+- "all in" bids
+- MS Change functionality on Right Click 
+  - this setting is saved between game sessions and is reset when entering a new raid
+
+#### Auction Conclusion:
+- automatic trade to winner
+- item distribution from loot
 - automatic EP/DKP deduction
 
 ---
