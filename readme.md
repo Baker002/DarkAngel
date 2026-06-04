@@ -120,7 +120,6 @@ Automation for guild raid time gatherings.
   - players from Guild Browser
   - all matching search results
   - selected via Ctrl/Shift
-
 - raid settings:
   - loot method
   - difficulty
