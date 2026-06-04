@@ -338,7 +338,7 @@ AskDiscordFrame:RegisterEvent("CHAT_MSG_RAID");
 
 
 function Mod:OnInitialize()
-	DA_Inviter:SetScale(fuckingOptions.SRScale)
+	DA.CreateScaler('DA_Inviter',0.6,2,{'fuckingOptions','SRScale'})
 
 end
 
@@ -1098,7 +1098,6 @@ function Mod:Inviter_Load()
 
 	end
 
-	DA.CreateScaler('DA_Inviter',0.6,2,{'fuckingOptions','SRScale'})
 
 end
 

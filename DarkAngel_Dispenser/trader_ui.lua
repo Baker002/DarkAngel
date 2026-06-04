@@ -13,7 +13,7 @@ DA.HelpCreater(F,{"CENTER",F,"TOPRIGHT",-15,-5},'dispenser_guide',8,8)
 
 function Mod:OnInitialize()
 
-	DA_Flasker:SetScale(fuckingOptions.FFFLScale)
+	DA.CreateScaler('DA_Flasker',0.8,2,{'fuckingOptions','FFFLScale'})
 	
 	--flask dispenser
 	DA.CreateTimer(nil,"flask_disp",0,fuckingOptions.dispenser_speed,true,function(self)
@@ -166,7 +166,6 @@ F:SetScript("OnDragStop", function(self)
 	fuckingOptions.saved_guiPositions.DA_Flasker={point[1] or "TOPLEFT",point[3] or "CENTER",point[4] or 0,point[5] or 0}
 
 end)
-DA.CreateScaler('DA_Flasker',0.8,2,{'fuckingOptions','FFFLScale'})
 
 local TR_SelectedSet_UI=1
 

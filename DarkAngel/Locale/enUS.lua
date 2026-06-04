@@ -680,7 +680,7 @@ L['6-8 standby']=true
 L['profile']='set'
 L['jokes']=true
 L['zamprocep']='%standby award'
-L['zamenagudok']='# whisper me \'epgp standby\' to join the raid standby'
+L['zamenagudok']="# whisper me '?standby' to join the raid standby"
 L["settingep0"]="Player $1 has less EP than you’re trying to spend ($2). EP set to 0."
 L["settinggp0"]="Player $1 has less GP than you’re trying to spend ($2). GP set to 0."
 L['seems you forgot to enable some checks']=true
@@ -729,7 +729,7 @@ L["seems you got incorrect officer note in guild (double tvin). Contact officer 
 L['seems your main got frozen epgp. Contact officer to fix it']=true
 L['seems you got frozen epgp. Contact officer to fix it']=true
 L['you are locally assigned, try to use standby without main nickname']=true
-L["You are not in guild. Try adding your main nickname: epgp standby Player"]=true
+L["You are not in guild. Try adding your main nickname: ?standby Player"]=true
 L["there is no such main in guild"]=true
 L["corrupted local assign. The Old Buddy is back?"]=true
 
@@ -839,9 +839,9 @@ end
 
 --Descriptions
 do
-L["DESCr-procepzam_usemanual"]=[[|cffaaccffDetermines the standby percentage|r
+L["DESCr-procepzam_usemanual"]=[[|cffaaccffDetermines the percentage|r
   |cffff9999Disabled|r:
-    The standby receives a percentage of the raid reward based on the EPGP addon settings in "O > Guild > Info" :
+    The standby receives a percentage of the raid reward based on settings in "O > Guild > Info" :
       -EPGP-
       @BASE_GP:1
       @DECAY_P:30
@@ -975,7 +975,7 @@ L['DESCr-awlocalstt_qdkp_sync']="Import locals from DarkAngel to QDKP"
 
 L['DESCr-ZamenaFrBtn']=[==[|cffff9999Additional standby|r
 Useful when there is not enough space in the raid to keep the standby players
-Players can whisper "epgp standby" (by default) to you to join standby
+Players can whisper "?standby" (by default) to you to join standby
 
 The list of players is saved even when you re-enter the game (saved within your account>guild)]==]
 L['DESCr-additionalbinds']=[==[|cffff9999Additional binds|r

@@ -1398,7 +1398,7 @@ f.scrollbar:Hide()
 
 return f
 end
-function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
+function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue,customparent,custompoint)
 	if not Frametoscale then print('error 1086') return end
 
 	if type(Frametoscale)=='table' then
@@ -1414,6 +1414,18 @@ function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
 		top = 0,
 		scale = 1,
 	}
+	local function getvalue()
+		return 
+				setvalue[3] and _G[setvalue[1]][_G[setvalue[3]]][setvalue[2]]
+			or 	setvalue[2] and _G[setvalue[1]][setvalue[2]]
+	end
+	local function writevalue(val)
+		if setvalue[3] then
+			_G[setvalue[1]][_G[setvalue[3]]][setvalue[2]] = val
+		elseif setvalue[2] then
+			_G[setvalue[1]][setvalue[2]] = val
+		end
+	end
 	local function GetScaleDistance()
 		local left, top = SOS.left, SOS.top
 		local scale = SOS.EFscale
@@ -1424,7 +1436,9 @@ function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
 
 		return sqrt(x*x+y*y)
 	end
-
+	local function UpdateValue()
+		Frametoscale:SetScale(getvalue())
+	end
 	local function OnUpdate(self)
 		local scale = GetScaleDistance()/SOS.dist*SOS.scale
 		if scale < minsc then
@@ -1433,29 +1447,25 @@ function DA.CreateScaler(Frametoscale,minsc,maxsc,setvalue)
 			scale = maxsc
 		end
 
-		_G[setvalue[1]][setvalue[2]]=scale
-		Frametoscale:SetScale(_G[setvalue[1]][setvalue[2]])
-		
-		local s = SOS.scale/Frametoscale:GetScale()
-		local x = SOS.x*s
-		local y = SOS.y*s
-		Frametoscale:ClearAllPoints()
-		Frametoscale:SetPoint("TOPLEFT", UIParent, "TOPLEFT", x, y)
+		writevalue(scale)
+		Frametoscale:SetScale(scale)
+
+		if customparent and custompoint then
+			Frametoscale:SetParent(customparent)
+			Frametoscale:SetPoint(unpack(custompoint))
+		else
+			local s = SOS.scale/Frametoscale:GetScale()
+			local x = SOS.x*s
+			local y = SOS.y*s
+			Frametoscale:ClearAllPoints()
+			Frametoscale:SetPoint("TOPLEFT", UIParent, "TOPLEFT", x, y)
+		end
 	end
 
+	UpdateValue()
 	if setvalue[3] then
-		local function UpdateValue()
-			local val = _G[setvalue[1]][_G[setvalue[3]]][setvalue[2]]
-			Frametoscale:SetScale(val)
-		end
-		UpdateValue()
 		table.insert(DA.RunOnGuildUpdate, UpdateValue)
 	elseif setvalue[2] then
-		local function UpdateValue()
-			local val = _G[setvalue[1]][setvalue[2]]
-			Frametoscale:SetScale(val)
-		end
-		UpdateValue()
 		table.insert(DA.RunOnSettingsImport, UpdateValue)
 	end
 

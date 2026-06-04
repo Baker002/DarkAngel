@@ -1,5 +1,5 @@
 ## Title: DarkAngel
-## Version: 5.5.2
+## Version: 5.6
 ## Author: Baker
 ## Interface: 30300
 ## Notes: No one can hide from my sight...

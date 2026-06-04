@@ -62,6 +62,7 @@ local fuckingOptions_local={
 	SRScale=0.967,
 	FFFLScale=0.96,
 	Awarderscale=1.107,
+	AWautooptScale=2,
 	BidTrackerScale=1.1,
 	Decaydays=2,
 	decaygroup=1,
@@ -1056,8 +1057,7 @@ Dark_Angel_OnInit = function(guildinit)
 	DA.RunBuildQueue()
 	
 	
-	DarkAngelGUI:SetScale(fuckingOptions.FFGScale)
-	DarkAngelGUI.Guild.GC:SetScale(fuckingOptions.GCScale)
+	DA.CreateScaler('DarkAngelGUI',0.6,2,{'fuckingOptions','FFGScale'})
 	
 
 	Create_Slash_Functions()

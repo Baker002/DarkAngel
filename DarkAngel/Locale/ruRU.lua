@@ -683,7 +683,7 @@ L['6-8 standby']='6-8 замена'
 L['profile']='набор'
 L['jokes']='приколы'
 L['zamprocep']='%награды замене'
-L['zamenagudok']='# замена - мне в лс epgp standby'
+L['zamenagudok']="# замена - мне в лс '?standby'"
 L["settingep0"]="У игрока $1 меньше ЕП чем запланировано снять ($2). ЕП записано как 0"
 L["settinggp0"]="У игрока $1 меньше ГП чем запланировано снять ($2). ГП записано как 0"
 L['seems you forgot to enable some checks']='возможно галочки не выставлены'
@@ -732,7 +732,7 @@ L["seems you got incorrect officer note in guild (double tvin). Contact officer 
 L['seems your main got frozen epgp. Contact officer to fix it']="у вашего мейна заморожено еп. Обратитесь к офицеру для разморозки"
 L['seems you got frozen epgp. Contact officer to fix it']="у вас заморожено еп. Обратитесь к офицеру для разморозки"
 L['you are locally assigned, try to use standby without main nickname']="ты локально подвязан, попробуй писать стендбай без ника основы"
-L["You are not in guild. Try adding your main nickname: epgp standby Player"]="ты не в гильдии. добавляй к команде ник мейна в ги: epgp standby Player"
+L["You are not in guild. Try adding your main nickname: ?standby Player"]="ты не в гильдии. добавляй к команде ник мейна в ги: ?standby Player"
 L["there is no such main in guild"]="такого мейна нет в гильдии"
 L["corrupted local assign. The Old Buddy is back?"]="обнаружена хуйня (кривая локальная привязка) старый ливер вернулся?"
 
@@ -840,9 +840,9 @@ end
 
 --Descriptions
 do
-L["DESCr-procepzam_usemanual"]=[[|cffff9999Определяет, процент награды для замены|r
+L["DESCr-procepzam_usemanual"]=[[|cffff9999Определяет процент награды|r
   |cffaaccffВыкл|r:
-    Замена получает процент от рейдовой награды согласно настройкам аддона EPGP в разделе "O > Гильдия > Информация" :
+    Замена получает процент от рейдовой награды согласно настройкам в разделе "O > Гильдия > Информация" :
       -EPGP-
       @BASE_GP:1
       @DECAY_P:30
@@ -975,7 +975,7 @@ L['DESCr-awlocalstt_qdkp_sync']="Импортировать локалки из 
 
 L['DESCr-ZamenaFrBtn']=[==[|cffff9999Дополнительная замена|r
 Полезно когда в рейде нехватает мест под замену
-Игроки могут шепнуть вам "epgp standby" (по умолчанию) чтобы попасть на замену
+Игроки могут шепнуть вам "?standby" (по умолчанию) чтобы попасть на замену
 
 Список игроков сохраняется даже при перезаходе в игру (в пределах аккаунта>гильдии)]==]
 L['DESCr-additionalbinds']=[==[|cffff9999Дополнительные бинды|r

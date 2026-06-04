@@ -270,7 +270,8 @@ end)
 DA_Awarder.group={}
 function Mod:OnInitialize()
 
-	DA_Awarder:SetScale(fuckingOptions.Awarderscale)
+	DA.CreateScaler('DA_Awarder',0.8,2,{'fuckingOptions','Awarderscale'})
+	DA.CreateScaler(DA_Awarder.autoopt,1,4,{'fuckingOptions','AWautooptScale'},DA_Awarder, {"BOTTOMLEFT", DA_Awarder, "BOTTOMRIGHT", 2, 0})
 	
     DA_Snapshots=DA_Snapshots or {}
 		
@@ -498,7 +499,6 @@ function Mod:OnGuildLoad()
 		tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 		tinsert(DA_Fep_bulk,function() FEP_GatherRaid() end)
 	end
-	
 	
  
 end
@@ -1817,11 +1817,11 @@ for i=1,8 do
 		{[[Interface\Icons\Spell_Shadow_SoulGem]],L['remmarkpl'],'saved'}
 		}) do
 			if n~=5 then
-				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 				end,txt[2])
 			else
-				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 					for setname,settbl in pairs(DA_StoredCheckboxes) do
 						if not DA_StoredCheckboxes_remembered[setname] then
@@ -1837,19 +1837,19 @@ for i=1,8 do
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]:SetScript("OnEnter", function(self)
 					self:RegisterEvent('MODIFIER_STATE_CHANGED')
 					local ppls,list=getstorednames(i)
-					if IsAltKeyDown() and not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
+					if IsAltKeyDown() and not IsShiftKeyDown() and GetMouseFocus()==self and ppls>0 then
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cfffc3562"..L['alt-click to DELETE all saved characters'],{UIDarkAngelFontConsolas:GetFont(), 10})
-					elseif IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
+					elseif IsShiftKeyDown() and GetMouseFocus()==self and ppls>0 then
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb".."|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.." |cff6df7bb:\n|cff62ddf5"..list,{UIDarkAngelFontConsolas:GetFont(), 10})
-					elseif not IsShiftKeyDown() and GetMouseFocus():GetName()==self:GetName() and ppls>0 then
+					elseif not IsShiftKeyDown() and GetMouseFocus()==self and ppls>0 then
 						DA.myShowTooltip(self,txt[2].."\n\n|cff6df7bb"..L['players saved'].." |cff6ee3fa"..ppls.."\n|cff447882"..L['hold Shift to see names'].."\n|cff824452"..L['alt-click to DELETE all saved characters'],{UIDarkAngelFontConsolas:GetFont(), 10})
-					elseif GetMouseFocus():GetName()==self:GetName() and ppls==0 then
+					elseif GetMouseFocus()==self and ppls==0 then
 						DA.myShowTooltip(self,txt[2].."\n\n|cffeef564 "..L['no people saved'],{UIDarkAngelFontConsolas:GetFont(), 10})
 					end
 				end)
 				
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]:SetScript("OnEvent", function(self)
-					if self:IsVisible() and self:IsMouseOver() and GetMouseFocus():GetName()==self:GetName() then
+					if self:IsVisible() and self:IsMouseOver() and GetMouseFocus()==self then
 						self:GetScript('OnEnter')(GetMouseFocus())
 					end
 				end)
@@ -1875,7 +1875,7 @@ for i=1,8 do
 		end)
 		DA_Awarder.autoopt['fr'..i].group1.onenter=function()
 			for b=1,5 do
-				DA_Awarder.autoopt['fr'..i].group1['gr1'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*b, 0)
+				DA_Awarder.autoopt['fr'..i].group1['gr1'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -5+11*b, 0)
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..b]:Show()
 			end
 			DA_Awarder.autoopt['fr'..i].group1:SetSize(55,11)
@@ -1886,7 +1886,7 @@ for i=1,8 do
 				for k=1,5 do
 					if DA_Awarder.autoopt['fr'..i].group1['gr1'..k].isenabled then
 						countbunnies=countbunnies+1
-						DA_Awarder.autoopt['fr'..i].group1['gr1'..k]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*countbunnies, 0)
+						DA_Awarder.autoopt['fr'..i].group1['gr1'..k]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -5+11*countbunnies, 0)
 						DA_Awarder.autoopt['fr'..i].group1['gr1'..k]:Show()
 					else
 						DA_Awarder.autoopt['fr'..i].group1['gr1'..k]:Hide()
@@ -1894,7 +1894,7 @@ for i=1,8 do
 				end
 				if countbunnies==0 then
 					DA_Awarder.autoopt['fr'..i].group1:SetSize(11,11)
-					DA_Awarder.autoopt['fr'..i].group1['gr11']:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11, 0)
+					DA_Awarder.autoopt['fr'..i].group1['gr11']:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -5+11, 0)
 					DA_Awarder.autoopt['fr'..i].group1['gr11']:Show()
 				else
 					DA_Awarder.autoopt['fr'..i].group1:SetSize(11*countbunnies,11)
@@ -1922,11 +1922,11 @@ for i=1,8 do
 		{ut,"HUNTER"}
 		}) do
 			if n==1 then
-				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},9,"Interface\\Icons\\Spell_ChargePositive",function(self)
+				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -5+11*n, 0},9,"Interface\\Icons\\Spell_ChargePositive",function(self)
 					DA_StoredCheckboxes[DA_SelSet][i][txt[3]]=self.isenabled
 				end,txt[2])
 			else
-				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].cl[txt[2]]=self.isenabled
 				end,LOCALIZED_CLASS_NAMES_MALE[txt[2]])
 				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]:GetNormalTexture():SetTexCoord(unpack(CLASS_ICON_TCOORDS[txt[2]]))
@@ -1986,7 +1986,7 @@ for i=1,8 do
 		{"Interface\\Icons\\Spell_Holy_SealOfProtection",L['guild rank award'],'officer'},
 		}) do
 			if n==1 then --SKADA
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					
 					if not _G[DA_StoredCheckboxes[DA_SelSet].skadamode] then
 						DA.Print('Skada DB not selected/not found')
@@ -2052,11 +2052,11 @@ for i=1,8 do
 				end
 				)
 			elseif n==2 then --LEADER
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 				end,txt[2])
 			elseif n==3 then --OFFICER
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 					if not self.isenabled then
 						DA_Awarder.autoopt.officerassign:Hide()
@@ -2101,7 +2101,7 @@ for i=1,8 do
 		end)
 		DA_Awarder.autoopt['fr'..i].group3.onenter=function()
 			for b=1,3 do
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*b, 0)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11*b, 0)
 				DA_Awarder.autoopt['fr'..i].group3['gr3'..b]:Show()
 			end
 			DA_Awarder.autoopt['fr'..i].group3:SetSize(34,11)
@@ -2112,7 +2112,7 @@ for i=1,8 do
 				for k=1,3 do
 					if DA_Awarder.autoopt['fr'..i].group3['gr3'..k].isenabled then
 						countbunnies=countbunnies+1
-						DA_Awarder.autoopt['fr'..i].group3['gr3'..k]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*countbunnies, 0)
+						DA_Awarder.autoopt['fr'..i].group3['gr3'..k]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11*countbunnies, 0)
 						DA_Awarder.autoopt['fr'..i].group3['gr3'..k]:Show()
 					else
 						DA_Awarder.autoopt['fr'..i].group3['gr3'..k]:Hide()
@@ -2120,7 +2120,7 @@ for i=1,8 do
 				end
 				if countbunnies==0 then
 					DA_Awarder.autoopt['fr'..i].group3:SetSize(11,11)
-					DA_Awarder.autoopt['fr'..i].group3['gr31']:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11, 0)
+					DA_Awarder.autoopt['fr'..i].group3['gr31']:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -5+11, 0)
 					DA_Awarder.autoopt['fr'..i].group3['gr31']:Show()
 				else
 					DA_Awarder.autoopt['fr'..i].group3:SetSize(11*countbunnies,11)
@@ -2701,7 +2701,14 @@ function DA_Awarder.FEP_UpdateFrames()
 	end
 
 	if not FEP_ZamField.focusgained then FEP_ZamField:SetText(DA_Standby[DA_CurrentGuild]) end
-	if DA_Awarder.AssignFrame:IsShown() and (not DA_Awarder.AssignFrame.EB.focusgained) then _G[DA_Awarder.AssignFrame.GetCalledby]:Click() end
+	if DA_Awarder.AssignFrame:IsShown() and (not DA_Awarder.AssignFrame.EB.focusgained) then 
+		if not DA_Awarder.AssignFrame.GetCalledby then return end
+
+		local grp,pl = unpack(DA_Awarder.AssignFrame.GetCalledby)
+		if grp and pl then
+			DA_Awarder.group[grp].player[pl]:Click()
+		end
+	end
 	FEP_ResetAllChecks()
 	FEP_RecalculateAllBtnEP()
 	DA.AWAutoOptions()
@@ -4716,7 +4723,6 @@ function FEP_CreateGroups()
 
 	end
 
-	DA.CreateScaler('DA_Awarder',0.8,2,{'fuckingOptions','Awarderscale'})
 end
 
 
@@ -5074,7 +5080,7 @@ local function createGroupFrames(number)
 		DA_Awarder.group[number].player[i] = DA.CreateFFGButton2(nil,group,{"TOPLEFT", group, "TOPLEFT", 1, 15-i*16},14,153,'',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 11, 'outline'},function(self,btntype)
 			if self.c then
 				if btntype=='LeftButton' then
-					FEP_OpenAssignment(self.c, self.state, self.main, self.mainmain,self:GetName())
+					FEP_OpenAssignment(self.c, self.state, self.main, self.mainmain,{number, i})
 					
 				elseif btntype=='RightButton' and IsShiftKeyDown() and self.state=='n' and CanGuildInvite() then
 					GuildInvite(self.c.name)
@@ -5311,7 +5317,7 @@ local function createGroupFrames(number)
 			DA.myHideTooltip()
 		end)
 		playerFrame:SetScript("OnEvent", function(self)
-			if self:IsVisible() and self:IsMouseOver() and GetMouseFocus():GetName()==self:GetName() then
+			if self:IsVisible() and self:IsMouseOver() and GetMouseFocus()==self then
 				self:GetScript('OnEnter')(GetMouseFocus())
 			end
 		end)
@@ -6638,16 +6644,13 @@ if fuckingOptions.EnableZamena then
 else
 FEP_ZamWHframe:UnregisterEvent("CHAT_MSG_WHISPER");
 end
-if GetNumRaidMembers()==0 then return end
+if not (UnitInRaid("player") or GetNumRaidMembers()==0) then return end
 
-  if not UnitInRaid("player") then return end
   
-  
-
-  if msg:sub(1, 12):lower() ~= 'epgp standby' then return end
+  if msg:sub(1, 8):lower() ~= '?standby' then return end
 FEP_GatherRaid()
 
-  local member = msg:sub(13):match("([^ ]+)")
+  local member = msg:sub(9):match("([^ ]+)")
   if member then
     -- http://lua-users.org/wiki/LuaUnicode
     local firstChar, offset = member:match("([%z\1-\127\194-\244][\128-\191]*)()")
@@ -6758,7 +6761,7 @@ FEP_GatherRaid()
 			
 			
 		else
-			SendChatMessage(L["You are not in guild. Try adding your main nickname: epgp standby Player"], "whisper",nil,sender)
+			SendChatMessage(L["You are not in guild. Try adding your main nickname: ?standby Player"], "whisper",nil,sender)
 		end
 		
 	elseif FEP_L_gMain[DA_CurrentGuild][sender] then

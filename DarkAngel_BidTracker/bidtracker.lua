@@ -436,7 +436,6 @@ DA.FontCreater(nil,"Player",{"LEFT",DA_BidTracker,"TOPLEFT",70,-40},DA_BidTracke
 DA_BidTracker.winnerfont=DA.FontCreater(nil,"",{"LEFT",DA_BidTracker,"TOPLEFT",4,-187},DA_BidTracker,30,100,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'left')
 DA_BidTracker.pricebox=DA.EditBoxCreater2(nil,DA_BidTracker,{"LEFT", DA_BidTracker, "TOPLEFT",80,-187},{65,12},"1",false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},nil,1,nil,true)
 
-DA.CreateScaler('DA_BidTracker',0.8,2,{'fuckingOptions','BidTrackerScale'})
 
 for i=1,9 do
 	DA_BidTracker['loot'..i]=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOP", 0,-40-13*i},12,145,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
@@ -1336,7 +1335,7 @@ function Mod:OnInitialize()
 end
 
 function Mod:OnEnable()
-	DA_BidTracker:SetScale(fuckingOptions.BidTrackerScale)
+	DA.CreateScaler('DA_BidTracker',0.8,2,{'fuckingOptions','BidTrackerScale'})
 	
 	for item,itemIDToFetch in pairs(item_IDs_roster) do
 		QueueItemForCache(itemIDToFetch)

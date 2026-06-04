@@ -11,7 +11,6 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 		tinsert(UISpecialFrames, "DA_RightClickMenu")
 	end
 
-	DA.CreateScaler('DarkAngelGUI',0.6,2,{'fuckingOptions','FFGScale'})
 
 	do --frame
 		DA_RightClickMenu = DA.FrameCreater("DA_RightClickMenu",UIParent,62,105,{"TOPLEFT",UIParent,"TOPLEFT"},nil,{0.1,0.12,0.19,0.7},nil,true)
@@ -398,6 +397,8 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 				DA.Print('Ctrl+Alt+Shift+Click to leave guild')
 				if IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown() then
 					GuildLeave()
+					DA_RightClickMenu:Hide()
+					DA.ResumeTimer('greset')
 				end
 				return
 			end

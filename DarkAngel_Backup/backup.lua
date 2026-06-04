@@ -1263,10 +1263,7 @@ function Mod.Backup_Load()
 			
 			if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled then DarkAngelGUI.Backup.doginvitereb:EnableMouse(true);DarkAngelGUI.Backup.doginvitereb:SetAlpha(1) else DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) end
 			
-			
-			
-			
-			local f=CreateFrame('Frame');f:RegisterEvent("CHAT_MSG_CHANNEL");f:SetScript("OnEvent",function(self,_,message,sender,...) if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled and fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase~="" and message==fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase then GuildInvite(sender) end end)
+			local f=CreateFrame('Frame');f:RegisterEvent("CHAT_MSG_CHANNEL");f:SetScript("OnEvent",function(self,_,message,sender,...) if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled and fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase~="" and message==fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase and sender~=GetUnitName('player') then GuildInvite(sender) end end)
 			
 		end
 				
