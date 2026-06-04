@@ -488,7 +488,7 @@ DA.AddToBuildQueue("GuildControl", function()
 
 
 
-    gc.restbtn=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",17,-34},12,30,'reset','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9},function()
+    gc.restbtn=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",17,-34},12,30,'reset',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9},function()
         get_from_guild()
         if gc.run.saveranks and gc.run.matchranks then
             gc.run.saveranks:SetChecked(false)
@@ -502,7 +502,7 @@ DA.AddToBuildQueue("GuildControl", function()
     end)
 
 
-    DarkAngelGUI.Guild.OpenGC_Btn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",425,-10},12,25,'gm','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+    DarkAngelGUI.Guild.OpenGC_Btn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",425,-10},12,25,'gm',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
         if gc:IsShown() then
             gc:Hide()
         else
@@ -820,7 +820,7 @@ DA.AddToBuildQueue("GuildControl", function()
             get_players()
             reRender_gc()
         end
-        gc.exportBtn=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",17,-46},12,30,'export','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
+        gc.exportBtn=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",17,-46},12,30,'export',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
             if gc.exportFrame:IsShown() then
                 gc.exportFrame:Hide()
             else
@@ -830,7 +830,7 @@ DA.AddToBuildQueue("GuildControl", function()
 
         gc.exportFrame=DA.FrameCreater(nil,gc,130,38,{"BOTTOMRIGHT", gc, "TOPRIGHT", 0, 2})
 
-        gc.exportFrame.apply=DA.CreateFFGButton2(nil,gc.exportFrame,{"CENTER",gc.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        gc.exportFrame.apply=DA.CreateFFGButton2(nil,gc.exportFrame,{"CENTER",gc.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
         function(self)
             if gc.exportFrame.EB:GetText() and gc.exportFrame.EB:GetText()~="" then
                 gc.ranksroster=nil
@@ -1219,7 +1219,7 @@ DA.AddToBuildQueue("GuildControl", function()
             run_process_next()
         end
 
-        gc.run.run=DA.CreateFFGButton2(nil,gc.run,{"CENTER",gc.run,"TOPLEFT",48,-142},15,34,"Run",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
+        gc.run.run=DA.CreateFFGButton2(nil,gc.run,{"CENTER",gc.run,"TOPLEFT",48,-142},15,34,"Run",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
             if gc.run.saveranks:GetChecked() or gc.run.moveplayers:GetChecked() then
                 if #DA_Bulk_list==0 then
                     self:Disable()
@@ -1239,7 +1239,7 @@ DA.AddToBuildQueue("GuildControl", function()
         end)
         gc.run.run:Disable()
 
-        gc.run.stop=DA.CreateFFGButton2(nil,gc.run,{"CENTER",gc.run,"TOPLEFT",88,-142},15,34,"Stop",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
+        gc.run.stop=DA.CreateFFGButton2(nil,gc.run,{"CENTER",gc.run,"TOPLEFT",88,-142},15,34,"Stop",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9},function(self)
             run_stop(nil,1)
         end)
         gc.run.stop:Disable()

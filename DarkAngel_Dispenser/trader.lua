@@ -2,7 +2,7 @@
 ---@class DarkAngelAddon
 local DA = DarkAngel
 local L = DA.L
-local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
+local LGT=DA.LGT
 
 DA.TR_working=false
 local targetn=nil

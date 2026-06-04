@@ -32,7 +32,7 @@ end
 print("Hello world!")
 ]=])
 
-	DarkAngelGUI.Con.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Con,{"CENTER",DarkAngelGUI.Con,"TOPLEFT",58,-20},12,50,'/run','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function()
+	DarkAngelGUI.Con.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Con,{"CENTER",DarkAngelGUI.Con,"TOPLEFT",58,-20},12,50,'/run',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function()
 		DarkAngelGUI.Con.EB:ClearFocus()
 			loadstring(DarkAngelGUI.Con.EB:GetText(),'Piece of Shiet')()
 	end)

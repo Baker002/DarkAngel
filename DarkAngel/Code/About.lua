@@ -17,7 +17,7 @@ DA.AddToBuildQueue("About", function()
 		return f
 	end
 	local function do_eb_with_title(rel, point,ebText,labelText)
-		local eb = DA.EditBoxCreater2(nil, rel, point, {180, 10}, ebText, false, false, {UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"})
+		local eb = DA.EditBoxCreater2(nil, rel, point, {180, 10}, ebText, false, false, {UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"},nil,nil,nil,'text')
 		local label = DA.FontCreater(nil, labelText, {"BOTTOMLEFT", eb, "TOPLEFT", 1, -1}, eb, 15, 180, {UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"}, "left", {0.80, 0.88, 1, 1})
 		return eb,label
 	end

@@ -72,12 +72,24 @@ end):RegisterForClicks('anydown')
 -- minimap
 DarkAngel_minimapBtn = CreateFrame("Button", "DarkAngel_minimapBtn", Minimap)
 local minibtn = DarkAngel_minimapBtn
-minibtn:SetFrameLevel(99)
-minibtn:SetSize(28,28)
-minibtn:SetMovable(true)
-minibtn:SetNormalTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon.blp")
-minibtn:SetPushedTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon2.blp")
-minibtn:SetHighlightTexture("Interface\\AddOns\\DarkAngel\\template\\MinimapIcon.blp")
+	minibtn:SetFrameStrata("MEDIUM")
+	minibtn:SetWidth(31); minibtn:SetHeight(31)
+	minibtn:SetFrameLevel(8)
+	minibtn:SetMovable(true)
+	minibtn:RegisterForDrag("LeftButton")
+	minibtn:RegisterForClicks("LeftButtonUp","RightButtonUp")
+	minibtn:SetHighlightTexture([[Interface\Minimap\UI-Minimap-ZoomButton-Highlight]])
+local overlay = minibtn:CreateTexture(nil, "OVERLAY")
+	overlay:SetWidth(53); overlay:SetHeight(53)
+	overlay:SetTexture([[Interface\Minimap\MiniMap-TrackingBorder]])
+	overlay:SetPoint("TOPLEFT")
+local icon = minibtn:CreateTexture(nil, "BACKGROUND")
+	icon:SetWidth(20); icon:SetHeight(20)
+	icon:SetTexture([[Interface\AddOns\DarkAngel\template\MinimapIcon]])
+	icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	icon:SetPoint("CENTER", 0, 0)
+	minibtn.icon = icon
+
 local myIconPos = 0
 local function UpdateMapBtn()
     local Xpoa, Ypoa = GetCursorPosition()
@@ -88,8 +100,13 @@ local function UpdateMapBtn()
     minibtn:ClearAllPoints()
     minibtn:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52 - (80 * cos(myIconPos)), (80 * sin(myIconPos)) - 52)
 end
-minibtn:RegisterForDrag("LeftButton")
-minibtn:RegisterForClicks("LeftButtonUp","RightButtonUp")
+local function PressDown(self)
+	self.icon:SetWidth(18); self.icon:SetHeight(18)
+end
+
+local function ReleaseUp(self)
+	self.icon:SetWidth(20); self.icon:SetHeight(20)
+end
 minibtn:ClearAllPoints();
 minibtn:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 52 - (80 * cos(myIconPos)),(80 * sin(myIconPos)) - 52)
 minibtn:SetScript("OnClick", function(self,clicktype)
@@ -139,11 +156,13 @@ minibtn:SetScript("OnClick", function(self,clicktype)
 		DarkAngel_minimapBtn.menu.timerticked=0
 	end
 end)
-minibtn:SetScript("OnDragStart", function()
+minibtn:SetScript("OnDragStart", function(self)
+	ReleaseUp(self)
     minibtn:StartMoving()
     minibtn:SetScript("OnUpdate", UpdateMapBtn)
 end)
-minibtn:SetScript("OnDragStop", function()
+minibtn:SetScript("OnDragStop", function(self)
+	ReleaseUp(self)
     minibtn:StopMovingOrSizing();
     minibtn:SetScript("OnUpdate", nil)
     UpdateMapBtn();
@@ -179,7 +198,15 @@ end)
 minibtn:SetScript("OnLeave",function(self)
 	DA.myHideMMTooltip()
 end)
-
+minibtn:SetScript("OnMouseDown", function(self)
+	PressDown(self)
+end)
+minibtn:SetScript("OnMouseUp", function(self)
+	ReleaseUp(self)
+end)
+minibtn:SetScript("OnHide", function(self)
+	ReleaseUp(self)
+end)
 DarkAngel_minimapBtn:Hide()
 DarkAngel_minimapBtn.menu=CreateFrame("Button", nil,UIParent)
 DarkAngel_minimapBtn.menu.timerticked=0

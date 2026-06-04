@@ -203,6 +203,7 @@ end
 
 --Gui2
 do
+L["reset"]=true
 L['guild raid']=true
 L['pure guild']="full guild"
 L["DESCr-dkpCommTT"]=[[Defines the conditions for accepting messages:
@@ -405,6 +406,17 @@ If you are not sure what you are doing, it may be a good idea to export the sett
 end
 
 do -- Bid Tracker
+L["current"]=true
+L["MS Change"]=true
+L["DESCr-mschange_rightclickmenu"]=[[|cffff9999Main Spec (MS) change for loot distribution|r
+If a player wants to receive loot that does not match their raid spec, this menu will help you manage it.
+The icons on the left show the spec and role currently detected by the addon. On the right are buttons for selecting the custom MS.
+
+If a question mark icon is displayed instead of a spec, it means the addon currently has no data about the player’s spec.
+If you do not intend to change a player’s MS, there is no need to manually set their current spec.
+
+To change MS, in most cases, selecting the appropriate role or spec is sufficient. However, for some classes it may be necessary to specify both.
+The setting is saved between game sessions and is automatically reset when entering a new raid.]]
 L["Minimal bid"]=true
 L["Bidder module is disabled. Enable it in main addon options"]=true
 L["Any higher"]=true
@@ -488,6 +500,7 @@ Color indication:
 |cff888888member cannot wear item|r
 can wear, but item does not match their spec
 |cff1ced93can wear, item by spec|r
+|cfffc96ffcan wear, matches MS Change|r
 
 |cffff9999May work badly for some trinkets|r
 The check function is very simple, so it is still recommended to use the head when distributing loot :)
@@ -618,9 +631,6 @@ L['qDKPexp']='qDKP'
 L['qDKP addon not found']=true
 L['standby']=true
 L['fepassign']="Assign!"
-L['mark on role']=true
-L['mark on class']=true
-L['misc']=true
 L['and higher']=true
 L['no people saved']=true
 L['players saved']=true

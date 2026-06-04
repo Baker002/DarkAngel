@@ -2,6 +2,7 @@
 ---@class DarkAngelAddon
 local DA = DarkAngel
 local L = DA.L
+local LGT=DA.LGT
 
 DA.AddToBuildQueue("RightClickMenuFrame", function()
 
@@ -13,7 +14,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 	DA.CreateScaler('DarkAngelGUI',0.6,2,{'fuckingOptions','FFGScale'})
 
 	do --frame
-		DA_RightClickMenu = DA.FrameCreater("DA_RightClickMenu",UIParent,62,105,{"TOPLEFT",UIParent,"TOPLEFT"},nil,{0.06,0.09,0.12,0.7},nil,true)
+		DA_RightClickMenu = DA.FrameCreater("DA_RightClickMenu",UIParent,62,105,{"TOPLEFT",UIParent,"TOPLEFT"},nil,{0.1,0.12,0.19,0.7},nil,true)
 		DA_RightClickMenu:SetFrameLevel(107)
 		DA_RightClickMenu.timerticked=0
 		DA_RightClickMenu:SetScript("OnEnter",function() DA_RightClickMenu.timerticked=0 end)
@@ -138,7 +139,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 		end,nil,nil,'left')
 
 		DA_RightClickMenu.epgpaward,DA_RightClickMenu.epgpawardFrame=DA.CreateFFGDropFrame(DA_RightClickMenu,L['award'],14,73,{"LEFT",DA_RightClickMenu,"TOPRIGHT",-75,-80},120,57,"TOPRIGHT",'left',nil,nil,nil,true)
-		DA_RightClickMenu.epgpawardFrame.t:SetTexture(0.06,0.09,0.12,0.7)
+		DA_RightClickMenu.epgpawardFrame.t:SetTexture(0.1,0.12,0.19,0.7)
 		DA_RightClickMenu.epgpaward:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 		DA_RightClickMenu.epgpaward.fs:SetTextColor(0.5,0.9,1,1)
 			do --award
@@ -227,7 +228,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 				DA_RightClickMenu.epgpawardFrame.Dropdown = DA.FrameCreater(nil,DA_RightClickMenu.epgpawardFrame,270,111,{"TOPLEFT",DA_RightClickMenu.epgpawardFrame,"BOTTOMLEFT",2,-2},nil,{0.15, 0.17, 0.2, 0.65})
 					DA.CloseButtonCreater(nil,DA_RightClickMenu.epgpawardFrame.Dropdown,{"BOTTOMLEFT", DA_RightClickMenu.epgpawardFrame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
 				for i=1,20 do
-					DA_RightClickMenu.epgpawardFrame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame.Dropdown,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
+					DA_RightClickMenu.epgpawardFrame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame.Dropdown,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
 
 					end,nil,nil,'left')
 				end
@@ -235,7 +236,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 
 				DA.HelpCreater(DA_RightClickMenu.epgpawardFrame,{"CENTER",DA_RightClickMenu.epgpawardFrame,"TOPLEFT",52.5,-8},'awardprocent_tt',10,10)
 
-				DA_RightClickMenu.epgpawardFrame.start=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 60, -2},13,50,L['add'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+				DA_RightClickMenu.epgpawardFrame.start=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 60, -2},13,50,L['add'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 					self:Disable()
 					DA_RightClickMenu.epgpawardFrame.value.focusgained=nil
 					DA_RightClickMenu.epgpawardFrame.value:ClearFocus()
@@ -472,13 +473,23 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 		end)
 		DA_RightClickMenu.looter.icon=DA_RightClickMenu:CreateTexture(nil, "BACKGROUND"); DA_RightClickMenu.looter.icon:SetTexture("Interface\\GroupFrame\\UI-Group-MasterLooter"); DA_RightClickMenu.looter.icon:SetPoint('center',DA_RightClickMenu.looter,'center'); DA_RightClickMenu.looter.icon:SetParent(DA_RightClickMenu.looter);DA_RightClickMenu.looter.icon:SetBlendMode("blend")
 
-		DA_RightClickMenu.kick=DA.CreateFFGButton2(nil,DA_RightClickMenu,{"CENTER",DA_RightClickMenu,"TOPRIGHT",-116.5,-90},15,44,L['kick'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 9},function()
+		DA_RightClickMenu.kick=DA.CreateFFGButton2(nil,DA_RightClickMenu,{"CENTER",DA_RightClickMenu,"TOPRIGHT",-116.5,-85},15,44,L['kick'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9},function()
 			if UnitIsRaidOfficer('player') and UnitInRaid(DA_RightClickMenu.player) then
 				if GetLootMethod()=='master' and DA_RightClickMenu.lootername and DA_RightClickMenu.lootername==DA_RightClickMenu.player then
 					SetLootMethod("master", UnitName('player'))
-					UninviteUnit(DA_RightClickMenu.player)
+					if IsShiftKeyDown() then
+						UninviteUnit(DA_RightClickMenu.player)
+					else
+						DA.Print(L['requires Shift+Click'])
+						return
+					end
 				else
-					UninviteUnit(DA_RightClickMenu.player)
+					if IsShiftKeyDown() then
+						UninviteUnit(DA_RightClickMenu.player)
+					else
+						DA.Print(L['requires Shift+Click'])
+						return
+					end
 				end
 			end
 		end,nil,nil,'left')
@@ -486,9 +497,539 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 
 
 	end
+
+	do --ms change
+		local SelectRole
+		local SelectSpec
+		local PendingMS = {}
+		local letPlayer
+		local letClass
+		local letRole
+		local letSpec
+		DA_RightClickMenu.mschangeFrame = DA.FrameCreater(nil,DA_RightClickMenu,172,70,{"TOPLEFT",DA_RightClickMenu,"BOTTOMLEFT",0,-2},nil,{0.1,0.12,0.19,0.7},nil,true)
+		local closebtn = DA.CloseButtonCreater(nil,DA_RightClickMenu.mschangeFrame,{"center", DA_RightClickMenu.mschangeFrame, "TOPRIGHT", -7.5,-7.5},10,10,'x')
+		local frame = DA_RightClickMenu.mschangeFrame
+		DA_RightClickMenu.mschangeOpenBtn = DA.CreateFFGButton2(nil,DA_RightClickMenu,{"CENTER",DA_RightClickMenu,"BOTTOMLEFT",30,6},8,40,'^^^',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
+			DA_RightClickMenu.mschangeOpenBtn.interracted = true
+			if not s.state then
+				s.state = true
+				frame:Hide()
+				s:SetText("+++")
+			else
+				s.state = false
+				frame:Show()
+				s:SetText("^^^")
+
+			end
+		end)
+		DA_RightClickMenu.mschangeOpenBtn:Hide()
+		DA_RightClickMenu.mschangeOpenBtn.interracted = false
+		closebtn:HookScript("OnClick",function() DA_RightClickMenu.mschangeOpenBtn:SetText("+++");DA_RightClickMenu.mschangeOpenBtn.state=true;DA_RightClickMenu.mschangeOpenBtn.interracted = true end)
+		frame:Hide()
+		frame.classBtn = DA.IconicButtonCreater(frame, {"TOPLEFT",frame,"TOPLEFT",2,-13}, 25, "", nil, "Class")
+		frame.classBtn:EnableMouse(false)
+		frame.roleBtn = DA.IconicButtonCreater(frame, {"LEFT",frame.classBtn,"RIGHT",2,0}, 25, "", nil, "Current Role")
+		frame.roleBtn:EnableMouse(false)
+		frame.specBtn = DA.IconicButtonCreater(frame, {"TOP",frame.roleBtn,"BOTTOM",0,-2}, 25, "", nil, "Current Spec")
+		frame.specBtn:EnableMouse(false)
+		frame.defaultBtn = DA.IconicButtonCreater(frame, {"TOP",frame.classBtn,"BOTTOM",0,-2}, 25, "", nil, L["reset"],function()
+			DA_Tooltip:Hide()
+			local name = letPlayer
+			table.wipe(PendingMS)
+
+			DarkAngel_BTMS[name] = nil
+
+			local pack ={
+				name=name,
+				class=letClass,
+				role=letRole,
+				spec=letSpec,
+				msRole=nil,
+				msSpec=nil
+			}
+			DA.TimerAfterShort(0.1, function() frame:UpdateMSUI(pack) end)
+		end)
+		frame.defaultBtn:SetNormalTexture([[Interface\Icons\Spell_Shadow_SacrificialShield]])
+		frame.defaultBtn:SetHighlightTexture("")
+		frame.defaultBtn:Disable()
+		frame.defaultBtn.switch(false)
+		
+		frame.currentFont=DA.FontCreater(nil,L["current"],{"LEFT",frame.classBtn,"TOPLEFT",1,6},frame.classBtn,30,100,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'left')
+
+		frame.roleButtons = {}
+
+		local roleOrder = {
+			"tank",
+			"healer",
+			"melee",
+			"caster"
+		}
+
+		for i, role in ipairs(roleOrder) do
+			local btn = DA.IconicButtonCreater(frame, {"TOPLEFT",frame,"TOPLEFT",70 + (i-1)*25,-13}, 25, DA.RolesTextures[role], nil, role,function()
+				SelectRole(role)
+				DA_Tooltip:Hide()
+			end)
+			btn.switch(false)
+			frame.roleButtons[role] = btn
+		end
+
+		frame.specButtons = {}
+
+		for i = 1, 3 do
+			local btn = DA.IconicButtonCreater(frame, {"TOPLEFT",frame,"TOPLEFT",82.5 + (i-1)*25,-40}, 25, "", nil, function()
+				local class = letClass
+				if class then
+					local trnames = {LGT:GetTreeNames(class)}
+					return #trnames==3 and trnames[i] or "Spec #"..i
+				else
+					return "Spec #"..i
+				end
+			end, function() 
+				SelectSpec(i)
+				DA_Tooltip:Hide()
+			end)
+
+			btn.switch(false)
+
+			frame.specButtons[i] = btn
+		end
+		
+		frame.MSFont=DA.FontCreater(nil,L["MS Change"],{"LEFT",frame.classBtn,"TOPLEFT",71,6},frame.classBtn,30,100,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},'left')
+
+		DA.HelpCreater(frame,{"CENTER", frame, "TOPRIGHT", -18,-7.5},'mschange_rightclickmenu',10,10)
+		
+		local specTextures = {
+			WARRIOR = {
+				[[Interface\Icons\Ability_Warrior_SavageBlow]],      -- Arms
+				[[Interface\Icons\Ability_Warrior_InnerRage]],       -- Fury
+				[[Interface\Icons\Ability_Warrior_DefensiveStance]], -- Protection
+			},
+			PALADIN = {
+				[[Interface\Icons\Spell_Holy_HolyBolt]],             -- Holy
+				[[Interface\Icons\Spell_Holy_DevotionAura]],         -- Protection
+				[[Interface\Icons\Ability_Paladin_HeartOfTheCrusader]], -- Retribution
+			},
+			HUNTER = {
+				[[Interface\Icons\Ability_Hunter_BeastTaming]],      -- Beast Mastery
+				[[Interface\Icons\Ability_Marksmanship]],            -- Marksmanship
+				[[Interface\Icons\Ability_Hunter_Swiftness]],        -- Survival
+			},
+			ROGUE = {
+				[[Interface\Icons\Ability_Rogue_Eviscerate]],        -- Assassination
+				[[Interface\Icons\Ability_BackStab]],                -- Combat
+				[[Interface\Icons\Ability_Stealth]],                 -- Subtlety
+			},
+			PRIEST = {
+				[[Interface\Icons\Spell_Holy_WordFortitude]],        -- Discipline
+				[[Interface\Icons\Spell_Holy_GuardianSpirit]],       -- Holy
+				[[Interface\Icons\Spell_Shadow_ShadowWordPain]],     -- Shadow
+			},
+			DEATHKNIGHT = {
+				[[Interface\Icons\Spell_Deathknight_BloodPresence]], -- Blood
+				[[Interface\Icons\Spell_Deathknight_FrostPresence]], -- Frost
+				[[Interface\Icons\Spell_Deathknight_UnholyPresence]],-- Unholy
+			},
+			SHAMAN = {
+				[[Interface\Icons\Spell_Nature_Lightning]],          -- Elemental
+				[[Interface\Icons\Spell_Nature_LightningShield]],    -- Enhancement
+				[[Interface\Icons\Spell_Nature_MagicImmunity]],      -- Restoration
+			},
+			MAGE = {
+				[[Interface\Icons\Spell_Holy_MagicalSentry]],        -- Arcane
+				[[Interface\Icons\Spell_Fire_FireBolt02]],           -- Fire
+				[[Interface\Icons\Spell_Frost_FrostBolt02]],         -- Frost
+			},
+			WARLOCK = {
+				[[Interface\Icons\Spell_Shadow_DeathCoil]],          -- Affliction
+				[[Interface\Icons\Spell_Shadow_Metamorphosis]],      -- Demonology
+				[[Interface\Icons\Spell_Shadow_RainOfFire]],         -- Destruction
+			},
+			DRUID = {
+				[[Interface\Icons\Ability_Druid_Balance]],           -- Balance
+				[[Interface\Icons\Ability_Druid_CatForm]],           -- Feral
+				[[Interface\Icons\Spell_Nature_HealingTouch]],       -- Restoration
+			},
+		}
+		local QUESTION_MARK = [[Interface\Icons\INV_Misc_QuestionMark]]
+		local function GetSpecIcon(class, spec)
+			if not class or not spec or type(spec) ~= "number" then
+				return QUESTION_MARK
+			end
+
+			local classSpecs = specTextures[class]
+			if not classSpecs then
+				return QUESTION_MARK
+			end
+
+			return classSpecs[spec] or QUESTION_MARK
+		end
+		local function btnSetRoleTxt(btn, role)
+			btn:SetNormalTexture(role and DA.RolesTextures[role] or QUESTION_MARK)
+		end
+		local RoleSpecMap = {
+			WARRIOR = {
+				tank = {
+					specs = {3},
+				},
+				melee = {
+					default = 2, -- Fury
+					specs = {1,2}, -- Arms/Fury
+				},
+			},
+			PALADIN = {
+				tank = {
+					specs = {2},
+				},
+				healer = {
+					specs = {1},
+				},
+				melee = {
+					specs = {3},
+				},
+			},
+			DEATHKNIGHT = {
+				tank = {
+					default = 1, -- Blood
+					specs = {1,2,3},
+				},
+				melee = {
+					-- no default
+					specs = {1,2,3},
+				},
+			},
+			DRUID = {
+				tank = {
+					specs = {2},
+				},
+				melee = {
+					specs = {2},
+				},
+				caster = {
+					specs = {1},
+				},
+				healer = {
+					specs = {3},
+				},
+			},
+			PRIEST = {
+				healer = {
+					default = 1, -- Discipline
+					specs = {1,2}, -- Disc/Holy
+				},
+				caster = {
+					specs = {3},
+				},
+			},
+			SHAMAN = {
+				healer = {
+					specs = {3},
+				},
+				melee = {
+					specs = {2},
+				},
+				caster = {
+					specs = {1},
+				},
+			},
+			MAGE = {
+				caster = {
+					-- no default
+					specs = {1,2,3},
+				},
+			},
+			WARLOCK = {
+				caster = {
+					-- no default
+					specs = {1,2,3},
+				},
+			},
+			HUNTER = {
+				caster = {
+					default = 2, -- Marksmanship
+					specs = {1,2,3},
+				},
+			},
+			ROGUE = {
+				melee = {
+					default = 2, -- Combat
+					specs = {1,2,3},
+				},
+			},
+		}
+		local SpecRoleMap = {
+			WARRIOR = {
+				[1] = { -- Arms
+					roles = {"melee"},
+				},
+				[2] = { -- Fury
+					roles = {"melee"},
+				},
+				[3] = { -- Protection
+					roles = {"tank"},
+				},
+			},
+			PALADIN = {
+				[1] = { -- Holy
+					roles = {"healer"},
+				},
+				[2] = { -- Protection
+					roles = {"tank"},
+				},
+				[3] = { -- Retribution
+					roles = {"melee"},
+				},
+			},
+			DEATHKNIGHT = {
+				[1] = { -- Blood
+					default = "tank",
+					roles = {"tank","melee"},
+				},
+				[2] = { -- Frost
+					default = "melee",
+					roles = {"tank","melee"},
+				},
+				[3] = { -- Unholy
+					default = "melee",
+					roles = {"tank","melee"},
+				},
+			},
+			DRUID = {
+				[1] = { -- Balance
+					roles = {"caster"},
+				},
+				[2] = { -- Feral
+					default = "melee",
+					roles = {"tank","melee"},
+				},
+				[3] = { -- Restoration
+					roles = {"healer"},
+				},
+			},
+			PRIEST = {
+				[1] = { -- Discipline
+					roles = {"healer"},
+				},
+				[2] = { -- Holy
+					roles = {"healer"},
+				},
+				[3] = { -- Shadow
+					roles = {"caster"},
+				},
+			},
+			SHAMAN = {
+				[1] = { -- Elemental
+					roles = {"caster"},
+				},
+				[2] = { -- Enhancement
+					roles = {"melee"},
+				},
+				[3] = { -- Restoration
+					roles = {"healer"},
+				},
+			},
+			MAGE = {
+				[1] = { -- Arcane
+					roles = {"caster"},
+				},
+				[2] = { -- Fire
+					roles = {"caster"},
+				},
+				[3] = { -- Frost
+					roles = {"caster"},
+				},
+			},
+			WARLOCK = {
+				[1] = { -- Affliction
+					roles = {"caster"},
+				},
+				[2] = { -- Demonology
+					roles = {"caster"},
+				},
+				[3] = { -- Destruction
+					roles = {"caster"},
+				},
+			},
+			HUNTER = {
+				[1] = { -- Beast Mastery
+					roles = {"caster"},
+				},
+				[2] = { -- Marksmanship
+					roles = {"caster"},
+				},
+				[3] = { -- Survival
+					roles = {"caster"},
+				},
+			},
+			ROGUE = {
+				[1] = { -- Assassination
+					roles = {"melee"},
+				},
+				[2] = { -- Combat
+					roles = {"melee"},
+				},
+				[3] = { -- Subtlety
+					roles = {"melee"},
+				},
+			},
+		}
+		local function UpdateAvailableRoles(class, msRole)
+
+			local map = RoleSpecMap[class]
+
+			for role, btn in pairs(frame.roleButtons) do
+
+				if msRole and msRole==role then
+					btn.switch(true)
+					btn:SetAlpha(1)
+					btn:EnableMouse(true)
+				elseif map and map[role] then
+					btn.switch(false)
+					if msRole then
+						btn:SetAlpha(0.7)
+					else
+						btn:SetAlpha(1)
+					end
+					btn:EnableMouse(true)
+				else
+					btn.switch(false)
+					btn:SetAlpha(0.3)
+					btn:EnableMouse(false)
+				end
+
+			end
+
+		end
+		local function UpdateSelectedSpec(msSpec)
+			
+			for specID, btn in pairs(frame.specButtons) do
+
+				if msSpec and msSpec==specID then
+					btn.switch(true)
+					btn:SetAlpha(1)
+				else
+					btn.switch(false)
+					btn:SetAlpha(0.7)
+				end
+
+			end
+		end
+		local function CommitMS()
+			local name = letPlayer
+
+			local newGlobal = {msrole=PendingMS.role, msspec=PendingMS.spec}
+			DarkAngel_BTMS[name] = newGlobal
+
+			local pack ={
+				name=name,
+				class=letClass,
+				role=letRole,
+				spec=letSpec,
+				msRole=newGlobal.msrole,
+				msSpec=newGlobal.msspec
+			}
+			DA.TimerAfterShort(0.1, function() frame:UpdateMSUI(pack) end)
+		end
+		SelectRole = function (role)
+			local class = letClass
+			PendingMS.role = role
+			if PendingMS.spec then
+				CommitMS()
+				return
+			end
+
+			local roleData = RoleSpecMap[class][role]
+			local specs = roleData.specs
+
+			if #specs == 1 then
+				PendingMS.spec = specs[1]
+				CommitMS()
+			elseif roleData.default then
+				PendingMS.spec = roleData.default
+				CommitMS()
+			else
+				PendingMS.spec = nil
+			end
+		end
+		SelectSpec = function (spec)
+			local class = letClass
+			PendingMS.spec = spec
+			if PendingMS.role then
+				CommitMS()
+				return
+			end
+
+			local specData = SpecRoleMap[class][spec]
+
+			if #specData.roles == 1 then
+				PendingMS.role = specData.roles[1]
+				CommitMS()
+			elseif specData.default then
+				PendingMS.role = specData.default
+				CommitMS()
+			else
+				PendingMS.role = nil
+			end
+		end
+		local function clearGlobal()
+			local raidroster={}
+			for i=1,GetNumRaidMembers() do
+
+				local name, _ = GetRaidRosterInfo(i)
+				raidroster[name]=true
+			end
+
+			for name,_ in pairs(DarkAngel_BTMS) do
+				if not UnitInRaid(name) and not raidroster[name] then
+					DarkAngel_BTMS[name] = nil
+				end
+			end
+
+		end
+		function frame:UpdateMSUI(playerData)
+			clearGlobal()
+			local name =  playerData.name
+			local class	= playerData.class
+			local role	= playerData.role
+			local spec	= playerData.spec
+			local msRole = playerData.msRole or PendingMS.role
+			local msSpec = playerData.msSpec or PendingMS.spec
+
+			if letPlayer and letPlayer~=name then
+				table.wipe(PendingMS)
+			end
+			letPlayer = name
+			letClass = class
+			letRole = role
+			letSpec = spec
+
+			-- Default textures
+			self.classBtn:SetNormalTexture([[Interface\GLUES\CHARACTERCREATE\UI-CHARACTERCREATE-CLASSES]])
+			self.classBtn:GetNormalTexture():SetTexCoord(unpack(CLASS_ICON_TCOORDS[class]))
+			btnSetRoleTxt(self.roleBtn, role)
+			self.specBtn:SetNormalTexture(GetSpecIcon(class, spec) )
+			for specID = 1, 3 do
+				self.specButtons[specID]:SetNormalTexture(GetSpecIcon(class, specID))
+			end
+
+			-- Override exists
+			UpdateAvailableRoles(class, msRole)
+			UpdateSelectedSpec(msSpec)
+			
+			-- Default button
+			if msRole or msSpec then
+				self.defaultBtn:Enable()
+				self.defaultBtn.switch(true)
+			else
+				self.defaultBtn:Disable()
+				self.defaultBtn.switch(false)
+			end
+
+		end
+	end
 end)
 
-function DA.OpenOptMenu(parent,name, in_guild_backup)
+function DA.OpenOptMenu(parent,name, in_guild_backup, MSChangePack)
 	DA_RightClickMenu:Hide()
 	DA_RightClickMenu:SetPoint("TOPLEFT",parent,"BOTTOM")
 	if not name then return end
@@ -620,7 +1161,20 @@ function DA.OpenOptMenu(parent,name, in_guild_backup)
 		DA_RightClickMenu.assist:Show()
 		DA_RightClickMenu.looter:Show()
 
-
+		-- MS CHANGE Frame
+		if DA.loaded_Modules['BidTracker'] and GetNumRaidMembers()>0 and MSChangePack then
+			-- DA_RightClickMenu.mschangeFrame.mspacked = MSChangePack
+			DA_RightClickMenu.mschangeOpenBtn:Show()
+			if GetLootMethod()=='master' and not DA_RightClickMenu.mschangeOpenBtn.interracted then
+				DA_RightClickMenu.mschangeFrame:Show()
+			end
+			
+			--call mschangeFrame update
+			DA_RightClickMenu.mschangeFrame:UpdateMSUI(MSChangePack)
+		else
+			DA_RightClickMenu.mschangeFrame:Hide()
+			DA_RightClickMenu.mschangeOpenBtn:Hide()
+		end
 	else
 		if not InCombatLockdown() then
 			DA_RightClickMenu.target:Hide()
@@ -628,6 +1182,8 @@ function DA.OpenOptMenu(parent,name, in_guild_backup)
 			DA_RightClickMenu.MT:Hide()
 			DA_RightClickMenu.OT:Hide()
 		end
+			DA_RightClickMenu.mschangeFrame:Hide()
+			DA_RightClickMenu.mschangeOpenBtn:Hide()
 		DA_RightClickMenu:SetSize(77,104)
 
 		DA_RightClickMenu.assist:Hide()

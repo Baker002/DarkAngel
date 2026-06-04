@@ -469,7 +469,11 @@ function DA:OnInitialize()
 
 	--rightclick optmenu hide
 	DA.CreateTimer(nil,"OptHider",0,0.2,function() if DA_RightClickMenu and DA_RightClickMenu:IsShown() then return true end end,function(self)
-		if (DA_RightClickMenu.parentbtn:IsMouseOver() or DA_RightClickMenu:IsMouseOver() or DA_RightClickMenu.epgpawardFrame:IsMouseOver() or DA_RightClickMenu.epgpawardFrame.Dropdown:IsMouseOver()) then 
+		if (DA_RightClickMenu.parentbtn:IsMouseOver() 
+		or DA_RightClickMenu:IsMouseOver() 
+		or DA_RightClickMenu.mschangeFrame:IsMouseOver() 
+		or DA_RightClickMenu.epgpawardFrame:IsMouseOver() 
+		or DA_RightClickMenu.epgpawardFrame.Dropdown:IsMouseOver()) then 
 			DA_RightClickMenu.timerticked=0 
 		elseif not _G[DA_RightClickMenu.calledfrom]:IsVisible() then
 			DA_RightClickMenu.timerticked=0
@@ -1025,10 +1029,11 @@ end
 function DA.RunBuildQueue()
     for _, builder in ipairs(BuildGUITask) do
 		local moduleName, buildFunc = unpack(builder)
-        local ok, err = pcall(buildFunc)
-        if not ok then
-            DA.Print("|cffff0000INIT error in " .. moduleName .. ":|r " .. err)
-        end
+        -- local ok, err = pcall(buildFunc)
+		DA.Safecall("[INIT] "..moduleName, buildFunc)
+        -- if not ok then
+        --     DA.Print("|cffff0000INIT error in " .. moduleName .. ":|r " .. err, DA.GetErrorCopyLink(debugstack()))
+        -- end
     end
 end
 Dark_Angel_OnInit = function(guildinit)

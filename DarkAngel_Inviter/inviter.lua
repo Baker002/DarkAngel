@@ -1010,7 +1010,7 @@ function Mod:Inviter_Load()
 			add_additional_invites()
 
 		end
-		DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 26, -143},  12,  50,  L['start'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},startRT)
+		DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 26, -143},  12,  50,  L['start'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},startRT)
 
 		local function stopRT(self)
 			listinvite_bulk=nil
@@ -1027,7 +1027,7 @@ function Mod:Inviter_Load()
 			if fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM then else InviterMsgFrame:UnregisterEvent("CHAT_MSG_WHISPER");end
 		end
 		-- STOP button
-		DA_Inviter.stopbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"LEFT", DA_Inviter.startbtn, "RIGHT", 5, 0},  12,  48.1,  L["stop"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},stopRT)
+		DA_Inviter.stopbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"LEFT", DA_Inviter.startbtn, "RIGHT", 5, 0},  12,  48.1,  L["stop"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},stopRT)
 		DA_Inviter.stopbtn:Disable()
 
 

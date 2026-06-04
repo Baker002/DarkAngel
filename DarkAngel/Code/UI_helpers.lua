@@ -3,7 +3,12 @@
 local DA = DarkAngel
 local L = DA.L
 
-
+DA.RolesTextures = {
+	tank   = [[Interface\AddOns\DarkAngel\template\tankIconTr]],
+	healer = [[Interface\AddOns\DarkAngel\template\healerIconTr]],
+	melee    = [[Interface\AddOns\DarkAngel\template\dpsIconTr]],
+	caster	=	[[Interface\AddOns\DarkAngel\template\rangedDpsIconTr]]
+}
 -- GUI Builders
 function DA.FrameCreater(name,rel,width,heigh,point,artTexture,customBGcolor, moreframelvl, alwaysDarkFrame)
 	local f=CreateFrame("Frame", name, rel)
@@ -187,7 +192,8 @@ function DA.CreateDropdownSelector(d)
 	
 	local function getRoster()
 		if valuesrosterDynamic then
-			return DA.Safecall(valuesrosterDynamic)
+			local ok, result = DA.Safecall("[other]", valuesrosterDynamic)
+			return result or {}
 		else
 			return valuesroster
 		end
@@ -233,7 +239,7 @@ function DA.CreateDropdownSelector(d)
 					if not frameHideOnSelection or frameHideOnSelection() then
 						frame:Hide()
 					end
-					if funcOnSelection then DA.Safecall(funcOnSelection) end
+					if funcOnSelection then DA.Safecall("[other]", funcOnSelection) end
 					frame:reRender()
 				end)
 				newrosterCount = newrosterCount + 1
@@ -272,7 +278,8 @@ function DA.CreateDropdownNoValueSelector(d)
 			d.rel, 	d.point, 	d.height,	d.width, 	d.title, d.frpoint, d.valuesroster, d.valuesrosterDynamic, d.justh, d.optjusth, d.funcOnShow, d.funcOnHide, d.desrtag
 	local function getRoster()
 		if valuesrosterDynamic then
-			return DA.Safecall(valuesrosterDynamic)
+			local ok, result = DA.Safecall("[other]", valuesrosterDynamic)
+			return result or {}
 		else
 			return valuesroster
 		end
@@ -329,7 +336,7 @@ function DA.CreateDropdownNoValueSelector(d)
 					if not frameHideOnSelection or frameHideOnSelection() then
 						frame:Hide()
 					end
-					if funcOnSelection then DA.Safecall(funcOnSelection) end
+					if funcOnSelection then DA.Safecall("[other]", funcOnSelection) end
 					frame:reRender()
 				end)
 				newrosterCount = newrosterCount + 1
@@ -511,8 +518,8 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelButtonTemplate2")
 
 	return f
 end
-function DA.IconicButtonCreater(name,rel,point,size,texture,onclickscr,descrtext,customscript)
-local f = CreateFrame("Button", name, rel, "UIDarkAngelIconicButton")
+function DA.IconicButtonCreater(rel,point,size,texture,onclickscr,descrtext,customscript)
+local f = CreateFrame("Button", nil, rel, "UIDarkAngelIconicButton")
 	f:SetPoint(unpack(point))
 	f:SetHeight(size)
 	f:SetWidth(size)
@@ -539,9 +546,10 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelIconicButton")
 		f:GetScript("OnEnter")(f)
 	end)
 	f.switch=function(state)
+		if not f:GetNormalTexture() then return end
 		if state then
 			f:GetNormalTexture():SetDesaturated(false)
-			f:SetAlpha(0.85)
+			f:SetAlpha(1)
 			f.isenabled=true
 		else
 			f:GetNormalTexture():SetDesaturated(true)
@@ -549,7 +557,7 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelIconicButton")
 			f.isenabled=nil
 		end
 	end
-
+	f.isenabled = true
 	if descrtext then
 		f:SetScript("OnEnter", function(self)
 			self:SetAlpha(1)
@@ -563,7 +571,7 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelIconicButton")
 
 		f:SetScript("OnLeave", function(self)
 			if self.isenabled then
-				self:SetAlpha(0.85)
+				self:SetAlpha(1)
 			else
 				self:SetAlpha(0.6)
 			end
@@ -1032,9 +1040,7 @@ local f = CreateFrame("EditBox", name, rel)
 	f:SetMultiLine(allowMultiLine)
 	f:SetAutoFocus(allowAutoFocus)
 	f:SetFont(unpack(fonttype))
-	 DA.Safecall(function ()
-		f:SetFrameLevel(rel:GetFrameLevel() + 2)
-	 end)
+	f:SetFrameLevel(rel:GetFrameLevel() + 2)
 	f.stored=false
 
 --	28/255, 32/255, 50/255
@@ -1354,12 +1360,18 @@ f:EnableMouse(true)
 f:SetMovable(true)
 f:SetResizable(true)
 f:SetFrameLevel(rel:GetFrameLevel() + 30 )
-f.scrollframe = f.scrollframe or CreateFrame("ScrollFrame", name..'ScrollFrame', _G[name], "UIDarkAngelScrollFrame");
+f.scrollframe = f.scrollframe or CreateFrame("ScrollFrame", name..'ScrollFrame', f, "UIDarkAngelScrollFrame");
 f.scrollchild = f.scrollchild or CreateFrame("Frame");
 local scrollbarName = f.scrollframe:GetName()
 f.scrollbar = _G[scrollbarName.."ScrollBar"]
 f.scrollupbutton = _G[scrollbarName.."ScrollBarScrollUpButton"]
 f.scrolldownbutton = _G[scrollbarName.."ScrollBarScrollDownButton"]
+	f.scrollbar:Hide()
+	f.scrollbar.isHider=true
+	f.scrollbar:GetThumbTexture():Hide()
+	f.scrollupbutton:Hide()
+	f.scrolldownbutton:Hide()
+
 f.scrollupbutton:ClearAllPoints()
 f.scrollupbutton:SetPoint("TOPRIGHT", f.scrollframe, "TOPRIGHT", -2, -2)
 f.scrolldownbutton:ClearAllPoints();

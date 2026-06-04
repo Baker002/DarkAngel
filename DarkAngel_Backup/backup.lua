@@ -324,7 +324,7 @@ for i=350,1,-1 do
 				Backup_ReRender_guild(gname)
 			end,
 		nil,nil,'center')
-		_G["FFGBL"..counter..'cls']:SetHighlightTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red")
+		_G["FFGBL"..counter..'cls']:SetHighlightTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 		_G["FFGBL"..counter..'cls']:GetFontString():SetTextColor(1,0.65,0.65,0.65,1)
 		_G["FFGBL"..counter..'cls'].storedDBtype=db[i].source[1]
 		_G["FFGBL"..counter..'cls'].storedId=db[i].source[2]
@@ -991,7 +991,7 @@ function Mod.Backup_Load()
 				hideOnEscape = true,
 				preferredIndex = 3, -- Avoid clashing with other popups
 			}
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-35},12,50,L['players data'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-35},12,50,L['players data'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 6, "OUTLINE"},function() 
 				for _,i in pairs({"manualnote","manualofnote","manualrank","manuallocals","manualgannounce","manualginfo","manualgmrank"}) do
 					if i=="manualnote" or i=="manualofnote" or i=="manualrank" then
 						DarkAngelGUI.Backup[i]:SetChecked(1)
@@ -1000,17 +1000,17 @@ function Mod.Backup_Load()
 					end
 				end
 			end)
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-50},12,50,L['full guild'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-50},12,50,L['full guild'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
 				for _,i in pairs({"manualnote","manualofnote","manualrank","manuallocals","manualgannounce","manualginfo","manualgmrank"}) do
 					DarkAngelGUI.Backup[i]:SetChecked(1)
 				end
 			end)
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-65},12,50,L['clear'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",345,-65},12,50,L['clear'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
 				for _,i in pairs({"manualnote","manualofnote","manualrank","manuallocals","manualgannounce","manualginfo","manualgmrank"}) do
 					DarkAngelGUI.Backup[i]:SetChecked(false)
 				end
 			end)
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",355,-85},12,50,"reloadUI",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",355,-85},12,50,"reloadUI",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
 				StaticPopup_Show('DarkAngel_backup_RELOADUI')
 			end)
 		
@@ -1025,7 +1025,7 @@ function Mod.Backup_Load()
 		
 			DA.FontCreater(nil,L["Create_Manual_backup"],{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",235,-20},DarkAngelGUI.Backup.manualnote,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",260,-118},12,60,L['Create Backup'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",260,-118},12,60,L['Create Backup'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() 
 				if DA.CreateBackup(
 					nil,
 					DarkAngelGUI.Backup.manualnote:GetChecked(),
@@ -1088,7 +1088,7 @@ function Mod.Backup_Load()
 			
 			DA.FontCreater(nil,L["Saved guilds"],{"LEFT",guilds,"TOPLEFT",10,5},guilds,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
-			DA.CreateFFGButton2(nil,guilds,{"LEFT",guilds,"TOPLEFT",90,5},10,40,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,guilds,{"LEFT",guilds,"TOPLEFT",90,5},10,40,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"},function() 
 				Backup_ReRenderGuilds()
 				Backup_ReRender_guild(DA_CurrentGuild)
 				DA.SetTimerTime('autobackup_hours',1)
@@ -1225,13 +1225,13 @@ function Mod.Backup_Load()
 		end
 	
 		do --run and stop
-			DarkAngelGUI.Backup.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-232},12,40,'start','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-232},12,40,'start',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
 				DarkAngelGUI.Backup.stopbtn:Enable()
 				StartBackupRestoration()
 			end)
 			
-			DarkAngelGUI.Backup.stopbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-247},12,40,L['stop'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.stopbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-247},12,40,L['stop'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
 				StopBackupRestoration()
 			end)

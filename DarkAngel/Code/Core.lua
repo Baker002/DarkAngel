@@ -35,33 +35,51 @@ Bismillah — we press Run.
 ---@class DarkAngelAddon
 local DA = DarkAngel
 	DA.L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+	DA.LGT = LibStub:GetLibrary('LibGroupTalents-1.0')
 local L = DA.L
 
 
 
 --- Lua helpers
-function DA.Safecall(func, ...)
-	if type(func) ~= "function" then
-		DA.Print("|cffff0000Safecall error:|r invalid function")
-		return
-	end
 
-	local ok,
-		result1, result2, result3,
-		result4, result5, result6,
-		result7, result8, result9 =
-			pcall(func, ...)
-			-- xpcall(func, debugstack, ...)
+function DA.GetErrorCopyLink(longString)
+	DA.LinkIndex = DA.LinkIndex + 1
+	local id = tostring(DA.LinkIndex)
+	DA.LinkStorage[id] = longString
+	return "|cffbf4949|Hdalink:" .. id .. "|h<click to copy full error message>|h|r"
+end
+function DA.Safecall(objectName, func, ...)
+	local a1, a2, a3, a4, a5, a6, a7, a8, a9 = ...
+	
+    if type(func) ~= "function" then
+        DA.Print("|cffff0000Safecall error:|r invalid function")
+        return
+    end
 
-	if not ok then
-		DA.Print("|cffff0000Error:|r "..tostring(result1))
-		return
-	end
+    local function ErrorHandler(err)
+        return tostring(err) .. "\n" .. debugstack(2)
+    end
 
-	return
-		result1, result2, result3,
-		result4, result5, result6,
-		result7, result8, result9
+    local ok,
+        result1, result2, result3,
+        result4, result5, result6,
+        result7, result8, result9 =
+            xpcall(
+                function()
+                    return func(a1, a2, a3, a4, a5, a6, a7, a8, a9)
+                end,
+                ErrorHandler
+            )
+
+    if not ok then
+        DA.Print("|cffff0000Error in |r", objectName, ": ", DA.GetErrorCopyLink(result1))
+        return
+    end
+
+    return
+        ok, result1, result2, result3,
+        result4, result5, result6,
+        result7, result8, result9
 end
 function DA.Print(...)
 	print("[|cffed94edDarkAngel|cffffffff]:", ...)
@@ -261,14 +279,10 @@ da_simpleTimer:SetScript("OnUpdate", function(self,_)
     end
 
     while self.count > 0 and self.queue[1].time <= now do
-        local cb = self.queue[1].func
+        local func = self.queue[1].func
         simpleTimer_Shift()
 
-		DA.Safecall(cb)
-        -- local ok, err = pcall(cb)
-        -- if not ok then
-        --     DA.Print("|cffff0000Timer Error:|r "..tostring(err))
-        -- end
+		DA.Safecall("[scheduled]", func)
     end
 end)
 DA.TimerAfter = function(duration, callback)

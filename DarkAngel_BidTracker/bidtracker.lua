@@ -2,7 +2,7 @@
 ---@class DarkAngelAddon
 local DA = DarkAngel
 local L = DA.L
-local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
+local LGT=DA.LGT
 local Mod = DA:NewModule("BidTracker")
 
 local item_IDs_roster={
@@ -623,7 +623,7 @@ local function IsLootRoleMaches(class,role,spec_ID)
 	for _,t in ipairs(DA_BidTracker.rosterRaidRoles) do
 		if t and (not t[1] or class==t[1]) and
 			(not t[2] or role==t[2]) and
-			(not t[3] or spec_ID==t[3]) then
+			(not t[3] or tostring(spec_ID)==tostring(t[3])) then
 			return true
 		end
 	end
@@ -849,6 +849,13 @@ local function DetermineLootRolesForItem(itemLink, itemType, itemSubType, itemID
 
 	tooltip:Hide()
 end
+local function prepareRoleSpec(name, BTRole, BTSpec)
+	if DarkAngel_BTMS[name] and DarkAngel_BTMS[name].msspec and DarkAngel_BTMS[name].msrole then
+		return DarkAngel_BTMS[name].msrole, DarkAngel_BTMS[name].msspec, true
+	else
+		return BTRole, BTSpec, false
+	end
+end
 local function Add_Check_Bid(value, name, isAllIn)
 	
 	local main
@@ -983,8 +990,17 @@ local function Add_Check_Bid(value, name, isAllIn)
 	local usable=CanItemBeUsedByClass(DA_BidTracker.itemlink,class)
 	
 	local specname = select(1,LGT:GetUnitTalentSpec(name),1)
-	local spec_a,spec_b,spec_c = LGT:GetTreeNames(class)
-	local spec_ID = specname and ((spec_a and spec_a == specname and 1) or (spec_b and spec_b == specname and 2) or (spec_c and spec_c == specname and 3)) or nil
+	local specnames = {LGT:GetTreeNames(class)}
+	local spec_ID
+		for ID,spcname in ipairs(specnames) do
+			if #specnames==3 then
+				if spcname == specname then
+					spec_ID = ID
+					break
+				end
+			end
+		end
+	
 	local role=LGT:GetUnitRole(name)
 	
 	if DA_BidTracker.bidsession_roster[1] and value<DA_BidTracker.bidsession_roster[1][1] and fuckingOptions_g[DA_CurrentGuild].auc_allow_lower then
@@ -1052,7 +1068,16 @@ local function Add_Check_Bid(value, name, isAllIn)
 	for i=1,9 do
 		if DA_BidTracker.bidsession_roster[i] then
 			if DA_BidTracker.bidsession_roster[i].usable then
-				if IsLootRoleMaches(DA_BidTracker.bidsession_roster[i].class,DA_BidTracker.bidsession_roster[i].role,DA_BidTracker.bidsession_roster[i].spec_ID) then
+				local processedRole, processedSpec, isMSChanged = prepareRoleSpec(DA_BidTracker.bidsession_roster[i][2], DA_BidTracker.bidsession_roster[i].role, DA_BidTracker.bidsession_roster[i].spec_ID)
+				
+				local rolematch = IsLootRoleMaches(
+					DA_BidTracker.bidsession_roster[i].class,
+					processedRole,
+					processedSpec
+				) 
+				if rolematch and isMSChanged then
+					DA_BidTracker['loot'..i]:SetText("|cfffc96ff"..addspacestovalue(DA_BidTracker.bidsession_roster[i][1]).."  "..addspacestobank(DA_BidTracker.bidsession_roster[i][3]).."   "..DA_BidTracker.bidsession_roster[i].classCC..DA_BidTracker.bidsession_roster[i][2])
+				elseif rolematch then
 					DA_BidTracker['loot'..i]:SetText("|cff1ced93"..addspacestovalue(DA_BidTracker.bidsession_roster[i][1]).."  "..addspacestobank(DA_BidTracker.bidsession_roster[i][3]).."   "..DA_BidTracker.bidsession_roster[i].classCC..DA_BidTracker.bidsession_roster[i][2])
 				else
 					DA_BidTracker['loot'..i]:SetText(addspacestovalue(DA_BidTracker.bidsession_roster[i][1]).."  "..addspacestobank(DA_BidTracker.bidsession_roster[i][3]).."   "..DA_BidTracker.bidsession_roster[i].classCC..DA_BidTracker.bidsession_roster[i][2])
@@ -1069,7 +1094,23 @@ local function Add_Check_Bid(value, name, isAllIn)
 					DA_BidTracker.winneralt=DA_BidTracker.bidsession_roster[i][5] or nil
 				elseif btntype=='RightButton' then
 					DA_RightClickMenu.calledfrom="DA_BidTracker"
-					DA.OpenOptMenu(self,DA_BidTracker.bidsession_roster[i][2])
+
+					local name = DA_BidTracker.bidsession_roster[i][2]
+					local role = DA_BidTracker.bidsession_roster[i].role
+					local class = DA_BidTracker.bidsession_roster[i].class
+					local specID = DA_BidTracker.bidsession_roster[i].spec_ID
+					local msChGlobal = DarkAngel_BTMS[name]
+					local isMSRoleChanged = msChGlobal and msChGlobal.msrole
+					local isMSSpecChanged = msChGlobal and msChGlobal.msspec
+					local MSChangePack={
+						name=name,
+						class=class,
+						role=role,
+						spec=specID,
+						msRole=isMSRoleChanged,
+						msSpec=isMSSpecChanged  
+					}
+					DA.OpenOptMenu(self,name,nil,MSChangePack)
 				end
 			end)
 			DA_BidTracker['loot'..i].myID=i
@@ -1100,7 +1141,7 @@ local function Add_Check_Bid(value, name, isAllIn)
 end
 
 
-DA_BidTracker.spendbutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOPLEFT",113,-202},12,50,L["Spend"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
+DA_BidTracker.spendbutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOPLEFT",113,-202},12,50,L["Spend"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
 	self:Disable()
 	local price=tonumber(DA_BidTracker.pricebox:GetText())
 	local main=DA_BidTracker.winnermain
@@ -1151,7 +1192,7 @@ DA_BidTracker.spendbutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_Bi
 		return
 	end
 end)
-DA_BidTracker.giveitembutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOPLEFT",45,-202},12,70,L["Give item"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function()
+DA_BidTracker.giveitembutton=DA.CreateFFGButton2(nil,DA_BidTracker,{"center", DA_BidTracker, "TOPLEFT",45,-202},12,70,L["Give item"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function()
 	local item=DA_BidTracker.itemlink
 	local player=DA_BidTracker.winnerfont:GetText()
 	
@@ -1291,7 +1332,7 @@ DA_BidTracker:SetScript("OnEvent",function(self,event,message,author)
 end)
 
 function Mod:OnInitialize()
-
+	DarkAngel_BTMS = DarkAngel_BTMS or {}
 end
 
 function Mod:OnEnable()
@@ -1548,7 +1589,7 @@ function Mod:BidTracker_Load()
 	for i=1,4 do
 		DA_BidTracker.OptionsFr['opt'..i]=DA.FrameCreater(nil,DA_BidTracker.OptionsFr.BSC,DA_BidTracker.OptionsFr.BSC.width-5,15,{"TOPLEFT", DA_BidTracker.OptionsFr.BSC, "TOPLEFT", 2.5, -6-16*i})
 
-		DA_BidTracker.OptionsFr['opt'..i].del=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",12,0},10,15,"x",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() end)
+		DA_BidTracker.OptionsFr['opt'..i].del=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",12,0},10,15,"x",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() end)
 		DA_BidTracker.OptionsFr['opt'..i].bidlimit=DA.EditBoxCreater2(nil,DA_BidTracker.OptionsFr['opt'..i],{"LEFT", DA_BidTracker.OptionsFr['opt'..i], "LEFT",30,0},{35,12},"",false,false,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},nil,1,nil,true)
 		DA_BidTracker.OptionsFr['opt'..i].bidincr=DA.CreateFFGButton2(nil,DA_BidTracker.OptionsFr['opt'..i],{"center", DA_BidTracker.OptionsFr['opt'..i], "LEFT",90,0},12,30,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self, btntype) 
 			local newValue
@@ -1661,7 +1702,7 @@ DA.AddModOptions('BidTracker', function(optFrame,optScrollFrame)
 	DA.CheckBtnCreater(nil,f,{"CENTER", OnlyGuildChbx, "CENTER", 65, 0},15,15,"100%",function(self) fuckingOptions.auc_OnlyInFullGuild=(self:GetChecked() or false) end,{'fuckingOptions','auc_OnlyInFullGuild'},"OnlyInFullGuildRaid")
 	DA.FontCreater(nil,"BidTracker",{"LEFT",f,"TOPLEFT",5,-6},OnlyGuildChbx,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
-	DA.CreateFFGButton2(nil,f,{"center", f, "TOPLEFT", 80,-6},10,30,'open','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+	DA.CreateFFGButton2(nil,f,{"center", f, "TOPLEFT", 80,-6},10,30,'open',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 		DA.AnimateText(optScrollFrame.scrollchild.addbinds_ch)
 	end,'bt_open')
 	

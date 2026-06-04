@@ -367,7 +367,7 @@ DA.AddToBuildQueue("Options", function()
 					end
 				end)
 
-				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-60},12,45,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-60},12,45,L['import'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
 					if not(btnType=="RightButton" and frame.EB:GetText() and frame.EB:GetText():gsub("%s+","")~="") then return end
 
 					self:Disable()
@@ -392,7 +392,7 @@ DA.AddToBuildQueue("Options", function()
 					end)
 				end,'confirm_rightclick')
 
-				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-121,5},6,20,'<<<','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-121,5},6,20,'<<<',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
 					if not s.state then
 						s.state = true
 						frame:SetSize(DarkAngelGUI.width,220)
@@ -428,7 +428,7 @@ DA.AddToBuildQueue("Options", function()
       
 
 ]==]			
-				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-100,5},6,18,':3','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black',{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function()
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"BOTTOMRIGHT",-100,5},6,18,':3',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function()
 					frame.EB:SetText(cat)
 				end)
 			end
@@ -487,7 +487,7 @@ DA.AddToBuildQueue("Options", function()
 					funcOnShow = function(s) s:reRender() end,
 				})
 
-				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-170},12,45,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
+				DA.CreateFFGButton2(nil,frame,{"CENTER",frame,"TOPRIGHT",-50,-170},12,45,L['import'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"}, function(self,btnType)
 					if not(btnType=="RightButton" and frame.fromFrame.storedvalue and frame.toFrame.storedvalue and frame.fromFrame.storedvalue~=frame.toFrame.storedvalue) then return end
 
 					
@@ -547,10 +547,11 @@ DA.AddToBuildQueue("Options", function()
 	local modOptTable = {}
 	for _,t in ipairs(DA.modOptCreate) do
 		local modName,modOptFunc = unpack(t)
-		local ok, result = pcall(modOptFunc, DarkAngelGUI.opt, DarkAngelopt)
-        if not ok then
-            DA.Print("|cffff0000["..modName.."]: Init Error:|r "..tostring(result))
-		else
+		local ok, result = DA.Safecall("[INIT Mod] ".. modName .." Config", modOptFunc, DarkAngelGUI.opt, DarkAngelopt)
+		-- local ok, result = pcall(modOptFunc, DarkAngelGUI.opt, DarkAngelopt)
+        if ok then
+        --     DA.Print("|cffff0000["..modName.."]: Mod Options Init Error:|r "..tostring(result), DA.GetErrorCopyLink(debugstack()))
+		-- else
 			table.insert(modOptTable, {modName, result})
 			DA.loaded_Modules[modName]=true
         end

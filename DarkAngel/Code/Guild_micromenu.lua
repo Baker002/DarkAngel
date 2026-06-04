@@ -49,7 +49,7 @@ DA.AddToBuildQueue("About", function()
 
         DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.micromenu,{"center", DarkAngelGUI.Guild.micromenu, "TOPRIGHT", -8.5,-8.5},12,12,'x')
 
-        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",90,-11},12,50,L['tvins'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",90,-11},12,50,L['tvins'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
             if DarkAngelGUI.Guild.micromenu.ofnotebox:GetText() and (DA.DecodeNote(DarkAngelGUI.Guild.micromenu.ofnotebox:GetText())=='m' or DA.DecodeNote(DarkAngelGUI.Guild.micromenu.ofnotebox:GetText())=='f' ) then
             --is main/frozen main
                 DarkAngelGUI.Guild.precmatch:SetChecked(false);fuckingOptions.precisematchsearch=false
@@ -88,7 +88,7 @@ DA.AddToBuildQueue("About", function()
             end
         end)
 
-        DarkAngelGUI.Guild.micromenu.deletelocal=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",10,-85},10,45,L['delete'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self,clicktype)
+        DarkAngelGUI.Guild.micromenu.deletelocal=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",10,-85},10,45,L['delete'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self,clicktype)
             if clicktype=='RightButton' then
                 if FEP_L_gMain[DA_CurrentGuild][DarkAngelGUI.Guild.micromenu.plbox:GetText()] then
                     FEP_L_gMain[DA_CurrentGuild][DarkAngelGUI.Guild.micromenu.plbox:GetText()]=nil
@@ -211,7 +211,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.noteboxfont=DA.FontCreater(nil,L['note'],{"TOPLEFT",DarkAngelGUI.Guild.micromenu.notebox,"TOPLEFT",5,12},DarkAngelGUI.Guild.micromenu.notebox,15,170,{UIDarkAngelFontConsolas:GetFont(), 9,'outline'},'left',{0.85,1,1,0.8})
         --set
-        DarkAngelGUI.Guild.micromenu.noteset=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",6,-80},12,30,L['set'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.noteset=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",6,-80},12,30,L['set'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
                 DarkAngelGUI.Guild.micromenu.notebox:ClearFocus();DarkAngelGUI.Guild.micromenu.notebox.focusgained=nil
                 if CanEditPublicNote() then else DA.Print(L['I am not allowed to edit public notes']) return end
@@ -227,7 +227,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.noteset:Disable()
         --cancel
-        DarkAngelGUI.Guild.micromenu.notecancel=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",39,-80},12,50,L['cancel'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.notecancel=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",39,-80},12,50,L['cancel'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
                 DarkAngelGUI.Guild.micromenu.notebox:ClearFocus();DarkAngelGUI.Guild.micromenu.notebox.focusgained=nil
                 DarkAngelGUI.Guild.micromenu.notebox.t:SetTexture(28/255, 32/255, 50/255, 1);
@@ -239,7 +239,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.notecancel:Disable()
         --refresh
-        DarkAngelGUI.Guild.micromenu.noterefresh=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",92,-80},12,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.noterefresh=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",92,-80},12,50,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
                 DarkAngelGUI.Guild.micromenu.notebox:ClearFocus();DarkAngelGUI.Guild.micromenu.notebox.focusgained=nil
                 DarkAngelGUI.Guild.micromenu.notebox.t:SetTexture(28/255, 32/255, 50/255, 1);
@@ -312,7 +312,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.ofnoteboxfont=DA.FontCreater(nil,L['officer note'],{"TOPLEFT",DarkAngelGUI.Guild.micromenu.ofnotebox,"TOPLEFT",5,12},DarkAngelGUI.Guild.micromenu.ofnotebox,15,170,{UIDarkAngelFontConsolas:GetFont(), 9,'outline'},'left',{0.85,1,1,0.8})
         --set
-        DarkAngelGUI.Guild.micromenu.ofnoteset=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",6,-120},12,30,L['set'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.ofnoteset=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",6,-120},12,30,L['set'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
 
                 if DarkAngelGUI.Guild.micromenu.islocal then
@@ -376,7 +376,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.ofnoteset:Disable()
         --cancel
-        DarkAngelGUI.Guild.micromenu.ofnotecancel=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",39,-120},12,50,L['cancel'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.ofnotecancel=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",39,-120},12,50,L['cancel'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
                 DarkAngelGUI.Guild.micromenu.ofnotebox:ClearFocus();DarkAngelGUI.Guild.micromenu.ofnotebox.focusgained=nil
                 DarkAngelGUI.Guild.micromenu.ofnotebox.t:SetTexture(28/255, 32/255, 50/255, 1);
@@ -388,7 +388,7 @@ DA.AddToBuildQueue("About", function()
         )
         DarkAngelGUI.Guild.micromenu.ofnotecancel:Disable()
         --refresh
-        DarkAngelGUI.Guild.micromenu.ofnoterefresh=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",92,-120},12,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.ofnoterefresh=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"TOPLEFT",DarkAngelGUI.Guild.micromenu,"TOPLEFT",92,-120},12,50,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
             function()
                 DarkAngelGUI.Guild.micromenu.ofnotebox:ClearFocus();DarkAngelGUI.Guild.micromenu.ofnotebox.focusgained=nil
                 DarkAngelGUI.Guild.micromenu.ofnotebox.t:SetTexture(28/255, 32/255, 50/255, 1);

@@ -274,8 +274,12 @@
 				local scrollBar = _G[self:GetName() .. "ScrollBar"];
 				local _,m = scrollBar:GetMinMaxValues()
 				scrollBar:GetThumbTexture():SetTexCoord(0, 1, 0, 1)
-
-				if m==0 then
+				if scrollBar.isHider then
+					scrollBar:Hide()
+					scrollBar:GetThumbTexture():Hide()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()
+				elseif m==0 then
 					scrollBar:GetThumbTexture():Hide()
 					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
 					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()
@@ -289,7 +293,12 @@
 				ScrollFrame_OnScrollRangeChanged(self, xrange, yrange);
 				local scrollBar = _G[self:GetName() .. "ScrollBar"];
 				local _,m = scrollBar:GetMinMaxValues()
-				if m==0 then
+				if scrollBar.isHider then
+					scrollBar:Hide()
+					scrollBar:GetThumbTexture():Hide()
+					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
+					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()
+				elseif m==0 then
 					scrollBar:GetThumbTexture():Hide()
 					_G[self:GetName() .. "ScrollBarScrollUpButton"]:Hide()
 					_G[self:GetName() .. "ScrollBarScrollDownButton"]:Hide()

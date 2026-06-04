@@ -1971,7 +1971,7 @@ DA.AddToBuildQueue("Guild", function()
     DarkAngelGUI.Guild.offliners=DA.CheckBtnCreater(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",93,-16},14,14,'offline',function(self) fuckingOptions.showoffl=(self:GetChecked() or false) DA.GetGuildData();DA.GuildSetAllLines() end,{'fuckingOptions','showoffl'})
 
     -- refresh
-    DarkAngelGUI.Guild.refreshbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",163,-8},8,52,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+    DarkAngelGUI.Guild.refreshbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",163,-8},8,52,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
         DA.GetGuildData()
         DA.GuildSetAllLines()
     end)
@@ -2172,7 +2172,7 @@ DA.AddToBuildQueue("Guild", function()
             nil,nil,nil,1
         )
 
-        DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
+        DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function()
             copyFrame_Update(1)
         end)
 
@@ -2263,7 +2263,7 @@ DA.AddToBuildQueue("Guild", function()
     DA.CheckBtnCreater(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",253,-25},10,10,nil,function(self) fuckingOptions_g[DA_CurrentGuild].evaluateoffnote=(self:GetChecked() or false) DA.GetGuildData();DA.GuildSetAllLines(); if DarkAngelGUI.Guild.copyFrame:IsShown() then copyFrame_Update() end end,{'fuckingOptions_g','evaluateoffnote','DA_CurrentGuild'},'desc_evaluate')
 
     -- clear
-    DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",265,-10},12,50,L['clear'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+    DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",265,-10},12,50,L['clear'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
         DarkAngelGUI.Guild.precmatch:SetChecked(1);fuckingOptions.precisematchsearch=1
         DarkAngelGUI.Guild.showlocals:SetChecked(false);fuckingOptions.showlocals=false
         DarkAngelGUI.Guild.EB1:SetText("")
@@ -2546,7 +2546,7 @@ DA.AddToBuildQueue("Guild", function()
 
             for i=1,7 do
                 DarkAngelGUI.Guild.patternsFrame['pat'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame,{"TOPLEFT", DarkAngelGUI.Guild.patternsFrame, "TOPLEFT", 54, 10-11*i},10,80,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) end)
-                DarkAngelGUI.Guild.patternsFrame['patdel'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame['pat'..i],{"LEFT", DarkAngelGUI.Guild.patternsFrame['pat'..i], "RIGHT", 2, 0},9,9,"x",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                DarkAngelGUI.Guild.patternsFrame['patdel'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame['pat'..i],{"LEFT", DarkAngelGUI.Guild.patternsFrame['pat'..i], "RIGHT", 2, 0},9,9,"x",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     if fuckingOptions.storedpatterns[i] then table.remove(fuckingOptions.storedpatterns,i) end
                     re_render_custom_patterns()
                 end)
@@ -2610,7 +2610,7 @@ DA.AddToBuildQueue("Guild", function()
     end
 
     -- bulk
-    DarkAngelGUI.Guild.bulkBtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",385,-10},12,40,'bulk','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+    DarkAngelGUI.Guild.bulkBtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",385,-10},12,40,'bulk',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
         if DarkAngelGUI.Guild.bulkmenu:IsShown() then
             DarkAngelGUI.Guild.bulkmenu:Hide()
         else
@@ -2619,7 +2619,7 @@ DA.AddToBuildQueue("Guild", function()
     end)
 
     -- backup close
-    DarkAngelGUI.Guild.backupClose=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",345,-54.5},10,90,L['roster from backup'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+    DarkAngelGUI.Guild.backupClose=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",345,-54.5},10,90,L['roster from backup'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
         self:Hide()
         DarkAngelGuild.custom_mode=nil
         DarkAngelGUI.Guild.micromenu:Hide()
@@ -2944,13 +2944,13 @@ DA.AddToBuildQueue("Guild", function()
             DarkAngelGUI.Guild.bulkmenu.autodeselect.font:SetFont(UIDarkAngelFontConsolas:GetFont(), 6.5)
             DarkAngelGUI.Guild.bulkmenu.autodeselect:SetChecked(false)
 
-            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-56.5},10,40,L['clear'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8},function(self)
+            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-56.5},10,40,L['clear'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8},function(self)
                 SelectGuildMember(nil,true)
                 DarkAngelGUI.Guild.UpdRows(DarkAngelGuild.offset or 1)
             end)
 
             ----START
-            DarkAngelGUI.Guild.bulkmenu.startbulk=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-30.5},10,40,L["bulkstart"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
+            DarkAngelGUI.Guild.bulkmenu.startbulk=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-30.5},10,40,L["bulkstart"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
                     DarkAngelGUI.Guild.bulkmenu.adnotebox:ClearFocus()
                     DarkAngelGUI.Guild.bulkmenu.adnotebox.focusgained=nil
                     if DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() and DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() and (not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() or (DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() and DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText())) then
@@ -2964,7 +2964,7 @@ DA.AddToBuildQueue("Guild", function()
             DarkAngelGUI.Guild.bulkmenu.startbulk:Disable()
 
             --- STOP
-            DarkAngelGUI.Guild.bulkmenu.stoper=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-43.5},10,40,L["bulkstop"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
+            DarkAngelGUI.Guild.bulkmenu.stoper=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",166,-43.5},10,40,L["bulkstop"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self)
                     DA.StopTimer('bulkprocessor')
                     table.wipe(DA_Bulk_list)
                     DarkAngelGUI.Guild.bulkmenu.startbulk:Enable()
@@ -3031,7 +3031,7 @@ DA.AddToBuildQueue("Guild", function()
             DarkAngelGUI.Guild.bulkmenu.ismakingnewmain=DA.CheckBtnCreater(nil,DarkAngelGUI.Guild.bulkmenu,{"CENTER",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",137,-137},15,15,L["Make it new Main"],function(self) end)
             DarkAngelGUI.Guild.bulkmenu.ismakingnewmain.font:SetSize(80,30)
 
-            DarkAngelGUI.Guild.bulkmenu.retvgobtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"center",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",163,-117},12,40,L["bulkstart"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self)
+            DarkAngelGUI.Guild.bulkmenu.retvgobtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"center",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",163,-117},12,40,L["bulkstart"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self)
                 DarkAngelGUI.Guild.bulkmenu.assignedto.focusgained=nil;DarkAngelGUI.Guild.bulkmenu.assignedto:ClearFocus()
                 DarkAngelGUI.Guild.bulkmenu.newmain.focusgained=nil;DarkAngelGUI.Guild.bulkmenu.newmain:ClearFocus()
                 if not CanEditOfficerNote() then
@@ -3043,13 +3043,13 @@ DA.AddToBuildQueue("Guild", function()
                 end
             end)
 
-            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",85,-123},10,28,'swap','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",85,-123},10,28,'swap',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
                 local first=DarkAngelGUI.Guild.bulkmenu.assignedto:GetText()
                 local second=DarkAngelGUI.Guild.bulkmenu.newmain:GetText()
                 DarkAngelGUI.Guild.bulkmenu.assignedto:SetText(second)
                 DarkAngelGUI.Guild.bulkmenu.newmain:SetText(first)
             end)
-            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-107},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+            DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-107},13,10,'>',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
                 DarkAngelGUI.Guild.precmatch:SetChecked(false);fuckingOptions.precisematchsearch=false
                 DarkAngelGUI.Guild.showlocals:SetChecked(1);fuckingOptions.showlocals=1
                 DarkAngelGUI.Guild.EB1:SetText(DarkAngelGUI.Guild.bulkmenu.assignedto:GetText())
@@ -3061,7 +3061,7 @@ DA.AddToBuildQueue("Guild", function()
                 DA.GetGuildData();DA.GuildSetAllLines()
 
             end)
-            DarkAngelGUI.Guild.bulkmenu.retvrunsrch2=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-137},13,10,'>','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
+            DarkAngelGUI.Guild.bulkmenu.retvrunsrch2=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPLEFT",110,-137},13,10,'>',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function()
                 DarkAngelGUI.Guild.precmatch:SetChecked(false);fuckingOptions.precisematchsearch=false
                 DarkAngelGUI.Guild.showlocals:SetChecked(1);fuckingOptions.showlocals=1
                 DarkAngelGUI.Guild.EB1:SetText(DarkAngelGUI.Guild.bulkmenu.newmain:GetText())

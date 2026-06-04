@@ -2,7 +2,7 @@
 ---@class DarkAngelAddon
 local DA = DarkAngel
 local L = DA.L
-local LGT=LibStub:GetLibrary('LibGroupTalents-1.0')
+local LGT=DA.LGT
 local Mod = DA:NewModule("Awarder")
 
 local localsToShare={}
@@ -174,7 +174,29 @@ local raidCompClasses = {
 	["WARRIOR2"] = { letter = "h", role = "melee" },
 	["WARRIOR3"] = { letter = "g", role = "tank" , only=true},
 }
+local function ClearAwardRowsCrap()
+	if not DA_Awarder.autoopt or not DA_Awarder.autoopt:IsShown() then return end
 
+	for f=1,8 do
+		for g=1,3 do
+			local gr = DA_Awarder.autoopt['fr'..f]
+			if not gr then return end
+			local f = gr['group'..g]
+			if not f then return end
+
+			local scrollbarName = f.scrollframe:GetName()
+			f.scrollbar = _G[scrollbarName.."ScrollBar"]
+			f.scrollupbutton = _G[scrollbarName.."ScrollBarScrollUpButton"]
+			f.scrolldownbutton = _G[scrollbarName.."ScrollBarScrollDownButton"]
+				f.scrollbar:Hide()
+				f.scrollbar.isHider=true
+				f.scrollbar:GetThumbTexture():Hide()
+				f.scrollupbutton:Hide()
+				f.scrolldownbutton:Hide()
+				f.onleave(f)
+		end
+	end
+end
 local function raidCompGetClassShort(class, spec, role)
 	if not class then 
 		return "0" 
@@ -238,7 +260,7 @@ DA_Awarder=DA.FrameCreater(nil,UIParent,350,495,{"CENTER", UIParent, "CENTER", 0
 DA_Awarder:RegisterForDrag("LeftButton")
 DA_Awarder:SetScript("OnDragStart", DA_Awarder.StartMoving)
 DA_Awarder:SetScript("OnDragStop", function(self)
-
+	ClearAwardRowsCrap()
 	self:StopMovingOrSizing(self)
 
 	local point={DA_Awarder:GetPoint(1)}
@@ -507,10 +529,10 @@ end
 DA_Awarder.locker=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER",DA_Awarder,"TOPLEFT",40,-10},10,74,L["Lock raid"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "outline"},function(self)
 	if self.fs:GetText()==L["Unlock raid"] then
 		self.fs:SetText(L["Lock raid"])
-		self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
+		self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 	elseif self.fs:GetText()==L["Lock raid"] then
 		self.fs:SetText(L["Unlock raid"])
-		self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp')
+		self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 	end
 end,"awardlocker")
 DA_Awarder.locker.getstate=function()
@@ -523,10 +545,10 @@ end
 DA_Awarder.locker.setstate=function(state)
 	if state then
 		DA_Awarder.locker.fs:SetText(L["Unlock raid"])
-		DA_Awarder.locker:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp')
+		DA_Awarder.locker:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 	else
 		DA_Awarder.locker.fs:SetText(L["Lock raid"])
-		DA_Awarder.locker:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
+		DA_Awarder.locker:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 	end
 end
 		
@@ -544,7 +566,7 @@ end
 DA_Awarder.autoopt=DA.FrameCreater(nil,DA_Awarder,250,160,{"BOTTOMLEFT", DA_Awarder, "BOTTOMRIGHT", 2, 0})
 DA_Awarder.autoopt:RegisterForDrag("LeftButton")
 DA_Awarder.autoopt:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-DA_Awarder.autoopt:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+DA_Awarder.autoopt:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 
 DA_Awarder.autoopt.helper = DA.HelpCreater(DA_Awarder.autoopt,{"center", DA_Awarder.autoopt, "TOPRIGHT", -22,-8.5},'autoopt_tt',11,11)
 
@@ -1282,62 +1304,62 @@ local function GetChatCopyLink(longString)
 end
 local function re_render_saves()
 
-local saves_Frame=DA_Awarder.getsavesFrame
-local saves_Frame_Scrolled=DA_Saved_Raids.scrollchild
+	local saves_Frame=DA_Awarder.getsavesFrame
+	local saves_Frame_Scrolled=DA_Saved_Raids.scrollchild
 
-local saves_sorted=DA_Snapshots
+	local saves_sorted=DA_Snapshots
 
-local counter=0
-for i=100,1,-1 do
-	if saves_sorted[i] then
-	counter=counter+1
-		local f=DA.CreateFFGButton2("DA_RS_"..counter..'but',saves_Frame_Scrolled,{"TOPLEFT",saves_Frame_Scrolled,"TOPLEFT",0,10-(11*counter)},13,145,saves_sorted[i].stamp..((saves_sorted[i].isauto and "|cffaaffa0 A |r") or "|cffc490fc M |r")..saves_sorted[i].members.." |cff99aaaapl.|r",nil,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
-			function(self)
-				saves_Frame:Hide()
-				if not IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
-					DA.LoadSnapshot(self.stored,'all')
-				elseif not IsAltKeyDown() and IsShiftKeyDown() and not IsControlKeyDown() then
-					DA.LoadSnapshot(self.stored,'raid')
-				elseif not IsAltKeyDown() and not IsShiftKeyDown() and IsControlKeyDown() then
-					DA.LoadSnapshot(self.stored,'marks')
-				elseif IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
-					if not saves_sorted[i].compLink then
-						DA.Print("Raid composition is not stored for this old snapshot. Try to load and re-save it")
-						return
+	local counter=0
+	for i=100,1,-1 do
+		if saves_sorted[i] then
+		counter=counter+1
+			local f=DA.CreateFFGButton2("DA_RS_"..counter..'but',saves_Frame_Scrolled,{"TOPLEFT",saves_Frame_Scrolled,"TOPLEFT",0,10-(11*counter)},13,145,saves_sorted[i].stamp..((saves_sorted[i].isauto and "|cffaaffa0 A |r") or "|cffc490fc M |r")..saves_sorted[i].members.." |cff99aaaapl.|r",nil,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
+				function(self)
+					saves_Frame:Hide()
+					if not IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
+						DA.LoadSnapshot(self.stored,'all')
+					elseif not IsAltKeyDown() and IsShiftKeyDown() and not IsControlKeyDown() then
+						DA.LoadSnapshot(self.stored,'raid')
+					elseif not IsAltKeyDown() and not IsShiftKeyDown() and IsControlKeyDown() then
+						DA.LoadSnapshot(self.stored,'marks')
+					elseif IsAltKeyDown() and not IsShiftKeyDown() and not IsControlKeyDown() then
+						if not saves_sorted[i].compLink then
+							DA.Print("Raid composition is not stored for this old snapshot. Try to load and re-save it")
+							return
+						end
+						DA.Print("Raid Comp Link: "..GetChatCopyLink(saves_sorted[i].compLink))
+						StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, saves_sorted[i].compLink)
 					end
-					DA.Print("Raid Comp Link: "..GetChatCopyLink(saves_sorted[i].compLink))
-					StaticPopup_Show("DA_COPY_TEXT_POPUP", nil, nil, saves_sorted[i].compLink)
-				end
-			end,
-		nil,nil,'left')
-		f.stored=i
-		
-		local cls=DA.CreateFFGButton2("DA_RS_"..counter..'cls',saves_Frame_Scrolled,{"LEFT",f,"RIGHT",-0.5,0},13,13,'x',nil,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
-			function(self)
-				self:Hide()
-				f:Hide()
-				table.remove(DA_Snapshots,f.stored)
-				re_render_saves()
-				re_render_saves()
-			end,
-		nil,nil,'left')
-		
-		f:SetScript("OnEnter", function(self) cls:Show() end)
-		f:SetScript("OnLeave", function(self) if not cls:IsMouseOver() then cls:Hide() end end)
-		
-		_G["DA_RS_"..counter..'cls']:SetHighlightTexture("Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red")
-		_G["DA_RS_"..counter..'cls']:GetFontString():SetTextColor(1,0.65,0.65,0.65,1)
-		_G["DA_RS_"..counter..'cls']:Hide()
-		_G["DA_RS_"..counter..'cls']:SetScript("OnLeave", function(self) self:Hide() end)
-		
-		
-	else
-		if _G["DA_RS_"..i..'but'] then
-			_G["DA_RS_"..i..'but']:Hide()
-			_G["DA_RS_"..i..'cls']:Hide()
+				end,
+			nil,nil,'left')
+			f.stored=i
+			
+			local cls=DA.CreateFFGButton2("DA_RS_"..counter..'cls',saves_Frame_Scrolled,{"LEFT",f,"RIGHT",-0.5,0},13,13,'x',nil,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},
+				function(self)
+					self:Hide()
+					f:Hide()
+					table.remove(DA_Snapshots,f.stored)
+					re_render_saves()
+					re_render_saves()
+				end,
+			nil,nil,'left')
+			
+			f:SetScript("OnEnter", function(self) cls:Show() end)
+			f:SetScript("OnLeave", function(self) if not cls:IsMouseOver() then cls:Hide() end end)
+			
+			_G["DA_RS_"..counter..'cls']:SetHighlightTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
+			_G["DA_RS_"..counter..'cls']:GetFontString():SetTextColor(1,0.65,0.65,0.65,1)
+			_G["DA_RS_"..counter..'cls']:Hide()
+			_G["DA_RS_"..counter..'cls']:SetScript("OnLeave", function(self) self:Hide() end)
+			
+			
+		else
+			if _G["DA_RS_"..i..'but'] then
+				_G["DA_RS_"..i..'but']:Hide()
+				_G["DA_RS_"..i..'cls']:Hide()
+			end
 		end
 	end
-end
 
 	DA_Saved_Raids:ClearAllPoints()
 	DA_Saved_Raids:SetPoint("TOPLEFT", saves_Frame, "TOPLEFT", 0, -1)
@@ -1507,7 +1529,7 @@ do	-- Skada options
 
 		
 		--DELETE
-		DA_Awarder.autoopt.skadaassign.main.deletebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",80,-180},12,45,'Delete','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp',
+		DA_Awarder.autoopt.skadaassign.main.deletebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",80,-180},12,45,'Delete',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],
 		function(self)
 			if DA_Awarder.autoopt.skadaassign.opened_criteriaID and DA_StoredCheckboxes[DA_SelSet][DA_Awarder.autoopt.skadaassign.opened_criteriaID] then
 				DA_Awarder.autoopt.skadaassign:Hide()
@@ -1769,7 +1791,6 @@ local function LoadSkadaCriteriaAssignment(ID)
 	end
 
 end
-
 for i=1,8 do
 	DA_Awarder.autoopt['fr'..i]=DA.FrameCreater(nil,DA_Awarder.autoopt,DA_Awarder.autoopt.width-5,12,{"LEFT", DA_Awarder.autoopt, "BOTTOMLEFT", 2.5, 111-13*i})
 
@@ -1777,7 +1798,7 @@ for i=1,8 do
 		
 		
 		if i==1 then
-			DA_Awarder.autoopt['fr'..i]['raid']=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i],{"CENTER", DA_Awarder.autoopt['fr'..i], "LEFT", 7, 0},12,"Interface\\Icons\\Spell_Magic_PolymorphRabbit",function(self)
+			DA_Awarder.autoopt['fr'..i]['raid']=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i],{"CENTER", DA_Awarder.autoopt['fr'..i], "LEFT", 7, 0},12,"Interface\\Icons\\Spell_Magic_PolymorphRabbit",function(self)
 				DA_StoredCheckboxes[DA_SelSet][i].rl['raid']=self.isenabled
 			end,L['award for raid'])
 			DA_Awarder.autoopt['fr'..i]['raid'].switch(false)
@@ -1788,23 +1809,19 @@ for i=1,8 do
 	do --grp 1
 		DA_Awarder.autoopt['fr'..i].group1=DA.HideBarCreater('DA_Aw_AO'..i..'grp1',DA_Awarder.autoopt['fr'..i],{55,11},{"LEFT", DA_Awarder.autoopt['fr'..i], "LEFT", 16, 0})
 	
-		
-		
-		DA_Awarder.autoopt['fr'..i].group1.rolefont=DA.FontCreater(nil,L['mark on role'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group1,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
-		
 		for n,txt in ipairs({
-		{"Interface\\Icons\\Spell_Holy_AvengersShield",L['tanking award'],'tank'},
-		{"Interface\\Icons\\Spell_Holy_GuardianSpirit",L['healer award'],'healer'},
-		{"Interface\\Icons\\Ability_Warrior_PunishingBlow",L['meelee dps award'],'melee'},
-		{"Interface\\Icons\\Spell_Fire_FlameBolt",L['ranged dps award'],'caster'},
-		{"Interface\\Icons\\Spell_Shadow_SoulGem",L['remmarkpl'],'saved'}
+		{DA.RolesTextures.tank,L['tanking award'],'tank'},
+		{DA.RolesTextures.healer,L['healer award'],'healer'},
+		{DA.RolesTextures.melee,L['meelee dps award'],'melee'},
+		{DA.RolesTextures.caster,L['ranged dps award'],'caster'},
+		{[[Interface\Icons\Spell_Shadow_SoulGem]],L['remmarkpl'],'saved'}
 		}) do
 			if n~=5 then
-				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 				end,txt[2])
 			else
-				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group1['gr1'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group1.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 					for setname,settbl in pairs(DA_StoredCheckboxes) do
 						if not DA_StoredCheckboxes_remembered[setname] then
@@ -1861,7 +1878,6 @@ for i=1,8 do
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group1.scrollchild, "LEFT", -6.5+11*b, 0)
 				DA_Awarder.autoopt['fr'..i].group1['gr1'..b]:Show()
 			end
-			DA_Awarder.autoopt['fr'..i].group1.rolefont:Show()
 			DA_Awarder.autoopt['fr'..i].group1:SetSize(55,11)
 		end
 		DA_Awarder.autoopt['fr'..i].group1.onleave=function()
@@ -1883,7 +1899,6 @@ for i=1,8 do
 				else
 					DA_Awarder.autoopt['fr'..i].group1:SetSize(11*countbunnies,11)
 				end
-				DA_Awarder.autoopt['fr'..i].group1.rolefont:Hide()
 			end
 		end
 	
@@ -1892,8 +1907,6 @@ for i=1,8 do
 	do --grp 2
 		DA_Awarder.autoopt['fr'..i].group2=DA.HideBarCreater('DA_Aw_AO'..i..'grp2',DA_Awarder.autoopt['fr'..i],{150,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group1, "RIGHT", 5, 0})
 		
-		DA_Awarder.autoopt['fr'..i].group2.classfont=DA.FontCreater(nil,L['mark on class'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group2,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
-
 		local ut="Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
 		for n,txt in ipairs({
 		{"Interface\\Icons\\Spell_ChargePositive",L['remmandcl'],'andcl'},
@@ -1909,11 +1922,11 @@ for i=1,8 do
 		{ut,"HUNTER"}
 		}) do
 			if n==1 then
-				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},9,"Interface\\Icons\\Spell_ChargePositive",function(self)
+				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},9,"Interface\\Icons\\Spell_ChargePositive",function(self)
 					DA_StoredCheckboxes[DA_SelSet][i][txt[3]]=self.isenabled
 				end,txt[2])
 			else
-				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group2.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].cl[txt[2]]=self.isenabled
 				end,LOCALIZED_CLASS_NAMES_MALE[txt[2]])
 				DA_Awarder.autoopt['fr'..i].group2['gr2'..n]:GetNormalTexture():SetTexCoord(unpack(CLASS_ICON_TCOORDS[txt[2]]))
@@ -1938,7 +1951,6 @@ for i=1,8 do
 				DA_Awarder.autoopt['fr'..i].group2['gr2'..b]:SetPoint("CENTER", DA_Awarder.autoopt['fr'..i].group2.scrollchild, "LEFT", -6.5+11*b, 0)
 				DA_Awarder.autoopt['fr'..i].group2['gr2'..b]:Show()
 			end
-			DA_Awarder.autoopt['fr'..i].group2.classfont:Show()
 			DA_Awarder.autoopt['fr'..i].group2:SetSize(122,11)
 		end
 		DA_Awarder.autoopt['fr'..i].group2.onleave=function()
@@ -1960,7 +1972,6 @@ for i=1,8 do
 				else
 					DA_Awarder.autoopt['fr'..i].group2:SetSize(11*countbunnies,11)
 				end
-				DA_Awarder.autoopt['fr'..i].group2.classfont:Hide()
 			end
 		end
 		
@@ -1969,15 +1980,13 @@ for i=1,8 do
 	do --grp 3
 		DA_Awarder.autoopt['fr'..i].group3=DA.HideBarCreater('DA_Aw_AO'..i..'grp3',DA_Awarder.autoopt['fr'..i],{34,11},{"LEFT", DA_Awarder.autoopt['fr'..i].group2, "RIGHT", 5, 0})
 		
-		DA_Awarder.autoopt['fr'..i].group3.miscfont=DA.FontCreater(nil,L['misc'],{'bottomleft',DA_Awarder.autoopt['fr'..i].group3,'TOPLEFT',5,-3},DA_Awarder.autoopt['fr'..i].fonts,15,150,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.85,0.85,0.8})
-		
 		for n,txt in ipairs({
 		{"Interface\\Icons\\Spell_Lightning_LightningBolt01",L['Skada-based award'],'skada'},
 		{"Interface\\Icons\\Ability_Mage_TormentOfTheWeak",L['award for leader'],'leader'},
 		{"Interface\\Icons\\Spell_Holy_SealOfProtection",L['guild rank award'],'officer'},
 		}) do
 			if n==1 then --SKADA
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					
 					if not _G[DA_StoredCheckboxes[DA_SelSet].skadamode] then
 						DA.Print('Skada DB not selected/not found')
@@ -2043,11 +2052,11 @@ for i=1,8 do
 				end
 				)
 			elseif n==2 then --LEADER
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 				end,txt[2])
 			elseif n==3 then --OFFICER
-				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(nil,DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
+				DA_Awarder.autoopt['fr'..i].group3['gr3'..n]=DA.IconicButtonCreater(DA_Awarder.autoopt['fr'..i].group3.scrollchild,{"CENTER", DA_Awarder.autoopt['fr'..i].group3.scrollchild, "LEFT", -6.5+11*n, 0},11,txt[1],function(self)
 					DA_StoredCheckboxes[DA_SelSet][i].rl[txt[3]]=self.isenabled
 					if not self.isenabled then
 						DA_Awarder.autoopt.officerassign:Hide()
@@ -2096,7 +2105,6 @@ for i=1,8 do
 				DA_Awarder.autoopt['fr'..i].group3['gr3'..b]:Show()
 			end
 			DA_Awarder.autoopt['fr'..i].group3:SetSize(34,11)
-			DA_Awarder.autoopt['fr'..i].group3.miscfont:Show()
 		end
 		DA_Awarder.autoopt['fr'..i].group3.onleave=function()
 			if not DA_Awarder.autoopt['fr'..i].group3:IsMouseOver() then
@@ -2117,7 +2125,6 @@ for i=1,8 do
 				else
 					DA_Awarder.autoopt['fr'..i].group3:SetSize(11*countbunnies,11)
 				end
-				DA_Awarder.autoopt['fr'..i].group3.miscfont:Hide()
 			end
 		end
 	end
@@ -2128,18 +2135,18 @@ end
 DA_Awarder.righside=DA.FrameCreater(nil,DA_Awarder,350,333,{"TOPLEFT", _G['DA_Awarder'], "TOPRIGHT", 2, 0})
 DA_Awarder.righside:RegisterForDrag("LeftButton")
 DA_Awarder.righside:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-DA_Awarder.righside:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+DA_Awarder.righside:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 
 DA_Awarder.AssignFrame=DA.FrameCreater(nil,DA_Awarder,180,130,{"TOPRIGHT",_G["DA_Awarder"],"TOPLEFT",-2,0})
 DA_Awarder.AssignFrame:RegisterForDrag("LeftButton")
 DA_Awarder.AssignFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-DA_Awarder.AssignFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+DA_Awarder.AssignFrame:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 
 
 FEP_ZamFrame=DA.FrameCreater(nil,DA_Awarder,180,334,{"BOTTOMRIGHT",_G["DA_Awarder"],"BOTTOMLEFT",-2,0})
 FEP_ZamFrame:RegisterForDrag("LeftButton")
 FEP_ZamFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-FEP_ZamFrame:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+FEP_ZamFrame:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 
 DA_Awarder.array={
 	g1=0,
@@ -2151,7 +2158,7 @@ DA_Awarder.array={
 	g7=0,
 	g8=0,
 }
-
+ClearAwardRowsCrap()
 function DA.AWAutoOptions()
 	for i=1,8 do
 		if DA_StoredCheckboxes[DA_SelSet][i] then
@@ -2209,7 +2216,7 @@ function DA.AWAutoOptions()
 			DA_Awarder.autoopt['fr'..i]:Hide()
 		end
 	end
-	
+	ClearAwardRowsCrap()
 	skada_db_check_if_one()
 	skada_db_set()
 end
@@ -2483,7 +2490,7 @@ function DA_Awarder.FEP_UpdateFrames()
 			
 				if not frame.c or not frame.c.name then
 					if not InCombatLockdown() then frame:Hide() end
-					frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
+					frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 					frame:SetText("")
 				else
 					if not InCombatLockdown() then frame:Show() end
@@ -2516,12 +2523,12 @@ function DA_Awarder.FEP_UpdateFrames()
 					
 					if flag=="n" then
 						if ng then
-							frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp')
+							frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 							frame.state="n"
 							frame.main=FEP_L_gMain[DA_CurrentGuild][frame.c.name] or "not in guild"
 							frame.mainmain=FEP_gMain[FEP_L_gMain[DA_CurrentGuild][frame.c.name] or "_abs"] or ""
 						else
-							frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red.blp')
+							frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]])
 							frame.state="n"
 							frame.main=FEP_gMain[frame.c.name] or "not in guild"
 							frame.mainmain=FEP_gMain[FEP_gMain[frame.c.name] or "_abs"] or ""
@@ -2889,7 +2896,7 @@ function FEP_GatherRaid()
 				playerFrame.epvalue=nil
 				playerFrame.mainmain=nil
 				playerFrame:SetText('')
-				playerFrame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp')
+				playerFrame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])
 				
 				for cbox=1,#DA_StoredCheckboxes[DA_SelSet] do
 					playerFrame.cb[cbox]:Hide()
@@ -3164,7 +3171,7 @@ function FEP_CreateGroups()
 				FEP_Printtest()
 			end)
 
-			DA_Awarder.AwardFrame.AwardStartBtn=DA.CreateFFGButton2(nil,DA_Awarder.AwardFrame, {"CENTER", DA_Awarder.AwardFrame, "TOPLEFT", 65,-100},  12,  35,  "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			DA_Awarder.AwardFrame.AwardStartBtn=DA.CreateFFGButton2(nil,DA_Awarder.AwardFrame, {"CENTER", DA_Awarder.AwardFrame, "TOPLEFT", 65,-100},  12,  35,  "",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 			function(self)
 				self:Disable()
 				FEP_AwardEP()
@@ -3301,7 +3308,7 @@ function FEP_CreateGroups()
 				FEP_AskUpd()
 			end,'awlocalstt_ask')
 			
-			DA_Awarder.appllocalsbutton=DA.CreateFFGButton2(nil,DA_Awarder.getlocalsFrame,{"CENTER",DA_Awarder.getlocalsFrame,"TOPLEFT",100,-13},12,45,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			DA_Awarder.appllocalsbutton=DA.CreateFFGButton2(nil,DA_Awarder.getlocalsFrame,{"CENTER",DA_Awarder.getlocalsFrame,"TOPLEFT",100,-13},12,45,L['import'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 			function(self)
 				local text=DA_Awarder.getlocalsFrame.EB:GetText()
 				if text and text~="" then
@@ -3500,7 +3507,7 @@ function FEP_CreateGroups()
 				SendAddonMessage("DA_ass", 'assist', "raid")
 			end
 		end,'take_assistant')
-		DA_Awarder.DisbandBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 310,-10},10,13,'R','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
+		DA_Awarder.DisbandBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 310,-10},10,13,'R',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function() 
 			
 			if IsShiftKeyDown() and IsAltKeyDown() and IsControlKeyDown() then
 				local myname=GetUnitName('player')
@@ -3523,7 +3530,7 @@ function FEP_CreateGroups()
 			end
 		end,'disband_raid')
 		
-		DA_Awarder.CreateRaidBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 270,-18},12,60,CONVERT_TO_RAID,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() 
+		DA_Awarder.CreateRaidBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 270,-18},12,60,CONVERT_TO_RAID,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() 
 			if (GetNumRaidMembers()==0 and GetNumPartyMembers()>0) then
 				ConvertToRaid()
 				SetLootMethod("master","player")
@@ -3619,7 +3626,7 @@ function FEP_CreateGroups()
 			DA_Awarder.EPGPValues = DA_Awarder.EPGPValues
 			DA_Awarder.EPGPValues:RegisterForDrag("LeftButton")
 			DA_Awarder.EPGPValues:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
-			DA_Awarder.EPGPValues:SetScript("OnDragStop", function(self) self:GetParent():StopMovingOrSizing() end) 
+			DA_Awarder.EPGPValues:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 			-- DA_Awarder.EPGPValues:SetFrameLevel(150)
 			DA_Awarder.EPGPValues.t:SetTexture(0.03, 0.04, 0.07, 0.9)
 			
@@ -4443,7 +4450,7 @@ function FEP_CreateGroups()
 			
 			DA_Awarder.naborFrame.exportFrame=DA.FrameCreater(nil,DA_Awarder.naborFrame,130,38,{"BOTTOMLEFT", DA_Awarder.naborFrame, "BOTTOMRIGHT", 2, 0})
 			
-			DA_Awarder.naborFrame.exportFrame.apply=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+			DA_Awarder.naborFrame.exportFrame.apply=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame.exportFrame,{"CENTER",DA_Awarder.naborFrame.exportFrame,"TOPLEFT",30,-26},12,35,L['import'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
 			function(self)
 				if DA_Awarder.naborFrame.exportFrame.EB:GetText() and DA_Awarder.naborFrame.exportFrame.EB:GetText()~="" then
 					DA_StoredCheckboxes=nil
@@ -5109,7 +5116,55 @@ local function createGroupFrames(number)
 					-- local ofnot=self.main
 					-- if ofnot=='not in guild' then ofnot=nil end
 					DA_RightClickMenu.calledfrom="DA_Awarder"
-					DA.OpenOptMenu(self,self.c.name)
+					local name = self.c.name
+					local MSChangePack
+					if DA.loaded_Modules['BidTracker'] then
+						local class = self.c.clas
+
+						local role = LGT:GetUnitRole(name)
+
+						local t1, t2, t3 = LGT:GetTreeNames(class)
+						local dom, tr1, tr2, tr3 = LGT:GetUnitTalentSpec(name)
+
+						local specID
+
+						if dom then
+							if dom == t1 then
+								specID = 1
+							elseif dom == t2 then
+								specID = 2
+							elseif dom == t3 then
+								specID = 3
+							end
+						end
+
+						if not specID then
+							local maxPoints = math.max(tr1 or 0, tr2 or 0, tr3 or 0)
+
+							if maxPoints == 0 then
+								specID = false
+							elseif maxPoints == tr1 then
+								specID = 1
+							elseif maxPoints == tr2 then
+								specID = 2
+							elseif maxPoints == tr3 then
+								specID = 3
+							end
+						end
+						local msChGlobal = DarkAngel_BTMS[name]
+						local isMSRoleChanged = msChGlobal and msChGlobal.msrole
+						local isMSSpecChanged = msChGlobal and msChGlobal.msspec
+						MSChangePack={
+							name=name,
+							class=class,
+							role=role,
+							spec=specID,
+							msRole=isMSRoleChanged,
+							msSpec=isMSSpecChanged  
+						}
+					end
+					DA.OpenOptMenu(self,name,nil,MSChangePack)
+					
 					
 				end
 				
@@ -5344,7 +5399,7 @@ function FEP_CreateGroup(id,posx,posy)
 	gr:SetMovable(true)
 	gr:RegisterForDrag("LeftButton")
 	gr:SetScript("OnDragStart", function() DA_Awarder:StartMoving() end)
-	gr:SetScript("OnDragStop", function() DA_Awarder:StopMovingOrSizing() end) 
+	gr:SetScript("OnDragStop", function() ClearAwardRowsCrap();DA_Awarder:StopMovingOrSizing() end) 
 
 	createGroupFrames(id)
 

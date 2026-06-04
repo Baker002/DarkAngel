@@ -1957,7 +1957,7 @@ function Mod.Logger_Load()
 		Log_Create_ScrollBar()
 		DA.HelpCreater(DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",9,-9},'LogHelp',15,15)
 			
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() Mod:StartScan() end)
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() Mod:StartScan() end)
 			
 			--info/motd details
 			do
@@ -2117,7 +2117,7 @@ function Mod.Logger_Load()
 				)
 				
 				
-				DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+				DA.CreateFFGButton2(nil,CopyFrameAdditional,{"CENTER",CopyFrameAdditional,"TOPLEFT",40,-12},12,50,'print',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
 					copyFrame_Update(1)
 				end)
 				
@@ -2288,9 +2288,9 @@ function Mod.Logger_Load()
 				DarkAngelGUI.Details.SearchEB:ClearFocus()
 				Mod:StartScan() 
 			end
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 127,0},18,50,L['Search'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 127,0},18,50,L['Search'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},run_search)
 			
-			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 182,0},18,50,L['Target'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
+			DA.CreateFFGButton2(nil,DarkAngelGUI.Details,{"CENTER",DarkAngelGUI.Details.SearchEB,"CENTER", 182,0},18,50,L['Target'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},function() 
 				DarkAngelGUI.Details.SearchEB:SetText(select(1,UnitName("target")) or UnitName("player"))
 				DA.RunLogSearch(DarkAngelGUI.Details.SearchEB:GetText())
 				DarkAngelGUI.Details.SearchEB.t:SetBlendMode("ADD");
@@ -3032,12 +3032,12 @@ DA.AddModOptions('Logger', function(_,optScrollFrame)
 		
 	
 	local prntLeavers = DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-20},15,15,L['Print leavers in chat'],function(self) fuckingOptions.prntleav=(self:GetChecked() or false) end,{'fuckingOptions','prntleav'},nil)
-		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-20},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-20},12,15,"?",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print("F "..GetPlayerScanLink(UnitName('player'))..(FEP_gMain[UnitName('player')] and GetPlayerScanLink(FEP_gMain[UnitName('player')]) or GetPlayerScanLink("example")))
 		end)
 		DA.FontCreater(nil,"Logger",{"LEFT",f,"TOPLEFT",5,-6},prntLeavers,15,180,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-32},15,15,L['Old data notice'],function(self) fuckingOptions_g[DA_CurrentGuild].printOldDeleted=(self:GetChecked() or false) end,{'fuckingOptions_g','printOldDeleted','DA_CurrentGuild'},'OldDataDeletionPrint')
-		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-32},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-32},12,15,"?",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print(L['deleted data']..' |cff00ffffBigguy|cffffffff [|cff00ffff12345|cffffffff] '..L['old data'])
 			DA.Print(L['deleted data']..' |cff00ffffSmolguy|cffffffff [|cff00ffffBigguy|cffffffff] '..L['old data'])
 			DA.Print(L['deleted data']..' |cff00ffffLilguy|cffffffff [|cff00ffffBigguy|cffffffff] '..L['old data'])
@@ -3045,7 +3045,7 @@ DA.AddModOptions('Logger', function(_,optScrollFrame)
 		end)
 	DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-44},15,15,L['Track suspicious changes'],function(self) fuckingOptions_g[DA_CurrentGuild].warnsuspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warnsuspic','DA_CurrentGuild'},'warnsuspic')
 		local suspext=DA.CheckBtnCreater(nil,f,{"CENTER",f,"TOPLEFT",15,-55},12,12,L['DKP simplified'],function(self) fuckingOptions_g[DA_CurrentGuild].warn_improv_suspic=(self:GetChecked() or false) end,{'fuckingOptions_g','warn_improv_suspic','DA_CurrentGuild'},'warn_improv_suspic')
-		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-44},12,15,"?",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Black.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+		DA.CreateFFGButton2(nil,f,{"CENTER",f,"TOPLEFT",145,-44},12,15,"?",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 			DA.Print(L['detmanchange'].. GetPlayerScanLink(UnitName('player'))) 
 		end)
 		
@@ -3153,7 +3153,7 @@ DA.AddModOptions('Logger', function(_,optScrollFrame)
 			
 		end
 		
-		logF.saveBtn=DA.CreateFFGButton2(nil,logF,{"TOPRIGHT",logF,"TOPRIGHT",-1,-1},10,30,"save",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Red',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		logF.saveBtn=DA.CreateFFGButton2(nil,logF,{"TOPRIGHT",logF,"TOPRIGHT",-1,-1},10,30,"save",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 			for crit,val in pairs(microOpt) do
 				fuckingOptions_g[DA_CurrentGuild][crit]=val
 			end
