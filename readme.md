@@ -101,7 +101,7 @@ Automatic raid consumable distribution.
 
 <p align="left">
   <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_awarder.webp">
-    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_awarder.webp" width="550">
+    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_awarder.webp" width="400">
   </a>
 </p>
 
@@ -135,7 +135,7 @@ EP-Auc / DKP-based loot auction system.
 
 <p align="left">
   <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bidtracker.webp">
-    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bidtracker.webp" width="750">
+    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bidtracker.webp" width="700">
   </a>
 </p>
 
