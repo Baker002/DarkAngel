@@ -7,6 +7,8 @@ DarkAngel provides tools for guild and raid management, loot distribution, EPGP/
 
 <p align="center"><img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_main.webp" alt="DarkAngel Preview"></p>
 
+## Community
+[Join my Discord :)](https://discord.gg/wTBNRZcTqv)
 
 The system is built from independent modules that can be used either together or partially.
 
