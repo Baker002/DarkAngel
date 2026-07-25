@@ -1926,3 +1926,17 @@ end
 -- unsuccessfull even with 300% speed engineering boots; still, the best one attempt w/o using terrain patches
 -- we should look for a way to travel distance without falling down at all; for example dc from server 
 -- DA_CreateWaypointAtAzimuth(90-24)
+
+function DA_FakeItemReceived(playername, itemID, count)
+    count = count or 1
+
+    local itemName, _ = GetItemInfo(itemID)
+
+    local itemLink = "|cffa335ee|Hitem:"..itemID..":0:0:0:0:0:0:0:80|h["..itemName.."]|h|r"
+    local message = (count > 1)
+        and string.format(LOOT_ITEM_MULTIPLE, playername, itemLink, count)
+        or string.format(LOOT_ITEM, playername, itemLink)
+	local c = ChatTypeInfo.LOOT
+    DEFAULT_CHAT_FRAME:AddMessage(message, c.r, c.g, c.b)
+end
+

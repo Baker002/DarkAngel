@@ -53,19 +53,10 @@ Admin-style guild management panel with advanced search, sorting, filtering, and
   </a>
 </p>
 
-Guild structure management panel.
+Guild structure management panel with planning mode and batch changes.
 
-* Visual rank hierarchy with permissions.
-* Create, copy, move, and reorganize ranks in planning mode.
-* Move players between ranks before applying changes.
-* Import/export configurations.
-* Log integration.
-* Apply changes in a single action with automatic backup.
-
-### Other Core Features
-
-* Local player linking without requiring guild invitation.
-* EPGP/DKP system support.
+- Visual rank hierarchy with permissions, rank/player reorganization, and import/export support.
+- Apply all changes at once with automatic backup and logging integration.
 
 ---
 
@@ -79,19 +70,10 @@ Guild structure management panel.
 
 Automation for guild raid gathering and invitations.
 
-* Keyword-based auto invite.
-* Raid announcements via guild chat, whispers, and LFG/global channels.
-* Secret phrase support for public channels.
-* Automatic stop by timer or specific time.
-* Discord link auto-send on request.
-* Bulk invites from:
-
-  * online level 80 members
-  * Awarder raid snapshots
-  * Guild Browser results
-  * search results
-  * manually selected players
-* Raid settings: loot method and difficulty.
+- Keyword-based auto invites and raid announcements via guild chat, whispers, and LFG/global channels with secret phrase support.
+- Automatic stopping by timer or scheduled time, with Discord link delivery on request.
+- Bulk invites from online level 80 members, Awarder raid snapshots, Guild Browser/search results, or manually selected players.
+- Raid configuration: loot method and difficulty.
 
 ---
 
@@ -117,67 +99,34 @@ Automatic raid consumable distribution.
 
 # DarkAngel_Awarder
 
+<p align="left">
+  <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_awarder.webp">
+    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_awarder.webp" width="550">
+  </a>
+</p>
+
 Raid browser and EPGP/DKP award system.
 
 ### Raid Management
 
-* Raid display with groups 1–8.
-* Class colors and status indicators (ready check, RL/assist, Master Looter, MT/OT).
-* Drag & drop player and group management.
-
-### Player Status Tracking
-
-Visual indicators for:
-
-* normal players
-* external links
-* invalid links
-* new players
-* frozen EPGP/DKP characters
-* raid duplicates
-
-### Player Information
-
-Shift-hover details:
-
-* EP/GP/PR/DKP
-* notes
-* mains/alts
-* local links
-* raid presence history
+Raid browser and management tools with:
+- Groups 1–8 display, class colors, and status indicators (ready check, RL/assist, Master Looter, MT/OT).
+- Drag & drop player/group management.
+- Player status tracking with indicators for links, new players, frozen EPGP/DKP characters, and raid duplicates.
+- Shift-hover player information: EP/GP/PR/DKP, notes, mains/alts, local links, and raid history.
 
 ### Raid Rewards
 
-* Raid snapshots with offline representation.
-* Wowhead raid export.
-* Flexible EPGP/DKP reward criteria.
-* Automatic/manual checkbox assignment.
-* Batch awards with reward breakdown messages.
+Flexible EPGP/DKP reward system with:
+- Raid snapshots, offline raid representation, and Wowhead export.
+- Automatic/manual awards, batch rewards, and reward breakdown messages.
+- Conditional rewards based on participation, role, class/spec, raid leader, and combat logs (Scada integration).
+- Support for both positive and negative rewards.
 
-Conditional rewards based on:
+### Whisper Commands & Raid Actions
 
-* raid participation
-* role
-* class/spec
-* raid leader
-* combat logs (Scada integration)
-
-Supports both positive and negative rewards.
-
-### Whisper Commands
-
-* Check EPGP/DKP points.
-* Link to main character.
-* Create local links without joining the guild.
-
-### Raid Operations
-
-Right-click actions:
-
-* MT/OT, ML, Assist.
-* Kick players.
-* MS Change loot priority (BidTracker integration).
-
+- Whisper commands for EPGP/DKP checks, main linking, and local links.
+- Right-click raid actions: MT/OT, ML, Assist, Kick, and MS Change loot priority (BidTracker integration).
 ---
 
 # DarkAngel_BidTracker
@@ -185,8 +134,8 @@ Right-click actions:
 EP-Auc / DKP-based loot auction system.
 
 <p align="left">
-  <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bid.webp">
-    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bid.webp" width="550">
+  <a href="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bidtracker.webp">
+    <img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_bidtracker.webp" width="750">
   </a>
 </p>
 
@@ -239,8 +188,8 @@ Guild backup and restoration system.
   * ranks
   * MOTD / Guild Info / GM system
   * local links
-* Storage:
 
+* Storage:
   * SavedVariables
   * per-character storage
 
