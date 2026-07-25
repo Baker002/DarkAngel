@@ -401,7 +401,7 @@ DA.AddToBuildQueue("About", function()
         )
 
         --freeze
-        DarkAngelGUI.Guild.micromenu.ofnotefreeze=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"CENTER",DarkAngelGUI.Guild.micromenu,"TOPLEFT",110,-103},10,10,'f','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Blue.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
+        DarkAngelGUI.Guild.micromenu.ofnotefreeze=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.micromenu,{"CENTER",DarkAngelGUI.Guild.micromenu,"TOPLEFT",110,-103},10,10,'f',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Blue]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},
         function(self)
             local note=DarkAngelGUI.Guild.micromenu.ofnotebox:GetText()
             local typ,ep,gp=DA.DecodeNote(note)

@@ -3,7 +3,7 @@
 
 ![DarkAngel Preview](https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_main.webp)
 
-DarkAngel provides tools for guild and raidmanagement, loot distribution, EPGP/DKP awarding, logging, bulk operations and other stuff.
+DarkAngel provides tools for guild and raid management, loot distribution, EPGP/DKP awarding, logging, bulk operations and other stuff.
 
 The system is built from independent modules that can be used either together or partially.
 
@@ -194,15 +194,18 @@ Raid browser and EPGP/DKP award system.
 - export to Wowhead raid preview
 
 #### EPGP/DKP system
-- flexible award criteria:
-  - raid participation
-  - role (tank/heal/dps)
-  - class / build
-  - raid leader
-  - custom log-based rewards (e.g. top DPS of the raid via Scada logs)
+- flexible award criteria
 - automatic and manual checkbox assignment
 - batch awards
 - chat messages with reward breakdown
+
+#### Conditional Award by criteria
+- raid participation
+- role (tank/heal/dps)
+- class / build
+- raid leader
+- Scada log-based rewards!!! (e.g. bonus reward for top 5 DPS players; 0-2 deaths)
+  - instead of rewarding good behavior, you can punish (reward with "-") for mistakes :) Scada knows better
 
 #### Raid operations on RightClick
 - MT/OT / ML / Assist

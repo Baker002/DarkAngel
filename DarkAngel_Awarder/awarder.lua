@@ -448,7 +448,7 @@ local function skada_opt_refresh_bosses()
 			end
 			skadaframe_Scrolled[i]:Show()
 		elseif foundSkada[i] then
-			skadaframe_Scrolled[i]=DA.CreateFFGButton2(nil,skadaframe_Scrolled,{"TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,foundSkada[i].name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+			skadaframe_Scrolled[i]=DA.CreateFFGButton2(nil,skadaframe_Scrolled,{"TOPLEFT", skadaframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,foundSkada[i].name,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 				DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText(foundSkada[i].mobname)
 				DA_Awarder.autoopt.skadaassign.SKDTBL=foundSkada[i]
 				if foundSkada[i].mobname=='total' and DA_Awarder.autoopt.skadaassign.selmode and not skada_list_modes_total[DA_Awarder.autoopt.skadaassign.selmode] then
@@ -584,7 +584,7 @@ DA_Awarder.autoopt.officerassign.andhigher.font:SetFont("Fonts\\FRIZQT__.TTF", 7
 
 
 for i=1,GuildControlGetNumRanks() do 
-	DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function() end,nil,nil,'left')
+	DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function() end,nil,nil,'left')
 end
 
 local function OpenOfficerCriteriaAssignment(ID)
@@ -600,7 +600,7 @@ local function OpenOfficerCriteriaAssignment(ID)
 			end)
 			DA_Awarder.autoopt.officerassign['rankbtn'..i]:SetPoint("TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i)
 		else
-			DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self) 
+			DA_Awarder.autoopt.officerassign['rankbtn'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.officerassign,{"TOPLEFT", DA_Awarder.autoopt.officerassign, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function(self) 
 				DA_StoredCheckboxes[DA_SelSet][ID].rl['officer']={i-1, (DA_Awarder.autoopt.officerassign.andhigher:GetChecked() or false)}
 				DA_Awarder.autoopt.officerassign:Hide()
 				DA.AWAutoOptions()
@@ -777,7 +777,7 @@ local function ReRenderNaborsList()
 					DA_Awarder.naborFrame[naborplace].deletebtn:Show()
 				end
 			else
-				DA_Awarder.naborFrame[naborplace]=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"TOPLEFT", DA_Awarder.naborFrame, "TOPLEFT", 1,10-11*naborplace},10,75,naborname,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+				DA_Awarder.naborFrame[naborplace]=DA.CreateFFGButton2(nil,DA_Awarder.naborFrame,{"TOPLEFT", DA_Awarder.naborFrame, "TOPLEFT", 1,10-11*naborplace},10,75,naborname,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 					DA_Awarder.naborFrame:Hide()
 					DA_SelSet=self:GetText()
 					DA_Awarder.naborbtn:SetText(self:GetText())
@@ -1129,7 +1129,7 @@ local function skada_addit_render()
 				or DA_Awarder.autoopt.skadaassign.selmode=='dmg_taken_attack'
 				or DA_Awarder.autoopt.skadaassign.selmode=='cc_done_specif') and tonumber(db[i]) and GetSpellLink(tonumber(db[i])) then
 					local name, _, _, _, _, _ = GetSpellInfo(db[i])
-					f_Scrolled[i]=DA.CreateFFGButton2(nil,f_Scrolled,{"TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i},10,150,name.." [ID:"..db[i].."]",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+					f_Scrolled[i]=DA.CreateFFGButton2(nil,f_Scrolled,{"TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i},10,150,name.." [ID:"..db[i].."]",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 						DA_Awarder.autoopt.skadaassign.main.addit_eb:SetText(db[i])
 						DA_Awarder.autoopt.skadaassign.addit:Hide()
 						DA_Awarder.autoopt.skadaassign.main:Show()
@@ -1143,7 +1143,7 @@ local function skada_addit_render()
 						GameTooltip:Hide()
 					end)
 				else
-					f_Scrolled[i]=DA.CreateFFGButton2(nil,f_Scrolled,{"TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i},10,150,db[i],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+					f_Scrolled[i]=DA.CreateFFGButton2(nil,f_Scrolled,{"TOPLEFT", f_Scrolled, "TOPLEFT", 1,10-11*i},10,150,db[i],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 						DA_Awarder.autoopt.skadaassign.main.addit_eb:SetText(db[i])
 						DA_Awarder.autoopt.skadaassign.addit:Hide()
 						DA_Awarder.autoopt.skadaassign.main:Show()
@@ -1387,7 +1387,7 @@ do	-- Skada options
 
 
 		
-		DA_Awarder.autoopt.skadaassign.main.bossesbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-30},12,40,'boss','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		DA_Awarder.autoopt.skadaassign.main.bossesbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-30},12,40,'boss',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function(self)
 			DA_Awarder.autoopt.skadaassign.main:Hide()
 			skada_opt_refresh_bosses()
@@ -1397,7 +1397,7 @@ do	-- Skada options
 		DA_Awarder.autoopt.skadaassign.main.selectedboss=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.bossesbtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.bossesbtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
 
-		DA_Awarder.autoopt.skadaassign.main.modebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-50},12,40,'mode','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		DA_Awarder.autoopt.skadaassign.main.modebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-50},12,40,'mode',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function(self)
 			DA_Awarder.autoopt.skadaassign.main:Hide()
 			skada_modes_preshow()
@@ -1406,7 +1406,7 @@ do	-- Skada options
 
 		DA_Awarder.autoopt.skadaassign.main.selectedmode=DA.FontCreater(nil,'--',{"LEFT",DA_Awarder.autoopt.skadaassign.main.modebtn,"RIGHT",2,0},DA_Awarder.autoopt.skadaassign.main.modebtn,15,120,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"left",{0.85,1,1,0.9})
 
-		DA_Awarder.autoopt.skadaassign.main.additbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-70},12,40,'select','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',
+		DA_Awarder.autoopt.skadaassign.main.additbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-70},12,40,'select',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function(self)
 			skada_addit_render()
 		end,'center')
@@ -1427,7 +1427,7 @@ do	-- Skada options
 
 		
 		-- SAVE
-		DA_Awarder.autoopt.skadaassign.main.savebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-180},12,45,'Save','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp',
+		DA_Awarder.autoopt.skadaassign.main.savebtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-180},12,45,'Save',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]],
 		function(self)
 			DA_Awarder.autoopt.skadaassign.main.addit_eb.focusgained=nil
 			DA_Awarder.autoopt.skadaassign.main.addit_eb:ClearFocus()
@@ -1545,7 +1545,7 @@ do	-- Skada options
 		DA_Awarder.autoopt.skadaassign.main.deletebtn.fs:SetAlpha(0.5)
 		
 		--RESET
-		DA_Awarder.autoopt.skadaassign.main.resetbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-160},12,45,'reset','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		DA_Awarder.autoopt.skadaassign.main.resetbtn=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.main,{"CENTER",DA_Awarder.autoopt.skadaassign.main,"TOPLEFT",30,-160},12,45,'reset',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function(self)
 			DA_Awarder.autoopt.skadaassign.main.selectedboss:SetText('--')
 			DA_Awarder.autoopt.skadaassign.selmode=nil
@@ -1568,7 +1568,7 @@ do	-- Skada options
 			
 				for i,j in ipairs(skada_list_matematics) do
 					
-					DA_Awarder.autoopt.skadaassign.main.operand_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.main.operand_FRM,{"TOPLEFT", DA_Awarder.autoopt.skadaassign.main.operand_FRM, "TOPLEFT", 1,10-11*i},10,118,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+					DA_Awarder.autoopt.skadaassign.main.operand_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.skadaassign.main.operand_FRM,{"TOPLEFT", DA_Awarder.autoopt.skadaassign.main.operand_FRM, "TOPLEFT", 1,10-11*i},10,118,j[1],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 						
 						DA_Awarder.autoopt.skadaassign.main.operand_FRM:Hide()
 						DA_Awarder.autoopt.skadaassign.main.operand_btn:SetText(j[2])
@@ -1629,7 +1629,7 @@ do	-- Skada options
 
 		DA_Awarder.autoopt.skadaassign.addit:Hide()
 		
-		DA_Awarder.autoopt.skadaassign.addit.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.addit,{"CENTER",DA_Awarder.autoopt.skadaassign.addit,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		DA_Awarder.autoopt.skadaassign.addit.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.addit,{"CENTER",DA_Awarder.autoopt.skadaassign.addit,"TOPLEFT",30,-8},15,40,'back',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function(self)
 			DA_Awarder.autoopt.skadaassign.addit:Hide()
 			DA_Awarder.autoopt.skadaassign.main:Show()
@@ -1649,14 +1649,14 @@ do	-- Skada options
 
 		DA_Awarder.autoopt.skadaassign.bosses:Hide()
 
-		DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		DA_Awarder.autoopt.skadaassign.bosses.back=DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",30,-8},15,40,'back',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function()
 			DA_Awarder.autoopt.skadaassign.bosses:Hide()
 			DA_Awarder.autoopt.skadaassign.main:Show()
 		end,'center')
 
 		
-		DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',
+		DA.ButtonCreater(nil,DA_Awarder.autoopt.skadaassign.bosses,{"CENTER",DA_Awarder.autoopt.skadaassign.bosses,"TOPLEFT",80,-8},15,50,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],
 		function()
 			skada_opt_refresh_bosses()
 		end,'center')
@@ -1686,7 +1686,7 @@ do	-- Skada options
 		local modesframe_Scrolled=DA_Skada_modes_scr.scrollchild
 		
 		for i,j in pairs(skada_list_modes) do
-			modesframe_Scrolled[i]=DA.CreateFFGButton2(nil,modesframe_Scrolled,{"TOPLEFT", modesframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,j[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+			modesframe_Scrolled[i]=DA.CreateFFGButton2(nil,modesframe_Scrolled,{"TOPLEFT", modesframe_Scrolled, "TOPLEFT", 1,10-11*i},10,150,j[1],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 				DA_Awarder.autoopt.skadaassign.main.selectedmode:SetText(j[1])
 				DA_Awarder.autoopt.skadaassign.selmode=j[2]
 				DA_Awarder.autoopt.skadaassign.modes:Hide()
@@ -2137,7 +2137,7 @@ DA_Awarder.righside:RegisterForDrag("LeftButton")
 DA_Awarder.righside:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 DA_Awarder.righside:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
 
-DA_Awarder.AssignFrame=DA.FrameCreater(nil,DA_Awarder,180,130,{"TOPRIGHT",_G["DA_Awarder"],"TOPLEFT",-2,0})
+DA_Awarder.AssignFrame=DA.FrameCreater(nil,DA_Awarder,180,140,{"TOPRIGHT",_G["DA_Awarder"],"TOPLEFT",-2,0})
 DA_Awarder.AssignFrame:RegisterForDrag("LeftButton")
 DA_Awarder.AssignFrame:SetScript("OnDragStart", function(self) self:GetParent():StartMoving() end)
 DA_Awarder.AssignFrame:SetScript("OnDragStop", function(self) ClearAwardRowsCrap();self:GetParent():StopMovingOrSizing() end) 
@@ -2535,7 +2535,7 @@ function DA_Awarder.FEP_UpdateFrames()
 						end
 						
 					elseif flag=="f" or (flag=='t' and flag2=='f') then
-						frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Blue.blp')
+						frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Blue]])
 						if ng then
 							if flag2=='f' then 
 								frame.state="tf" 
@@ -2561,12 +2561,12 @@ function DA_Awarder.FEP_UpdateFrames()
 					elseif flag=="t" then
 						if ng then
 							if string.find(DA_standby_mainslist,"@"..FEP_L_gMain[DA_CurrentGuild][frame.c.name].."@") then
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Purple.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Purple]])
 								frame.state="put"
 								frame.main=FEP_L_gMain[DA_CurrentGuild][frame.c.name]
 								frame.mainmain=nil
 							else
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Green.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 								if EPGP then
 									if not EPGP:IsMemberInAwardList(FEP_L_gMain[DA_CurrentGuild][frame.c.name]) then
 										EPGP:SelectMember(FEP_L_gMain[DA_CurrentGuild][frame.c.name])
@@ -2585,12 +2585,12 @@ function DA_Awarder.FEP_UpdateFrames()
 							end
 						else
 							if string.find(DA_standby_mainslist,"@"..FEP_gMain[frame.c.name].."@") then
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Purple.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Purple]])
 								frame.state="put"
 								frame.main=FEP_gMain[frame.c.name]
 								frame.mainmain=nil
 							else
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Highlight]])
 								DA_standby_mainslist=DA_standby_mainslist..FEP_gMain[frame.c.name].."@"
 								frame.state="tnormal" 
 								frame.main=FEP_gMain[frame.c.name]
@@ -2608,12 +2608,12 @@ function DA_Awarder.FEP_UpdateFrames()
 					elseif flag=="m" then
 						if ng then
 							if string.find(DA_standby_mainslist,"@"..frame.c.name.."@") then
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Purple.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Purple]])
 								frame.state="pum"
 								frame.main=FEP_L_gMain[DA_CurrentGuild][frame.c.name]
 								frame.mainmain=nil
 							else
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_White.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]])
 								DA_standby_mainslist=DA_standby_mainslist..frame.c.name.."@"
 								frame.state="mnormal" 
 								frame.main=FEP_L_gMain[DA_CurrentGuild][frame.c.name]
@@ -2626,12 +2626,12 @@ function DA_Awarder.FEP_UpdateFrames()
 							end
 						else
 							if string.find(DA_standby_mainslist,"@"..frame.c.name.."@") then
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Purple.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Purple]])
 								frame.state="pum"
 								frame.main=FEP_gMain[frame.c.name]
 								frame.mainmain=nil
 							else
-								frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Highlight.blp')
+								frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Highlight]])
 								DA_standby_mainslist=DA_standby_mainslist..frame.c.name.."@"
 								frame.state="mnormal" 
 								frame.main=FEP_gMain[frame.c.name]
@@ -2648,12 +2648,12 @@ function DA_Awarder.FEP_UpdateFrames()
 						
 					elseif flag=="pb" then
 						if ng then
-							frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Yellow.blp')
+							frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 							frame.state="pb"
 							frame.main=FEP_L_gMain[DA_CurrentGuild][frame.c.name]
 							frame.mainmain=nil
 						else
-							frame:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-UP_Yellow.blp')
+							frame:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 							frame.state="pb"
 							frame.main=FEP_gMain[frame.c.name]
 							frame.mainmain=nil						
@@ -2863,6 +2863,7 @@ function FEP_GatherRaid()
 			DA_Awarder.isinraidfont=DA.FontCreater(nil,'NOT IN RAID',{"TOPLEFT",DA_Awarder,"TOPLEFT",195,0},DA_Awarder,15,170,{UIDarkAngelFontConsolas:GetFont(), 11},'left',{1,0.7,0.7,0.8})
 		end
 		if DA_Awarder.locker.getstate() then FEP_Fill() return end
+		if DarkAngel_BTMS then table.wipe(DarkAngel_BTMS) end
 	else
 		if IsRaidLeader() then
 			DA_Awarder.GiveAssistBtn:Hide()
@@ -2950,7 +2951,7 @@ function FEP_CreateGroups()
 		DA_Awarder.raiddifficultyBtn,DA_Awarder.raiddifficultyFrame=DA.CreateFFGDropFrame(DA_Awarder,"",10,25,{"CENTER",DA_Awarder,"TOPLEFT",175,-10},105,12,"TOP",nil,nil,nil,'Raid difficulty')
 
 		for i,j in ipairs({"10","25","10H","25H"}) do
-			DA_Awarder.raiddifficultyFrame[i]=DA.CreateFFGButton2(nil,DA_Awarder.raiddifficultyFrame,{"TOPLEFT", DA_Awarder.raiddifficultyFrame, "TOPLEFT", -25+26*i,-1},10,25,j,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DA_Awarder.raiddifficultyFrame[i]=DA.CreateFFGButton2(nil,DA_Awarder.raiddifficultyFrame,{"TOPLEFT", DA_Awarder.raiddifficultyFrame, "TOPLEFT", -25+26*i,-1},10,25,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 			
 				DA_Awarder.raiddifficultyFrame:Hide()
 				SetRaidDifficulty(i)
@@ -3496,7 +3497,7 @@ function FEP_CreateGroups()
 		DA_Awarder.refreshbtn:GetPushedTexture():SetBlendMode('blend')
 		
 		
-		DA_Awarder.GiveAssistBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 295,-10},10,13,'A','Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+		DA_Awarder.GiveAssistBtn=DA.CreateFFGButton2(nil,DA_Awarder,{"CENTER", DA_Awarder, "TOPLEFT", 295,-10},10,13,'A',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 			if GetNumRaidMembers()==0 then 
 				return 
 			end
@@ -3693,20 +3694,18 @@ function FEP_CreateGroups()
 				end
 			end
 			local function sort_roles(a,b)
-				if not a[2] and not b[2] then
-					return nil
-				elseif not a[2] then
-					return true
-				elseif not b[2] then
-					return false
-				elseif a[3] and a[3]=='d' then
-					return true
-				elseif b[3] and b[3]=='d' then
-					return false
-				else
-					return a[2] > b[2]
+					if tonumber(a[2]) and tonumber(b[2]) then
+						return a[2] > b[2]
+					elseif not tonumber(a[2]) and not tonumber(b[2]) then
+						return a[1] < b[1]
+					elseif not tonumber(a[2]) then
+						return true
+					elseif not tonumber(b[2]) then
+						return false
+					else
+						return a[1] < b[1]
+					end
 				end
-			end
 			local function getEPGP_PR(net,tot)
 				if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 					local base = (DA_Guild_Info[DA_CurrentGuild].base1 or 1) or (DA_Guild_Info[DA_CurrentGuild].base1==0 and 1)
@@ -3821,18 +3820,16 @@ function FEP_CreateGroups()
 				meel_ranged_end=math.max(#melee_roster,#ranged_roster,1)
 				--sorting
 				table.sort(all_roster,function(a,b)
-					if not a[3] and not b[3] then
-						return nil
-					elseif not a[3] then
+					if tonumber(a[3]) and tonumber(b[3]) then
+						return a[3] > b[3]
+					elseif not tonumber(a[3]) and not tonumber(b[3]) then
+						return a[1] < b[1]
+					elseif not tonumber(a[3]) then
 						return true
-					elseif not b[3] then
-						return false
-					elseif a[4] and a[4]=='d' then
-						return true
-					elseif b[4] and b[4]=='d' then
+					elseif not tonumber(b[3]) then
 						return false
 					else
-						return a[3] > b[3]
+						return a[1] < b[1]
 					end
 				end)
 				
@@ -4180,10 +4177,10 @@ function FEP_CreateGroups()
 	end
 
 	do --Assign frame
-		DA_Awarder.AssignFrame.Pname1=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 20, -10},DA_Awarder.AssignFrame,15,180,{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},'left')
-		DA_Awarder.AssignFrame.Pname2=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 20, -20},DA_Awarder.AssignFrame,15,180,{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},'left')
-		DA_Awarder.AssignFrame.Pname3=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 20, -30},DA_Awarder.AssignFrame,15,180,{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},'left')
-		DA_Awarder.AssignFrame.Pname4=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 20, -40},DA_Awarder.AssignFrame,15,180,{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},'left')
+		DA_Awarder.AssignFrame.Pname1=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 10, -10},DA_Awarder.AssignFrame,15,200,{UIDarkAngelFontConsolas:GetFont(), 12, "OUTLINE"},'left')
+		DA_Awarder.AssignFrame.Pname2=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 10, -20},DA_Awarder.AssignFrame,15,200,{UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"},'left')
+		DA_Awarder.AssignFrame.Pname3=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 10, -30},DA_Awarder.AssignFrame,15,200,{UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"},'left')
+		DA_Awarder.AssignFrame.Pname4=DA.FontCreater(nil,"player",{"TOPLEFT", DA_Awarder.AssignFrame, "TOPLEFT", 10, -40},DA_Awarder.AssignFrame,15,200,{UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"},'left')
 		DA_Awarder.AssignFrame.cmd=DA.FontCreater(nil,"player",{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", 0, 30},DA_Awarder.AssignFrame,15,180,{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},'center')
 		DA_Awarder.AssignFrame.EB=DA.EditBoxCreater(nil,DA_Awarder.AssignFrame,{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", -20, 20},{120,10},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 10},
 				function(self) 		self.t:SetBlendMode('add');self:ClearFocus();self.focusgained=nil;DA_Awarder.AssignFrame.Dropdown:Hide() end,
@@ -4214,9 +4211,9 @@ function FEP_CreateGroups()
 
 		DA_Awarder.AssignFrame.Dropdown=DA.FrameCreater(nil,DA_Awarder.AssignFrame.EB,160,20,{"TOPLEFT",DA_Awarder.AssignFrame.EB,"BOTTOMLEFT"})	
 		
-		DA_Awarder.AssignFrame.easybtn=DA.CreateFFGButton2(nil,DA_Awarder.AssignFrame,{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", -30,8},  10,  55,  "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{"Fonts\\FRIZQT__.TTF", 7, "OUTLINE"})
+		DA_Awarder.AssignFrame.easybtn=DA.CreateFFGButton2(nil,DA_Awarder.AssignFrame,{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", -30,8},  10,  55,  "",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{"Fonts\\FRIZQT__.TTF", 7, "OUTLINE"})
 		
-		DA.CreateFFGButton2(nil,DA_Awarder.AssignFrame,{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", 65,20},  12,  50,  L['fepassign'],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{"Fonts\\FRIZQT__.TTF", 8, "OUTLINE"},
+		DA.CreateFFGButton2(nil,DA_Awarder.AssignFrame,{"CENTER", DA_Awarder.AssignFrame, "BOTTOM", 65,20},  12,  50,  L['fepassign'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{"Fonts\\FRIZQT__.TTF", 8, "OUTLINE"},
 		function(self)
 			DA_Awarder.AssignFrame.EB:ClearFocus()
 			local name=DA_Awarder.AssignFrame.Pname1:GetText()
@@ -4659,7 +4656,7 @@ function FEP_CreateGroups()
 						end)
 						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]:SetPoint("TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i)
 					else
-						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.selectdb_FRM,{"TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i},10,78,name,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
+						DA_Awarder.autoopt.selectdb_FRM['scdb'..i]=DA.CreateFFGButton2(nil,DA_Awarder.autoopt.selectdb_FRM,{"TOPLEFT", DA_Awarder.autoopt.selectdb_FRM, "TOPLEFT", 1,10-11*i},10,78,name,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, 'outline'},function(self) 
 							DA_Awarder.autoopt.selectdb_FRM:Hide()
 							if self.fs:GetText()=='SkadaCharDB' or self.fs:GetText()=='SkadaStorageDB' then
 								DA_StoredCheckboxes[DA_SelSet].skadamode=self.fs:GetText()
@@ -6968,7 +6965,7 @@ end
 
 
 local lastGuildGet = 0
-local AW_allowed_players={}
+ AW_allowed_players={}
 local function gatherAllowedPlayers()
 	table.wipe(AW_allowed_players)
 	if fuckingOptions_g[DA_CurrentGuild].trustedMode==1 then
@@ -7000,13 +6997,46 @@ local function IsAllowedPlayer(name,mode)
     end
 	local perm_type = fuckingOptions_g[DA_CurrentGuild].trustedMode
 	
-	if perm_type == 5 then return end
+	if not perm_type or perm_type == 5 then return end
 	
-	if mode=="locals" and (perm_type == 4 or perm_type == 3) and DA.IsInSameGuild(name) then return true end
+	if mode=="locals" then
+		if not DA.IsInSameGuild(name) then
+			return false
+		elseif perm_type == 4 or perm_type == 3 then
+			return true
+		elseif perm_type == 2 or perm_type == 1 then
+			if AW_allowed_players[name] then 
+				return true 
+			else
+				return false
+			end
+		end
+	end
 	
-	if mode=="assist" and (perm_type == 4 or (perm_type == 3 and DA.IsInSameGuild(name)))  then return true end
-	
-	if AW_allowed_players[name] then return true end
+	if mode=="assist" then
+		if perm_type == 4 then
+			return true
+		else
+			local nameProcessed
+			if DA.IsInSameGuild(name) then
+				nameProcessed = name
+			elseif FEP_L_gMain[DA_CurrentGuild][name] and DA.IsInSameGuild(FEP_L_gMain[DA_CurrentGuild][name]) then
+				nameProcessed = FEP_L_gMain[DA_CurrentGuild][name]
+			else
+				return false
+			end
+
+			if perm_type == 3 then
+				return true
+			elseif perm_type == 2 or perm_type == 1 then
+				if AW_allowed_players[nameProcessed] then 
+					return true 
+				else
+					return false
+				end
+			end
+		end
+	end
 end
 
 DA:RegisterComm("DA_ass", function(message, dtype, sender)

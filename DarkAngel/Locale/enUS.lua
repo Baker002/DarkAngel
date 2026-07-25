@@ -1,7 +1,7 @@
 
 
 local debug = false
-local L = LibStub("AceLocale-3.0"):NewLocale("DarkAngel", "enUS", true, debug)
+local L = LibStub("AceLocale-3.0"):NewLocale("DarkAngel", "enUS", true, debug) ---@class DALocale
 L.lang = "enUS"
 --other
 L["Scale"]=true
@@ -162,6 +162,8 @@ end
 
 --Backups
 do
+L["BankTabCountMismatch"]="The number of guild bank tabs does not match the current configuration. Unavailable tabs will not be used."
+L['only ex-members']=true
 L['backup_reload_ui']='The backup you created will only be physically written to disk after you reboot the user interface. If you want additional assurance that the backup will be saved no matter what, it is highly recommended to reboot the user interface.\n\nDo you want to reboot now?'
 L["guild MOTD"]=true
 L["guild info"]=true
@@ -203,6 +205,10 @@ end
 
 --Gui2
 do
+L["Current raid does not meet the requirements"]=true
+L["You are not in guild. Guild invitations wont work"]=true
+L["Enable any other invitation method"]=true
+L["Guild Invitations disabled"]=true
 L["reset"]=true
 L['guild raid']=true
 L['pure guild']="full guild"
@@ -214,9 +220,10 @@ L["DESCr-dkpCommTT"]=[[Defines the conditions for accepting messages:
 |cffaaccffFull Guild|r — same as "|cffaaccffGuild Raid|r", but requires 100% guild members (current and locally linked).
   -- With this option enabled, the linking command will only work for players who have already joined the guild but are not linked yet, 
   -- since for security reasons the auto-link command cannot modify existing guild or local links.]]
-L["DESCr-OnlyInGuildRaid"]=[[Only in guild raid]]
-L["DESCr-OnlyInFullGuildRaid"]=[[Strictly 100% of raid members must be in a guild or locally bound
-Off: minimum 70%]]
+L["DESCr-OnlyInGuildRaidGeneric"]=[[Trigger conditions:
+|cffaaccffIn Raid|r — essentially no restriction; you only need to be in a raid.
+|cffaaccffGuild Raid|r — at least 70% of the raid members must be guild members.
+|cffaaccffFull Guild|r — requires all raid members to be guild members (100%) (or locally linked).]]
 L["DESCr-anyjoin"]=[[Join the first available raid announced in guild chat
 The addon will track raids created through this addon, or announcements starting with "RT+" or "РТ+"]]
 L["DESCr-ongRaidstt"]=[[Want to always be first into the raid? This menu is for you...
@@ -763,8 +770,8 @@ L['AW_frozen_main']="|cff2299ffPlayer's main is frozen|r \nShift+RightClick to u
 L['AW_empty_note']="Empty officer note \nIs it someone's alt or new player?\n\nNote: \""
 L['AW_empty_note_1']="\" \n\nLeftClick - open assignment menu\nShift+RightClick - set default zero officernote"
 L['AW_empty_note_2']="\" \n\nYou cannot actually do anything with it. Useless scum"
-L['AW_not_in_guild1']="Player not in guild \nShift+RightClick to invite"
-L['AW_not_in_guild2']="Player not in guild \nYou dont have permission for guild invites"
+L['AW_not_in_guild1']="Character is not in the guild\nLeft-click — link this player to a guild main\n\nShift+Right-click: invite to guild"
+L['AW_not_in_guild2']="Character is not in the guild\nLeft-click — link this player to a guild main\n\nShift+Right-click: You do not have permission to invite players to the guild"
 
 L['AW_local_ex1']="locally assigned to non-guild player \nleaver's local tvin?\n\n"
 L['AW_local_ex2']="locally assigned to player with incorrect EPGP value (comma instead of dot separator) \n(fucked up)\n\n"
@@ -871,10 +878,13 @@ If any of the groups have 4/5 players, some will be moved in transit through the
 L['DESCr-logCleandesc']=[[|cffff9999Store players data for the specified time|r
 When changing the storage period to a shorter one, excessive data will be gradually deleted]]
 L['DESCr-minlog']=[[An addon will always keep this amount of log entries for any data type with "Full" logging]]
-L['DESCr-doginviter_d']=[[|cffff9999Enable automatic invitations|r
-An addon will monitor all available chat channels for the specified "secret phrase" and once such is found, send guild invite to an author
+L['DESCr-doginviter_d'] = [[|cffff9999Enable automatic invitations|r
+The addon will look for a specified "secret phrase" in all available chat channels and whispers. When the phrase is detected, it automatically sends a guild invitation to the player who posted it.
+This feature works especially well together with the "Passive Restoration" option when migrating members between guilds.
 
-Is a perfect solution along with 'passive restoration' option when you need to migrate members between guilds]]
+|cff80c0ffTip:|r Choose a trigger phrase that looks like random gibberish or spam to avoid attracting attention, but make it unique enough that nobody is likely to type it accidentally.]]
+L['DESCr-doginviter_onlyExd'] = [[Send invitations only to players that are present in the selected backup
+(works only when "passive restoration" is enabled)]]
 L['DESCr-patternsFrame_save']=[[|cffff9999Save current search settings as a template|r
 Often using complex search criterias? For example, wanna see "mains" with "<5" rank? (try it) ? - create a pattern with this option
 
@@ -1039,20 +1049,25 @@ Also affects global dispenser sequences.
 If the module keeps failing stacks creations, especially if you dispense 
 a lot of items of the same type for many roles, you may think of increasing this value (0.2 should work just fine)
 |cff99eeeeDefault|r: 0.15]==]
-L['DESCr-LogHelp']=[==[The time displayed for each line is colored |cff4d7f7fgreen|r
-for changes that were noticed online, so the changes are fairly accurate.
-For changes that happened while you were offline, their times are marked |cff7f4d4dred|r.
-The red values ​​are not as accurate, as they show the overall difference and represent when the change was |cffffaaffnoted|r, not committed
+L['DESCr-LogHelp']=[==[|cff88ccffTimestamp colors:|r
+  |cff6b8889cyan|r - changes detected in real time
+  |cffbf8586red|r - changes discovered post-factum
+    -These timestamps are less precise, as they represent the overall difference
+    and indicate when the change was |cffffaaffdetected|r (typically your login time) rather than when it actually occurred.
 
-(+10+20+30-50 in |cff4d7fonline|r mode would be shown as +10 in |cff7f4d4doffline|r mode)]==]
+|cff88ccffLogging|r
+In the addon settings for this module ('opt' tab), you can choose which data the module collects and stores,
+how long it should be retained, and configure several additional options.
+
+You can filter the Log by the type of data that has changed.
+The checkboxes are also color-coded to reflect each category's logging level.
+You can quickly isolate a single category by |cff88ccffShift|r-clicking its checkbox.]==]
 L["DESCr-DetailsHelp"]=[==[asdasd]==]
 L["DESCr-GuildHelp"]=[==[asd]==]
-L["DESCr-storeautoman"]=[==[If selected, the backup will be saved in local character storage
-and will be not accessible from other characters on the same account.
-Good for automatic backups
-If deselected, the backup gets saved in account-wide folder
+L["DESCr-storeautoman"]=[==[If selected, the backup gets saved in account-wide folder
 (accessible from all of the characters on the same account. Uses more memory.)
-Good for manual backups]==]
+If deselected, the backup will be saved in local character storage
+and will be not accessible from other characters on the same account]==]
 L["DESCr-doautohours"]=[==[By default, an addon creates |cffaaffff1|r automatic backup per day on login
 This option will force an addon to create backups periodically, once per |cffaaffffN|r hours
 (Possible range: 1-10 hours)]==]
@@ -1067,9 +1082,9 @@ L["DESCr-bckprm"]=[==[Restore players data that are stored as |cffa0ffffmains|r 
 (having main values in the officer note)]==]
 L["DESCr-bckprt"]=[==[Restore players data that are stored as |cffa0fffftvins|r |cffffaaaain the backup|r
 (having non-main values in the officer note)]==]
-L["DESCr-bckpin"]=[==[When processing, skip actual guild members that are having
+L["DESCr-bckpin"]=[==[When processing, skip guild members that are having
 any |cffaaffffnote|r filled]==]
-L["DESCr-bckpio"]=[==[When processing, skip actual guild members that are having
+L["DESCr-bckpio"]=[==[When processing, skip guild members that are having
 any |cffaaffffofficer note|r filled]==]
 L["DESCr-pricolsedit"]=[==[Edit list of jokes]==]
 L["DESCr-BulkHelp"]=[==[|cffff9999Bulk actions menu|r
@@ -1125,11 +1140,17 @@ L["DESCr-addonscale"]=[==[Sets the Scale value of the addon.
 Not to be confused with |cffff00ffSize|r 
 (you may play with Alt-draging the addon window).
 |cff99eeeeDefault|r: 1.0]==]
-L['DESCr-epgpdecayprec']=[==[If the addon detects that an |cffaaccffEPGP|r:|cffaaccffDecay|r recently happened when you log in, this option determines whether expected values should be recalculated.
-If you were offline during |cffaaccffDecay|r and could not see EP/GP changes happening in the guild, the addon will try to approximately reconstruct them and show possible suspicious gains.
+L['DESCr-epgpdecayprec']=[==[If the addon detects that an |cffaaccffEPGP|r:|cffaaccffDecay|r recently happened when you log in, 
+this option determines whether expected values should be recalculated.
+If you were offline during |cffaaccffDecay|r and could not see EP/GP changes happening in the guild, 
+the addon will try to approximately reconstruct them and show possible suspicious gains.
 
-When a decay is detected, players whose decayed values are as expected are marked as "cl" (clean) in Log, while players with discrepancies are marked with the difference amount and the letter "d" (diff).
-|cff88ccffTip|r: if you see a "clean" difference value, the EP/GP gain most likely happened |cff88ccffafter|r the decay. Messy-looking values usually mean there was an EP/GP gain before the decay (or possibly both before and after).
+When a decay is detected, players whose decayed values are as expected are marked as "|cffffffffcl|r" (clean) in Log, 
+while players with discrepancies are marked with the difference amount and the letter "|cffffffffd|r" (diff). 
+These are displayed in both 'decay' and 'frozen' categories in Log.
+
+|cff88ccffTip|r: if you see a whole difference value, the EP/GP gain most likely happened |cff88ccffafter|r the decay. 
+Messy-looking values usually mean there was an EP/GP gain before the decay (or possibly both before and after).
 Keep in mind that the more days passed since your last login, the less accurate this estimation becomes.
 
 |cffffaeaeRecommended|r: 1–3 days depending on guild activity.  

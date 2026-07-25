@@ -324,7 +324,13 @@ local function resort_gdata(data)
 		do
 
 		local groups = {}
-
+		local function comparator(a,b)
+			if a > b then
+				return b
+			else
+				return a
+			end
+		end
 		for _, player in ipairs(data) do
 			local typ,ep,gp,_=DA.DecodeNote(player[4][1])
 
@@ -340,35 +346,33 @@ local function resort_gdata(data)
 				table.insert(groups[ep].alts, player)
 			end
 		end
-
+		
 		for _, group in pairs(groups) do
-				table.sort(group.alts, function(a,b)
-					if a[7] == "online" and b[7] == "online" then
-						return a[1] < b[1]
-					elseif a[7] == "online" then
-						return true
-					elseif b[7] == "online" then
-						return false
-					else
-						return a.offlinecounter < b.offlinecounter
-					end
-				end)
+			local bestAlt
+			for _, alt in ipairs(group.alts) do
+				if not bestAlt then
+					bestAlt = alt
 
-				if group.main and group.main[7] == "online" then
-					group.lastonline="online"
-				elseif group.alts[1] and group.alts[1][7] == "online" then
-					group.lastonline="online"
-				elseif group.main and not group.alts[1] then
-					group.lastonline=group.main.offlinecounter
-				elseif group.alts[1] then
-					if group.main and group.main.offlinecounter < group.alts[1].offlinecounter then
-						group.lastonline=group.main.offlinecounter
-					else
-						group.lastonline=group.alts[1].offlinecounter
-					end
+				elseif alt[7] == "online" then
+					bestAlt = alt
+					break
+				elseif bestAlt[7] ~= "online"
+					and alt.offlinecounter < bestAlt.offlinecounter then
+					bestAlt = alt
 				end
+			end
+			if (group.main and group.main[7] == "online") 
+				or (bestAlt and bestAlt[7] == "online") then
+		 		group.lastonline="online"
+			elseif group.main and bestAlt then
+				group.lastonline=comparator(group.main.offlinecounter , bestAlt.offlinecounter)
+			elseif group.main then
+				group.lastonline=group.main.offlinecounter
+			elseif bestAlt then
+				group.lastonline=bestAlt.offlinecounter
+			end
 		end
-		HSFHSFSDSDFSDFSDF=groups
+		
 		local groupsArray = {}
 		for _, group in pairs(groups) do
 			table.insert(groupsArray, group)
@@ -399,7 +403,7 @@ local function resort_gdata(data)
 				end
 			end)
 		end
-
+		
 		local sortedPlayers = {}
 		for _, group in pairs(groupsArray) do
 			if group.main then
@@ -408,7 +412,6 @@ local function resort_gdata(data)
 				else
 					group.main[7] = remove_color_codes(group.main[7])
 				end
-
 				table.insert(sortedPlayers, group.main)
 			end
 			for _, alt in ipairs(group.alts) do
@@ -1019,12 +1022,12 @@ local function GetGuildDataFiltered(eb_name, eb_lvl, eb_note, eb_offnote, eb_ran
 			(not eb_lvl or guildData_mathChecker(entry[2], eb_lvl)) and
 			(not eb_note or guildData_mathChecker(entry[3], eb_note)) and
 			(not eb_offnote or guildData_mathChecker(entry[4][2], eb_offnote)) and
-			(not eb_rank or string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank)
-				or string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank)
+			(not eb_rank or string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank or "")
+				or string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank or "")
 				or guildData_mathChecker(entry[5][1], eb_rank)) and
 			(not eb_online or
 				(entry[5][1] ~= 'local' and
-					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online))) and
+					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online or ""))) and
 			(not anyclass
 				or classTbl[entry[6]])
 			)
@@ -1033,12 +1036,12 @@ local function GetGuildDataFiltered(eb_name, eb_lvl, eb_note, eb_offnote, eb_ran
 			(eb_lvl and guildData_mathChecker(entry[2], eb_lvl)) or
 			(eb_note and guildData_mathChecker(entry[3], eb_note)) or
 			(eb_offnote and guildData_mathChecker(entry[4][2], eb_offnote)) or
-			(eb_rank and (string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank) or
-						  string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank) or
+			(eb_rank and (string.lower(string.gsub(entry[5][1], "\"", "")):find(lower_eb_rank or "") or
+						  string.lower(string.gsub(entry[5][2], "\"", "")):find(lower_eb_rank or "") or
 						  guildData_mathChecker(entry[5][1], eb_rank))) or
 			(eb_online and
 				(entry[5][1] ~= 'local' and
-					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online))) or
+					string.lower(string.gsub(entry[7], "\"", "")):find(lower_eb_online or ""))) or
 			(anyclass and
 				classTbl[entry[6]])
 			))
@@ -2059,7 +2062,7 @@ DA.AddToBuildQueue("Guild", function()
         DarkAngelGUI.Guild.gsortbtn,DarkAngelGUI.Guild.gsortFrame=DA.CreateFFGDropFrame(DarkAngelGUI.Guild,L["sort"],12,32,{"CENTER",DarkAngelGUI.Guild,"TOPLEFT",215,-10},164,90,{"BOTTOMRIGHT", "TOPRIGHT", 65, 5})
         DarkAngelGUI.Guild.gsortFrame:SetFrameLevel(DarkAngelGUI.Guild:GetFrameLevel()+15)
         for i,criteria in pairs(additgsort) do
-            DarkAngelGUI.Guild.gsortFrame[i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.gsortFrame,{"TOPLEFT", DarkAngelGUI.Guild.gsortFrame, "TOPLEFT", (i>8 and 70.5 or 1),10-11*(i>8 and i-8 or i)},10,(i>8 and 92 or 68),criteria[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), criteria[2] or 9, "OUTLINE"},function(self)
+            DarkAngelGUI.Guild.gsortFrame[i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.gsortFrame,{"TOPLEFT", DarkAngelGUI.Guild.gsortFrame, "TOPLEFT", (i>8 and 70.5 or 1),10-11*(i>8 and i-8 or i)},10,(i>8 and 92 or 68),criteria[1],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), criteria[2] or 9, "OUTLINE"},function(self)
 
                 fuckingOptions.gsort=self.fs:GetText()
                 DA.GetGuildData(1)
@@ -2471,7 +2474,7 @@ DA.AddToBuildQueue("Guild", function()
             local epgpPatternButtons={}
             -- 
             for _,ss in ipairs(patterns_c) do
-                local f = DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame,{"TOPLEFT", DarkAngelGUI.Guild.patternsFrame, "TOPLEFT",-25+((ss[2])*26),	10-(11*(ss[1]))},10,25,ss[3],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up'..ss[6],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                local f = DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame,{"TOPLEFT", DarkAngelGUI.Guild.patternsFrame, "TOPLEFT",-25+((ss[2])*26),	10-(11*(ss[1]))},10,25,ss[3],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]]..ss[6],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     DarkAngelGUI.Guild.precmatch:SetChecked(ss[4]);fuckingOptions.precisematchsearch=ss[4]
                     DarkAngelGUI.Guild.showlocals:SetChecked(ss[5]);fuckingOptions.showlocals=ss[5]
                     for i=1,6 do
@@ -2545,7 +2548,7 @@ DA.AddToBuildQueue("Guild", function()
         do --custom
 
             for i=1,7 do
-                DarkAngelGUI.Guild.patternsFrame['pat'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame,{"TOPLEFT", DarkAngelGUI.Guild.patternsFrame, "TOPLEFT", 54, 10-11*i},10,80,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) end)
+                DarkAngelGUI.Guild.patternsFrame['pat'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame,{"TOPLEFT", DarkAngelGUI.Guild.patternsFrame, "TOPLEFT", 54, 10-11*i},10,80,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) end)
                 DarkAngelGUI.Guild.patternsFrame['patdel'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.patternsFrame['pat'..i],{"LEFT", DarkAngelGUI.Guild.patternsFrame['pat'..i], "RIGHT", 2, 0},9,9,"x",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     if fuckingOptions.storedpatterns[i] then table.remove(fuckingOptions.storedpatterns,i) end
                     re_render_custom_patterns()
@@ -2652,7 +2655,7 @@ DA.AddToBuildQueue("Guild", function()
                 DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
             end)
             for i,j in pairs({L['selected'],L['all found']}) do
-                DarkAngelGUI.Guild.bulkmenu.applytoFrame['fr'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.applytoFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.applytoFrame, "TOPLEFT", 1,10-11*i},10,68,j,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                DarkAngelGUI.Guild.bulkmenu.applytoFrame['fr'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.applytoFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.applytoFrame, "TOPLEFT", 1,10-11*i},10,68,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:SetText(self.fs:GetText())
                     DarkAngelGUI.Guild.bulkmenu.applytoFrame:Hide()
                     if DarkAngelGUI.Guild.bulkmenu.applytobtn.fs:GetText() and DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:GetText() and (not DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() or (DarkAngelGUI.Guild.bulkmenu.adranksmenubtn:IsShown() and DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:GetText())) then
@@ -2671,7 +2674,7 @@ DA.AddToBuildQueue("Guild", function()
                 DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
             end)
             for i,j in ipairs(actions_list) do
-                DarkAngelGUI.Guild.bulkmenu.actionFrame['fr'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.actionFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.actionFrame, "TOPLEFT", 1,10-11*i},10,78,j,'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                DarkAngelGUI.Guild.bulkmenu.actionFrame['fr'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.actionFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.actionFrame, "TOPLEFT", 1,10-11*i},10,78,j,[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     DarkAngelGUI.Guild.bulkmenu.actionbtn.fs:SetText(self.fs:GetText())
                     DarkAngelGUI.Guild.bulkmenu.actionFrame:Hide()
                     if i<4 then
@@ -2735,7 +2738,7 @@ DA.AddToBuildQueue("Guild", function()
                             end)
                             DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame['rankbtn'..i]:SetPoint("TOPLEFT", DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame, "TOPLEFT", 1,10-11*i)
                         else
-                            DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame['rankbtn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                            DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame['rankbtn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                                 DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:SetText(self.fs:GetText())
                                 DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.rankid=i-1
                                 DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
@@ -2769,7 +2772,7 @@ DA.AddToBuildQueue("Guild", function()
 
             end)
             for i=1,GuildControlGetNumRanks() do
-                DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame['rankbtn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+                DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame['rankbtn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame, "TOPLEFT", 1,10-11*i},10,68,GuildControlGetRankName(i),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
                     DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.fs:SetText(self.fs:GetText())
                     DarkAngelGUI.Guild.bulkmenu.adranksmenubtn.rankid=i-1
                     DarkAngelGUI.Guild.bulkmenu.adranksmenuFrame:Hide()
@@ -2799,7 +2802,7 @@ DA.AddToBuildQueue("Guild", function()
                     DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown = DA.FrameCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,270,111,{"TOPLEFT",DarkAngelGUI.Guild.bulkmenu,"TOPRIGHT",2,-59})
                         DA.CloseButtonCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown,{"BOTTOMLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown, "TOPRIGHT", 2,2},10,10,'x')
                     for i=1,20 do
-                        DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White.blp',{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
+                        DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown['btn'..i]=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown, "TOPLEFT", 1,10-11*i},10,268,"",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function(self)
 
                         end,nil,nil,'left')
                     end
@@ -2811,24 +2814,24 @@ DA.AddToBuildQueue("Guild", function()
                         if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
                             if self.fs:GetText()=='EP' then
                                 self.fs:SetText('GP')
-                                self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+                                self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
                             else
                                 self.fs:SetText('EP')
-                                self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+                                self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
                             end
                         elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
                             if self.fs:GetText()=='+DKP' then
                                 self.fs:SetText('-DKP')
-                                self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+                                self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
                             else
                                 self.fs:SetText('+DKP')
-                                self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+                                self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
                             end
                         end
                     end
                     table.insert(DA.RunOnGuildUpdate, epgpdkpfunc)
                     DA.HelpCreater(DarkAngelGUI.Guild.bulkmenu.award123Frame,{"CENTER",DarkAngelGUI.Guild.bulkmenu.award123Frame,"TOPLEFT",15,-36},'awardprocent_tt',20,20)
-                    DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 1, -9},15,30,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
+                    DarkAngelGUI.Guild.bulkmenu.award123Frame.epgp=DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 1, -9},15,30,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
 
                     DarkAngelGUI.Guild.bulkmenu.award123Frame.reason=DA.EditBoxCreater(nil,DarkAngelGUI.Guild.bulkmenu.award123Frame,{"TOPLEFT", DarkAngelGUI.Guild.bulkmenu.award123Frame, "TOPLEFT", 35, -10},{90,11},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9},
                         function(self) 		if self:GetText()~="" then self.t:SetBlendMode("BLEND") else self.t:SetBlendMode("ADD") end ;self:ClearFocus(); DarkAngelGUI.Guild.bulkmenu.award123Frame.Dropdown:Hide();self.focusgained=nil end,
@@ -3143,34 +3146,34 @@ DA.AddToBuildQueue("Guild", function()
             DarkAngelGUI.Guild.classFrame[class].fs:SetTextColor(unpack(DA.GetNumericClassColor(class)))
 
         end
-        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.classFrame,{"TOPLEFT", DarkAngelGUI.Guild.classFrame, "TOPLEFT", 1, -1},9,33.5,"all",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-                local w = next(DarkAngelGUI.Guild.classTbl) and true or nil
-                if w then
-                    for i,class in ipairs(classes) do DarkAngelGUI.Guild.classTbl[class]=nil ; DarkAngelGUI.Guild.classFrame[class].enabled=false end
-                else
-                    for i,class in ipairs(classes) do DarkAngelGUI.Guild.classTbl[class]=true ; DarkAngelGUI.Guild.classFrame[class].enabled=true end
-                end
-                update_class_srch()
-                DA.GetGuildData();DA.GuildSetAllLines()
-                copyFrame_Update()
-            end)
-        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.classFrame,{"TOPRIGHT", DarkAngelGUI.Guild.classFrame, "TOPRIGHT", -1, -1},9,33.5,"inv",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
-                for i,class in ipairs(classes) do
-                if DarkAngelGUI.Guild.classTbl[class] then
-                    DarkAngelGUI.Guild.classTbl[class]=nil
-                else
-                    DarkAngelGUI.Guild.classTbl[class]=true
-                end
-            end
-                update_class_srch()
-                DA.GetGuildData();DA.GuildSetAllLines()
-                copyFrame_Update()
-            end)
+        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.classFrame,{"TOPLEFT", DarkAngelGUI.Guild.classFrame, "TOPLEFT", 1, -1},9,33.5,"all",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			local w = next(DarkAngelGUI.Guild.classTbl) and true or nil
+			if w then
+				for i,class in ipairs(classes) do DarkAngelGUI.Guild.classTbl[class]=nil ; DarkAngelGUI.Guild.classFrame[class].enabled=false end
+			else
+				for i,class in ipairs(classes) do DarkAngelGUI.Guild.classTbl[class]=true ; DarkAngelGUI.Guild.classFrame[class].enabled=true end
+			end
+			update_class_srch()
+			DA.GetGuildData();DA.GuildSetAllLines()
+			copyFrame_Update()
+		end)
+        DA.CreateFFGButton2(nil,DarkAngelGUI.Guild.classFrame,{"TOPRIGHT", DarkAngelGUI.Guild.classFrame, "TOPRIGHT", -1, -1},9,33.5,"inv",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			for i,class in ipairs(classes) do
+				if DarkAngelGUI.Guild.classTbl[class] then
+					DarkAngelGUI.Guild.classTbl[class]=nil
+				else
+					DarkAngelGUI.Guild.classTbl[class]=true
+				end
+			end
+			update_class_srch()
+			DA.GetGuildData();DA.GuildSetAllLines()
+			copyFrame_Update()
+		end)
 
         function update_class_srch()
             for i,class in ipairs(classes) do
                 if DarkAngelGUI.Guild.classTbl[class] then
-                    DarkAngelGUI.Guild.classFrame[class]:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White')
+                    DarkAngelGUI.Guild.classFrame[class]:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]])
                     DarkAngelGUI.Guild.classFrame[class].enabled=true
                 else
                     DarkAngelGUI.Guild.classFrame[class]:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]])

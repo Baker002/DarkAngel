@@ -268,23 +268,23 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 					if DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' then
 						if self.fs:GetText()=='EP' then
 							self.fs:SetText('GP')
-							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+							self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 						else
 							self.fs:SetText('EP')
-							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+							self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 						end
 					elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' then
 						if self.fs:GetText()=='+DKP' then
 							self.fs:SetText('-DKP')
-							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+							self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 						else
 							self.fs:SetText('+DKP')
-							self:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+							self:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 						end
 					end
 				end
 				table.insert(DA.RunOnGuildUpdate, epgpdkpfunc)
-				DA_RightClickMenu.epgpawardFrame.epgp=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 5, -2},13,40,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
+				DA_RightClickMenu.epgpawardFrame.epgp=DA.CreateFFGButton2(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 5, -2},13,40,((DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and 'EP') or (DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and '+DKP')),[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},epgpdkpfunc)
 
 
 				DA_RightClickMenu.epgpawardFrame.reason=DA.EditBoxCreater(nil,DA_RightClickMenu.epgpawardFrame,{"TOPLEFT", DA_RightClickMenu.epgpawardFrame, "TOPLEFT", 5, -30},{50,18},nil,false,false,{UIDarkAngelFontConsolas:GetFont(), 9.5},
@@ -510,7 +510,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 		DA_RightClickMenu.mschangeFrame = DA.FrameCreater(nil,DA_RightClickMenu,172,70,{"TOPLEFT",DA_RightClickMenu,"BOTTOMLEFT",0,-2},nil,{0.1,0.12,0.19,0.7},nil,true)
 		local closebtn = DA.CloseButtonCreater(nil,DA_RightClickMenu.mschangeFrame,{"center", DA_RightClickMenu.mschangeFrame, "TOPRIGHT", -7.5,-7.5},10,10,'x')
 		local frame = DA_RightClickMenu.mschangeFrame
-		DA_RightClickMenu.mschangeOpenBtn = DA.CreateFFGButton2(nil,DA_RightClickMenu,{"CENTER",DA_RightClickMenu,"BOTTOMLEFT",30,6},8,40,'^^^',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
+		DA_RightClickMenu.mschangeOpenBtn = DA.CreateFFGButton2(nil,DA_RightClickMenu,{"CENTER",DA_RightClickMenu,"BOTTOMLEFT",30,6},8,40,'+++',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 7, "OUTLINE"}, function(s)
 			DA_RightClickMenu.mschangeOpenBtn.interracted = true
 			if not s.state then
 				s.state = true
@@ -523,6 +523,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 
 			end
 		end)
+		DA_RightClickMenu.mschangeOpenBtn.state=true
 		DA_RightClickMenu.mschangeOpenBtn:Hide()
 		DA_RightClickMenu.mschangeOpenBtn.interracted = false
 		closebtn:HookScript("OnClick",function() DA_RightClickMenu.mschangeOpenBtn:SetText("+++");DA_RightClickMenu.mschangeOpenBtn.state=true;DA_RightClickMenu.mschangeOpenBtn.interracted = true end)
@@ -1031,6 +1032,7 @@ DA.AddToBuildQueue("RightClickMenuFrame", function()
 end)
 
 function DA.OpenOptMenu(parent,name, in_guild_backup, MSChangePack)
+	local myName = GetUnitName('player')
 	DA_RightClickMenu:Hide()
 	DA_RightClickMenu:SetPoint("TOPLEFT",parent,"BOTTOM")
 	if not name then return end
@@ -1117,10 +1119,9 @@ function DA.OpenOptMenu(parent,name, in_guild_backup, MSChangePack)
 
 		end
 
-		if UnitIsPartyLeader('player') then
-			if GetLootMethod()=='master' then
-				DA_RightClickMenu.lootername=false
-				if GetNumRaidMembers()==0 then return end
+		if GetLootMethod()=='master' then
+			DA_RightClickMenu.lootername=false
+			if GetNumRaidMembers()==0 then else
 				for i=1,GetNumRaidMembers() do
 
 					local nam, _, _, _, _, _, _, _, _, _, isML = GetRaidRosterInfo(i)
@@ -1130,7 +1131,10 @@ function DA.OpenOptMenu(parent,name, in_guild_backup, MSChangePack)
 					end
 				end
 			end
+		end
 
+		if UnitIsPartyLeader('player') then
+			
 			DA_RightClickMenu.assist:SetAlpha(1)
 			DA_RightClickMenu.assist:Enable()
 			DA_RightClickMenu.looter:SetAlpha(1)
@@ -1164,10 +1168,11 @@ function DA.OpenOptMenu(parent,name, in_guild_backup, MSChangePack)
 
 		-- MS CHANGE Frame
 		if DA.loaded_Modules['BidTracker'] and GetNumRaidMembers()>0 and MSChangePack then
-			-- DA_RightClickMenu.mschangeFrame.mspacked = MSChangePack
 			DA_RightClickMenu.mschangeOpenBtn:Show()
-			if GetLootMethod()=='master' and not DA_RightClickMenu.mschangeOpenBtn.interracted then
+			if not DA_RightClickMenu.mschangeOpenBtn.interracted and GetLootMethod()=='master' and (DA_RightClickMenu.lootername==myName or UnitIsRaidOfficer(myName)) then
 				DA_RightClickMenu.mschangeFrame:Show()
+				DA_RightClickMenu.mschangeOpenBtn:SetText("^^^")
+				DA_RightClickMenu.mschangeOpenBtn.state=false
 			end
 			
 			--call mschangeFrame update

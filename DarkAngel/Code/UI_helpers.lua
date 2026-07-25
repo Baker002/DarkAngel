@@ -211,7 +211,7 @@ function DA.CreateDropdownSelector(d)
 			local data = ss
 			local text,value,isHidden,funcOnSelection,deskr,frameHideOnSelection,DrawLocked = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr, data.funcframeHideOnSelection, data.funcDrawLocked
 			if not frame[id] then
-				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 					--func is set later anyways
 				end,deskr,nil,optjusth or 'center')
 			end
@@ -308,7 +308,7 @@ function DA.CreateDropdownNoValueSelector(d)
 			local data = ss
 			local text,value,isHidden,funcOnSelection,deskr,frameHideOnSelection,DrawLocked = data.text, data.value, data.isHidden, data.funcOnSelection, data.deskr, data.funcframeHideOnSelection, data.funcDrawLocked
 			if not frame[id] then
-				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
+				frame[id]=DA.CreateFFGButton2(nil,frame,{"TOPLEFT",frame, "TOPLEFT",1, (height-((height+1)*id))},height,btnwidth,text or "",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function()
 					-- func is set later anyways
 				end,deskr,nil,optjusth or 'center')
 			end
@@ -472,7 +472,7 @@ local f = CreateFrame("Button", name, rel, "UIDarkAngelCloseButton")
 	f:SetWidth(wid)
 	f:SetBackdropColor(1, 1, 1, 1)
 	f:RegisterForClicks("LeftButtonUp","RightButtonUp")
-	f:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp')
+	f:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]])
 	-- f:SetScript("OnClick", HideParentPanel)
 	f:SetText(settext)
 	if framelevel then
@@ -884,14 +884,19 @@ local f = CreateFrame("Button", nil, rel, "UIDarkAngelButtonTemplate2")
 	f:SetText("?")
 	f:SetNormalTexture(nil)
 	f:RegisterForClicks(false)
-	if desrtag and L['DESCr-'..desrtag] then
-		f:SetScript("OnEnter", function(self)
-			DA.myShowTooltip(self,L['DESCr-'..desrtag])
-		end)
+	if desrtag then
+		local descrTT = L['DESCr-'..desrtag]
+		if not descrTT then
+			print("missing localization: ", desrtag)
+		else
+			f:SetScript("OnEnter", function(self)
+				DA.myShowTooltip(self,descrTT)
+			end)
 
-		f:SetScript("OnLeave", function(self)
-			DA.myHideTooltip()
-		end)
+			f:SetScript("OnLeave", function(self)
+				DA.myHideTooltip()
+			end)
+		end
 	end
 	return f
 end
@@ -1897,3 +1902,27 @@ end
 		FFTestFF=sorted
 	end
 end
+
+-- creates waypoint at little distance at azimuth Z
+function DA_CreateWaypointAtAzimuth(Z)
+    SetMapToCurrentZone()
+    Z=(Z or 0) +180
+    local x, y = GetPlayerMapPosition("player")
+    if not x or not y or (x == 0 and y == 0) then
+        return
+    end
+
+    local rad = math.rad(Z)
+
+    local newX = x + 0.03 * math.sin(rad)
+    local newY = y + 0.03 * math.cos(rad)
+
+    SlashCmdList.NOWAY()
+
+    SlashCmdList.WAY(newX .. " " .. newY)
+end
+
+-- azimuth to GM Island when rocketboots-slowfall-jumping from Teldrassil's branch at 22.5, 41.3 
+-- unsuccessfull even with 300% speed engineering boots; still, the best one attempt w/o using terrain patches
+-- we should look for a way to travel distance without falling down at all; for example dc from server 
+-- DA_CreateWaypointAtAzimuth(90-24)

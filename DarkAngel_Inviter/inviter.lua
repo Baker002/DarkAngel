@@ -228,19 +228,17 @@ local function AddInQueue(_, event, message, author, dtype,EV_author, _)
 	end
 
 	--convert to raid
-	if (GetNumRaidMembers()==0 and GetNumPartyMembers()>0) then
-		if not convertedToRaid then
-			convertedToRaid=true
-			ConvertToRaid()
-			if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='m' then
-				SetLootMethod("master","player")
-			elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='g' then
-				SetLootMethod("group")
-			elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='f' then
-				SetLootMethod("freeforall")
-			end
-			SetRaidDifficulty(DA_Inviter.initRaidDifficulty)
+	if not convertedToRaid and (GetNumRaidMembers()==0 and GetNumPartyMembers()>0) then
+		convertedToRaid=true
+		ConvertToRaid()
+		if fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='m' then
+			SetLootMethod("master","player")
+		elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='g' then
+			SetLootMethod("group")
+		elseif fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=='f' then
+			SetLootMethod("freeforall")
 		end
+		SetRaidDifficulty(DA_Inviter.initRaidDifficulty)
 	end
 
 
@@ -321,9 +319,9 @@ local discordphrases={
 }
 local AskDiscordFrame = CreateFrame("FRAME");
 local function checkOnlyGuildPerm()
-	if GetNumRaidMembers()==0 then return false end
-	if not fuckingOptions.Inviter_shareDiscordOnlyInGuild then return true end
-	return DA.IsFullGuildRaid(fuckingOptions.Inviter_shareDiscordOnlyInFullGuild)
+	if GetNumRaidMembers()==0 or not fuckingOptions.Inviter_DiscordOnlyInFGuild then return false end
+	if fuckingOptions.Inviter_DiscordOnlyInFGuild==1 then return true end
+	return DA.IsFullGuildRaid(fuckingOptions.Inviter_DiscordOnlyInFGuild==3 or false)
 end
 local function GiveDiscordLink(_, _, message, _)
 	if (Inviter_Started==true and fuckingOptions_g[DA_CurrentGuild].Inviter_shareDiscord and fuckingOptions_g[DA_CurrentGuild].Inviter_RTDiscord~="https://discord.gg/discord_link" and not checkOnlyGuildPerm()) then
@@ -423,8 +421,7 @@ function Mod:OnGuildLoad()
 		--autostop
 		if fuckingOptions_g[DA_CurrentGuild].Inviter_AutoStop and IsAutoStopTimeReached() then
 			self:SetScript("OnUpdate",nil)
-			listinvite_bulk=nil
-			listinvite_bulk={}
+			table.wipe(listinvite_bulk)
 			self.mytime=nil
 			convertedToRaid=false
 			DA_Inviter.stopbtn:Disable()
@@ -588,9 +585,9 @@ function Mod:Inviter_Load()
 	end
 
 	-- Accept From
-	DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -60},20,20,L['accept from guild chat'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromGuild','DA_CurrentGuild'},nil)
+	DA_Inviter.CB_acceptguild = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -60},20,20,L['accept from guild chat'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromGuild','DA_CurrentGuild'},nil)
 	--приём через лс
-	DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -75},20,20,L['accept from pm'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromPM','DA_CurrentGuild'},nil)
+	DA_Inviter.CB_acceptPM = DA.CheckBtnCreater(nil,DA_Inviter,{"TOPLEFT", DA_Inviter, "TOPLEFT", 20, -75},20,20,L['accept from pm'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM=(self:GetChecked() or false) end,{'fuckingOptions_g','Inviter_AcceptFromPM','DA_CurrentGuild'},nil)
 	
 
 	do -- auto-stop
@@ -684,7 +681,7 @@ function Mod:Inviter_Load()
 		do -- Discord
 			local discordEB
 			local discordChbx = DA.CheckBtnCreater(nil,DA_Inviter.OptionsFr,{"TOPLEFT", DA_Inviter.OptionsFr, "TOPLEFT", 3, -90},20,20,L['provide discord if asked'],function(self) fuckingOptions_g[DA_CurrentGuild].Inviter_shareDiscord=(self:GetChecked() or false);ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_shareDiscord, discordEB) end,{'fuckingOptions_g','Inviter_shareDiscord','DA_CurrentGuild'},"invprovidediscord")
-
+			DA_Inviter.CB_acceptLFG = discordChbx
 			local discordEBFLVL
 			local function dsescapefunc(self)
 				if self.focusgained then self.t:SetBlendMode("ADD");self:ClearFocus();self.focusgained=nil;
@@ -737,9 +734,26 @@ function Mod:Inviter_Load()
 			ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_shareDiscord, discordEB)
 			table.insert(DA.RunOnGuildUpdate, function() ebAlpha(fuckingOptions_g[DA_CurrentGuild].Inviter_shareDiscord, discordEB) end)
 
-			local discordOnlyGuildChbx = DA.CheckBtnCreater(nil,DA_Inviter.OptionsFr,{"CENTER", discordChbx, "CENTER", 130, 0},20,20,L['guild raid'],function(self) fuckingOptions.Inviter_shareDiscordOnlyInGuild=(self:GetChecked() or false) end,{'fuckingOptions','Inviter_shareDiscordOnlyInGuild'},"OnlyInGuildRaid")
-			DA.CheckBtnCreater(nil,DA_Inviter.OptionsFr,{"CENTER", discordOnlyGuildChbx, "CENTER", 65, 0},20,20,"100%",function(self) fuckingOptions.Inviter_shareDiscordOnlyInFullGuild=(self:GetChecked() or false) end,{'fuckingOptions','Inviter_shareDiscordOnlyInFullGuild'},"OnlyInFullGuildRaid")
-
+			-- command whispers raid selector
+			DA.CreateDropdownSelector({
+				rel = DA_Inviter.OptionsFr,
+				point = {"CENTER", discordChbx, "CENTER", 150, 0},
+				width = 70,
+				height = 12,
+				frpoint = "BOTTOM",
+				valuesroster = {
+					{ text = L["in raid"], value = 1},
+					{ text = L["guild raid"], value = 2},
+					{ text = L["pure guild"], value = 3},
+				},
+				get = function()
+					return fuckingOptions.Inviter_DiscordOnlyInFGuild
+				end,
+				set = function(value)
+					fuckingOptions.Inviter_DiscordOnlyInFGuild = value
+				end,
+				desrtag = "OnlyInGuildRaidGeneric"
+			})
 		end
 
 		do --приём из лфг
@@ -887,27 +901,21 @@ function Mod:Inviter_Load()
 		local function add_additional_invites()
 			local index={}
 			local myname=UnitName('player')
+			for _,v in pairs(listinvite_bulk) do
+				index[v]=true
+			end
 
 			if DA_Inviter.addInvFr.lvl80:GetChecked() then
-				table.wipe(index)
-				for k,v in pairs(listinvite_bulk) do
-				index[v]=k
-				end
-
 				for k=1,DA.GetNumGMembers() do
 					local name, _, _, level, _, _, note, _, online, _, _, _, _, _, _, _ = GetGuildRosterInfo(k)
 					if name and name~=myname and online and level==80 and not UnitInRaid(name) and not index[name] then
 						table.insert(listinvite_bulk,name)
+						index[name]=true
 					end
 				end
 
 			end
 			if DA_Awarder and DA_Inviter.addInvFr.fromsnapshot:GetChecked() then
-				table.wipe(index)
-				for k,v in pairs(listinvite_bulk) do
-				index[v]=k
-				end
-
 				for group=1,8 do
 					for i=1,5 do
 
@@ -920,44 +928,36 @@ function Mod:Inviter_Load()
 						and not UnitInRaid(frame.c.name)
 						and not index[frame.c.name] then
 							table.insert(listinvite_bulk,frame.c.name)
+							index[frame.c.name]=true
 						end
 					end
 				end
 
 			end
 			if DA_Inviter.addInvFr.gselected:GetChecked() then
-				table.wipe(index)
-				for k,v in pairs(listinvite_bulk) do
-				index[v]=k
-				end
-
 				local roster=DA.GetGfoundList('sel')
 
 				for _,r in ipairs(roster) do
 					if (r[4] or r[1]=='local') and 
 					r[2] and r[2]~=myname and not UnitInRaid(r[2]) and not index[r[2]] then
 						table.insert(listinvite_bulk,r[2])
+						index[r[2]]=true
 					end
 				end
 
 			end
 			if DA_Inviter.addInvFr.gfound:GetChecked() then
-
-				table.wipe(index)
-				for k,v in pairs(listinvite_bulk) do
-				index[v]=k
-				end
-
 				local roster=DA.GetGfoundList('all')
 
 				for _,r in ipairs(roster) do
 					if (r[4] or r[1]=='local') and r[2] and r[2]~=myname and not UnitInRaid(r[2]) and not index[r[2]] then
 						table.insert(listinvite_bulk,r[2])
+						index[r[2]]=true
 					end
 				end
 
 			end
-
+			table.wipe(index)
 			AddInQueue()
 
 		end
@@ -980,15 +980,37 @@ function Mod:Inviter_Load()
 			end
 			local guildchat_listen, guildchat_speak, not_in_guild = getGuildChatPermissions()
 
-			if not_in_guild then
-				DA.Print(L["is not in guild"])
-				return
-			elseif not guildchat_listen then
-				DA.Print(L["It looks like your guild rank doesn't allow you to read guild chat"])
-				return
-			elseif not guildchat_speak then
-				DA.Print(L["It looks like your guild rank doesn't allow you to use guild chat"])
-				return
+			if not_in_guild and fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild then
+				DA.Print("[Inviter]: |cffff9999".. L["You are not in guild. Guild invitations wont work"])
+				if not(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM or fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG) then
+					DA.Print("[Inviter]: |cffff9999".. L["Enable any other invitation method"])
+					return
+				end
+				fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild = false
+				DA_Inviter.CB_acceptguild:SetChecked(false)
+				DA.Print("[Inviter]: |cff9868cc".. L["Guild Invitations disabled"])
+				
+			end
+			if not guildchat_listen and fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild then
+				DA.Print("[Inviter]: |cffff9999".. L["It looks like your guild rank doesn't allow you to read guild chat"])
+				if not(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM or fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG) then
+					DA.Print("[Inviter]: |cffff9999".. L["Enable any other invitation method"])
+					return
+				end
+				fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild = false
+				DA_Inviter.CB_acceptguild:SetChecked(false)
+				DA.Print("[Inviter]: |cff9868cc".. L["Guild Invitations disabled"])
+			end 
+			if not guildchat_speak and fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild then
+				DA.Print("[Inviter]: |cffff9999".. L["It looks like your guild rank doesn't allow you to use guild chat"])
+				if not(fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromPM or fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromLFG) then
+					DA.Print("[Inviter]: |cffff9999".. L["Enable any other invitation method"])
+					--technically, you can still invite ppl, but we wont allow it :)
+					return
+				end
+				fuckingOptions_g[DA_CurrentGuild].Inviter_AcceptFromGuild = false
+				DA_Inviter.CB_acceptguild:SetChecked(false)
+				DA.Print("[Inviter]: |cff9868cc".. L["Guild Invitations disabled"])
 			end
 			writeNewTiming()
 			self:Disable()
@@ -1013,8 +1035,7 @@ function Mod:Inviter_Load()
 		DA_Inviter.startbtn=DA.CreateFFGButton2(nil,  DA_Inviter,  {"TOPLEFT", DA_Inviter, "TOPLEFT", 26, -143},  12,  50,  L['start'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],  {UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},startRT)
 
 		local function stopRT(self)
-			listinvite_bulk=nil
-			listinvite_bulk={}
+			table.wipe(listinvite_bulk)
 			DA.StopTimer("inviter");DA.XTimers["inviter"].mytime=nil
 			convertedToRaid=false
 			self:Disable()
@@ -1071,7 +1092,7 @@ function Mod:Inviter_Load()
 		DA_Inviter.lootBtn,DA_Inviter.lootFrame=DA.CreateFFGDropFrame(DA_Inviter,"",12,45,{"TOPLEFT",DA_Inviter,"TOPLEFT",135,-125},47,34,"BOTTOM",nil,nil,nil,'lootBtnSelect',true)
 		-- DA_Inviter.lootFrame:SetFrameLevel(200)
 		for id,ss in ipairs(lootSelectTbl) do
-			DA_Inviter.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.lootFrame,{"TOPLEFT",DA_Inviter.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_White',{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+			DA_Inviter.lootFrame[id]=DA.CreateFFGButton2(nil,DA_Inviter.lootFrame,{"TOPLEFT",DA_Inviter.lootFrame, "TOPLEFT",1, 10-11*id},10,45,ss[1],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_White]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
 				fuckingOptions_g[DA_CurrentGuild].initRaidLootMethod=ss[2]
 				rerender_lootSelectFrame()
 				DA_Inviter.lootFrame:Hide()

@@ -515,7 +515,7 @@ DA.AddToBuildQueue("GuildControl", function()
 
     gc.ranksOnClickMenu=DA.FrameCreater(nil,gc,280,42,{"TOPRIGHT",gc,"TOPRIGHT",0,0})
     gc.ranksOnClickMenu:Hide()
-    -- gc.ranksOnClickMenu:SetFrameLevel(100)
+    gc.ranksOnClickMenu:SetFrameLevel((gc:GetFrameLevel() or 5)+25)
     gc.ranksOnClickMenu.t:SetTexture(0.03, 0.04, 0.07, 0.8)
 
     gc.ranksOnClickMenu.duplicate=DA.CreateFFGButton2(nil,gc.ranksOnClickMenu,{"left",gc.ranksOnClickMenu,"topleft",1,-6},10,gc.ranksOnClickMenu.width-2,L["create duplicate rank, shift rest right"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, 'outline'},function() end,nil,nil,'left')
@@ -605,7 +605,7 @@ DA.AddToBuildQueue("GuildControl", function()
 
             --mover
             do
-                gc['d'..i..'mover']=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",22+46*i,-33},8,13,"<>",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9},function(self,mouse)
+                gc['d'..i..'mover']=DA.CreateFFGButton2(nil,gc,{"CENTER",gc,"TOPLEFT",22+46*i,-33},8,13,"<>",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{UIDarkAngelFontConsolas:GetFont(), 9},function(self,mouse)
                     if mouse=="RightButton" then
                         DA.myHideTooltip()
                         DarkAngel_minimapBtn.menu:Hide();
@@ -627,7 +627,7 @@ DA.AddToBuildQueue("GuildControl", function()
                         DA.GetGuildData();DA.GuildSetAllLines()
                         return
                     end
-
+                    
                     if gc.ranksOnClickMenu:IsShown() then
                         gc.ranksOnClickMenu:Hide()
                     else
@@ -636,7 +636,7 @@ DA.AddToBuildQueue("GuildControl", function()
                     end
                 end)
 
-                gc['d'..i..'pos_frm']=DA.FrameCreater(nil,gc['d'..i..'name'],25,18,{"BOTTOMRIGHT",gc['d'..i..'mover'],"BOTTOMLEFT",-2,0},nil,{0.7, 1, 1, 0.6})
+                gc['d'..i..'pos_frm']=DA.FrameCreater(nil,gc['d'..i..'name'],25,18,{"BOTTOMRIGHT",gc['d'..i..'mover'],"BOTTOMLEFT",-2,0},nil,{0.7, 1, 1, 0.6},true,true)
                 gc['d'..i..'pos_frm'].t:SetBlendMode('add')
                 DA.FontCreater(nil,">>>",{"RIGHT",gc['d'..i..'pos_frm'],"RIGHT",-2,0},gc['d'..i..'pos_frm'],15,50,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},"right",{0.75,0.95,0.95,0.75})
 
@@ -867,7 +867,7 @@ DA.AddToBuildQueue("GuildControl", function()
         gc.helpwindow=DA.FrameCreater(nil,gc,350,150,{"TOPLEFT",gc,"TOPLEFT",30,-40},nil,{0.05, 0.12, 0.18, 0.8},1)
             DA.FontCreater(nil,L['gc_helper'],{"TOPLEFT",gc.helpwindow,"TOPLEFT",5,-12},gc.helpwindow,160,340,{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},"left",{0.75,0.9,0.9,0.9}):SetJustifyV("top")
 
-            DA.CreateFFGButton2(nil,gc.helpwindow,{"CENTER",gc.helpwindow,"BOTTOM",0,10},12,80,L["got it, close"],'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up',{UIDarkAngelFontConsolas:GetFont(), 9},function()
+            DA.CreateFFGButton2(nil,gc.helpwindow,{"CENTER",gc.helpwindow,"BOTTOM",0,10},12,80,L["got it, close"],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],{UIDarkAngelFontConsolas:GetFont(), 9},function()
                 gc.helpwindow:Hide()
             end)
 
@@ -1115,6 +1115,9 @@ DA.AddToBuildQueue("GuildControl", function()
                     local bankslots=GetNumGuildBankTabs()
                     if bankslots==0 then bankslots=false end
 
+                    if bankslots and gc.ranksroster[2].bankpermissions and #gc.ranksroster[2].bankpermissions~=bankslots then
+                        DA.Print(L["BankTabCountMismatch"])
+                    end
                     for selectedrank=1,#gc.ranksroster do
                         tinsert(DA_Bulk_list,function() DA.Process_GMranking(gc.ranksroster,selectedrank,bankslots,task=='lock') end)
                         tinsert(DA_Bulk_list,function()  end)

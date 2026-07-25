@@ -1137,7 +1137,7 @@ local function ScanCompare(db,firstrun)
 						end
 
 						if opt_rank then
-							tinsert(fd.r,{ val.r, tmstmp })
+							tinsert(fd.r,{ val.r, tmstmp, addit=GetRankChangeAuthor(player,val.r and val.r[2] or "") })
 						end
 					
 					if firstrun then 
@@ -1201,6 +1201,7 @@ local function ScanCompare(db,firstrun)
 end
 
 local function packGMTable(t)
+	SADGSDGSDFdfasf = t
 	local result={}
 		for i,j in ipairs(t) do
 			local microTable = DA.stringToTable(j)
@@ -1292,7 +1293,7 @@ local function CheckGuildInfosChange(scheduled, onlchange_PassedState)
 		end
 		if #missing > 0 then
 			re_schedule_CheckGuildInfosChange(isonlinechange)
-			DA.Print("[Debug]: Guild data not loaded  -> " .. table.concat(missing, ", ") .. ". Check rescheduled.")
+			DA.DebugPrint("[Debug]: Guild data not loaded  -> " .. table.concat(missing, ", ") .. ". Check rescheduled.")
 			return
 		end
 
@@ -1955,7 +1956,7 @@ function Mod.Logger_Load()
 	do
 		-- DA.ScrollBarCreater("DarkAngelLog",DarkAngelGUI.Log,{DarkAngelGUI.Log.width-5, DarkAngelGUI.Log.height-70},{"TOPLEFT", 5, -62})
 		Log_Create_ScrollBar()
-		DA.HelpCreater(DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",9,-9},'LogHelp',15,15)
+		DA.HelpCreater(DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",9,-9},"LogHelp",15,15)
 			
 			DA.CreateFFGButton2(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",40,-30},12,35,L['refresh'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},function() Mod:StartScan() end)
 			
@@ -1964,6 +1965,8 @@ function Mod.Logger_Load()
 				DarkAngelGUI.Log.GinfoFrame=DA.FrameCreater(nil,DarkAngelGUI.Log,280,300,{"TOPLEFT",DarkAngelGUI.Log,"TOPRIGHT",2,0})
 				DA.CloseButtonCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"TOPRIGHT", DarkAngelGUI.Log.GinfoFrame, "TOPRIGHT", -5,-5},10,10,'x')
 				
+				local gc=DarkAngelGUI.Guild.GC
+
 				DarkAngelGinfoFrame = DA.ScrollBarCreater("DarkAngelGinfoFrame",DarkAngelGUI.Log.GinfoFrame,{DarkAngelGUI.Log.GinfoFrame.width-5, DarkAngelGUI.Log.GinfoFrame.height-30},{"TOPLEFT", 5, -20},1)
 				local ginf_Scrolled=DarkAngelGinfoFrame.scrollchild
 
@@ -1980,19 +1983,19 @@ function Mod.Logger_Load()
 				
 				local comp=DA.CheckBtnCreater(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",15,-12},15,15,"compare",function() DarkAngelGUI.Log.GinfoFrame.re_render() end)
 				comp:SetChecked(true)
-				
-				
-				local gmpreview = DA.CreateFFGButton2(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",130,-12},10,105,'gm editor preview',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
-					
+				local function DoGraphicGMPreview()
 					local entry = DarkAngelGUI.Log.GinfoFrame.tbl
 					if not entry then return end
 					
-					local gc=DarkAngelGUI.Guild.GC
 					gc.ranksroster=nil
 					gc.ranksroster=packGMTable(entry[1])
 					
 					gc.finish_import()
+				end
+				local gmpreview = DA.CreateFFGButton2(nil,DarkAngelGUI.Log.GinfoFrame,{"CENTER",DarkAngelGUI.Log.GinfoFrame,"TOPLEFT",130,-12},10,105,'gm editor preview',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 10, "OUTLINE"},function() 
+					DoGraphicGMPreview()
 					gc:Show()
+					DarkAngelGUI.Log.GinfoFrame:Hide()
 				end)
 				gmpreview:Hide()
 				
@@ -2012,11 +2015,16 @@ function Mod.Logger_Load()
 							ginf_eb:SetText(entry[1])
 						end
 					end
-					DarkAngelGUI.Log.GinfoFrame:Show()
 					
 					if entry.isgm then
+						if gc:IsShown() then
+							DoGraphicGMPreview()
+						else
+							DarkAngelGUI.Log.GinfoFrame:Show()
+						end
 						gmpreview:Show()
 					else
+						DarkAngelGUI.Log.GinfoFrame:Show()
 						gmpreview:Hide()
 					end
 				end
@@ -2187,52 +2195,132 @@ function Mod.Logger_Load()
 			end
 			
 			do --search checkboxes
-				-- for 
-				local newplayerCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log,"TOPLEFT",180,-10},15,15,L["new player"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_new=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_new','DA_CurrentGuild'})
-					DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-10},15,15,L['deserter'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_leaver=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_leaver','DA_CurrentGuild'})
-					DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",0,-20},15,15,L["re-joined"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rejoin=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rejoin','DA_CurrentGuild'})
+				local LogFrame = DarkAngelGUI.Log
+				local stngs = fuckingOptions_g[DA_CurrentGuild]
+				local chGroups = {
+					{
+						{L["new player"], "LCB_new", Root=true, cyanText=true},
+						{L["deserter"], "LCB_leaver", cyanText=true},
+						{L["re-joined"], "LCB_rejoin", cyanText=true},
+					},
+					{
+						{L["officer note"], "LCB_offnote", RelPos={85,0}},
+						{L["twined"], "LCB_tvink"},
+						{L["suspic/twin"], "LCB_tvink_susp"},
+						{L["decay"], "LCB_decay"},
+						{L["frozen"], "LCB_frozen"},
+					},
+					{
+						{L["note"], "LCB_note", RelPos={170,0}},
+						{L["rank"], "LCB_rank"},
+						{L["guild info"], "LCB_ginfo"},
+						{L["guild MOTD"], "LCB_gmotd"},
+						{L["Guild GM system"], "LCB_GM"},
+					}
 
-				DarkAngelGUI.Log.offnoteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",85,0},15,15,L["officer note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_offnote=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_offnote','DA_CurrentGuild'})
-					DarkAngelGUI.Log.twinkCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-10},15,15,L['twined'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink','DA_CurrentGuild'})
-					DarkAngelGUI.Log.twinksuspCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-20},15,15,L["suspic/twin"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_tvink_susp=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_tvink_susp','DA_CurrentGuild'})
-					DarkAngelGUI.Log.decayCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-30},15,15,L["decay"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_decay=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_decay','DA_CurrentGuild'})
-					DarkAngelGUI.Log.frozenCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.offnoteCB,"CENTER",0,-40},15,15,L['frozen'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_frozen=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_frozen','DA_CurrentGuild'})
+				}
+				local function ChbSetAll(calledCB, allenable, revert)
+					for _, grp in ipairs(chGroups) do
+						for _, subCBtbl in ipairs(grp) do
+							local optTag = subCBtbl[2]
+							local cb = LogFrame[optTag]
 
-				DarkAngelGUI.Log.noteCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",newplayerCB,"CENTER",170,0},15,15,L["note"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_note=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_note','DA_CurrentGuild'})
-					DarkAngelGUI.Log.rankCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-10},15,15,L["rank"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_rank=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_rank','DA_CurrentGuild'})
-					DarkAngelGUI.Log.ginfCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-20},15,15,L["guild info"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_ginfo=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_ginfo','DA_CurrentGuild'})
-					DarkAngelGUI.Log.motdCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-30},15,15,L["guild MOTD"],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_gmotd=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_gmotd','DA_CurrentGuild'})
-					DarkAngelGUI.Log.gmCB=DA.CheckBtnCreater(nil,DarkAngelGUI.Log,{"CENTER",DarkAngelGUI.Log.noteCB,"CENTER",0,-40},15,15,L['Guild GM system'],function(self) fuckingOptions_g[DA_CurrentGuild].LCB_GM=(self:GetChecked() or false) LogSetAllLines();copyFrame_Update() end,{'fuckingOptions_g','LCB_GM','DA_CurrentGuild'})
+							if calledCB and IsShiftKeyDown() then
+								if cb == calledCB then
+									stngs[optTag] = 1
+									cb:SetChecked(true)
+								else
+									stngs[optTag] = false
+									cb:SetChecked(false)
+								end
 
-					-- FilterLog()
+							elseif revert then
+								local newValue = not stngs[optTag]
+								stngs[optTag] = newValue and 1 or false
+								cb:SetChecked(newValue)
+
+							elseif allenable then
+								stngs[optTag] = 1
+								cb:SetChecked(true)
+							end
+						end
+					end
+				end
+
+				for _, grp in ipairs(chGroups) do
+
+					local cb_group
+					local tag = grp[1][1]
+					local optTag = grp[1][2]
+					if grp[1].Root then
+						cb_group=DA.CheckBtnCreater(nil,LogFrame,{"CENTER",LogFrame,"TOPLEFT",180,-10},15,15,tag,function(self)
+							stngs[optTag]=(self:GetChecked() or false)
+							ChbSetAll(self) LogSetAllLines();copyFrame_Update()
+						end,{'fuckingOptions_g',optTag,'DA_CurrentGuild'})
+					elseif grp[1].RelPos then
+						cb_group =DA.CheckBtnCreater(nil,LogFrame,{"CENTER",LogFrame['LCB_new'],"CENTER",grp[1].RelPos[1],grp[1].RelPos[2]},15,15,tag,function(self) 
+							stngs[optTag]=(self:GetChecked() or false)
+							ChbSetAll(self) LogSetAllLines();copyFrame_Update()
+						end,{'fuckingOptions_g',optTag,'DA_CurrentGuild'})
+					end
+					LogFrame[optTag] = cb_group
+					
+					for subID=1,#grp do
+						local subCBtbl = grp[subID]
+						local tag = subCBtbl[1]
+						local optTag = subCBtbl[2]
+						if subID>1 and subCBtbl then
+							local cb = DA.CheckBtnCreater(nil,LogFrame,{"CENTER",cb_group,"CENTER",0,-((subID-1)*10)},15,15,tag,function(self) 
+								stngs[optTag]=(self:GetChecked() or false)
+								ChbSetAll(self) LogSetAllLines();copyFrame_Update()
+							end,{'fuckingOptions_g',optTag,'DA_CurrentGuild'})
+							LogFrame[optTag] = cb
+						end
+						if subCBtbl.cyanText then
+							SetFontColor(LogFrame[optTag], 2)
+						end
+					end
+				end
+				
+				DA.CreateFFGButton2(nil,LogFrame,{"TOPLEFT", LogFrame, "TOPLEFT", 130, -8},9,33.5,"all",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+					ChbSetAll(nil,1)
+					LogSetAllLines();copyFrame_Update()
+				end)
+				DA.CreateFFGButton2(nil,LogFrame,{"TOPLEFT", LogFrame, "TOPLEFT", 130, -18},9,33.5,"inv",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Black]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self)
+					ChbSetAll(nil,nil,1)
+					LogSetAllLines();copyFrame_Update()
+				end)
+				
 			end
 
 			local function logReRender()
-				for _, j in ipairs({
-					{"Log_offnote", "offnoteCB"},
-					{"Log_note",    "noteCB"},
-					{"Log_rank",    "rankCB"},
-					{"Log_ginfo",   "ginfCB"},
-					{"Log_gmotd",   "motdCB"},
-					{"Log_GM",      "gmCB"},
+				for _, k in ipairs({
+					{"Log_offnote","LCB_offnote"},
+					{"Log_note",'LCB_note'},
+					{"Log_rank",'LCB_rank'},
+					{"Log_ginfo",'LCB_ginfo'},
+					{"Log_gmotd",'LCB_gmotd'},
+					{"Log_GM",'LCB_GM'}
 				}) do
-					local key, cbName = j[1], j[2]
-					local state = fuckingOptions_g[DA_CurrentGuild][key]
+					local stngsKey, key = k[1], k[2]
+					local state = fuckingOptions_g[DA_CurrentGuild][stngsKey]
 
-					if key == "Log_offnote" then
-						SetFontColor(DarkAngelGUI.Log.offnoteCB, state)
-						SetFontColor(DarkAngelGUI.Log.twinkCB, state)
-						SetFontColor(DarkAngelGUI.Log.twinksuspCB, state)
+					if stngsKey == "Log_offnote" then
+						SetFontColor(DarkAngelGUI.Log.LCB_offnote, state)
+						SetFontColor(DarkAngelGUI.Log.LCB_tvink, state)
+						SetFontColor(DarkAngelGUI.Log.LCB_tvink_susp, state)
 
 						if DA_Guild_Info[DA_CurrentGuild].GuildType == "epgp" then
-							SetFontColor(DarkAngelGUI.Log.decayCB, state)
-							SetFontColor(DarkAngelGUI.Log.frozenCB, state)
+							SetFontColor(DarkAngelGUI.Log.LCB_decay, state)
+							SetFontColor(DarkAngelGUI.Log.LCB_frozen, state)
+							DarkAngelGUI.Log.LCB_decay:Show()
+							DarkAngelGUI.Log.LCB_frozen:Show()
 						else
-							DarkAngelGUI.Log.decayCB:Hide()
-							DarkAngelGUI.Log.frozenCB:Hide()
+							DarkAngelGUI.Log.LCB_decay:Hide()
+							DarkAngelGUI.Log.LCB_frozen:Hide()
 						end
 					else
-						SetFontColor(DarkAngelGUI.Log[cbName], state)
+						SetFontColor(DarkAngelGUI.Log[key], state)
 					end
 				end
 			end
@@ -2537,7 +2625,7 @@ local function log_get_change_type_colored(tag)
 			return "|cff84e3ceDKP"
 		end
 	elseif tag == "t" then
-		return "twinked"
+		return "twined"
 	elseif tag == "jmt" then
    		return tag
 	elseif tag == "rt" or tag == "tm" or tag == "mt" then
@@ -2549,7 +2637,7 @@ local function log_get_change_type_colored(tag)
 	elseif tag == "fc" then 
 		return "|cff4942ffEPGP"
 	elseif tag == "uf" then
-		return "|cff4942ffun-frozen"
+		return "|cff4942ffun-froz."
 	elseif tag == "f" then
 		return "|cff4942fffrozen"
 	elseif tag == "note" then

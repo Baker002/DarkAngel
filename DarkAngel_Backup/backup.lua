@@ -803,7 +803,9 @@ end
 		
 		local bankslots=GetNumGuildBankTabs()
 		if bankslots==0 then bankslots=false end
-		
+		if bankslots and DA_Unpacked.guildranks[2].bankpermissions and #DA_Unpacked.guildranks[2].bankpermissions~=bankslots then
+			DA.Print(L["BankTabCountMismatch"])
+		end
 		for selectedrank=1,#db do
 			tinsert(DA_Bulk_list,function() DA.Process_GMranking(DA_Unpacked.guildranks,selectedrank,bankslots,nil,1) end)
 			tinsert(DA_Bulk_list,function()  end)
@@ -1156,11 +1158,13 @@ function Mod.Backup_Load()
 			DarkAngelGUI.Backup.restmain=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",135,-235},15,15,"|cff87edd4"..L['restore backup mains'],nil,nil,'bckprm')
 				DarkAngelGUI.Backup.restmain1=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup.restmain,"CENTER",12,-10},15,15,nil,function(self) DarkAngelGUI.Backup.restmain.ino=self:GetChecked() end,nil,'bckpin')
 				DarkAngelGUI.Backup.restmain2=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup.restmain,"CENTER",23,-10},15,15,nil,function(self) DarkAngelGUI.Backup.restmain.inof=self:GetChecked() end,nil,'bckpio')
-				
+			
 			DarkAngelGUI.Backup.resttvin=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",135,-257},15,15,"|cff87edd4"..L['restore backup tvins'],nil,nil,'bckprt')
 				DarkAngelGUI.Backup.resttvin1=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup.resttvin,"CENTER",12,-10},15,15,nil,function(self) DarkAngelGUI.Backup.resttvin.ino=self:GetChecked() end,nil,'bckpin')
 				DarkAngelGUI.Backup.resttvin2=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup.resttvin,"CENTER",23,-10},15,15,nil,function(self) DarkAngelGUI.Backup.resttvin.inof=self:GetChecked() end,nil,'bckpio')
-		
+			
+			DarkAngelGUI.Backup.restmain:SetChecked(1)
+			DarkAngelGUI.Backup.resttvin:SetChecked(1)
 		end
 		
 		do --open data btns
@@ -1225,13 +1229,13 @@ function Mod.Backup_Load()
 		end
 	
 		do --run and stop
-			DarkAngelGUI.Backup.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-232},12,40,'start',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.runbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",140,-285},12,40,'start',[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
 				DarkAngelGUI.Backup.stopbtn:Enable()
 				StartBackupRestoration()
 			end)
 			
-			DarkAngelGUI.Backup.stopbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",250,-247},12,40,L['stop'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
+			DarkAngelGUI.Backup.stopbtn=DA.CreateFFGButton2(nil,DarkAngelGUI.Backup,{"LEFT",DarkAngelGUI.Backup,"TOPLEFT",184,-285},12,40,L['stop'],[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Red]],{UIDarkAngelFontConsolas:GetFont(), 9, "OUTLINE"},function(self) 
 				self:Disable()
 				StopBackupRestoration()
 			end)
@@ -1241,15 +1245,14 @@ function Mod.Backup_Load()
 		
 		do --guild inviter
 		
-			DarkAngelGUI.Backup.doginviter=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",395,-262},15,15,L['Guild inviter'],
-			function(self) 
+			DarkAngelGUI.Backup.doginviter=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",385,-235},15,15,L['Guild inviter'], function(self) 
 				fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled=(self:GetChecked() or false);
 				if self:GetChecked() and CanGuildInvite() then
 				elseif self:GetChecked() then
 					DA.Print("You are not allowed to invite new members to your guild")
 					self:SetChecked(false)
 					fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled=false
-					DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) 
+					DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6)
 					return
 				end
 				if self:GetChecked() then 
@@ -1258,17 +1261,34 @@ function Mod.Backup_Load()
 					DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) 
 				end 
 			end,{'fuckingOptions_g','guildInviterEnabled',"DA_CurrentGuild"},'doginviter_d')
-			DarkAngelGUI.Backup.doginvitereb=DA.EditBoxCreater2(nil,DarkAngelGUI.Backup,{"TOPLEFT",DarkAngelGUI.Backup.doginviter,"TOPLEFT",5,-15},{100,32},fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","guildInviterPhrase","DA_CurrentGuild"},4,200,'text')
+			DarkAngelGUI.Backup.doginviter_ex=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",395,-247},15,15,L['only ex-members'],nil,nil,'doginviter_onlyExd')
+			DarkAngelGUI.Backup.doginvitereb=DA.EditBoxCreater2(nil,DarkAngelGUI.Backup,{"TOPLEFT",DarkAngelGUI.Backup.doginviter,"TOPLEFT",2,-27},{110,32},fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase,true,nil,{"Fonts\\FRIZQT__.TTF", 10, "OUTLINE"},{"fuckingOptions_g","guildInviterPhrase","DA_CurrentGuild"},4,200,'text')
 			-- DA.FontCreater(nil,L["Secret phrase"],{"LEFT",DarkAngelGUI.Backup.doginvitereb,"TOPLEFT",5,5},DarkAngelGUI.Backup.doginvitereb,15,170,{UIDarkAngelFontConsolas:GetFont(), 8, "OUTLINE"},'left')
 			
 			if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled then DarkAngelGUI.Backup.doginvitereb:EnableMouse(true);DarkAngelGUI.Backup.doginvitereb:SetAlpha(1) else DarkAngelGUI.Backup.doginvitereb:EnableMouse(false);DarkAngelGUI.Backup.doginvitereb:SetAlpha(0.6) end
 			
-			local f=CreateFrame('Frame');f:RegisterEvent("CHAT_MSG_CHANNEL");f:SetScript("OnEvent",function(self,_,message,sender,...) if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled and fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase~="" and message==fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase and sender~=GetUnitName('player') then GuildInvite(sender) end end)
+			local f=CreateFrame('Frame')
+			f:RegisterEvent("CHAT_MSG_CHANNEL")
+			f:RegisterEvent("CHAT_MSG_WHISPER")
+			f:SetScript("OnEvent",function(self,_,message,sender,...) 
+				if fuckingOptions_g[DA_CurrentGuild].guildInviterEnabled
+				and fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase~=""
+				and message==fuckingOptions_g[DA_CurrentGuild].guildInviterPhrase
+				and sender~=GetUnitName('player') 
+				then 
+					if not DarkAngelGUI.Backup.doginviter_ex:GetChecked()
+					or (DarkAngelGUI.Backup.passiverest:GetChecked() and DA_Unpacked and DA_Unpacked.pl_data and DA_Unpacked.pl_data[sender]) 
+					then
+						GuildInvite(sender)
+					end
+				end 
+
+			end)
 			
 		end
 				
 		do --passive restoration
-			DarkAngelGUI.Backup.passiverest=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",265,-262},15,15,L['passive restoration'],function(self) 
+			DarkAngelGUI.Backup.passiverest=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",270,-235},15,15,L['passive restoration'],function(self) 
 				if self:GetChecked() then
 					_G['DADckp_passive']:RegisterEvent("CHAT_MSG_SYSTEM")
 				else
@@ -1276,11 +1296,14 @@ function Mod.Backup_Load()
 				end
 			end,nil,'bckpassive')
 			DarkAngelGUI.Backup.passiverest.font:SetTextColor(0.8,0.4,0.5,1)
-			DarkAngelGUI.Backup.passiverestnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",275,-273},15,15,L['note'])
-			DarkAngelGUI.Backup.passiverestofnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",275,-283},15,15,L['officer note'])
-			DarkAngelGUI.Backup.passiverestrank=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",275,-293},15,15,L['rank'])
+			DarkAngelGUI.Backup.passiverestnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",280,-247},15,15,L['note'])
+			DarkAngelGUI.Backup.passiverestofnote=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",280,-259},15,15,L['officer note'])
+			DarkAngelGUI.Backup.passiverestrank=DA.CheckBtnCreater(nil,DarkAngelGUI.Backup,{"CENTER",DarkAngelGUI.Backup,"TOPLEFT",280,-271},15,15,L['rank'])
 			
-			DADckp_passive = CreateFrame('Frame','DADckp_passive');_G['DADckp_passive']:SetScript("OnEvent",function(_,_,msg,...)
+			DADckp_passive = CreateFrame('Frame','DADckp_passive')
+			_G['DADckp_passive']:SetScript("OnEvent",function(s,_,msg,...)
+				if not DarkAngelGUI.Backup.passiverest:GetChecked() then s:UnregisterEvent("CHAT_MSG_SYSTEM") return end
+
 				local msg=msg
 				local player=msg:match("(.+)%s"..L['joins_guild'])
 				GuildRoster()

@@ -31,7 +31,7 @@
   See LICENSE file for full details.
   
   
-Official addon Discord channel: https://discord.gg/bpPzRk3bnk
+Official addon Discord channel: https://discord.gg/wTBNRZcTqv
 
 
 					  
@@ -74,11 +74,9 @@ local fuckingOptions_local={
 	TXTArtOnFront=true,
 	
 	auc_bidBtnsTutorial=true,
-	auc_OnlyInGuild=false,
-	auc_OnlyInFullGuild=true,
+	auc_OnlyInFGuild=2,
 
-	Inviter_shareDiscordOnlyInGuild=true,
-	Inviter_shareDiscordOnlyInFullGuild=true,
+	Inviter_DiscordOnlyInFGuild=2,
 	Inviter_manualTimerSpeed=4,
 	Inviter_TimerMode=1,
 

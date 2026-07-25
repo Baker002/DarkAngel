@@ -505,7 +505,7 @@ DA.AddToBuildQueue("Options", function()
 	end
 
 	do	--alias and binds
-		local aliasbtn = DA.ButtonCreater(nil,GuildFrame,{"CENTER",GuildFrame,"TOPRIGHT",-27,-330},22,22,">",'Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up.blp',function() DarkAngel_minimapBtn:Click() end)
+		local aliasbtn = DA.ButtonCreater(nil,GuildFrame,{"CENTER",GuildFrame,"TOPRIGHT",-27,-330},22,22,">",[[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up]],function() DarkAngel_minimapBtn:Click() end)
 		local function aliasShowHide()
 			if fuckingOptions.gwinbtn then
 				aliasbtn:Show()

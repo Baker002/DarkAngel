@@ -34,14 +34,13 @@ Bismillah — we press Run.
 
 ---@class DarkAngelAddon
 local DA = DarkAngel
-	DA.L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel")
+	DA.L = LibStub("AceLocale-3.0"):GetLocale("DarkAngel") ---@class DALocale
 	DA.LGT = LibStub:GetLibrary('LibGroupTalents-1.0')
 local L = DA.L
 
-
+DA.debug = false
 
 --- Lua helpers
-
 function DA.GetErrorCopyLink(longString)
 	DA.LinkIndex = DA.LinkIndex + 1
 	local id = tostring(DA.LinkIndex)
@@ -83,6 +82,11 @@ function DA.Safecall(objectName, func, ...)
 end
 function DA.Print(...)
 	print("[|cffed94edDarkAngel|cffffffff]:", ...)
+end
+function DA.DebugPrint(...)
+	if DA.debug then
+		DA.Print(...)
+	end
 end
 function DA.ConcatStr(inputTable,maxl,separator)
 	local outputTable = {}
@@ -679,7 +683,7 @@ local guildControl_BankPermissionIDs={
 function DA.Process_GMranking(db,selectedrank,bankslots,lock,anons)
 
 
-	
+
 	GuildControlSetRank(selectedrank)
 	
 	if selectedrank>1 then
@@ -690,9 +694,14 @@ function DA.Process_GMranking(db,selectedrank,bankslots,lock,anons)
 				SetGuildBankWithdrawLimit((not lock and tonumber(db[selectedrank].gwithraw)) or 0)
 			end
 		end
-		
-		if bankslots and db[selectedrank].bankpermissions then
-			for banktab=1,bankslots do
+
+		local processedBankSlots=bankslots
+		if bankslots and db[2].bankpermissions and #db[2].bankpermissions~=bankslots then
+			processedBankSlots=math.min(bankslots, #db[2].bankpermissions)
+		end
+
+		if processedBankSlots and db[selectedrank].bankpermissions then
+			for banktab=1,processedBankSlots do
 				for rank,val in pairs(db[selectedrank].bankpermissions[banktab]) do
 					if rank=='stacksPerDay'then
 						SetGuildBankTabWithdraw(banktab,((not lock and tonumber(val)) or 0))
@@ -1468,29 +1477,29 @@ function DA.SetRecentAwardBtnTxt(epgp, btn)
 	if DA_Guild_Info[DA_CurrentGuild].GuildType=='dkp' and (epgp=='ep' or epgp=='gp') then
 		if epgp=='ep' then
 			btn:SetText("+DKP")
-			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+			btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 		elseif epgp=='gp' then
 			btn:SetText("-DKP")
-			btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+			btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 		end
 	elseif DA_Guild_Info[DA_CurrentGuild].GuildType=='epgp' and (epgp=='+dkp' or epgp=='-dkp') then
 		btn:SetText("EP")
-		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+		btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 
 
 	-- regular cases
 	elseif epgp=='ep' then
 		btn:SetText("EP")
-		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+		btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 	elseif epgp=='gp' then
 		btn:SetText("GP")
-		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+		btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 	elseif epgp=='+dkp' then
 		btn:SetText("+DKP")
-		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Green.blp')
+		btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Green]])
 	elseif epgp=='-dkp' then
 		btn:SetText("-DKP")
-		btn:SetNormalTexture('Interface\\AddOns\\DarkAngel\\template\\UI-Panel-Button-Up_Yellow.blp')
+		btn:SetNormalTexture([[Interface\AddOns\DarkAngel\template\UI-Panel-Button-Up_Yellow]])
 	end
 
 end
