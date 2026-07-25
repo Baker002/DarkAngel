@@ -36,14 +36,15 @@ DA.AddToBuildQueue("About", function()
 			self.clicks = (self.clicks or 0) + 1
 			-- future easter egg hook
 		end)
-			frame.versionFont = DA.FontCreater(nil, "5.4", {"LEFT", frame.versionBtn, "RIGHT", 10, 0}, frame.versionBtn, 18, 68, {UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"}, "left", {0.93, 0.90, 0.75, 1})
+		local addonVersion = GetAddOnMetadata("DarkAngel",'version')
+			frame.versionFont = DA.FontCreater(nil, addonVersion, {"LEFT", frame.versionBtn, "RIGHT", 10, 0}, frame.versionBtn, 18, 68, {UIDarkAngelFontConsolas:GetFont(), 11, "OUTLINE"}, "left", {0.93, 0.90, 0.75, 1})
 
 		
-		frame.youtubeEb,frame.youtubeFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -105},"https://youtube.com/add_guide_link","Video tutorial")
-		
+		frame.youtubeEb,frame.youtubeFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -105},"https://www.youtube.com/watch?v=GB8TdZ0teTI&list=PLbW5Le0wT0UX1jZhLLoQVSB_PEi1OyNHs","Video tutorial")
+		frame.youtubeEb:SetCursorPosition(0)
 		frame.dsEb,frame.dsFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -130},"https://discord.gg/rrQXzCD4MY","Discord")
 		
-		frame.kofiEb,frame.kofiFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -155},"https://donatello.to/darkangeladdon","Support author <3")
+		frame.donateEB,frame.donateFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -155},"https://donatello.to/darkangeladdon","Support author <3")
 		
 		frame.gitEb,frame.gitFont = do_eb_with_title(frame.aboutPanel, {"TOPLEFT", frame.aboutPanel, "TOPLEFT", 10, -180},"https://github.com/Baker002/DarkAngel","GitHub")
 		
