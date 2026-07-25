@@ -1,16 +1,13 @@
 # DarkAngel for Wrath of the Lich King `3.3.5`
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/Baker002/DarkAngel)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/Baker002/DarkAngel?label=version)
 
 DarkAngel provides tools for guild and raid management, loot distribution, EPGP/DKP awarding, logging, bulk operations and other stuff.
+The addon is built from independent modules that can be used either together or partially.
 
 <p align="center"><img src="https://github.com/Baker002/DarkAngel-images/blob/main/doc_images/preview_main.webp" alt="DarkAngel Preview"></p>
 
-## Community
 [Join my Discord :)](https://discord.gg/wTBNRZcTqv)
-
-The system is built from independent modules that can be used either together or partially.
 
 ---
 
